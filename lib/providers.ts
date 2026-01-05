@@ -37,6 +37,10 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'grok', name: 'Grok 3', provider: 'pollinations', description: 'xAI Grok 3' },
   { id: 'mistral', name: 'Mistral Large', provider: 'pollinations', description: 'Mistral AI Large' },
   { id: 'qwen-coder', name: 'Qwen 2.5 Coder', provider: 'pollinations', description: 'Qwen 2.5 Coder 32B' },
+  // MapleAI models
+  { id: 'mapleai-gpt4o', name: 'MapleAI GPT-4o', provider: 'mapleai', description: 'GPT-4o via MapleAI' },
+  { id: 'mapleai-claude', name: 'MapleAI Claude', provider: 'mapleai', description: 'Claude 3.5 via MapleAI' },
+  { id: 'mapleai-gemini', name: 'MapleAI Gemini', provider: 'mapleai', description: 'Gemini 2.0 via MapleAI' },
 ];
 
 // Available image models
@@ -46,12 +50,17 @@ export const IMAGE_MODELS: ImageModel[] = [
   { id: 'gptimage', name: 'GPT Image', provider: 'pollinations', description: 'OpenAI image generation' },
   { id: 'kontext', name: 'Kontext', provider: 'pollinations', description: 'Context-aware image generation' },
   { id: 'seedream', name: 'Seedream', provider: 'pollinations', description: 'Creative image generation' },
+  // MapleAI image models
+  { id: 'mapleai-dalle', name: 'MapleAI DALL-E', provider: 'mapleai', description: 'DALL-E via MapleAI' },
+  { id: 'mapleai-flux', name: 'MapleAI Flux', provider: 'mapleai', description: 'Flux via MapleAI' },
 ];
 
 // Available video models
 export const VIDEO_MODELS: VideoModel[] = [
   { id: 'veo', name: 'Veo', provider: 'pollinations', description: 'Google Veo video generation', maxDuration: 8 },
   { id: 'seedance', name: 'Seedance', provider: 'pollinations', description: 'Creative video generation', maxDuration: 10 },
+  // MapleAI video models
+  { id: 'mapleai-veo', name: 'MapleAI Veo', provider: 'mapleai', description: 'Veo via MapleAI', maxDuration: 8 },
 ];
 
 // Provider base URLs

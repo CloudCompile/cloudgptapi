@@ -1,7 +1,5 @@
 # ☁️ CloudGPT - Unified AI API Gateway
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/CloudCompile/cloudgpt&env=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,POLLINATIONS_API_KEY&envDescription=API%20keys%20required%20for%20CloudGPT&envLink=https://github.com/CloudCompile/cloudgpt/blob/main/KEYS_SETUP.md&project-name=cloudgpt&repository-name=cloudgpt)
-
 A unified API gateway for AI chat, image, and video generation. Access multiple AI providers through a single, consistent API interface.
 
 ## ✨ Features
@@ -15,16 +13,6 @@ A unified API gateway for AI chat, image, and video generation. Access multiple 
 - **🎨 Dark Mode** - Automatic dark mode support
 
 ## 🚀 Quick Start
-
-### Deploy to Vercel (Recommended)
-
-The easiest way to get started is to deploy to Vercel:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/CloudCompile/cloudgpt&env=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,POLLINATIONS_API_KEY&envDescription=API%20keys%20required%20for%20CloudGPT&envLink=https://github.com/CloudCompile/cloudgpt/blob/main/KEYS_SETUP.md&project-name=cloudgpt&repository-name=cloudgpt)
-
-1. Click the button above
-2. Configure the required environment variables (see [KEYS_SETUP.md](./KEYS_SETUP.md))
-3. Deploy!
 
 ### Local Development
 
@@ -47,6 +35,10 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000) to see the application.
 
 ## 📡 API Endpoints
+
+For complete API documentation, see [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
+
+### Quick Reference
 
 ### Chat Completions
 
@@ -174,6 +166,9 @@ curl -X POST https://your-app.vercel.app/api/chat \
 | `grok` | Grok 3 | xAI's model |
 | `mistral` | Mistral Large | Mistral AI's large model |
 | `qwen-coder` | Qwen 2.5 Coder | Coding-focused model |
+| `mapleai-gpt4o` | MapleAI GPT-4o | GPT-4o via MapleAI |
+| `mapleai-claude` | MapleAI Claude | Claude 3.5 via MapleAI |
+| `mapleai-gemini` | MapleAI Gemini | Gemini 2.0 via MapleAI |
 
 ### Image Models
 
@@ -184,6 +179,8 @@ curl -X POST https://your-app.vercel.app/api/chat \
 | `gptimage` | GPT Image | OpenAI DALL-E |
 | `kontext` | Kontext | Context-aware |
 | `seedream` | Seedream | Creative styles |
+| `mapleai-dalle` | MapleAI DALL-E | DALL-E via MapleAI |
+| `mapleai-flux` | MapleAI Flux | Flux via MapleAI |
 
 ### Video Models
 
@@ -191,6 +188,18 @@ curl -X POST https://your-app.vercel.app/api/chat \
 |----------|------|--------------|
 | `veo` | Google Veo | 8 seconds |
 | `seedance` | Seedance | 10 seconds |
+| `mapleai-veo` | MapleAI Veo | 8 seconds |
+
+## 🎵 MapleAI Additional Features
+
+MapleAI provider supports additional capabilities beyond chat, image, and video:
+
+- **Audio Generation** - Text-to-speech with multiple voices
+- **Audio Transcription** - Convert speech to text
+- **Embeddings** - Text embeddings for semantic search
+- **Content Moderation** - Detect harmful content
+
+See [API_DOCUMENTATION.md](./API_DOCUMENTATION.md#mapleai-integration) for detailed MapleAI documentation.
 
 ## 🛠️ Configuration
 
