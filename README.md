@@ -223,7 +223,7 @@ cloudgpt/
 │   ├── api-keys.ts            # API key utilities
 │   └── providers.ts           # AI provider configs
 ├── docs/                      # Frontend for GitHub Pages
-├── proxy.ts                   # Clerk middleware
+├── middleware.ts              # Clerk middleware
 ├── KEYS_SETUP.md              # Keys setup guide
 └── README.md                  # This file
 ```
