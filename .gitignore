@@ -43,3 +43,6 @@ coverage/
 
 # Misc
 *.log
+
+# Model cache
+.models-cache/
