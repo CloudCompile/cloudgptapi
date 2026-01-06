@@ -3,7 +3,7 @@
 export interface ChatModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'routeway' | 'openrouter' | 'stablehorde';
+  provider: 'pollinations' | 'routeway' | 'openrouter' | 'stablehorde' | 'meridian';
   description?: string;
   contextWindow?: number;
 }
@@ -105,6 +105,8 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'stable-horde-mistral-7b', name: 'Mistral 7B Instruct', provider: 'stablehorde', description: 'Mistral AI 7B Instruct model' },
   { id: 'stable-horde-qwen3-4b', name: 'Qwen 3 4B', provider: 'stablehorde', description: 'Qwen 3 4B model' },
   { id: 'stable-horde-neonmaid-12b', name: 'NeonMaid-12B', provider: 'stablehorde', description: 'NeonMaid-12B v2 creative model' },
+  // Meridian model
+  { id: 'meridian', name: 'Meridian', provider: 'meridian', description: 'Meridian cognitive substrate with persistent memory' },
 ];
 
 // Available image models
@@ -154,4 +156,5 @@ export const PROVIDER_URLS = {
     fluxSchnell: 'https://gateway.pixazo.ai/flux-1-schnell/v1/getData',
   },
   stablehorde: 'https://stablehorde.net/api/v2',
+  meridian: 'https://meridianlabs.website/api',
 };
