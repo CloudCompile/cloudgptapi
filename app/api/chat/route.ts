@@ -71,15 +71,24 @@ export async function POST(request: NextRequest) {
       providerApiKey = process.env.POLLINATIONS_API_KEY;
     }
 
+    // Build headers based on provider
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(providerApiKey && {
+        'Authorization': `Bearer ${providerApiKey}`,
+      }),
+    };
+
+    // OpenRouter requires additional headers
+    if (model.provider === 'openrouter') {
+      headers['HTTP-Referer'] = process.env.NEXT_PUBLIC_SITE_URL || 'https://cloudgptapi.vercel.app';
+      headers['X-Title'] = 'CloudGPT API';
+    }
+
     // Forward to provider API
     const providerResponse = await fetch(providerUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(providerApiKey && {
-          'Authorization': `Bearer ${providerApiKey}`,
-        }),
-      },
+      headers,
       body: JSON.stringify({
         model: modelId,
         messages: body.messages,
