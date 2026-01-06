@@ -46,6 +46,15 @@ export function extractApiKey(headers: Headers): string | null {
 }
 
 /**
+ * Safely parse a string to an integer, returning undefined for invalid values
+ */
+export function parseIntSafe(value: string | null | undefined): number | undefined {
+  if (!value) return undefined;
+  const parsed = parseInt(value, 10);
+  return isNaN(parsed) ? undefined : parsed;
+}
+
+/**
  * In-memory rate limiting
  * NOTE: This will not work correctly across multiple serverless instances.
  * For production, use Redis or Vercel KV.

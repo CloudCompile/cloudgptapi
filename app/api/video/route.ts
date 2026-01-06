@@ -81,13 +81,14 @@ export async function POST(request: NextRequest) {
     // Validate duration
     let duration = 4; // default
     if (body.duration !== undefined) {
-      duration = typeof body.duration === 'number' ? body.duration : parseInt(body.duration, 10);
-      if (isNaN(duration) || duration <= 0) {
+      const parsedDuration = typeof body.duration === 'number' ? body.duration : parseInt(body.duration, 10);
+      if (isNaN(parsedDuration) || parsedDuration <= 0) {
         return NextResponse.json(
           { error: 'Duration must be a positive number' },
           { status: 400 }
         );
       }
+      duration = parsedDuration;
     }
     if (model.maxDuration && duration > model.maxDuration) {
       return NextResponse.json(

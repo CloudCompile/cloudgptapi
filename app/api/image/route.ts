@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { extractApiKey, checkRateLimit, getRateLimitInfo } from '@/lib/api-keys';
+import { extractApiKey, checkRateLimit, getRateLimitInfo, parseIntSafe } from '@/lib/api-keys';
 import { IMAGE_MODELS, PROVIDER_URLS, ImageModel } from '@/lib/providers';
 
 export const runtime = 'edge';
+
+// Constants
+const MAX_IMAGE_DIMENSION = 4096;
 
 // Handle OPTIONS for CORS
 export async function OPTIONS() {
@@ -368,15 +371,15 @@ async function generateImage(body: {
   }
 
   // Validate dimensions if provided
-  if (body.width !== undefined && (typeof body.width !== 'number' || body.width <= 0 || body.width > 4096)) {
+  if (body.width !== undefined && (typeof body.width !== 'number' || body.width <= 0 || body.width > MAX_IMAGE_DIMENSION)) {
     return NextResponse.json(
-      { error: 'Width must be a positive number between 1 and 4096' },
+      { error: `Width must be a positive number between 1 and ${MAX_IMAGE_DIMENSION}` },
       { status: 400 }
     );
   }
-  if (body.height !== undefined && (typeof body.height !== 'number' || body.height <= 0 || body.height > 4096)) {
+  if (body.height !== undefined && (typeof body.height !== 'number' || body.height <= 0 || body.height > MAX_IMAGE_DIMENSION)) {
     return NextResponse.json(
-      { error: 'Height must be a positive number between 1 and 4096' },
+      { error: `Height must be a positive number between 1 and ${MAX_IMAGE_DIMENSION}` },
       { status: 400 }
     );
   }
@@ -487,13 +490,6 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // Parse and validate numeric parameters
-    const parseIntSafe = (value: string | null): number | undefined => {
-      if (!value) return undefined;
-      const parsed = parseInt(value, 10);
-      return isNaN(parsed) ? undefined : parsed;
-    };
 
     const body = {
       prompt,
