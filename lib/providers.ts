@@ -3,7 +3,7 @@
 export interface ChatModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'routeway' | 'openrouter' | 'stablehorde' | 'meridian' | 'liz';
+  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'liz';
   description?: string;
   contextWindow?: number;
 }
@@ -11,14 +11,14 @@ export interface ChatModel {
 export interface ImageModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'routeway' | 'openrouter' | 'appypie' | 'stablehorde';
+  provider: 'pollinations' | 'openrouter' | 'appypie' | 'stablehorde';
   description?: string;
 }
 
 export interface VideoModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'routeway' | 'openrouter';
+  provider: 'pollinations' | 'openrouter';
   description?: string;
   maxDuration?: number;
 }
@@ -45,26 +45,6 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'pollinations', description: 'Kimi K2 reasoning model' },
   { id: 'gemini-large', name: 'Gemini 2.5 Pro', provider: 'pollinations', description: 'Google Gemini 2.5 Pro' },
   { id: 'nova-micro', name: 'Nova Micro', provider: 'pollinations', description: 'Compact Nova model' },
-  // Routeway free models
-  { id: 'nemotron-3-nano-30b-a3b:free', name: 'Nemotron 3 Nano 30B', provider: 'routeway', description: 'NVIDIA Nemotron 3 Nano 30B' },
-  { id: 'devstral-2512:free', name: 'Devstral 2512', provider: 'routeway', description: 'Devstral 2512 model' },
-  { id: 'kimi-k2-0905:free', name: 'Kimi K2 0905', provider: 'routeway', description: 'Kimi K2 0905 model' },
-  { id: 'longcat-flash-chat:free', name: 'Longcat Flash Chat', provider: 'routeway', description: 'Longcat Flash Chat model' },
-  { id: 'minimax-m2:free', name: 'MiniMax M2', provider: 'routeway', description: 'MiniMax M2 model' },
-  { id: 'glm-4.6:free', name: 'GLM 4.6', provider: 'routeway', description: 'GLM 4.6 model' },
-  { id: 'deepseek-v3.1-terminus:free', name: 'DeepSeek V3.1 Terminus', provider: 'routeway', description: 'DeepSeek V3.1 Terminus model' },
-  { id: 'mai-ds-r1:free', name: 'MAI DS R1', provider: 'routeway', description: 'MAI DS R1 model' },
-  { id: 'nemotron-nano-9b-v2:free', name: 'Nemotron Nano 9B V2', provider: 'routeway', description: 'NVIDIA Nemotron Nano 9B V2' },
-  { id: 'gpt-oss-120b:free', name: 'GPT OSS 120B', provider: 'routeway', description: 'GPT OSS 120B model' },
-  { id: 'deepseek-v3.1:free', name: 'DeepSeek V3.1', provider: 'routeway', description: 'DeepSeek V3.1 model' },
-  { id: 'deepseek-r1t2-chimera:free', name: 'DeepSeek R1T2 Chimera', provider: 'routeway', description: 'DeepSeek R1T2 Chimera model' },
-  { id: 'llama-3.2-1b-instruct:free', name: 'Llama 3.2 1B Instruct', provider: 'routeway', description: 'Meta Llama 3.2 1B Instruct' },
-  { id: 'llama-3.2-3b-instruct:free', name: 'Llama 3.2 3B Instruct', provider: 'routeway', description: 'Meta Llama 3.2 3B Instruct' },
-  { id: 'deepseek-r1-distill-qwen-32b:free', name: 'DeepSeek R1 Distill Qwen 32B', provider: 'routeway', description: 'DeepSeek R1 Distill Qwen 32B' },
-  { id: 'deepseek-r1:free', name: 'DeepSeek R1', provider: 'routeway', description: 'DeepSeek R1 model' },
-  { id: 'deepseek-r1-0528:free', name: 'DeepSeek R1 0528', provider: 'routeway', description: 'DeepSeek R1 0528 model' },
-  { id: 'mistral-nemo-instruct:free', name: 'Mistral Nemo Instruct', provider: 'routeway', description: 'Mistral Nemo Instruct model' },
-  { id: 'llama-3.3-70b-instruct:free', name: 'Llama 3.3 70B Instruct', provider: 'routeway', description: 'Meta Llama 3.3 70B Instruct' },
   // OpenRouter free models
   { id: 'xiaomi/mimo-v2-flash:free', name: 'Xiaomi Mimo V2 Flash', provider: 'openrouter', description: 'Xiaomi Mimo V2 Flash model' },
   { id: 'mistralai/devstral-2512:free', name: 'Mistral Devstral 2512', provider: 'openrouter', description: 'Mistral AI Devstral 2512' },
@@ -183,7 +163,6 @@ export const VIDEO_MODELS: VideoModel[] = [
 // Provider base URLs
 export const PROVIDER_URLS = {
   pollinations: 'https://gen.pollinations.ai',
-  routeway: 'https://api.routeway.ai',
   openrouter: 'https://openrouter.ai',
   liz: 'https://lizley.zeabur.app',
   appypie: {

@@ -70,10 +70,7 @@ export async function POST(request: NextRequest) {
     let providerUrl: string;
     let providerApiKey: string | undefined;
     
-    if (model.provider === 'routeway') {
-      providerUrl = `${PROVIDER_URLS.routeway}/v1/chat/completions`;
-      providerApiKey = process.env.ROUTEWAY_API_KEY;
-    } else if (model.provider === 'openrouter') {
+    if (model.provider === 'openrouter') {
       providerUrl = `${PROVIDER_URLS.openrouter}/api/v1/chat/completions`;
       providerApiKey = process.env.OPENROUTER_API_KEY;
     } else if (model.provider === 'liz') {
