@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
-import { Cloud, LayoutDashboard, Rocket, Zap } from 'lucide-react';
+import { BookOpen, Cloud, LayoutDashboard, Rocket, Zap } from 'lucide-react';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -34,6 +34,10 @@ function Header() {
             <a href="/models" className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-primary transition-colors dark:text-slate-300">
               <Rocket className="h-4 w-4" />
               Models
+            </a>
+            <a href="/docs" className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-primary transition-colors dark:text-slate-300">
+              <BookOpen className="h-4 w-4" />
+              Docs
             </a>
           </div>
           

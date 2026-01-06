@@ -49,25 +49,25 @@ export default function Home() {
               icon={<MessageSquare className="h-6 w-6 text-blue-500" />}
               title="Chat API"
               description="Access GPT-4, Claude, and Llama through a unified interface."
-              href="/api/chat"
+              href="/docs#chat"
             />
             <FeatureCard 
               icon={<ImageIcon className="h-6 w-6 text-purple-500" />}
               title="Image API"
               description="Generate stunning visuals with Flux, Stable Diffusion, and more."
-              href="/api/image"
+              href="/docs#image"
             />
             <FeatureCard 
               icon={<Video className="h-6 w-6 text-pink-500" />}
               title="Video API"
               description="Create high-quality AI videos from simple text prompts."
-              href="/api/video"
+              href="/docs#video"
             />
             <FeatureCard 
               icon={<Bot className="h-6 w-6 text-emerald-500" />}
               title="Memory API"
               description="Give your AI a long-term memory with our Substrate integration."
-              href="/api/mem"
+              href="/docs#memory"
             />
           </div>
         </div>
@@ -109,14 +109,15 @@ export default function Home() {
                   <div className="h-3 w-3 rounded-full bg-green-500" />
                 </div>
                 <pre className="text-sm font-mono text-slate-300 overflow-x-auto">
-                  <code>{`const response = await fetch('https://cloudgpt.com/api/chat', {
+                  <code>{`const response = await fetch('https://cloudgptapi.vercel.app/api/chat', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'x-user-id': 'unique-user-123' // Optional: for user differentiation
   },
   body: JSON.stringify({
-    model: 'gpt-4o',
+    model: 'openai',
     messages: [{ role: 'user', content: 'Hello AI!' }]
   })
 });

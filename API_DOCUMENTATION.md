@@ -8,6 +8,7 @@ Complete API reference for CloudGPT - Unified AI API Gateway
 - [Base URL](#base-url)
 - [Rate Limits](#rate-limits)
 - [Error Handling](#error-handling)
+- [Custom Headers](#custom-headers)
 - [Endpoints](#endpoints)
   - [Chat Completions](#chat-completions)
   - [Chat with Memory](#chat-with-memory)
@@ -25,22 +26,22 @@ All API requests require authentication using an API key in the Authorization he
 Authorization: Bearer cgpt_your_api_key_here
 ```
 
-Get your API key from the [Dashboard](https://your-app.vercel.app/dashboard) after signing up.
+Get your API key from the [Dashboard](/dashboard) after signing up.
 
 ## Base URL
 
 ```
-https://your-app.vercel.app
+https://cloudgptapi.vercel.app
 ```
-
-Replace `your-app.vercel.app` with your actual deployment URL.
 
 ## Rate Limits
 
 | User Type | Chat | Image | Video |
 |-----------|------|-------|-------|
-| Anonymous | 10/min | 5/min | 2/min |
-| Authenticated | 60/min | 30/min | 10/min |
+| Anonymous (IP-based) | 10/min | 5/min | 2/min |
+| Authenticated (API Key) | 60/min* | 30/min* | 10/min* |
+
+*\*Default limits for authenticated users. Custom limits can be configured per API key.*
 
 Rate limit information is included in response headers:
 - `X-RateLimit-Remaining`: Requests remaining in current window
@@ -52,11 +53,8 @@ All errors follow this format:
 
 ```json
 {
-  "error": {
-    "message": "Error description",
-    "type": "invalid_request_error",
-    "code": "invalid_api_key"
-  }
+  "error": "Error description",
+  "details": "Technical details (if available)"
 }
 ```
 
@@ -67,6 +65,17 @@ All errors follow this format:
 - `401` - Unauthorized - Invalid or missing API key
 - `429` - Too Many Requests - Rate limit exceeded
 - `500` - Internal Server Error
+
+## Custom Headers
+
+CloudGPT automatically adds or propagates headers to upstream providers (like PolliStack/Meridian) for user differentiation and storage isolation:
+
+| Header | Value / Source | Description |
+|--------|----------------|-------------|
+| `X-App-Source` | `CloudGPT-Website` or `CloudGPT-API` | Identifies if the request came from the official playground or a 3rd party API client. |
+| `x-user-id` | Clerk ID, API Key User ID, or IP-based ID | A unique identifier for the end-user, ensuring isolated storage/memory in backend routers. |
+
+*Note: API clients can pass their own `x-user-id` header to override the default identification for their end-users.*
 
 ## Endpoints
 
@@ -109,12 +118,14 @@ Generate text completions using various LLMs.
 
 **Response:**
 
+Standard OpenAI-compatible response format.
+
 ```json
 {
   "id": "chatcmpl-abc123",
   "object": "chat.completion",
   "created": 1234567890,
-  "model": "gpt-4o",
+  "model": "openai",
   "choices": [
     {
       "index": 0,
@@ -133,23 +144,9 @@ Generate text completions using various LLMs.
 }
 ```
 
-**Example:**
-
-```bash
-curl -X POST https://your-app.vercel.app/api/chat \
-  -H "Authorization: Bearer cgpt_your_api_key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "openai",
-    "messages": [
-      {"role": "user", "content": "Write a haiku about AI"}
-    ]
-  }'
-```
-
 ### Chat with Memory
 
-Generate text completions using the Meridian cognitive substrate with persistent memory. This endpoint remembers previous interactions.
+Generate text completions using the Meridian cognitive substrate with persistent memory.
 
 **Endpoint:** `POST /api/mem`
 
@@ -161,29 +158,12 @@ Generate text completions using the Meridian cognitive substrate with persistent
 }
 ```
 
-**Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | The user prompt |
-
 **Response:**
 
 ```json
 {
   "response": "Based on our previous conversation, you mentioned the CloudGPT project..."
 }
-```
-
-**Example:**
-
-```bash
-curl -X POST https://your-app.vercel.app/api/mem \
-  -H "Authorization: Bearer cgpt_your_api_key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "prompt": "What was that project I mentioned?"
-  }'
 ```
 
 ### Image Generation
@@ -204,34 +184,9 @@ Generate images from text prompts.
 }
 ```
 
-**Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | Text description of the image |
-| `model` | string | Yes | Model ID (see [Image Models](#image-models)) |
-| `width` | integer | No | Image width. Default: 1024 |
-| `height` | integer | No | Image height. Default: 1024 |
-| `seed` | integer | No | Random seed for reproducibility |
-
 **Response:**
 
-Returns the generated image as binary data (PNG/JPEG) with appropriate `Content-Type` header.
-
-**Example:**
-
-```bash
-curl -X POST https://your-app.vercel.app/api/image \
-  -H "Authorization: Bearer cgpt_your_api_key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "prompt": "A futuristic city at night",
-    "model": "flux",
-    "width": 1024,
-    "height": 1024
-  }' \
-  --output image.png
-```
+Returns the generated image as binary data (PNG/JPEG).
 
 ### Video Generation
 
@@ -243,359 +198,78 @@ Generate videos from text prompts.
 
 ```json
 {
-  "prompt": "A cat playing with a red ball on a sunny day",
+  "prompt": "A cat playing with a red ball",
   "model": "veo",
-  "duration": 4,
-  "width": 1280,
-  "height": 720
+  "duration": 4
 }
 ```
 
-**Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | Text description of the video |
-| `model` | string | Yes | Model ID (see [Video Models](#video-models)) |
-| `duration` | integer | No | Video duration in seconds. Default: 4 |
-| `width` | integer | No | Video width. Default: 1280 |
-| `height` | integer | No | Video height. Default: 720 |
-
 **Response:**
 
-Returns the generated video as binary data (MP4) with appropriate `Content-Type` header.
-
-**Example:**
-
-```bash
-curl -X POST https://your-app.vercel.app/api/video \
-  -H "Authorization: Bearer cgpt_your_api_key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "prompt": "Ocean waves crashing on a beach",
-    "model": "veo",
-    "duration": 4
-  }' \
-  --output video.mp4
-```
+Returns the generated video as binary data (MP4).
 
 ### List Models
 
 Get available models for each modality.
 
-#### Chat Models
-
-**Endpoint:** `GET /api/models/chat`
-
-**Response:**
-
-```json
-{
-  "object": "list",
-  "data": [
-    {
-      "id": "openai",
-      "name": "OpenAI GPT-4o",
-      "provider": "pollinations",
-      "description": "OpenAI GPT-4o model"
-    },
-    {
-      "id": "mapleai-gpt4o",
-      "name": "MapleAI GPT-4o",
-      "provider": "mapleai",
-      "description": "GPT-4o via MapleAI"
-    }
-  ]
-}
-```
-
-#### Image Models
-
-**Endpoint:** `GET /api/models/image`
-
-**Response:**
-
-```json
-{
-  "object": "list",
-  "data": [
-    {
-      "id": "flux",
-      "name": "Flux",
-      "provider": "pollinations",
-      "description": "High quality image generation"
-    },
-    {
-      "id": "mapleai-dalle",
-      "name": "MapleAI DALL-E",
-      "provider": "mapleai",
-      "description": "DALL-E via MapleAI"
-    }
-  ]
-}
-```
-
-#### Video Models
-
-**Endpoint:** `GET /api/models/video`
-
-**Response:**
-
-```json
-{
-  "object": "list",
-  "data": [
-    {
-      "id": "veo",
-      "name": "Veo",
-      "provider": "pollinations",
-      "description": "Google Veo video generation",
-      "maxDuration": 8
-    },
-    {
-      "id": "mapleai-veo",
-      "name": "MapleAI Veo",
-      "provider": "mapleai",
-      "description": "Veo via MapleAI",
-      "maxDuration": 8
-    }
-  ]
-}
-```
-
-### API Key Management
-
-#### Create API Key
-
-**Endpoint:** `POST /api/keys`
-
-**Request Body:**
-
-```json
-{
-  "name": "My Production Key"
-}
-```
-
-**Response:**
-
-```json
-{
-  "id": "key_abc123",
-  "key": "cgpt_xyz789...",
-  "name": "My Production Key",
-  "created": 1234567890
-}
-```
-
-**Note:** The full API key is only shown once during creation. Store it securely.
-
-#### List API Keys
-
-**Endpoint:** `GET /api/keys`
-
-**Response:**
-
-```json
-{
-  "data": [
-    {
-      "id": "key_abc123",
-      "name": "My Production Key",
-      "prefix": "cgpt_xyz...",
-      "created": 1234567890,
-      "lastUsed": 1234567900
-    }
-  ]
-}
-```
-
-#### Delete API Key
-
-**Endpoint:** `DELETE /api/keys/:id`
-
-**Response:**
-
-```json
-{
-  "deleted": true,
-  "id": "key_abc123"
-}
-```
+- **Chat:** `GET /api/models/chat`
+- **Image:** `GET /api/models/image`
+- **Video:** `GET /api/models/video`
 
 ## Provider Support
 
-### Available Providers
+CloudGPT aggregates multiple top-tier AI providers:
 
-| Provider | Chat | Image | Video |
-|----------|------|-------|-------|
-| Pollinations | ✅ | ✅ | ✅ |
+| Provider | Description |
+|----------|-------------|
+| **Pollinations** | Main provider for fast text, image, and video models. |
+| **Routeway** | Provider for free high-performance models. |
+| **OpenRouter** | Gateway to a massive selection of models. |
+| **Stable Horde** | Community-driven distributed model network. |
+| **Meridian** | Specialized cognitive substrate with persistent memory. |
 
-### Chat Models
+### Popular Chat Models
 
-| Model ID | Name | Provider | Context Window |
-|----------|------|----------|----------------|
-| `openai` | OpenAI GPT-4o | Pollinations | 128k |
-| `openai-fast` | GPT-4o Mini | Pollinations | 128k |
-| `openai-large` | GPT-4.5 | Pollinations | 128k |
-| `claude` | Claude 3.5 Sonnet | Pollinations | 200k |
-| `claude-fast` | Claude 3 Haiku | Pollinations | 200k |
-| `gemini` | Gemini 2.0 Flash | Pollinations | 1M |
-| `gemini-large` | Gemini 2.5 Pro | Pollinations | 2M |
-| `deepseek` | DeepSeek V3 | Pollinations | 64k |
-| `grok` | Grok 3 | Pollinations | 128k |
-| `mistral` | Mistral Large | Pollinations | 128k |
-| `qwen-coder` | Qwen 2.5 Coder | Pollinations | 32k |
-| `perplexity-fast` | Perplexity Fast | Pollinations | 128k |
-| `perplexity-reasoning` | Perplexity Reasoning | Pollinations | 128k |
-| `kimi-k2-thinking` | Kimi K2 Thinking | Pollinations | 128k |
-| `gemini-large` | Gemini 2.5 Pro | Pollinations | 2M |
-| `nova-micro` | Nova Micro | Pollinations | 128k |
-| `chickytutor` | ChickyTutor | Pollinations | 128k |
-| `midijourney` | Midijourney | Pollinations | 128k |
-| `mapleai-gpt4o` | MapleAI GPT-4o | MapleAI | 128k |
-| `mapleai-claude` | MapleAI Claude | MapleAI | 200k |
-| `mapleai-gemini` | MapleAI Gemini | MapleAI | 1M |
+| Model ID | Name | Provider |
+|----------|------|----------|
+| `openai` | OpenAI GPT-4o | Pollinations |
+| `claude` | Claude 3.5 Sonnet | Pollinations |
+| `gemini` | Gemini 2.0 Flash | Pollinations |
+| `deepseek` | DeepSeek V3 | Pollinations |
+| `meridian` | Meridian (Memory) | Meridian |
+| `llama-3.3-70b-instruct:free` | Llama 3.3 70B | Routeway |
 
-### Image Models
+### Popular Image Models
 
-| Model ID | Name | Provider | Description |
-|----------|------|----------|-------------|
-| `kontext` | Kontext | Pollinations | FLUX.1 Kontext - In-context editing |
-| `turbo` | Turbo | Pollinations | SDXL Turbo - Real-time generation |
-| `nanobanana` | Nanobanana | Pollinations | Gemini 2.5 Flash Image |
-| `nanobanana-pro` | Nanobanana Pro | Pollinations | Gemini 3 Pro Image (4K) |
-| `seedream` | Seedream | Pollinations | ByteDance ARK (better quality) |
-| `seedream-pro` | Seedream Pro | Pollinations | ByteDance ARK (4K, Multi-Image) |
-| `gptimage` | GPT Image | Pollinations | OpenAI image generation |
-| `gptimage-large` | GPT Image Large | Pollinations | OpenAI advanced image generation |
-| `flux` | Flux | Pollinations | Fast high-quality generation |
-| `zimage` | Z-Image | Pollinations | Fast 6B Flux with 2x upscaling |
-| `mapleai-dalle` | MapleAI DALL-E | MapleAI | DALL-E via MapleAI |
-| `mapleai-flux` | MapleAI Flux | MapleAI | Flux via MapleAI |
-
-### Video Models
-
-| Model ID | Name | Provider | Max Duration |
-|----------|------|----------|--------------|
-| `veo` | Google Veo | Pollinations | 8 seconds |
-| `seedance` | Seedance | Pollinations | 10 seconds |
-| `seedance-pro` | Seedance Pro | Pollinations | 10 seconds |
-| `mapleai-veo` | MapleAI Veo | MapleAI | 8 seconds |
+| Model ID | Name | Provider |
+|----------|------|----------|
+| `flux` | Flux Schnell | Pollinations |
+| `turbo` | SDXL Turbo | Pollinations |
+| `kontext` | FLUX.1 Kontext | Pollinations |
+| `appypie-sdxl` | AppyPie SDXL | AppyPie |
 
 ## Code Examples
 
-### Python
-
-```python
-import requests
-
-API_KEY = "cgpt_your_api_key"
-BASE_URL = "https://your-app.vercel.app"
-
-headers = {
-    "Authorization": f"Bearer {API_KEY}",
-    "Content-Type": "application/json"
-}
-
-# Chat completion
-response = requests.post(
-    f"{BASE_URL}/api/chat",
-    headers=headers,
-    json={
-        "model": "openai",
-        "messages": [{"role": "user", "content": "Hello!"}]
-    }
-)
-print(response.json())
-
-# Image generation
-response = requests.post(
-    f"{BASE_URL}/api/image",
-    headers=headers,
-    json={
-        "prompt": "A sunset over mountains",
-        "model": "flux"
-    }
-)
-with open("image.png", "wb") as f:
-    f.write(response.content)
-```
-
-### JavaScript/Node.js
+### JavaScript (fetch)
 
 ```javascript
-const API_KEY = "cgpt_your_api_key";
-const BASE_URL = "https://your-app.vercel.app";
-
-// Chat completion
-const response = await fetch(`${BASE_URL}/api/chat`, {
-  method: "POST",
+const response = await fetch('https://cloudgptapi.vercel.app/api/chat', {
+  method: 'POST',
   headers: {
-    "Authorization": `Bearer ${API_KEY}`,
-    "Content-Type": "application/json"
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json',
+    'x-user-id': 'user_123' // Optional: differentiate storage
   },
   body: JSON.stringify({
-    model: "openai",
-    messages: [{ role: "user", content: "Hello!" }]
+    model: 'openai',
+    messages: [{ role: 'user', content: 'Hello!' }]
   })
 });
 
 const data = await response.json();
 console.log(data);
-
-// Image generation
-const imageResponse = await fetch(`${BASE_URL}/api/image`, {
-  method: "POST",
-  headers: {
-    "Authorization": `Bearer ${API_KEY}`,
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    prompt: "A sunset over mountains",
-    model: "flux"
-  })
-});
-
-const imageBlob = await imageResponse.blob();
-```
-
-### cURL
-
-```bash
-# Chat completion
-curl -X POST https://your-app.vercel.app/api/chat \
-  -H "Authorization: Bearer cgpt_your_api_key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "openai",
-    "messages": [{"role": "user", "content": "Hello!"}]
-  }'
-
-# Image generation
-curl -X POST https://your-app.vercel.app/api/image \
-  -H "Authorization: Bearer cgpt_your_api_key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "prompt": "A sunset over mountains",
-    "model": "flux"
-  }' \
-  --output image.png
-
-# Video generation
-curl -X POST https://your-app.vercel.app/api/video \
-  -H "Authorization: Bearer cgpt_your_api_key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "prompt": "Ocean waves",
-    "model": "veo"
-  }' \
-  --output video.mp4
 ```
 
 ## Support
 
-For issues, questions, or feature requests:
-- GitHub Issues: https://github.com/CloudCompile/cloudgpt/issues
-- Documentation: https://github.com/CloudCompile/cloudgpt/blob/main/README.md
-- Setup Guide: https://github.com/CloudCompile/cloudgpt/blob/main/KEYS_SETUP.md
+For issues or questions, visit our [Dashboard](/dashboard) or contact support at meridianlabsapp.website.

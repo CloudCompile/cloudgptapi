@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
 import { VIDEO_MODELS, PROVIDER_URLS } from '@/lib/providers';
 
@@ -11,6 +12,9 @@ export async function OPTIONS() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Get user from session
+    const { userId: sessionUserId } = await auth();
+
     // Extract and validate API key
     const rawApiKey = extractApiKey(request.headers);
     
@@ -82,7 +86,11 @@ export async function POST(request: NextRequest) {
     const encodedPrompt = encodeURIComponent(body.prompt);
     const pollinationsUrl = `${PROVIDER_URLS.pollinations}/image/${encodedPrompt}?${params.toString()}`;
     
-    const headers: Record<string, string> = {};
+    const userId = request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`;
+    const headers: Record<string, string> = {
+      'X-App-Source': apiKeyInfo ? 'CloudGPT-API' : 'CloudGPT-Website',
+      'x-user-id': userId,
+    };
     if (process.env.POLLINATIONS_API_KEY) {
       headers['Authorization'] = `Bearer ${process.env.POLLINATIONS_API_KEY}`;
     }

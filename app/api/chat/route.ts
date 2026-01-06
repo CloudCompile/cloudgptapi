@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo } from '@/lib/api-keys';
 import { CHAT_MODELS, PROVIDER_URLS } from '@/lib/providers';
 
@@ -11,7 +12,10 @@ export async function OPTIONS() {
 
 export async function POST(request: NextRequest) {
   try {
-    // Extract and validate API key
+    // Get user from session (for website users)
+    const { userId: sessionUserId } = await auth();
+
+    // Extract and validate API key (for API users)
     const rawApiKey = extractApiKey(request.headers);
     
     // Check rate limit (allow anonymous with lower limits)
@@ -84,20 +88,22 @@ export async function POST(request: NextRequest) {
     // Build headers based on provider
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'X-App-Source': apiKeyInfo ? 'CloudGPT-API' : 'CloudGPT-Website',
       ...(providerApiKey && {
         'Authorization': `Bearer ${providerApiKey}`,
       }),
     };
+
+    // Pass the extracted user ID to ALL providers (PolliStack router needs this)
+    // Priority: 1. Header x-user-id (from API client) 2. API Key owner 3. Session User 4. IP-based
+    const userId = request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`;
+    headers['x-user-id'] = userId;
 
     // Meridian requires x-api-key header instead of Authorization
     if (model.provider === 'meridian') {
       delete headers['Authorization'];
       if (providerApiKey) {
         headers['x-api-key'] = providerApiKey;
-      }
-      // Pass the extracted user ID to meridian if available
-      if (apiKeyInfo) {
-        headers['x-user-id'] = apiKeyInfo.userId;
       }
     }
 

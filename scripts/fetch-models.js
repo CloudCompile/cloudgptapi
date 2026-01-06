@@ -13,7 +13,10 @@ const POLLINATIONS_KEY = process.env.POLLINATIONS_API_KEY || 'pk_9TfuB6vtf1x67xg
 async function fetchModels(url, apiKey, name) {
   try {
     const response = await fetch(url, {
-      headers: { 'Authorization': `Bearer ${apiKey}` }
+      headers: { 
+        'Authorization': `Bearer ${apiKey}`,
+        'X-App-Source': 'CloudGPT'
+      }
     });
     
     if (!response.ok) throw new Error(`HTTP ${response.status}`);

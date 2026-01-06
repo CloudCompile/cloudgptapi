@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo } from '@/lib/api-keys';
 
 export const runtime = 'edge';
@@ -10,6 +11,9 @@ export async function OPTIONS() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Get user from session
+    const { userId: sessionUserId } = await auth();
+
     // Extract and validate CloudGPT API key
     const rawApiKey = extractApiKey(request.headers);
     if (!rawApiKey) {
@@ -55,14 +59,25 @@ export async function POST(request: NextRequest) {
     const providerUrl = 'https://meridianlabsapp.website/api/chat';
     const substrateApiKey = 'ps_6od22i7ddomt18c1jyk9hm';
 
+    // Build headers
+    const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+                     request.headers.get('x-real-ip') || 
+                     'anonymous';
+    
+    // Priority: 1. Header x-user-id (from API client) 2. API Key owner 3. Session User 4. IP-based
+    const userId = request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`;
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'x-api-key': substrateApiKey,
+      'x-user-id': userId,
+      'X-App-Source': apiKeyInfo ? 'CloudGPT-API' : 'CloudGPT-Website',
+    };
+
     // Forward to Substrate API
     const providerResponse = await fetch(providerUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': substrateApiKey,
-        'x-user-id': apiKeyInfo.userId,
-      },
+      headers,
       body: JSON.stringify({
         prompt: body.prompt,
       }),

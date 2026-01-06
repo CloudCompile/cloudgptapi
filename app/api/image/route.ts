@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
 import { IMAGE_MODELS, PROVIDER_URLS, ImageModel } from '@/lib/providers';
 
@@ -10,7 +11,7 @@ export async function OPTIONS() {
 }
 
 // Generate image using AppyPie API
-async function generateAppyPieImage(body: any, model: ImageModel) {
+async function generateAppyPieImage(body: any, model: ImageModel, userId?: string | null) {
   const apiKey = process.env.APPYPIE_API_KEY;
   
   if (!apiKey) {
@@ -77,6 +78,8 @@ async function generateAppyPieImage(body: any, model: ImageModel) {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-cache',
     'Ocp-Apim-Subscription-Key': apiKey,
+    'X-App-Source': userId?.startsWith('user_') ? 'CloudGPT-Website' : 'CloudGPT-API',
+    'x-user-id': userId || 'anonymous',
   };
 
   try {
@@ -106,6 +109,9 @@ async function generateAppyPieImage(body: any, model: ImageModel) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Get user from session
+    const { userId: sessionUserId } = await auth();
+
     // Extract and validate API key
     const rawApiKey = extractApiKey(request.headers);
     
@@ -159,7 +165,7 @@ export async function POST(request: NextRequest) {
 
     // Handle AppyPie models
     if (model.provider === 'appypie') {
-      const response = await generateAppyPieImage(body, model);
+      const response = await generateAppyPieImage(body, model, apiKeyInfo?.userId || sessionUserId);
       if (apiKeyInfo) {
         await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'image');
       }
@@ -178,7 +184,11 @@ export async function POST(request: NextRequest) {
     const encodedPrompt = encodeURIComponent(body.prompt);
     const pollinationsUrl = `${PROVIDER_URLS.pollinations}/prompt/${encodedPrompt}?${params.toString()}`;
     
-    const headers: Record<string, string> = {};
+    const userId = request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`;
+    const headers: Record<string, string> = {
+      'X-App-Source': apiKeyInfo ? 'CloudGPT-API' : 'CloudGPT-Website',
+      'x-user-id': userId,
+    };
     if (process.env.POLLINATIONS_API_KEY) {
       headers['Authorization'] = `Bearer ${process.env.POLLINATIONS_API_KEY}`;
     }

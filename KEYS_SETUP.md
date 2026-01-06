@@ -13,7 +13,9 @@ CLERK_SECRET_KEY=YOUR_SECRET_KEY
 
 # AI Provider Keys (At least one recommended)
 POLLINATIONS_API_KEY=your_pollinations_api_key
-MAPLEAI_API_KEY=your_mapleai_api_key
+ROUTEWAY_API_KEY=your_routeway_api_key
+OPENROUTER_API_KEY=your_openrouter_api_key
+MERIDIAN_API_KEY=your_meridian_api_key
 ```
 
 ## Setting Up Each Service
@@ -46,15 +48,34 @@ Pollinations provides text, image, and video generation capabilities.
 
 **Note:** The API works without a key but with stricter rate limits.
 
-### 3. MapleAI API Key (Optional)
+### 3. Routeway API Key (Optional)
 
-MapleAI is an alternative/additional AI provider.
+Routeway provides access to free high-performance models.
 
-1. Go to [mapleai.de](https://mapleai.de)
+1. Go to [api.routeway.ai](https://api.routeway.ai)
 2. Sign up for an account
 3. Navigate to the API section
 4. Generate a new API key
-5. Copy the key → `MAPLEAI_API_KEY`
+5. Copy the key → `ROUTEWAY_API_KEY`
+
+### 4. OpenRouter API Key (Optional)
+
+OpenRouter provides access to a massive selection of models.
+
+1. Go to [openrouter.ai](https://openrouter.ai)
+2. Sign up for an account
+3. Navigate to the Keys section
+4. Create a new key
+5. Copy the key → `OPENROUTER_API_KEY`
+
+### 5. Meridian API Key (Optional)
+
+Meridian provides specialized cognitive substrate with persistent memory.
+
+1. Go to [meridianlabsapp.website](https://meridianlabsapp.website)
+2. Sign up for an account
+3. Generate a new API key
+4. Copy the key → `MERIDIAN_API_KEY`
 
 ## Vercel Deployment Configuration
 
@@ -65,8 +86,10 @@ When deploying to Vercel:
 3. In the deployment configuration, add all environment variables:
    - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
    - `CLERK_SECRET_KEY`
-   - `POLLINATIONS_API_KEY` (optional)
-   - `MAPLEAI_API_KEY` (optional)
+   - `POLLINATIONS_API_KEY`
+   - `ROUTEWAY_API_KEY`
+   - `OPENROUTER_API_KEY`
+   - `MERIDIAN_API_KEY`
 4. Deploy!
 
 ### Environment Variables in Vercel

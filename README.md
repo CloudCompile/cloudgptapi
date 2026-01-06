@@ -48,6 +48,13 @@ Generate chat completions using various LLMs.
 POST /api/chat
 ```
 
+**Headers:**
+```http
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+x-user-id: unique-user-123 (optional)
+```
+
 **Request:**
 ```json
 {
@@ -66,7 +73,7 @@ POST /api/chat
   "id": "chatcmpl-xxx",
   "object": "chat.completion",
   "created": 1234567890,
-  "model": "gpt-4o",
+  "model": "openai",
   "choices": [
     {
       "index": 0,
