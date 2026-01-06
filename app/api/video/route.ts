@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const limit = apiKey ? 10 : 2;
     
     if (!checkRateLimit(effectiveKey, limit)) {
-      const rateLimitInfo = getRateLimitInfo(effectiveKey);
+      const rateLimitInfo = getRateLimitInfo(effectiveKey, limit);
       return NextResponse.json(
         { error: 'Rate limit exceeded', resetAt: rateLimitInfo.resetAt },
         { 
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
     // Return the video
     const videoBuffer = await pollinationsResponse.arrayBuffer();
     
-    const rateLimitInfo = getRateLimitInfo(effectiveKey);
+    const rateLimitInfo = getRateLimitInfo(effectiveKey, limit);
     return new NextResponse(videoBuffer, {
       headers: {
         'Content-Type': contentType || 'video/mp4',
@@ -149,7 +149,12 @@ export async function POST(request: NextRequest) {
     console.error('Video API error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+      }
     );
   }
 }

@@ -333,7 +333,7 @@ async function generateImage(body: {
   const limit = apiKey ? 30 : 5; // Image generation has lower limits
   
   if (!checkRateLimit(effectiveKey, limit)) {
-    const rateLimitInfo = getRateLimitInfo(effectiveKey);
+    const rateLimitInfo = getRateLimitInfo(effectiveKey, limit);
     return NextResponse.json(
       { error: 'Rate limit exceeded', resetAt: rateLimitInfo.resetAt },
       { 
@@ -421,7 +421,7 @@ async function generateImage(body: {
   // Return the image
   const imageBuffer = await pollinationsResponse.arrayBuffer();
   
-  const rateLimitInfo = getRateLimitInfo(effectiveKey);
+  const rateLimitInfo = getRateLimitInfo(effectiveKey, limit);
   return new NextResponse(imageBuffer, {
     headers: {
       'Content-Type': contentType || 'image/png',
@@ -465,7 +465,12 @@ export async function POST(request: NextRequest) {
     console.error('Image API error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+      }
     );
   }
 }
@@ -508,7 +513,12 @@ export async function GET(request: NextRequest) {
     console.error('Image API error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+      }
     );
   }
 }

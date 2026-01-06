@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const limit = apiKey ? 60 : 10; // Higher limit for authenticated users
     
     if (!checkRateLimit(effectiveKey, limit)) {
-      const rateLimitInfo = getRateLimitInfo(effectiveKey);
+      const rateLimitInfo = getRateLimitInfo(effectiveKey, limit);
       return NextResponse.json(
         { error: 'Rate limit exceeded', resetAt: rateLimitInfo.resetAt },
         { 
@@ -172,6 +172,7 @@ export async function POST(request: NextRequest) {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
           'Connection': 'keep-alive',
+          'Access-Control-Allow-Origin': '*',
         },
       });
     }
@@ -207,7 +208,7 @@ export async function POST(request: NextRequest) {
       };
     }
     
-    const rateLimitInfo = getRateLimitInfo(effectiveKey);
+    const rateLimitInfo = getRateLimitInfo(effectiveKey, limit);
     return NextResponse.json(responseData, {
       headers: {
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
@@ -222,7 +223,12 @@ export async function POST(request: NextRequest) {
     console.error('Chat API error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+      }
     );
   }
 }
