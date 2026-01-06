@@ -25,7 +25,11 @@ async function handleStableHordeChat(
   userId: string,
   effectiveKey: string
 ): Promise<NextResponse> {
+  // '0000000000' is Stable Horde's official anonymous API key for rate-limited access
   const hordeApiKey = process.env.STABLE_HORDE_API_KEY || '0000000000';
+  if (!process.env.STABLE_HORDE_API_KEY) {
+    console.warn('STABLE_HORDE_API_KEY not set, using anonymous access with reduced rate limits');
+  }
   const hordeUrl = PROVIDER_URLS.stablehorde;
   const modelName = getStableHordeTextModelName(modelId);
   

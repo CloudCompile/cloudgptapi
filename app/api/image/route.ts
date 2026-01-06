@@ -97,7 +97,7 @@ async function generateAppyPieImage(body: any, model: ImageModel, userId?: strin
       );
     }
 
-     return response;
+    return response;
   } catch (error) {
     console.error('AppyPie fetch error:', error);
     return NextResponse.json(
@@ -132,7 +132,11 @@ async function generateStableHordeImage(
   effectiveKey: string,
   apiKeyInfo: ApiKey | null
 ) {
-  const hordeApiKey = process.env.STABLE_HORDE_API_KEY || '0000000000'; // Anonymous key if not set
+  // '0000000000' is Stable Horde's official anonymous API key for rate-limited access
+  const hordeApiKey = process.env.STABLE_HORDE_API_KEY || '0000000000';
+  if (!process.env.STABLE_HORDE_API_KEY) {
+    console.warn('STABLE_HORDE_API_KEY not set, using anonymous access with reduced rate limits');
+  }
   const hordeUrl = PROVIDER_URLS.stablehorde;
   
   const modelName = getStableHordeModelName(model.id);
