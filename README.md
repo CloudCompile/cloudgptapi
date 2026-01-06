@@ -306,11 +306,34 @@ The `/docs` folder contains a static frontend that can be deployed to GitHub Pag
 - Interactive examples
 - Getting started guide
 
-To enable GitHub Pages:
-1. Go to your repository Settings
-2. Navigate to Pages
-3. Set Source to "Deploy from a branch"
-4. Select the `main` branch and `/docs` folder
+### Automated Deployment
+
+This repository includes a GitHub Actions workflow that automatically deploys the documentation to GitHub Pages when changes are pushed to the `main` branch.
+
+**Setup (One-time):**
+1. Go to your repository **Settings**
+2. Navigate to **Pages** (under "Code and automation")
+3. Under **Build and deployment**:
+   - Source: Select **GitHub Actions**
+4. The workflow will automatically deploy on every push to `main` that modifies the `docs/` folder
+
+**Manual Deployment:**
+You can also trigger a manual deployment:
+1. Go to **Actions** tab in your repository
+2. Select **Deploy Documentation to GitHub Pages**
+3. Click **Run workflow**
+
+Once set up, your documentation will be available at: `https://<username>.github.io/<repository-name>/`
+
+> **Note:** The first deployment may take a few minutes. Subsequent deployments are typically faster.
+
+### Dual Deployment
+
+The application supports **dual deployment**:
+- **Vercel**: Deploys the full Next.js application with API routes
+- **GitHub Pages**: Deploys static documentation from the `/docs` folder
+
+Both deployments work independently and update automatically when you push to `main`.
 
 ## 🔧 Recent Improvements
 
