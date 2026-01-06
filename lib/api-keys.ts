@@ -46,12 +46,30 @@ export function extractApiKey(headers: Headers): string | null {
 }
 
 /**
- * Safely parse a string to an integer, returning undefined for invalid values
+ * Safely parse a value to an integer, returning undefined for invalid values
+ * Handles both string and number inputs
  */
-export function parseIntSafe(value: string | null | undefined): number | undefined {
-  if (!value) return undefined;
+export function parseIntSafe(value: string | number | null | undefined): number | undefined {
+  if (value === null || value === undefined) return undefined;
+  if (typeof value === 'number') return isNaN(value) ? undefined : value;
   const parsed = parseInt(value, 10);
   return isNaN(parsed) ? undefined : parsed;
+}
+
+/**
+ * Validate image dimension (width or height)
+ * Returns null if valid, or an error message if invalid
+ */
+export function validateImageDimension(
+  dimension: number | undefined,
+  name: 'width' | 'height',
+  maxDimension: number
+): string | null {
+  if (dimension === undefined) return null;
+  if (typeof dimension !== 'number' || dimension <= 0 || dimension > maxDimension) {
+    return `${name.charAt(0).toUpperCase() + name.slice(1)} must be a positive number between 1 and ${maxDimension}`;
+  }
+  return null;
 }
 
 /**

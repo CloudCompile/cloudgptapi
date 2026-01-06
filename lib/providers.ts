@@ -1,5 +1,10 @@
 // AI Provider configurations and model definitions
 
+// Constants
+export const MAX_IMAGE_DIMENSION = 4096;
+export const DEFAULT_IMAGE_WIDTH = 1024;
+export const DEFAULT_IMAGE_HEIGHT = 1024;
+
 export interface ChatModel {
   id: string;
   name: string;

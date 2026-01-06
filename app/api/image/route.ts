@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { extractApiKey, checkRateLimit, getRateLimitInfo, parseIntSafe } from '@/lib/api-keys';
-import { IMAGE_MODELS, PROVIDER_URLS, ImageModel } from '@/lib/providers';
+import { extractApiKey, checkRateLimit, getRateLimitInfo, parseIntSafe, validateImageDimension } from '@/lib/api-keys';
+import { IMAGE_MODELS, PROVIDER_URLS, ImageModel, MAX_IMAGE_DIMENSION } from '@/lib/providers';
 
 export const runtime = 'edge';
-
-// Constants
-const MAX_IMAGE_DIMENSION = 4096;
 
 // Handle OPTIONS for CORS
 export async function OPTIONS() {
@@ -371,17 +368,14 @@ async function generateImage(body: {
   }
 
   // Validate dimensions if provided
-  if (body.width !== undefined && (typeof body.width !== 'number' || body.width <= 0 || body.width > MAX_IMAGE_DIMENSION)) {
-    return NextResponse.json(
-      { error: `Width must be a positive number between 1 and ${MAX_IMAGE_DIMENSION}` },
-      { status: 400 }
-    );
+  const widthError = validateImageDimension(body.width, 'width', MAX_IMAGE_DIMENSION);
+  if (widthError) {
+    return NextResponse.json({ error: widthError }, { status: 400 });
   }
-  if (body.height !== undefined && (typeof body.height !== 'number' || body.height <= 0 || body.height > MAX_IMAGE_DIMENSION)) {
-    return NextResponse.json(
-      { error: `Height must be a positive number between 1 and ${MAX_IMAGE_DIMENSION}` },
-      { status: 400 }
-    );
+  
+  const heightError = validateImageDimension(body.height, 'height', MAX_IMAGE_DIMENSION);
+  if (heightError) {
+    return NextResponse.json({ error: heightError }, { status: 400 });
   }
 
   // Build Pollinations URL with query params

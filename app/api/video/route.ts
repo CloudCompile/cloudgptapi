@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { extractApiKey, checkRateLimit, getRateLimitInfo } from '@/lib/api-keys';
+import { extractApiKey, checkRateLimit, getRateLimitInfo, parseIntSafe } from '@/lib/api-keys';
 import { VIDEO_MODELS, PROVIDER_URLS } from '@/lib/providers';
 
 export const runtime = 'edge';
@@ -81,8 +81,8 @@ export async function POST(request: NextRequest) {
     // Validate duration
     let duration = 4; // default
     if (body.duration !== undefined) {
-      const parsedDuration = typeof body.duration === 'number' ? body.duration : parseInt(body.duration, 10);
-      if (isNaN(parsedDuration) || parsedDuration <= 0) {
+      const parsedDuration = parseIntSafe(body.duration);
+      if (parsedDuration === undefined || parsedDuration <= 0) {
         return NextResponse.json(
           { error: 'Duration must be a positive number' },
           { status: 400 }
