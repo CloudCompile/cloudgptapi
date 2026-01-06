@@ -76,6 +76,9 @@ export async function POST(request: NextRequest) {
     } else if (model.provider === 'openrouter') {
       providerUrl = `${PROVIDER_URLS.openrouter}/api/v1/chat/completions`;
       providerApiKey = process.env.OPENROUTER_API_KEY;
+    } else if (model.provider === 'liz') {
+      providerUrl = `${PROVIDER_URLS.liz}/v1/chat/completions`;
+      providerApiKey = process.env.LIZ_API_KEY || 'sk-946715b46e8fcd676f8cc5d4e9c80a51';
     } else if (model.provider === 'meridian') {
       providerUrl = `${PROVIDER_URLS.meridian}/chat`;
       // Use the hardcoded key from the prompt for meridian if not in env
