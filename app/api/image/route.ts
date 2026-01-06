@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { extractApiKey, checkRateLimit, getRateLimitInfo } from '@/lib/api-keys';
-import { IMAGE_MODELS, PROVIDER_URLS } from '@/lib/providers';
+import { IMAGE_MODELS, PROVIDER_URLS, ImageModel } from '@/lib/providers';
 
 export const runtime = 'edge';
 
@@ -8,6 +8,116 @@ export const runtime = 'edge';
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200 });
 }
+
+// Generate image using AppyPie API
+async function generateAppyPieImage(body: any, model: ImageModel) {
+  const apiKey = process.env.APPYPIE_API_KEY || '4503d3c2296c4f66b00d4e88461f68b9';
+  
+  let url: string;
+  let requestBody: any;
+  
+  // Determine which AppyPie endpoint to use
+  if (model.id === 'appypie-sdxl') {
+    url = PROVIDER_URLS.appypie.sdxl;
+    requestBody = {
+      prompt: body.prompt,
+      negative_prompt: body.negative_prompt || 'Low-quality, blurry image',
+      height: body.height || 1024,
+      width: body.width || 1024,
+      num_steps: body.num_steps || 20,
+      guidance_scale: body.guidance_scale || 5,
+      seed: body.seed || 40,
+    };
+  } else if (model.id === 'appypie-sd-inpainting') {
+    url = PROVIDER_URLS.appypie.inpainting;
+    
+    // For inpainting, imageUrl and maskUrl are required
+    if (!body.imageUrl || !body.maskUrl) {
+      return NextResponse.json(
+        { error: 'imageUrl and maskUrl are required for inpainting model' },
+        { status: 400 }
+      );
+    }
+    
+    requestBody = {
+      prompt: body.prompt,
+      imageUrl: body.imageUrl,
+      maskUrl: body.maskUrl,
+      negative_prompt: body.negative_prompt || 'watermark',
+      height: body.height || 1024,
+      width: body.width || 1024,
+      num_steps: body.num_steps || 20,
+      guidance: body.guidance || 5,
+      seed: body.seed || 42,
+    };
+  } else if (model.id === 'appypie-flux-schnell') {
+    url = PROVIDER_URLS.appypie.fluxSchnell;
+    requestBody = {
+      prompt: body.prompt,
+      num_steps: body.num_steps || 4,
+      seed: body.seed || 15,
+      height: body.height || 512,
+      width: body.width || 512,
+    };
+  } else {
+    return NextResponse.json(
+      { error: 'Unknown AppyPie model' },
+      { status: 400 }
+    );
+  }
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
+  };
+
+  // Add API key header
+  if (model.id === 'appypie-sdxl' || model.id === 'appypie-flux-schnell') {
+    headers['Ocp-Apim-Subscription-Key'] = apiKey;
+  } else if (model.id === 'appypie-sd-inpainting') {
+    headers['Ocp-Apim-Subscription-Key'] = apiKey;
+  }
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      return NextResponse.json(
+        { error: 'AppyPie API error', details: errorText, status: response.status },
+        { status: response.status }
+      );
+    }
+
+    // Check content type
+    const contentType = response.headers.get('content-type');
+    
+    // If it's JSON, return the JSON response (which should contain image URL or data)
+    if (contentType?.includes('application/json')) {
+      const data = await response.json();
+      return NextResponse.json(data);
+    }
+
+    // If it's an image, return the image buffer
+    const imageBuffer = await response.arrayBuffer();
+    return new NextResponse(imageBuffer, {
+      headers: {
+        'Content-Type': contentType || 'image/png',
+      },
+    });
+  } catch (error) {
+    console.error('AppyPie API error:', error);
+    return NextResponse.json(
+      { error: 'Failed to generate image with AppyPie', details: String(error) },
+      { status: 500 }
+    );
+  }
+}
+
 
 // Shared image generation logic
 async function generateImage(body: {
@@ -20,6 +130,12 @@ async function generateImage(body: {
   negative_prompt?: string;
   quality?: string;
   nologo?: boolean;
+  // AppyPie specific parameters
+  imageUrl?: string;
+  maskUrl?: string;
+  num_steps?: number;
+  guidance_scale?: number;
+  guidance?: number;
 }, headers: Headers) {
   // Extract and validate API key
   const apiKey = extractApiKey(headers);
@@ -54,6 +170,11 @@ async function generateImage(body: {
       { error: `Unknown model: ${modelId}. Available models: ${IMAGE_MODELS.map(m => m.id).join(', ')}` },
       { status: 400 }
     );
+  }
+
+  // Handle AppyPie models
+  if (model.provider === 'appypie') {
+    return await generateAppyPieImage(body, model);
   }
 
   // Build Pollinations URL with query params

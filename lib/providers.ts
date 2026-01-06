@@ -11,7 +11,7 @@ export interface ChatModel {
 export interface ImageModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'routeway' | 'openrouter';
+  provider: 'pollinations' | 'routeway' | 'openrouter' | 'appypie';
   description?: string;
 }
 
@@ -113,6 +113,10 @@ export const IMAGE_MODELS: ImageModel[] = [
   { id: 'gptimage-large', name: 'GPT Image Large', provider: 'pollinations', description: "GPT Image 1.5 - OpenAI's advanced image generation model" },
   { id: 'flux', name: 'Flux', provider: 'pollinations', description: 'Flux Schnell - Fast high-quality image generation' },
   { id: 'zimage', name: 'Z-Image', provider: 'pollinations', description: 'Z-Image Turbo - Fast 6B Flux with 2x upscaling' },
+  // AppyPie models
+  { id: 'appypie-sdxl', name: 'AppyPie SDXL', provider: 'appypie', description: 'SDXL - High-resolution, realistic image generation' },
+  { id: 'appypie-sd-inpainting', name: 'AppyPie SD Inpainting', provider: 'appypie', description: 'Stable Diffusion 1.5 Inpainting - Image editing with masks' },
+  { id: 'appypie-flux-schnell', name: 'AppyPie Flux Schnell', provider: 'appypie', description: 'Flux-1 Schnell - Fast futuristic image generation' },
 ];
 
 // Available video models
@@ -127,4 +131,9 @@ export const PROVIDER_URLS = {
   pollinations: 'https://gen.pollinations.ai',
   routeway: 'https://api.routeway.ai',
   openrouter: 'https://openrouter.ai',
+  appypie: {
+    sdxl: 'https://gateway.appypie.com/getImage/v1/getSDXLImage',
+    inpainting: 'https://gateway-stable-diffusion-v1-5-inpainting.appypie.workers.dev/getImage',
+    fluxSchnell: 'https://gateway.pixazo.ai/flux-1-schnell/v1/getData',
+  },
 };
