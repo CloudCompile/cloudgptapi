@@ -23,6 +23,7 @@ export default function DocsPage() {
               
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-8 mb-4 px-3">Advanced</p>
               <DocNavLink href="#headers" icon={<Terminal className="h-4 w-4" />} label="Custom Headers" />
+              <DocNavLink href="#transparency" icon={<Shield className="h-4 w-4" />} label="Data & Privacy" />
               <DocNavLink href="#error-handling" icon={<Zap className="h-4 w-4" />} label="Error Handling" />
             </nav>
           </aside>
@@ -262,6 +263,65 @@ const response = await fetch('https://cloudgptapi.vercel.app/api/mem', {
                       </tbody>
                     </table>
                   </div>
+                </div>
+              </section>
+
+              {/* Data & Transparency */}
+              <section id="transparency" className="scroll-mt-24">
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                  <Shield className="h-6 w-6 text-emerald-500" />
+                  Data Handling & Transparency
+                </h2>
+                <div className="space-y-6 prose prose-slate dark:prose-invert max-w-none">
+                  <p>
+                    We believe in full transparency regarding how your data is handled. CloudGPT acts as a <strong>stateless router</strong>—we do not store your chat logs or generated content on our own servers. Instead, we propagate requests to specialized upstream providers.
+                  </p>
+                  
+                  <h3 className="text-lg font-bold">How Routing Works</h3>
+                  <p>
+                    When you make a request, CloudGPT performs the following steps:
+                  </p>
+                  <ol>
+                    <li><strong>Authentication:</strong> Verifies your API key or session.</li>
+                    <li><strong>User Identification:</strong> Determines the user ID for storage isolation (see below).</li>
+                    <li><strong>Provider Selection:</strong> Routes the request to providers like Pollinations, Routeway, or Meridian.</li>
+                    <li><strong>Header Propagation:</strong> Passes custom headers to upstream providers so they can manage data isolation on their end.</li>
+                  </ol>
+
+                  <h3 className="text-lg font-bold">User Identification Chain</h3>
+                  <p>
+                    To ensure your users' data (like memory or images) is kept separate, we use a strict priority chain to identify the requester:
+                  </p>
+                  <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-xl border">
+                    <ul className="list-none p-0 m-0 space-y-3">
+                      <li className="flex items-start gap-3">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">1</span>
+                        <span><strong>Client-Provided Header:</strong> If you pass an <code>x-user-id</code> header, it takes absolute priority.</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 text-xs font-bold">2</span>
+                        <span><strong>API Key Owner:</strong> If no header is present, the request is tied to the account that owns the API key.</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 text-xs font-bold">3</span>
+                        <span><strong>Session User:</strong> For website requests, we use the logged-in Clerk user.</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 text-xs font-bold">4</span>
+                        <span><strong>Anonymous IP:</strong> If all else fails, requests are tied to the requester's IP address.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <h3 className="text-lg font-bold">Where is data stored?</h3>
+                  <p>
+                    Data is stored at the <strong>edge provider</strong> level:
+                  </p>
+                  <ul>
+                    <li><strong>Memory:</strong> Managed by Meridian Labs via Substrate. Your context is isolated by the user ID we provide.</li>
+                    <li><strong>Images/Video:</strong> Cached by Pollinations or PolliStack for temporary retrieval.</li>
+                    <li><strong>Logs:</strong> CloudGPT only logs metadata (request count, model used) for billing and rate-limiting purposes.</li>
+                  </ul>
                 </div>
               </section>
 

@@ -9,6 +9,7 @@ Complete API reference for CloudGPT - Unified AI API Gateway
 - [Rate Limits](#rate-limits)
 - [Error Handling](#error-handling)
 - [Custom Headers](#custom-headers)
+- [Transparency & Data Privacy](#transparency--data-privacy)
 - [Endpoints](#endpoints)
 - [Chat Completions](#chat-completions)
 - [Advanced Memory Integrated Free AI Chat](#advanced-memory-integrated-free-ai-chat)
@@ -76,6 +77,36 @@ CloudGPT automatically adds or propagates headers to upstream providers (like Po
 | `x-user-id` | Clerk ID, API Key User ID, or IP-based ID | A unique identifier for the end-user, ensuring isolated storage/memory in backend routers. |
 
 *Note: API clients can pass their own `x-user-id` header to override the default identification for their end-users.*
+
+## Transparency & Data Privacy
+
+CloudGPT is committed to being an honest and transparent AI gateway. Here is exactly how we handle your information and how our routing works.
+
+### Stateless Architecture
+CloudGPT acts as a **stateless router**. This means:
+- We **do not store** chat messages, generated images, or video files on our own infrastructure.
+- We **do not train** models on your data.
+- We only store metadata (timestamps, model IDs, token counts) necessary for billing and rate-limiting.
+
+### Routing Logic
+When a request hits CloudGPT, it follows this flow:
+1. **Auth Check:** The `Authorization` header is validated.
+2. **User ID Derivation:** A unique ID is assigned to the request based on the [User Identification Chain](#user-identification-chain).
+3. **Provider Selection:** The request is mapped to an upstream provider (e.g., Pollinations, Meridian, OpenRouter).
+4. **Header Injection:** CloudGPT injects `X-App-Source` and `x-user-id` headers before forwarding the request.
+
+### User Identification Chain
+To ensure data isolation (especially for the Memory API), we identify users in this order:
+1. **Explicit Header:** `x-user-id` provided by the API client.
+2. **API Key Owner:** The ID of the account that generated the API key.
+3. **Clerk Session:** The logged-in user (for website requests).
+4. **Anonymous IP:** The public IP address of the requester (fallback).
+
+### Data Storage & Third Parties
+While CloudGPT is stateless, our upstream providers may have different policies:
+- **Memory API (Meridian):** Conversation context is stored in a cognitive substrate managed by Meridian Labs. This data is isolated by the user ID provided by CloudGPT.
+- **Image/Video (Pollinations):** Generated media is temporarily cached on Pollinations' edge servers to allow for download and retrieval.
+- **Provider Keys:** CloudGPT uses its own master keys for upstream providers; your API keys are never shared with them.
 
 ## Endpoints
 
