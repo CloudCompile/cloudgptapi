@@ -151,41 +151,46 @@ curl -X POST https://your-app.vercel.app/api/chat \
 
 ## 📋 Available Models
 
-### Chat Models
+For comprehensive information about all models including costs, response times, strengths, and weaknesses, see **[MODELS.md](./MODELS.md)**.
 
-| Model ID | Name | Description |
-|----------|------|-------------|
-| `openai` | OpenAI GPT-4o | OpenAI's flagship model |
-| `openai-fast` | GPT-4o Mini | Faster, more economical |
-| `openai-large` | GPT-4.5 | Largest OpenAI model |
-| `claude` | Claude 3.5 Sonnet | Anthropic's balanced model |
-| `claude-fast` | Claude 3 Haiku | Fast Claude responses |
-| `gemini` | Gemini 2.0 Flash | Google's fast model |
-| `gemini-large` | Gemini 2.5 Pro | Google's advanced model |
-| `deepseek` | DeepSeek V3 | DeepSeek's latest |
-| `grok` | Grok 3 | xAI's model |
-| `mistral` | Mistral Large | Mistral AI's large model |
-| `qwen-coder` | Qwen 2.5 Coder | Coding-focused model |
-| `chickytutor` | ChickyTutor | Educational AI tutor |
-| `midijourney` | Midijourney | Creative AI assistant |
+### Chat Models (Quick Reference)
 
-### Image Models
+| Model ID | Name | Best For |
+|----------|------|----------|
+| `openai` | OpenAI GPT-4o | General purpose, complex reasoning |
+| `openai-fast` | GPT-4o Mini | Fast responses, high volume |
+| `claude` | Claude 3.5 Sonnet | Code review, analysis, long context |
+| `claude-fast` | Claude 3 Haiku | Real-time chat, customer support |
+| `gemini` | Gemini 2.0 Flash | Long documents (1M tokens), cost-effective |
+| `gemini-large` | Gemini 2.5 Pro | Very long documents (2M tokens) |
+| `deepseek` | DeepSeek V3 | Cost-effective coding, math |
+| `grok` | Grok 3 | Current events, social media |
+| `mistral` | Mistral Large | Multilingual, European languages |
+| `qwen-coder` | Qwen 2.5 Coder | Code generation, debugging |
 
-| Model ID | Name | Description |
-|----------|------|-------------|
-| `flux` | Flux | High-quality generation |
-| `turbo` | Turbo | Fast generation |
-| `gptimage` | GPT Image | OpenAI DALL-E |
-| `kontext` | Kontext | Context-aware |
-| `seedream` | Seedream | Creative styles |
+**[View all 100+ chat models →](./MODELS.md#chat-models)**
 
-### Video Models
+### Image Models (Quick Reference)
 
-| Model ID | Name | Max Duration |
-|----------|------|--------------|
-| `veo` | Google Veo | 8 seconds |
-| `seedance` | Seedance | 10 seconds |
-| `seedance-pro` | Seedance Pro | 10 seconds |
+| Model ID | Name | Best For |
+|----------|------|----------|
+| `flux` | Flux | Fast high-quality generation |
+| `turbo` | Turbo | Real-time, rapid prototyping |
+| `gptimage` | GPT Image | Creative, brand-safe content |
+| `seedream-pro` | Seedream Pro | Professional, 4K resolution |
+| `kontext` | Kontext | Image editing, iteration |
+
+**[View all image models →](./MODELS.md#image-generation-models)**
+
+### Video Models (Quick Reference)
+
+| Model ID | Name | Max Duration | Best For |
+|----------|------|--------------|----------|
+| `veo` | Google Veo | 8 seconds | Product demos, social media |
+| `seedance` | Seedance | 10 seconds | Marketing videos |
+| `seedance-pro` | Seedance Pro | 10 seconds | Professional content |
+
+**[View all video models →](./MODELS.md#video-generation-models)**
 
 ## 🛠️ Configuration
 

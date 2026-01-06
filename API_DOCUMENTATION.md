@@ -16,6 +16,8 @@ Complete API reference for CloudGPT - Unified AI API Gateway
   - [API Key Management](#api-key-management)
 - [Provider Support](#provider-support)
 
+**📖 For detailed information about all models, including costs, response times, creators, strengths, and weaknesses, see [MODELS.md](./MODELS.md)**
+
 ## Authentication
 
 All API requests require authentication using an API key in the Authorization header:
