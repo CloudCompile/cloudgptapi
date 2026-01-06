@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CHAT_MODELS, IMAGE_MODELS, VIDEO_MODELS } from '@/lib/providers';
 
 type Mode = 'chat' | 'image' | 'video';
@@ -15,11 +15,26 @@ export default function PlaygroundPage() {
   const [imageUrl, setImageUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
 
+  // Cleanup URLs on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
+      if (videoUrl) URL.revokeObjectURL(videoUrl);
+    };
+  }, [imageUrl, videoUrl]);
+
   const handleModeChange = (newMode: Mode) => {
+    // Clean up URLs when switching modes
+    if (imageUrl) {
+      URL.revokeObjectURL(imageUrl);
+      setImageUrl('');
+    }
+    if (videoUrl) {
+      URL.revokeObjectURL(videoUrl);
+      setVideoUrl('');
+    }
     setMode(newMode);
     setOutput('');
-    setImageUrl('');
-    setVideoUrl('');
     setMessages([]);
     if (newMode === 'chat') setSelectedModel(CHAT_MODELS[0].id);
     if (newMode === 'image') setSelectedModel(IMAGE_MODELS[0].id);
@@ -46,6 +61,12 @@ export default function PlaygroundPage() {
           })
         });
 
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          setOutput(`Error: ${errorData.error || 'Failed to get response'}`);
+          return;
+        }
+
         const data = await response.json();
         const assistantMessage = data.choices?.[0]?.message?.content || 'No response';
         setMessages([...newMessages, { role: 'assistant', content: assistantMessage }]);
@@ -63,11 +84,16 @@ export default function PlaygroundPage() {
 
         if (response.ok) {
           const blob = await response.blob();
+          // Revoke previous URL to prevent memory leak
+          if (imageUrl) {
+            URL.revokeObjectURL(imageUrl);
+          }
           const url = URL.createObjectURL(blob);
           setImageUrl(url);
           setOutput('Image generated successfully!');
         } else {
-          setOutput('Failed to generate image');
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          setOutput(`Failed to generate image: ${errorData.error || 'Unknown error'}`);
         }
       } else if (mode === 'video') {
         setOutput('Generating video... This may take a while.');
@@ -82,11 +108,16 @@ export default function PlaygroundPage() {
 
         if (response.ok) {
           const blob = await response.blob();
+          // Revoke previous URL to prevent memory leak
+          if (videoUrl) {
+            URL.revokeObjectURL(videoUrl);
+          }
           const url = URL.createObjectURL(blob);
           setVideoUrl(url);
           setOutput('Video generated successfully!');
         } else {
-          setOutput('Failed to generate video');
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          setOutput(`Failed to generate video: ${errorData.error || 'Unknown error'}`);
         }
       }
     } catch (error) {

@@ -6,7 +6,14 @@ export const runtime = 'edge';
 
 // Handle OPTIONS for CORS
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 200 });
+  return new NextResponse(null, { 
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -35,7 +42,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
     
     // Validate required fields
     if (!body.messages || !Array.isArray(body.messages)) {
@@ -43,6 +58,23 @@ export async function POST(request: NextRequest) {
         { error: 'messages array is required' },
         { status: 400 }
       );
+    }
+
+    if (body.messages.length === 0) {
+      return NextResponse.json(
+        { error: 'messages array cannot be empty' },
+        { status: 400 }
+      );
+    }
+
+    // Validate message structure
+    for (const msg of body.messages) {
+      if (!msg.role || !msg.content) {
+        return NextResponse.json(
+          { error: 'Each message must have role and content' },
+          { status: 400 }
+        );
+      }
     }
 
     // Get model or use default
@@ -180,6 +212,9 @@ export async function POST(request: NextRequest) {
       headers: {
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       },
     });
     

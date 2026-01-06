@@ -31,10 +31,14 @@ export default function Dashboard() {
   async function fetchKeys() {
     try {
       const response = await fetch('/api/keys');
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
       const data = await response.json();
       setKeys(data.keys || []);
     } catch (err) {
       setError('Failed to fetch API keys');
+      console.error('Error fetching keys:', err);
     } finally {
       setLoading(false);
     }

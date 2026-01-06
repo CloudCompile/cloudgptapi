@@ -6,7 +6,14 @@ export const runtime = 'edge';
 
 // Handle OPTIONS for CORS
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 200 });
+  return new NextResponse(null, { 
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -35,12 +42,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
     
     // Validate required fields
     if (!body.prompt) {
       return NextResponse.json(
         { error: 'prompt is required' },
+        { status: 400 }
+      );
+    }
+
+    if (typeof body.prompt !== 'string' || body.prompt.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'prompt must be a non-empty string' },
         { status: 400 }
       );
     }
@@ -57,7 +79,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate duration
-    const duration = body.duration || 4;
+    let duration = 4; // default
+    if (body.duration !== undefined) {
+      duration = typeof body.duration === 'number' ? body.duration : parseInt(body.duration, 10);
+      if (isNaN(duration) || duration <= 0) {
+        return NextResponse.json(
+          { error: 'Duration must be a positive number' },
+          { status: 400 }
+        );
+      }
+    }
     if (model.maxDuration && duration > model.maxDuration) {
       return NextResponse.json(
         { error: `Duration exceeds maximum of ${model.maxDuration} seconds for ${modelId}` },
@@ -110,6 +141,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': contentType || 'video/mp4',
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+        'Access-Control-Allow-Origin': '*',
       },
     });
     

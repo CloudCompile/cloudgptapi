@@ -6,7 +6,14 @@ export const runtime = 'edge';
 
 // Handle OPTIONS for CORS
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 200 });
+  return new NextResponse(null, { 
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
 }
 
 // Generate image using AppyPie API
@@ -108,6 +115,7 @@ async function generateAppyPieImage(body: any, model: ImageModel) {
     return new NextResponse(imageBuffer, {
       headers: {
         'Content-Type': contentType || 'image/png',
+        'Access-Control-Allow-Origin': '*',
       },
     });
   } catch (error) {
@@ -254,6 +262,7 @@ async function generateStableHordeImage(body: any, model: ImageModel) {
           return new NextResponse(imageBuffer, {
             headers: {
               'Content-Type': contentType,
+              'Access-Control-Allow-Origin': '*',
             },
           });
         } else {
@@ -358,6 +367,20 @@ async function generateImage(body: {
     return await generateStableHordeImage(body, model);
   }
 
+  // Validate dimensions if provided
+  if (body.width !== undefined && (typeof body.width !== 'number' || body.width <= 0 || body.width > 4096)) {
+    return NextResponse.json(
+      { error: 'Width must be a positive number between 1 and 4096' },
+      { status: 400 }
+    );
+  }
+  if (body.height !== undefined && (typeof body.height !== 'number' || body.height <= 0 || body.height > 4096)) {
+    return NextResponse.json(
+      { error: 'Height must be a positive number between 1 and 4096' },
+      { status: 400 }
+    );
+  }
+
   // Build Pollinations URL with query params
   const params = new URLSearchParams();
   if (body.model) params.set('model', body.model);
@@ -404,18 +427,34 @@ async function generateImage(body: {
       'Content-Type': contentType || 'image/png',
       'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
       'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+      'Access-Control-Allow-Origin': '*',
     },
   });
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
     
     // Validate required fields
     if (!body.prompt) {
       return NextResponse.json(
         { error: 'prompt is required' },
+        { status: 400 }
+      );
+    }
+
+    if (typeof body.prompt !== 'string' || body.prompt.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'prompt must be a non-empty string' },
         { status: 400 }
       );
     }
@@ -444,12 +483,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Parse and validate numeric parameters
+    const parseIntSafe = (value: string | null): number | undefined => {
+      if (!value) return undefined;
+      const parsed = parseInt(value, 10);
+      return isNaN(parsed) ? undefined : parsed;
+    };
+
     const body = {
       prompt,
       model: searchParams.get('model') || 'flux',
-      width: searchParams.get('width') ? parseInt(searchParams.get('width')!) : undefined,
-      height: searchParams.get('height') ? parseInt(searchParams.get('height')!) : undefined,
-      seed: searchParams.get('seed') ? parseInt(searchParams.get('seed')!) : undefined,
+      width: parseIntSafe(searchParams.get('width')),
+      height: parseIntSafe(searchParams.get('height')),
+      seed: parseIntSafe(searchParams.get('seed')),
       enhance: searchParams.get('enhance') === 'true',
       negative_prompt: searchParams.get('negative_prompt') || undefined,
       quality: searchParams.get('quality') || undefined,
