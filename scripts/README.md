@@ -2,7 +2,7 @@
 
 ## fetch-models.js
 
-Fetches the latest available models from MapleAI and Pollinations APIs.
+Fetches the latest available models from Pollinations API.
 
 ### Usage
 
@@ -12,13 +12,11 @@ node scripts/fetch-models.js
 
 ### Environment Variables
 
-- `MAPLEAI_API_KEY` - MapleAI API key (optional, has default)
 - `POLLINATIONS_API_KEY` - Pollinations API key (optional, has default)
 
 ### Output
 
 Creates `.models-cache/` directory with:
-- `mapleai.json` - All MapleAI models
 - `pollinations-text.json` - Pollinations text/chat models
 - `pollinations-image.json` - Pollinations image/video models
 
@@ -29,7 +27,6 @@ Creates `.models-cache/` directory with:
 node scripts/fetch-models.js
 
 # Review the output
-cat .models-cache/mapleai.json | jq '.data[] | {id, type}'
 cat .models-cache/pollinations-text.json | jq '.data[] | .id'
 cat .models-cache/pollinations-image.json | jq '.[] | .name'
 

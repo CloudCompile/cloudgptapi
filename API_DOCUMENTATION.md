@@ -14,7 +14,6 @@ Complete API reference for CloudGPT - Unified AI API Gateway
   - [Video Generation](#video-generation)
   - [List Models](#list-models)
   - [API Key Management](#api-key-management)
-- [MapleAI Integration](#mapleai-integration)
 - [Provider Support](#provider-support)
 
 ## Authentication
@@ -384,168 +383,13 @@ Get available models for each modality.
 }
 ```
 
-## MapleAI Integration
-
-CloudGPT supports MapleAI as an additional provider with expanded capabilities.
-
-### MapleAI-Specific Features
-
-#### Audio Generation (Text-to-Speech)
-
-**Endpoint:** `POST /api/mapleai/audio/speech`
-
-**Request Body:**
-
-```json
-{
-  "model": "tts-1",
-  "voice": "alloy",
-  "input": "Hello, this is a test of text to speech.",
-  "response_format": "mp3"
-}
-```
-
-**Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | TTS model ID |
-| `voice` | string | Yes | Voice to use (alloy, echo, fable, onyx, nova, shimmer) |
-| `input` | string | Yes | Text to convert to speech |
-| `response_format` | string | No | Audio format (mp3, opus, aac, flac). Default: mp3 |
-
-**Response:** Returns audio file in the specified format.
-
-#### Audio Transcription
-
-**Endpoint:** `POST /api/mapleai/audio/transcriptions`
-
-**Request Body:** Multipart form data
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `file` | file | Yes | Audio file to transcribe |
-| `model` | string | Yes | Model ID (e.g., "whisper-1") |
-
-**Response:**
-
-```json
-{
-  "text": "This is the transcribed text from the audio file."
-}
-```
-
-#### Embeddings
-
-**Endpoint:** `POST /api/mapleai/embeddings`
-
-**Request Body:**
-
-```json
-{
-  "model": "text-embedding-3-small",
-  "input": "The quick brown fox jumps over the lazy dog"
-}
-```
-
-**Response:**
-
-```json
-{
-  "object": "list",
-  "data": [
-    {
-      "object": "embedding",
-      "index": 0,
-      "embedding": [0.123, -0.456, 0.789, ...]
-    }
-  ],
-  "model": "text-embedding-3-small",
-  "usage": {
-    "prompt_tokens": 10,
-    "total_tokens": 10
-  }
-}
-```
-
-#### Content Moderation
-
-**Endpoint:** `POST /api/mapleai/moderations`
-
-**Request Body:**
-
-```json
-{
-  "model": "text-moderation-latest",
-  "input": "Text to moderate"
-}
-```
-
-**Response:**
-
-```json
-{
-  "id": "modr-abc123",
-  "model": "text-moderation-latest",
-  "results": [
-    {
-      "flagged": false,
-      "categories": {
-        "hate": false,
-        "violence": false,
-        "sexual": false
-      },
-      "category_scores": {
-        "hate": 0.001,
-        "violence": 0.002,
-        "sexual": 0.001
-      }
-    }
-  ]
-}
-```
-
-### MapleAI Video Features
-
-#### Get Video Status
-
-**Endpoint:** `GET /api/mapleai/video/generations/:id`
-
-**Response:**
-
-```json
-{
-  "id": "vid_abc123",
-  "status": "completed",
-  "progress": 100,
-  "video_url": "https://...",
-  "download_url": "https://..."
-}
-```
-
-**Status values:** `queued`, `processing`, `completed`, `cancelled`, `failed`
-
-#### Cancel Video Generation
-
-**Endpoint:** `POST /api/mapleai/video/generations/:id/cancel`
-
-**Response:**
-
-```json
-{
-  "id": "vid_abc123",
-  "status": "cancelled"
-}
-```
-
 ## Provider Support
 
 ### Available Providers
 
-| Provider | Chat | Image | Video | Audio | Embeddings | Moderation |
-|----------|------|-------|-------|-------|------------|------------|
-| Pollinations | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| MapleAI | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Provider | Chat | Image | Video |
+|----------|------|-------|-------|
+| Pollinations | ✅ | ✅ | ✅ |
 
 ### Chat Models
 
@@ -562,6 +406,13 @@ CloudGPT supports MapleAI as an additional provider with expanded capabilities.
 | `grok` | Grok 3 | Pollinations | 128k |
 | `mistral` | Mistral Large | Pollinations | 128k |
 | `qwen-coder` | Qwen 2.5 Coder | Pollinations | 32k |
+| `perplexity-fast` | Perplexity Fast | Pollinations | 128k |
+| `perplexity-reasoning` | Perplexity Reasoning | Pollinations | 128k |
+| `kimi-k2-thinking` | Kimi K2 Thinking | Pollinations | 128k |
+| `gemini-large` | Gemini 2.5 Pro | Pollinations | 2M |
+| `nova-micro` | Nova Micro | Pollinations | 128k |
+| `chickytutor` | ChickyTutor | Pollinations | 128k |
+| `midijourney` | Midijourney | Pollinations | 128k |
 | `mapleai-gpt4o` | MapleAI GPT-4o | MapleAI | 128k |
 | `mapleai-claude` | MapleAI Claude | MapleAI | 200k |
 | `mapleai-gemini` | MapleAI Gemini | MapleAI | 1M |
@@ -570,11 +421,16 @@ CloudGPT supports MapleAI as an additional provider with expanded capabilities.
 
 | Model ID | Name | Provider | Description |
 |----------|------|----------|-------------|
-| `flux` | Flux | Pollinations | High quality generation |
-| `turbo` | Turbo | Pollinations | Fast generation |
-| `gptimage` | GPT Image | Pollinations | OpenAI DALL-E |
-| `kontext` | Kontext | Pollinations | Context-aware |
-| `seedream` | Seedream | Pollinations | Creative styles |
+| `kontext` | Kontext | Pollinations | FLUX.1 Kontext - In-context editing |
+| `turbo` | Turbo | Pollinations | SDXL Turbo - Real-time generation |
+| `nanobanana` | Nanobanana | Pollinations | Gemini 2.5 Flash Image |
+| `nanobanana-pro` | Nanobanana Pro | Pollinations | Gemini 3 Pro Image (4K) |
+| `seedream` | Seedream | Pollinations | ByteDance ARK (better quality) |
+| `seedream-pro` | Seedream Pro | Pollinations | ByteDance ARK (4K, Multi-Image) |
+| `gptimage` | GPT Image | Pollinations | OpenAI image generation |
+| `gptimage-large` | GPT Image Large | Pollinations | OpenAI advanced image generation |
+| `flux` | Flux | Pollinations | Fast high-quality generation |
+| `zimage` | Z-Image | Pollinations | Fast 6B Flux with 2x upscaling |
 | `mapleai-dalle` | MapleAI DALL-E | MapleAI | DALL-E via MapleAI |
 | `mapleai-flux` | MapleAI Flux | MapleAI | Flux via MapleAI |
 
@@ -584,6 +440,7 @@ CloudGPT supports MapleAI as an additional provider with expanded capabilities.
 |----------|------|----------|--------------|
 | `veo` | Google Veo | Pollinations | 8 seconds |
 | `seedance` | Seedance | Pollinations | 10 seconds |
+| `seedance-pro` | Seedance Pro | Pollinations | 10 seconds |
 | `mapleai-veo` | MapleAI Veo | MapleAI | 8 seconds |
 
 ## Code Examples

@@ -8,7 +8,7 @@ A unified API gateway for AI chat, image, and video generation. Access multiple 
 - **⚡ Edge Runtime** - Fast responses with Vercel Edge Functions
 - **🔐 Authentication** - Secure user accounts with Clerk
 - **🔑 API Keys** - Generate and manage API keys from the dashboard
-- **🌐 Multi-Provider** - Access Pollinations AI, MapleAI, and more
+- **🌐 Multi-Provider** - Access Pollinations AI and more
 - **📱 Responsive** - Works on desktop and mobile devices
 - **🎨 Dark Mode** - Automatic dark mode support
 
@@ -166,9 +166,8 @@ curl -X POST https://your-app.vercel.app/api/chat \
 | `grok` | Grok 3 | xAI's model |
 | `mistral` | Mistral Large | Mistral AI's large model |
 | `qwen-coder` | Qwen 2.5 Coder | Coding-focused model |
-| `mapleai-gpt4o` | MapleAI GPT-4o | GPT-4o via MapleAI |
-| `mapleai-claude` | MapleAI Claude | Claude 3.5 via MapleAI |
-| `mapleai-gemini` | MapleAI Gemini | Gemini 2.0 via MapleAI |
+| `chickytutor` | ChickyTutor | Educational AI tutor |
+| `midijourney` | Midijourney | Creative AI assistant |
 
 ### Image Models
 
@@ -179,8 +178,6 @@ curl -X POST https://your-app.vercel.app/api/chat \
 | `gptimage` | GPT Image | OpenAI DALL-E |
 | `kontext` | Kontext | Context-aware |
 | `seedream` | Seedream | Creative styles |
-| `mapleai-dalle` | MapleAI DALL-E | DALL-E via MapleAI |
-| `mapleai-flux` | MapleAI Flux | Flux via MapleAI |
 
 ### Video Models
 
@@ -188,25 +185,13 @@ curl -X POST https://your-app.vercel.app/api/chat \
 |----------|------|--------------|
 | `veo` | Google Veo | 8 seconds |
 | `seedance` | Seedance | 10 seconds |
-| `mapleai-veo` | MapleAI Veo | 8 seconds |
-
-## 🎵 MapleAI Additional Features
-
-MapleAI provider supports additional capabilities beyond chat, image, and video:
-
-- **Audio Generation** - Text-to-speech with multiple voices
-- **Audio Transcription** - Convert speech to text
-- **Embeddings** - Text embeddings for semantic search
-- **Content Moderation** - Detect harmful content
-
-See [API_DOCUMENTATION.md](./API_DOCUMENTATION.md#mapleai-integration) for detailed MapleAI documentation.
+| `seedance-pro` | Seedance Pro | 10 seconds |
 
 ## 🛠️ Configuration
 
 See [KEYS_SETUP.md](./KEYS_SETUP.md) for detailed instructions on setting up:
 - Clerk authentication
 - Pollinations API key
-- MapleAI API key
 - Other environment variables
 
 ## 📁 Project Structure
@@ -278,7 +263,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [Pollinations AI](https://pollinations.ai) - AI generation API
-- [MapleAI](https://mapleai.de) - AI provider
 - [Clerk](https://clerk.com) - Authentication
 - [Vercel](https://vercel.com) - Hosting platform
 - [Next.js](https://nextjs.org) - React framework
