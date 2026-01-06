@@ -9,6 +9,7 @@ import {
   ImageModel,
   VideoModel 
 } from '@/lib/providers';
+import { getModelDetails, ModelDetails } from '@/lib/model-details';
 import { 
   Activity, 
   CheckCircle2, 
@@ -22,7 +23,13 @@ import {
   Cpu,
   Globe,
   Filter,
-  ArrowUpRight
+  ArrowUpRight,
+  X,
+  Info,
+  TrendingUp,
+  TrendingDown,
+  Target,
+  Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -45,6 +52,8 @@ export default function ModelsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'chat' | 'image' | 'video'>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedModel, setSelectedModel] = useState<ModelType | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     // Initialize statuses
@@ -91,6 +100,16 @@ export default function ModelsPage() {
     );
     return { online, total: ALL_MODELS.length, avgLatency };
   }, [statuses]);
+
+  const handleModelClick = (model: ModelType) => {
+    setSelectedModel(model);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedModel(null), 300); // Clear after animation
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
@@ -152,6 +171,7 @@ export default function ModelsPage() {
               key={model.id} 
               model={model} 
               status={statuses[model.id] || { id: model.id, status: 'checking' }} 
+              onClick={() => handleModelClick(model)}
             />
           ))}
           
@@ -166,6 +186,15 @@ export default function ModelsPage() {
           )}
         </div>
       </div>
+
+      {/* Model Details Modal */}
+      {isModalOpen && selectedModel && (
+        <ModelDetailsModal 
+          model={selectedModel} 
+          status={statuses[selectedModel.id] || { id: selectedModel.id, status: 'checking' }}
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   );
 }
@@ -201,9 +230,11 @@ function TabButton({ active, onClick, icon, label }: { active: boolean, onClick:
   );
 }
 
-function ModelCard({ model, status }: { model: ModelType, status: ModelStatus }) {
+function ModelCard({ model, status, onClick }: { model: ModelType, status: ModelStatus, onClick: () => void }) {
   return (
-    <div className="group relative flex flex-col p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all hover:shadow-lg hover:-translate-y-1 overflow-hidden">
+    <div 
+      onClick={onClick}
+      className="group relative flex flex-col p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all hover:shadow-lg hover:-translate-y-1 overflow-hidden cursor-pointer">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
       
@@ -266,6 +297,218 @@ function ModelCard({ model, status }: { model: ModelType, status: ModelStatus })
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function ModelDetailsModal({ model, status, onClose }: { model: ModelType, status: ModelStatus, onClose: () => void }) {
+  const details = getModelDetails(model.id, model.type);
+  
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
+  // Close on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
+
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div 
+        className="relative w-full max-w-4xl max-h-[90vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 border-b border-slate-200 dark:border-slate-800 p-6">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 rounded-xl bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 transition-colors"
+          >
+            <X className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+          </button>
+          
+          <div className="flex items-start gap-4">
+            <div className={cn(
+              "p-3 rounded-2xl",
+              model.type === 'chat' ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600" :
+              model.type === 'image' ? "bg-purple-100 dark:bg-purple-900/30 text-purple-600" :
+              "bg-amber-100 dark:bg-amber-900/30 text-amber-600"
+            )}>
+              {model.type === 'chat' ? <MessageSquare className="h-8 w-8" /> :
+               model.type === 'image' ? <ImageIcon className="h-8 w-8" /> :
+               <Video className="h-8 w-8" />}
+            </div>
+            
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
+                  {model.name}
+                </h2>
+                {status.status === 'online' ? (
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-900/50">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-tight">Online</span>
+                  </div>
+                ) : status.status === 'offline' ? (
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-900/50">
+                    <span className="w-2 h-2 rounded-full bg-rose-500" />
+                    <span className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase tracking-tight">Offline</span>
+                  </div>
+                ) : null}
+              </div>
+              <p className="text-slate-600 dark:text-slate-400 mb-3">
+                {details?.longDescription || model.description || `High-performance ${model.type} model powered by ${model.provider}.`}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  {model.provider}
+                </span>
+                {details?.family && (
+                  <span className="px-3 py-1 rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                    {details.family}
+                  </span>
+                )}
+                <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 capitalize">
+                  {model.type}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6">
+          {details ? (
+            <div className="space-y-6">
+              {/* Strengths */}
+              {details.strengths && details.strengths.length > 0 && (
+                <section>
+                  <div className="flex items-center gap-2 mb-3">
+                    <TrendingUp className="h-5 w-5 text-emerald-600" />
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Strengths</h3>
+                  </div>
+                  <ul className="space-y-2">
+                    {details.strengths.map((strength, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-slate-700 dark:text-slate-300">{strength}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
+              {/* Weaknesses */}
+              {details.weaknesses && details.weaknesses.length > 0 && (
+                <section>
+                  <div className="flex items-center gap-2 mb-3">
+                    <TrendingDown className="h-5 w-5 text-amber-600" />
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Limitations</h3>
+                  </div>
+                  <ul className="space-y-2">
+                    {details.weaknesses.map((weakness, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <Info className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-slate-700 dark:text-slate-300">{weakness}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
+              {/* Use Cases */}
+              {details.useCases && details.useCases.length > 0 && (
+                <section>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Target className="h-5 w-5 text-blue-600" />
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Best For</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {details.useCases.map((useCase, idx) => (
+                      <span 
+                        key={idx}
+                        className="px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-sm font-medium text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-900/30"
+                      >
+                        {useCase}
+                      </span>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Technical Specifications */}
+              {details.technicalSpecs && (
+                <section>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Settings className="h-5 w-5 text-purple-600" />
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Technical Specifications</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {details.technicalSpecs.contextWindow && (
+                      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mb-1">Context Window</p>
+                        <p className="text-lg font-bold text-slate-900 dark:text-white">{details.technicalSpecs.contextWindow}</p>
+                      </div>
+                    )}
+                    {details.technicalSpecs.architecture && (
+                      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mb-1">Architecture</p>
+                        <p className="text-lg font-bold text-slate-900 dark:text-white">{details.technicalSpecs.architecture}</p>
+                      </div>
+                    )}
+                    {details.technicalSpecs.releaseDate && (
+                      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mb-1">Release Date</p>
+                        <p className="text-lg font-bold text-slate-900 dark:text-white">{details.technicalSpecs.releaseDate}</p>
+                      </div>
+                    )}
+                    {status.latency && (
+                      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mb-1">Current Latency</p>
+                        <p className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-slate-400" />
+                          {status.latency}ms
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </section>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Info className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Limited Information Available</h3>
+              <p className="text-slate-600 dark:text-slate-400 mb-4">
+                Detailed information for this model is not yet available.
+              </p>
+              <div className="inline-block p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <strong>Model ID:</strong> {model.id}
+                </p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <strong>Provider:</strong> {model.provider}
+                </p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <strong>Type:</strong> {model.type}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
