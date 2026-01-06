@@ -11,7 +11,14 @@ export async function OPTIONS() {
 
 // Generate image using AppyPie API
 async function generateAppyPieImage(body: any, model: ImageModel) {
-  const apiKey = process.env.APPYPIE_API_KEY || '4503d3c2296c4f66b00d4e88461f68b9';
+  const apiKey = process.env.APPYPIE_API_KEY;
+  
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: 'APPYPIE_API_KEY environment variable is not configured' },
+      { status: 500 }
+    );
+  }
   
   let url: string;
   let requestBody: any;
@@ -69,14 +76,8 @@ async function generateAppyPieImage(body: any, model: ImageModel) {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-cache',
+    'Ocp-Apim-Subscription-Key': apiKey,
   };
-
-  // Add API key header
-  if (model.id === 'appypie-sdxl' || model.id === 'appypie-flux-schnell') {
-    headers['Ocp-Apim-Subscription-Key'] = apiKey;
-  } else if (model.id === 'appypie-sd-inpainting') {
-    headers['Ocp-Apim-Subscription-Key'] = apiKey;
-  }
 
   try {
     const response = await fetch(url, {
