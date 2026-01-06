@@ -1,7 +1,5 @@
 # ☁️ CloudGPT - Unified AI API Gateway
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/CloudCompile/cloudgpt&env=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,POLLINATIONS_API_KEY&envDescription=API%20keys%20required%20for%20CloudGPT&envLink=https://github.com/CloudCompile/cloudgpt/blob/main/KEYS_SETUP.md&project-name=cloudgpt&repository-name=cloudgpt)
-
 A unified API gateway for AI chat, image, and video generation. Access multiple AI providers through a single, consistent API interface.
 
 ## ✨ Features
@@ -10,21 +8,11 @@ A unified API gateway for AI chat, image, and video generation. Access multiple 
 - **⚡ Edge Runtime** - Fast responses with Vercel Edge Functions
 - **🔐 Authentication** - Secure user accounts with Clerk
 - **🔑 API Keys** - Generate and manage API keys from the dashboard
-- **🌐 Multi-Provider** - Access Pollinations AI, MapleAI, and more
+- **🌐 Multi-Provider** - Access Pollinations AI and more
 - **📱 Responsive** - Works on desktop and mobile devices
 - **🎨 Dark Mode** - Automatic dark mode support
 
 ## 🚀 Quick Start
-
-### Deploy to Vercel (Recommended)
-
-The easiest way to get started is to deploy to Vercel:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/CloudCompile/cloudgpt&env=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,POLLINATIONS_API_KEY&envDescription=API%20keys%20required%20for%20CloudGPT&envLink=https://github.com/CloudCompile/cloudgpt/blob/main/KEYS_SETUP.md&project-name=cloudgpt&repository-name=cloudgpt)
-
-1. Click the button above
-2. Configure the required environment variables (see [KEYS_SETUP.md](./KEYS_SETUP.md))
-3. Deploy!
 
 ### Local Development
 
@@ -47,6 +35,10 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000) to see the application.
 
 ## 📡 API Endpoints
+
+For complete API documentation, see [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
+
+### Quick Reference
 
 ### Chat Completions
 
@@ -174,6 +166,8 @@ curl -X POST https://your-app.vercel.app/api/chat \
 | `grok` | Grok 3 | xAI's model |
 | `mistral` | Mistral Large | Mistral AI's large model |
 | `qwen-coder` | Qwen 2.5 Coder | Coding-focused model |
+| `chickytutor` | ChickyTutor | Educational AI tutor |
+| `midijourney` | Midijourney | Creative AI assistant |
 
 ### Image Models
 
@@ -191,13 +185,13 @@ curl -X POST https://your-app.vercel.app/api/chat \
 |----------|------|--------------|
 | `veo` | Google Veo | 8 seconds |
 | `seedance` | Seedance | 10 seconds |
+| `seedance-pro` | Seedance Pro | 10 seconds |
 
 ## 🛠️ Configuration
 
 See [KEYS_SETUP.md](./KEYS_SETUP.md) for detailed instructions on setting up:
 - Clerk authentication
 - Pollinations API key
-- MapleAI API key
 - Other environment variables
 
 ## 📁 Project Structure
@@ -269,7 +263,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [Pollinations AI](https://pollinations.ai) - AI generation API
-- [MapleAI](https://mapleai.de) - AI provider
 - [Clerk](https://clerk.com) - Authentication
 - [Vercel](https://vercel.com) - Hosting platform
 - [Next.js](https://nextjs.org) - React framework
