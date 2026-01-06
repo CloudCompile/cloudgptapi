@@ -1,27 +1,14 @@
 import { v4 as uuidv4 } from 'uuid';
-
-/**
- * API Key Management Utilities
- * 
- * IMPORTANT: This implementation uses in-memory storage for demonstration purposes.
- * For production deployments, replace with:
- * - Vercel KV or Redis for rate limiting
- * - A database (Postgres, MongoDB, etc.) for API key storage
- * 
- * The in-memory storage will not persist across:
- * - Serverless function cold starts
- * - Multiple function instances
- * - Deployments
- */
+import { supabaseAdmin } from './supabase';
 
 export interface ApiKey {
   id: string;
   key: string;
   userId: string;
   name: string;
-  createdAt: Date;
-  lastUsedAt?: Date;
-  rateLimit: number; // requests per minute
+  createdAt: string;
+  lastUsedAt?: string;
+  rateLimit: number;
   usageCount: number;
 }
 
@@ -45,10 +32,56 @@ export function extractApiKey(headers: Headers): string | null {
   return null;
 }
 
+// Validate API key and return user info
+export async function validateApiKey(key: string): Promise<ApiKey | null> {
+  const { data, error } = await supabaseAdmin
+    .from('api_keys')
+    .select('*')
+    .eq('key', key)
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  // Update last used at
+  await supabaseAdmin
+    .from('api_keys')
+    .update({ last_used_at: new Date().toISOString() })
+    .eq('id', data.id);
+
+  return {
+    id: data.id,
+    key: data.key,
+    userId: data.user_id,
+    name: data.name,
+    createdAt: data.created_at,
+    lastUsedAt: data.last_used_at,
+    rateLimit: data.rate_limit || 60,
+    usageCount: data.usage_count || 0,
+  };
+}
+
+// Track usage for an API key
+export async function trackUsage(apiKeyId: string, userId: string, modelId: string, type: 'chat' | 'image' | 'video' | 'mem') {
+  // Increment usage count on the API key
+  await supabaseAdmin.rpc('increment_usage_count', { key_id: apiKeyId });
+
+  // Log detailed usage
+  await supabaseAdmin
+    .from('usage_logs')
+    .insert({
+      api_key_id: apiKeyId,
+      user_id: userId,
+      model_id: modelId,
+      type: type,
+      timestamp: new Date().toISOString(),
+    });
+}
+
 /**
- * In-memory rate limiting
- * NOTE: This will not work correctly across multiple serverless instances.
- * For production, use Redis or Vercel KV.
+ * In-memory rate limiting (Fallback if DB rate limiting is too slow)
+ * For production, we'd ideally use Redis or a DB-level check.
  */
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
