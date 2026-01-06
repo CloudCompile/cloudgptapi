@@ -3,7 +3,7 @@
 export interface ChatModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'routeway' | 'openrouter' | 'stablehorde' | 'meridian';
+  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'liz';
   description?: string;
   contextWindow?: number;
 }
@@ -11,14 +11,14 @@ export interface ChatModel {
 export interface ImageModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'routeway' | 'openrouter' | 'appypie' | 'stablehorde';
+  provider: 'pollinations' | 'openrouter' | 'appypie' | 'stablehorde';
   description?: string;
 }
 
 export interface VideoModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'routeway' | 'openrouter';
+  provider: 'pollinations' | 'openrouter';
   description?: string;
   maxDuration?: number;
 }
@@ -40,32 +40,11 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'midijourney', name: 'Midijourney', provider: 'pollinations', description: 'Creative AI assistant' },
   { id: 'claude-fast', name: 'Claude 3 Haiku', provider: 'pollinations', description: 'Fast Claude model' },
   { id: 'claude', name: 'Claude 3.5 Sonnet', provider: 'pollinations', description: 'Anthropic Claude 3.5 Sonnet' },
-  { id: 'claude-large', name: 'Claude 3.5 Opus', provider: 'pollinations', description: 'Large Claude model' },
   { id: 'perplexity-fast', name: 'Perplexity Fast', provider: 'pollinations', description: 'Fast Perplexity model' },
   { id: 'perplexity-reasoning', name: 'Perplexity Reasoning', provider: 'pollinations', description: 'Perplexity with reasoning' },
   { id: 'kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'pollinations', description: 'Kimi K2 reasoning model' },
   { id: 'gemini-large', name: 'Gemini 2.5 Pro', provider: 'pollinations', description: 'Google Gemini 2.5 Pro' },
   { id: 'nova-micro', name: 'Nova Micro', provider: 'pollinations', description: 'Compact Nova model' },
-  // Routeway free models
-  { id: 'nemotron-3-nano-30b-a3b:free', name: 'Nemotron 3 Nano 30B', provider: 'routeway', description: 'NVIDIA Nemotron 3 Nano 30B' },
-  { id: 'devstral-2512:free', name: 'Devstral 2512', provider: 'routeway', description: 'Devstral 2512 model' },
-  { id: 'kimi-k2-0905:free', name: 'Kimi K2 0905', provider: 'routeway', description: 'Kimi K2 0905 model' },
-  { id: 'longcat-flash-chat:free', name: 'Longcat Flash Chat', provider: 'routeway', description: 'Longcat Flash Chat model' },
-  { id: 'minimax-m2:free', name: 'MiniMax M2', provider: 'routeway', description: 'MiniMax M2 model' },
-  { id: 'glm-4.6:free', name: 'GLM 4.6', provider: 'routeway', description: 'GLM 4.6 model' },
-  { id: 'deepseek-v3.1-terminus:free', name: 'DeepSeek V3.1 Terminus', provider: 'routeway', description: 'DeepSeek V3.1 Terminus model' },
-  { id: 'mai-ds-r1:free', name: 'MAI DS R1', provider: 'routeway', description: 'MAI DS R1 model' },
-  { id: 'nemotron-nano-9b-v2:free', name: 'Nemotron Nano 9B V2', provider: 'routeway', description: 'NVIDIA Nemotron Nano 9B V2' },
-  { id: 'gpt-oss-120b:free', name: 'GPT OSS 120B', provider: 'routeway', description: 'GPT OSS 120B model' },
-  { id: 'deepseek-v3.1:free', name: 'DeepSeek V3.1', provider: 'routeway', description: 'DeepSeek V3.1 model' },
-  { id: 'deepseek-r1t2-chimera:free', name: 'DeepSeek R1T2 Chimera', provider: 'routeway', description: 'DeepSeek R1T2 Chimera model' },
-  { id: 'llama-3.2-1b-instruct:free', name: 'Llama 3.2 1B Instruct', provider: 'routeway', description: 'Meta Llama 3.2 1B Instruct' },
-  { id: 'llama-3.2-3b-instruct:free', name: 'Llama 3.2 3B Instruct', provider: 'routeway', description: 'Meta Llama 3.2 3B Instruct' },
-  { id: 'deepseek-r1-distill-qwen-32b:free', name: 'DeepSeek R1 Distill Qwen 32B', provider: 'routeway', description: 'DeepSeek R1 Distill Qwen 32B' },
-  { id: 'deepseek-r1:free', name: 'DeepSeek R1', provider: 'routeway', description: 'DeepSeek R1 model' },
-  { id: 'deepseek-r1-0528:free', name: 'DeepSeek R1 0528', provider: 'routeway', description: 'DeepSeek R1 0528 model' },
-  { id: 'mistral-nemo-instruct:free', name: 'Mistral Nemo Instruct', provider: 'routeway', description: 'Mistral Nemo Instruct model' },
-  { id: 'llama-3.3-70b-instruct:free', name: 'Llama 3.3 70B Instruct', provider: 'routeway', description: 'Meta Llama 3.3 70B Instruct' },
   // OpenRouter free models
   { id: 'xiaomi/mimo-v2-flash:free', name: 'Xiaomi Mimo V2 Flash', provider: 'openrouter', description: 'Xiaomi Mimo V2 Flash model' },
   { id: 'mistralai/devstral-2512:free', name: 'Mistral Devstral 2512', provider: 'openrouter', description: 'Mistral AI Devstral 2512' },
@@ -107,6 +86,42 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'stable-horde-neonmaid-12b', name: 'NeonMaid-12B', provider: 'stablehorde', description: 'NeonMaid-12B v2 creative model' },
   // Meridian model
   { id: 'meridian', name: 'Meridian', provider: 'meridian', description: 'Meridian cognitive substrate with persistent memory' },
+  // Liz Proxy models
+  { id: 'claude-3-haiku', name: 'Claude 3 Haiku', provider: 'liz', description: 'Anthropic Claude 3 Haiku' },
+  { id: 'claude-3-opus', name: 'Claude 3 Opus', provider: 'liz', description: 'Anthropic Claude 3 Opus' },
+  { id: 'claude-3.5-haiku', name: 'Claude 3.5 Haiku', provider: 'liz', description: 'Anthropic Claude 3.5 Haiku' },
+  { id: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'liz', description: 'Anthropic Claude 3.5 Sonnet' },
+  { id: 'claude-3.7-sonnet', name: 'Claude 3.7 Sonnet', provider: 'liz', description: 'Anthropic Claude 3.7 Sonnet' },
+  { id: 'claude-haiku-4.5', name: 'Claude Haiku 4.5', provider: 'liz', description: 'Anthropic Claude Haiku 4.5' },
+  { id: 'claude-opus-4', name: 'Claude Opus 4', provider: 'liz', description: 'Anthropic Claude Opus 4' },
+  { id: 'claude-opus-4.1', name: 'Claude Opus 4.1', provider: 'liz', description: 'Anthropic Claude Opus 4.1' },
+  { id: 'claude-opus-4.5', name: 'Claude Opus 4.5', provider: 'liz', description: 'Anthropic Claude Opus 4.5' },
+  { id: 'claude-sonnet-4', name: 'Claude Sonnet 4', provider: 'liz', description: 'Anthropic Claude Sonnet 4' },
+  { id: 'claude-sonnet-4.5', name: 'Claude Sonnet 4.5', provider: 'liz', description: 'Anthropic Claude Sonnet 4.5' },
+  { id: 'gemini-2.0-flash-001', name: 'Gemini 2.0 Flash 001', provider: 'liz', description: 'Google Gemini 2.0 Flash 001' },
+  { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', provider: 'liz', description: 'Google Gemini 3 Flash Preview' },
+  { id: 'gemini-2.0-flash-lite-001', name: 'Gemini 2.0 Flash Lite 001', provider: 'liz', description: 'Google Gemini 2.0 Flash Lite 001' },
+  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'liz', description: 'Google Gemini 2.5 Flash' },
+  { id: 'gemini-2.5-flash-image', name: 'Gemini 2.5 Flash Image', provider: 'liz', description: 'Google Gemini 2.5 Flash Image' },
+  { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite', provider: 'liz', description: 'Google Gemini 2.5 Flash Lite' },
+  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'liz', description: 'Google Gemini 2.5 Pro' },
+  { id: 'gemini-3-pro-image-preview', name: 'Gemini 3 Pro Image Preview', provider: 'liz', description: 'Google Gemini 3 Pro Image Preview' },
+  { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', provider: 'liz', description: 'Google Gemini 3 Pro Preview' },
+  { id: 'deepseek-prover-v2', name: 'DeepSeek Prover V2', provider: 'liz', description: 'DeepSeek Prover V2' },
+  { id: 'deepseek-r1', name: 'DeepSeek R1', provider: 'liz', description: 'DeepSeek R1' },
+  { id: 'deepseek-r1-0528', name: 'DeepSeek R1 0528', provider: 'liz', description: 'DeepSeek R1 0528' },
+  { id: 'deepseek-v3', name: 'DeepSeek V3', provider: 'liz', description: 'DeepSeek V3' },
+  { id: 'deepseek-v3.1', name: 'DeepSeek V3.1', provider: 'liz', description: 'DeepSeek V3.1' },
+  { id: 'deepseek-v3.2-exp', name: 'DeepSeek V3.2 Exp', provider: 'liz', description: 'DeepSeek V3.2 Experimental' },
+  { id: 'deepseek-v3.2-speciale', name: 'DeepSeek V3.2 Speciale', provider: 'liz', description: 'DeepSeek V3.2 Speciale' },
+  { id: 'deepseek-v3.1-nex-n1:free', name: 'DeepSeek V3.1 Nex N1', provider: 'liz', description: 'DeepSeek V3.1 Nex N1 Free' },
+  { id: 'glm-4.5-air:free', name: 'GLM 4.5 Air Free', provider: 'liz', description: 'GLM 4.5 Air Free' },
+  { id: 'glm-4-32b', name: 'GLM 4 32B', provider: 'liz', description: 'GLM 4 32B' },
+  { id: 'glm-4.5', name: 'GLM 4.5', provider: 'liz', description: 'GLM 4.5' },
+  { id: 'glm-4.5-air', name: 'GLM 4.5 Air', provider: 'liz', description: 'GLM 4.5 Air' },
+  { id: 'glm-4.5v', name: 'GLM 4.5V', provider: 'liz', description: 'GLM 4.5 Vision' },
+  { id: 'glm-4.6', name: 'GLM 4.6', provider: 'liz', description: 'GLM 4.6' },
+  { id: 'glm-4.7', name: 'GLM 4.7', provider: 'liz', description: 'GLM 4.7' },
 ];
 
 // Available image models
@@ -148,8 +163,8 @@ export const VIDEO_MODELS: VideoModel[] = [
 // Provider base URLs
 export const PROVIDER_URLS = {
   pollinations: 'https://gen.pollinations.ai',
-  routeway: 'https://api.routeway.ai',
   openrouter: 'https://openrouter.ai',
+  liz: 'https://lizley.zeabur.app',
   appypie: {
     sdxl: 'https://gateway.appypie.com/getImage/v1/getSDXLImage',
     inpainting: 'https://gateway-stable-diffusion-v1-5-inpainting.appypie.workers.dev/getImage',
