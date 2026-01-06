@@ -23,6 +23,7 @@ export default function DocsPage() {
               
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-8 mb-4 px-3">Advanced</p>
               <DocNavLink href="#headers" icon={<Terminal className="h-4 w-4" />} label="Custom Headers" />
+              <DocNavLink href="#ratelimits" icon={<Clock className="h-4 w-4" />} label="Rate Limits" />
               <DocNavLink href="#transparency" icon={<Shield className="h-4 w-4" />} label="Data & Privacy" />
               <DocNavLink href="#error-handling" icon={<Zap className="h-4 w-4" />} label="Error Handling" />
             </nav>
@@ -262,6 +263,57 @@ const response = await fetch('https://cloudgptapi.vercel.app/api/mem', {
                         </tr>
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              </section>
+
+              {/* Rate Limits */}
+              <section id="ratelimits" className="scroll-mt-24">
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                  <Clock className="h-6 w-6 text-pink-500" />
+                  Rate Limits
+                </h2>
+                <div className="space-y-6">
+                  <p className="text-slate-600 dark:text-slate-400">
+                    To ensure fair usage and protect our upstream providers, CloudGPT implements per-minute rate limits based on your authentication status.
+                  </p>
+                  <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+                    <table className="w-full text-sm text-left">
+                      <thead className="bg-slate-50 dark:bg-slate-900 text-slate-500 font-medium">
+                        <tr>
+                          <th className="px-6 py-3">User Type</th>
+                          <th className="px-6 py-3">Chat</th>
+                          <th className="px-6 py-3">Image</th>
+                          <th className="px-6 py-3">Video</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                        <tr>
+                          <td className="px-6 py-4 font-bold">Anonymous (IP-based)</td>
+                          <td className="px-6 py-4">10 / min</td>
+                          <td className="px-6 py-4">5 / min</td>
+                          <td className="px-6 py-4">2 / min</td>
+                        </tr>
+                        <tr>
+                          <td className="px-6 py-4 font-bold text-primary">Authenticated (API Key)</td>
+                          <td className="px-6 py-4">60 / min*</td>
+                          <td className="px-6 py-4">30 / min*</td>
+                          <td className="px-6 py-4">10 / min*</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="text-sm text-slate-500">
+                    *Default limits for API keys. If you require higher throughput, please contact us for custom quota adjustments.
+                  </p>
+                  <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50">
+                    <h4 className="font-semibold text-amber-800 dark:text-amber-400 mb-1 flex items-center gap-2">
+                      <Info className="h-4 w-4" />
+                      Headers
+                    </h4>
+                    <p className="text-sm text-amber-700 dark:text-amber-500">
+                      Rate limit info is returned in the <code>X-RateLimit-Remaining</code> and <code>X-RateLimit-Reset</code> headers of every response.
+                    </p>
                   </div>
                 </div>
               </section>
