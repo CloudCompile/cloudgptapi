@@ -185,7 +185,7 @@ export const PROVIDER_URLS = {
   pollinations: 'https://gen.pollinations.ai',
   routeway: 'https://api.routeway.ai',
   openrouter: 'https://openrouter.ai',
-  liz: 'https://api.lizenin.xyz',
+  liz: 'https://lizley.zeabur.app',
   appypie: {
     sdxl: 'https://gateway.appypie.com/getImage/v1/getSDXLImage',
     inpainting: 'https://gateway-stable-diffusion-v1-5-inpainting.appypie.workers.dev/getImage',
