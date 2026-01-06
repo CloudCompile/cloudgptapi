@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       providerApiKey = process.env.OPENROUTER_API_KEY;
     } else if (model.provider === 'meridian') {
       providerUrl = `${PROVIDER_URLS.meridian}/chat`;
-      providerApiKey = process.env.MERIDIAN_API_KEY || 'ps_6od22i7ddomt18c1jyk9hm';
+      providerApiKey = process.env.MERIDIAN_API_KEY;
     } else {
       providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
       providerApiKey = process.env.POLLINATIONS_API_KEY;
@@ -85,7 +85,9 @@ export async function POST(request: NextRequest) {
     // Meridian requires x-api-key header instead of Authorization
     if (model.provider === 'meridian') {
       delete headers['Authorization'];
-      headers['x-api-key'] = providerApiKey || 'ps_6od22i7ddomt18c1jyk9hm';
+      if (providerApiKey) {
+        headers['x-api-key'] = providerApiKey;
+      }
     }
 
     // OpenRouter requires additional headers
