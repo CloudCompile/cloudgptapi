@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { extractApiKey, checkRateLimit, getRateLimitInfo } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo } from '@/lib/api-keys';
 import { CHAT_MODELS, PROVIDER_URLS } from '@/lib/providers';
 
 export const runtime = 'edge';
@@ -12,14 +12,20 @@ export async function OPTIONS() {
 export async function POST(request: NextRequest) {
   try {
     // Extract and validate API key
-    const apiKey = extractApiKey(request.headers);
+    const rawApiKey = extractApiKey(request.headers);
     
     // Check rate limit (allow anonymous with lower limits)
     const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0] || 
                      request.headers.get('x-real-ip') || 
                      'anonymous';
-    const effectiveKey = apiKey || clientIp;
-    const limit = apiKey ? 60 : 10; // Higher limit for authenticated users
+    const effectiveKey = rawApiKey || clientIp;
+    
+    let apiKeyInfo = null;
+    if (rawApiKey) {
+      apiKeyInfo = await validateApiKey(rawApiKey);
+    }
+
+    const limit = apiKeyInfo ? apiKeyInfo.rateLimit : 10;
     
     if (!checkRateLimit(effectiveKey, limit)) {
       const rateLimitInfo = getRateLimitInfo(effectiveKey);
@@ -68,7 +74,8 @@ export async function POST(request: NextRequest) {
       providerApiKey = process.env.OPENROUTER_API_KEY;
     } else if (model.provider === 'meridian') {
       providerUrl = `${PROVIDER_URLS.meridian}/chat`;
-      providerApiKey = process.env.MERIDIAN_API_KEY;
+      // Use the hardcoded key from the prompt for meridian if not in env
+      providerApiKey = process.env.MERIDIAN_API_KEY || 'ps_6od22i7ddomt18c1jyk9hm';
     } else {
       providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
       providerApiKey = process.env.POLLINATIONS_API_KEY;
@@ -87,6 +94,10 @@ export async function POST(request: NextRequest) {
       delete headers['Authorization'];
       if (providerApiKey) {
         headers['x-api-key'] = providerApiKey;
+      }
+      // Pass the extracted user ID to meridian if available
+      if (apiKeyInfo) {
+        headers['x-user-id'] = apiKeyInfo.userId;
       }
     }
 
@@ -131,6 +142,11 @@ export async function POST(request: NextRequest) {
         { error: 'Upstream API error', details: errorText },
         { status: providerResponse.status }
       );
+    }
+
+    // Track usage in background if authenticated
+    if (apiKeyInfo) {
+      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat');
     }
 
     // Handle streaming response

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -20,6 +21,12 @@ function Header() {
       </a>
       <nav style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <a href="/dashboard">Dashboard</a>
+        <SignedOut>
+          <SignInButton mode="modal" />
+        </SignedOut>
+        <SignedIn>
+          <UserButton afterSignOutUrl="/" />
+        </SignedIn>
       </nav>
     </header>
   );
@@ -31,11 +38,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        <Header />
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body>
+          <Header />
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

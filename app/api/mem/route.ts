@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': substrateApiKey,
+        'x-user-id': apiKeyInfo.userId,
       },
       body: JSON.stringify({
         prompt: body.prompt,
