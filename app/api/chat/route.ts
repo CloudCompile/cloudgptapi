@@ -63,6 +63,9 @@ export async function POST(request: NextRequest) {
     if (model.provider === 'routeway') {
       providerUrl = `${PROVIDER_URLS.routeway}/v1/chat/completions`;
       providerApiKey = process.env.ROUTEWAY_API_KEY;
+    } else if (model.provider === 'openrouter') {
+      providerUrl = `${PROVIDER_URLS.openrouter}/api/v1/chat/completions`;
+      providerApiKey = process.env.OPENROUTER_API_KEY;
     } else {
       providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
       providerApiKey = process.env.POLLINATIONS_API_KEY;
