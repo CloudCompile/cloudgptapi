@@ -3,429 +3,554 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CloudGPT - Unified AI API Documentation</title>
+  <title>CloudGPT - Unified AI API</title>
   <style>
-    :root {
-      --primary: #0070f3;
-      --primary-dark: #0051a8;
-      --bg: #ffffff;
-      --text: #171717;
-      --text-light: #666666;
-      --border: #eaeaea;
-      --code-bg: #f5f5f5;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --primary: #3291ff;
-        --primary-dark: #0070f3;
-        --bg: #0a0a0a;
-        --text: #ededed;
-        --text-light: #888888;
-        --border: #333333;
-        --code-bg: #1a1a1a;
-      }
-    }
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
+    :root {
+      --primary: #0070f3;
+      --primary-dark: #0051a8;
+      --primary-light: rgba(0, 112, 243, 0.1);
+      --slate-50: #f8fafc;
+      --slate-200: #e2e8f0;
+      --slate-400: #94a3b8;
+      --slate-500: #64748b;
+      --slate-600: #475569;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+      --slate-950: #020617;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --slate-50: #0f172a;
+        --slate-200: #334155;
+        --slate-400: #94a3b8;
+        --slate-500: #64748b;
+        --slate-600: #cbd5e1;
+        --slate-800: #e2e8f0;
+        --slate-900: #f1f5f9;
+        --slate-950: #020617;
+      }
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       line-height: 1.6;
-      color: var(--text);
-      background: var(--bg);
+      color: var(--slate-900);
+      background: white;
+      min-height: 100vh;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #0a0a0a;
+        color: var(--slate-50);
+      }
     }
 
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 20px;
+      padding: 0 1rem;
     }
 
-    header {
-      padding: 20px 0;
-      border-bottom: 1px solid var(--border);
+    /* Hero Section */
+    .hero-section {
+      position: relative;
+      padding: 5rem 0 8rem;
+      overflow: hidden;
+      background: linear-gradient(to bottom, transparent, var(--slate-50));
     }
 
-    header .container {
-      display: flex;
-      justify-content: space-between;
+    @media (prefers-color-scheme: dark) {
+      .hero-section {
+        background: linear-gradient(to bottom, transparent, rgba(15, 23, 42, 0.5));
+      }
+    }
+
+    .badge {
+      display: inline-flex;
       align-items: center;
-    }
-
-    .logo {
-      font-size: 1.5rem;
-      font-weight: bold;
-      text-decoration: none;
-      color: var(--text);
-    }
-
-    nav a {
-      color: var(--text);
-      text-decoration: none;
-      margin-left: 20px;
-    }
-
-    nav a:hover {
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      background: var(--primary-light);
       color: var(--primary);
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
     }
 
-    .hero {
-      padding: 80px 0;
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin-bottom: 2rem;
       text-align: center;
     }
 
-    .hero h1 {
-      font-size: 3rem;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, var(--primary), #7928ca);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .text-primary {
+      color: var(--primary);
     }
 
-    .hero p {
+    .hero-description {
       font-size: 1.25rem;
-      color: var(--text-light);
-      max-width: 600px;
-      margin: 0 auto 40px;
+      color: var(--slate-600);
+      margin-bottom: 2.5rem;
+      max-width: 42rem;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
     }
 
-    .buttons {
+    .button-group {
       display: flex;
-      gap: 16px;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
       justify-content: center;
-      flex-wrap: wrap;
+    }
+
+    @media (min-width: 640px) {
+      .button-group {
+        flex-direction: row;
+      }
     }
 
     .btn {
-      display: inline-block;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 600;
+      width: 100%;
+      padding: 1rem 2rem;
+      border-radius: 0.75rem;
+      font-weight: 700;
+      font-size: 1.125rem;
       text-decoration: none;
       transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .btn {
+        width: auto;
+      }
     }
 
     .btn-primary {
       background: var(--primary);
       color: white;
+      box-shadow: 0 20px 25px -5px rgba(0, 112, 243, 0.2);
     }
 
     .btn-primary:hover {
       background: var(--primary-dark);
+      transform: scale(1.02);
     }
 
     .btn-secondary {
-      border: 2px solid var(--border);
-      color: var(--text);
+      border: 2px solid var(--slate-200);
+      color: var(--slate-900);
+      background: transparent;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .btn-secondary {
+        border-color: var(--slate-800);
+        color: var(--slate-50);
+      }
+      .btn-secondary:hover {
+        background: var(--slate-900);
+      }
     }
 
     .btn-secondary:hover {
-      border-color: var(--primary);
-      color: var(--primary);
+      background: var(--slate-50);
     }
 
-    section {
-      padding: 60px 0;
+    /* Features Section */
+    .features-section {
+      padding: 6rem 0;
+      background: var(--slate-50);
     }
 
-    section h2 {
-      font-size: 2rem;
-      margin-bottom: 30px;
-      text-align: center;
-    }
-
-    .endpoint-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 20px;
-    }
-
-    .endpoint-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      padding: 24px;
-      border-radius: 12px;
-    }
-
-    .endpoint-card h3 {
-      margin-bottom: 12px;
-    }
-
-    .endpoint-card p {
-      color: var(--text-light);
-      margin-bottom: 16px;
-    }
-
-    .method {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: bold;
-      margin-right: 8px;
-    }
-
-    .method-post {
-      background: #22c55e;
-      color: white;
-    }
-
-    .method-get {
-      background: #3b82f6;
-      color: white;
-    }
-
-    code {
-      font-family: 'Monaco', 'Menlo', monospace;
-      font-size: 0.9rem;
-    }
-
-    pre {
-      background: var(--code-bg);
-      padding: 20px;
-      border-radius: 8px;
-      overflow-x: auto;
-      margin: 16px 0;
-    }
-
-    .example {
-      margin-top: 40px;
-    }
-
-    .example h3 {
-      margin-bottom: 16px;
-    }
-
-    .models-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    .models-table th,
-    .models-table td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .models-table th {
-      background: var(--code-bg);
-    }
-
-    footer {
-      padding: 40px 0;
-      text-align: center;
-      border-top: 1px solid var(--border);
-      color: var(--text-light);
-    }
-
-    footer a {
-      color: var(--primary);
-      text-decoration: none;
-    }
-
-    @media (max-width: 768px) {
-      .hero h1 {
-        font-size: 2rem;
+    @media (prefers-color-scheme: dark) {
+      .features-section {
+        background: rgba(15, 23, 42, 0.5);
       }
+    }
 
-      .endpoint-grid {
-        grid-template-columns: 1fr;
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .section-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .section-description {
+      color: var(--slate-600);
+    }
+
+    .feature-grid {
+      display: grid;
+      gap: 2rem;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 768px) {
+      .feature-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .feature-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .feature-card {
+      padding: 2rem;
+      border-radius: 1rem;
+      background: white;
+      border: 1px solid var(--slate-200);
+      transition: all 0.3s;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .feature-card {
+        background: var(--slate-950);
+        border-color: var(--slate-800);
+      }
+      .feature-card:hover {
+        border-color: rgba(0, 112, 243, 0.5);
+      }
+    }
+
+    .feature-card:hover {
+      border-color: rgba(0, 112, 243, 0.5);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .feature-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.75rem;
+      background: var(--slate-50);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+      transition: transform 0.3s;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .feature-icon {
+        background: var(--slate-900);
+      }
+    }
+
+    .feature-card:hover .feature-icon {
+      transform: scale(1.1);
+    }
+
+    .feature-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-description {
+      color: var(--slate-600);
+      margin-bottom: 1.5rem;
+    }
+
+    .feature-link {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: gap 0.3s;
+    }
+
+    .feature-card:hover .feature-link {
+      gap: 0.75rem;
+    }
+
+    /* Code Section */
+    .code-section {
+      padding: 6rem 0;
+    }
+
+    .code-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    @media (min-width: 1024px) {
+      .code-content {
+        flex-direction: row;
+      }
+    }
+
+    .code-text {
+      flex: 1;
+    }
+
+    .code-title {
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+
+    .benefit-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .benefit-item {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .benefit-icon {
+      flex-shrink: 0;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.5rem;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .benefit-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .benefit-description {
+      color: var(--slate-600);
+    }
+
+    .code-demo {
+      flex: 1;
+      width: 100%;
+    }
+
+    .terminal {
+      border-radius: 1rem;
+      background: var(--slate-950);
+      padding: 1.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--slate-800);
+    }
+
+    .terminal-header {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .terminal-button {
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 9999px;
+    }
+
+    .terminal-button.red { background: #ef4444; }
+    .terminal-button.yellow { background: #eab308; }
+    .terminal-button.green { background: #22c55e; }
+
+    .terminal-code {
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.875rem;
+      color: #cbd5e1;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: auto;
+      padding: 3rem 0;
+      border-top: 1px solid var(--slate-200);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      footer {
+        border-top-color: var(--slate-800);
+      }
+    }
+
+    footer p {
+      text-align: center;
+      color: var(--slate-500);
+      font-size: 0.875rem;
+    }
+
+    @media (min-width: 768px) {
+      .hero-title {
+        font-size: 4.5rem;
       }
     }
   </style>
 </head>
 <body>
-  <header>
+  <!-- Hero Section -->
+  <section class="hero-section">
     <div class="container">
-      <a href="/" class="logo">☁️ CloudGPT</a>
-      <nav>
-        <a href="#endpoints">API</a>
-        <a href="#models">Models</a>
-        <a href="https://github.com/CloudCompile/cloudgpt" target="_blank">GitHub</a>
-      </nav>
-    </div>
-  </header>
-
-  <section class="hero">
-    <div class="container">
-      <h1>Unified AI API Gateway</h1>
-      <p>Access multiple AI providers through a single, unified API. Generate text, images, and videos with ease.</p>
-      <div class="buttons">
-        <a href="https://github.com/CloudCompile/cloudgpt" class="btn btn-primary" target="_blank">
-          View on GitHub
-        </a>
-        <a href="#endpoints" class="btn btn-secondary">
-          Get Started
-        </a>
+      <div style="max-width: 64rem; margin: 0 auto; text-align: center;">
+        <div class="badge">
+          <span>⚡</span>
+          <span>The fastest AI API Gateway</span>
+        </div>
+        <h1 class="hero-title">
+          Unified API for <span class="text-primary">Every AI Model</span>
+        </h1>
+        <p class="hero-description">
+          Access chat, image, video, and memory-enhanced models through a single, lightning-fast endpoint. Build AI apps in minutes, not months.
+        </p>
+        <div class="button-group">
+          <a href="/dashboard" class="btn btn-primary">
+            Get Started Free
+            <span>→</span>
+          </a>
+          <a href="/playground" class="btn btn-secondary">
+            Live Playground
+          </a>
+        </div>
       </div>
     </div>
   </section>
 
-  <section id="endpoints">
+  <!-- Features Section -->
+  <section class="features-section">
     <div class="container">
-      <h2>API Endpoints</h2>
-      <div class="endpoint-grid">
-        <div class="endpoint-card">
-          <h3><span class="method method-post">POST</span> /api/chat</h3>
-          <p>Generate chat completions using various LLMs like GPT-4, Claude, Gemini, and more.</p>
-          <pre><code>{
-  "model": "openai",
-  "messages": [
-    {"role": "user", "content": "Hello!"}
-  ]
-}</code></pre>
-        </div>
-
-        <div class="endpoint-card">
-          <h3><span class="method method-post">POST</span> /api/image</h3>
-          <p>Generate images from text prompts using Flux, DALL-E, and other image models.</p>
-          <pre><code>{
-  "prompt": "A sunset over mountains",
-  "model": "flux",
-  "width": 1024,
-  "height": 1024
-}</code></pre>
-        </div>
-
-        <div class="endpoint-card">
-          <h3><span class="method method-post">POST</span> /api/video</h3>
-          <p>Generate videos from text prompts using Veo, Seedance, and other video models.</p>
-          <pre><code>{
-  "prompt": "A cat playing",
-  "model": "veo",
-  "duration": 4
-}</code></pre>
-        </div>
-
-        <div class="endpoint-card">
-          <h3><span class="method method-get">GET</span> /api/models/chat</h3>
-          <p>List all available chat models with their capabilities and descriptions.</p>
-          <pre><code>curl https://your-app.vercel.app/api/models/chat</code></pre>
-        </div>
-
-        <div class="endpoint-card">
-          <h3><span class="method method-get">GET</span> /api/models/image</h3>
-          <p>List all available image generation models.</p>
-          <pre><code>curl https://your-app.vercel.app/api/models/image</code></pre>
-        </div>
-
-        <div class="endpoint-card">
-          <h3><span class="method method-get">GET</span> /api/models/video</h3>
-          <p>List all available video generation models.</p>
-          <pre><code>curl https://your-app.vercel.app/api/models/video</code></pre>
-        </div>
+      <div class="section-header">
+        <h2 class="section-title">Powerful Endpoints</h2>
+        <p class="section-description">Everything you need to build production-ready AI applications.</p>
       </div>
-
-      <div class="example">
-        <h3>Authentication</h3>
-        <p>Include your API key in the Authorization header:</p>
-        <pre><code>curl -X POST https://your-app.vercel.app/api/chat \
-  -H "Authorization: Bearer cgpt_your_api_key_here" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "openai",
-    "messages": [{"role": "user", "content": "Hello!"}]
-  }'</code></pre>
-      </div>
-    </div>
-  </section>
-
-  <section id="models" style="background: var(--code-bg);">
-    <div class="container">
-      <h2>Available Models</h2>
       
-      <h3 style="margin-top: 30px; margin-bottom: 10px;">Chat Models</h3>
-      <table class="models-table">
-        <thead>
-          <tr>
-            <th>Model ID</th>
-            <th>Name</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td><code>openai</code></td><td>OpenAI GPT-4o</td><td>OpenAI's flagship model</td></tr>
-          <tr><td><code>openai-fast</code></td><td>GPT-4o Mini</td><td>Faster, more economical</td></tr>
-          <tr><td><code>claude</code></td><td>Claude 3.5 Sonnet</td><td>Anthropic's balanced model</td></tr>
-          <tr><td><code>gemini</code></td><td>Gemini 2.0 Flash</td><td>Google's fast model</td></tr>
-          <tr><td><code>deepseek</code></td><td>DeepSeek V3</td><td>DeepSeek's latest model</td></tr>
-          <tr><td><code>grok</code></td><td>Grok 3</td><td>xAI's model</td></tr>
-        </tbody>
-      </table>
-
-      <h3 style="margin-top: 30px; margin-bottom: 10px;">Image Models</h3>
-      <table class="models-table">
-        <thead>
-          <tr>
-            <th>Model ID</th>
-            <th>Name</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td><code>flux</code></td><td>Flux</td><td>High-quality image generation</td></tr>
-          <tr><td><code>turbo</code></td><td>Turbo</td><td>Fast image generation</td></tr>
-          <tr><td><code>gptimage</code></td><td>GPT Image</td><td>OpenAI DALL-E</td></tr>
-          <tr><td><code>kontext</code></td><td>Kontext</td><td>Context-aware generation</td></tr>
-          <tr><td><code>seedream</code></td><td>Seedream</td><td>Creative styles</td></tr>
-        </tbody>
-      </table>
-
-      <h3 style="margin-top: 30px; margin-bottom: 10px;">Video Models</h3>
-      <table class="models-table">
-        <thead>
-          <tr>
-            <th>Model ID</th>
-            <th>Name</th>
-            <th>Max Duration</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td><code>veo</code></td><td>Google Veo</td><td>8 seconds</td></tr>
-          <tr><td><code>seedance</code></td><td>Seedance</td><td>10 seconds</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section>
-    <div class="container">
-      <h2>Features</h2>
-      <div class="endpoint-grid">
-        <div class="endpoint-card" style="text-align: center;">
-          <h3>⚡ Edge Runtime</h3>
-          <p>Fast responses with Vercel Edge Functions for low latency worldwide.</p>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">💬</div>
+          <h3 class="feature-title">Chat API</h3>
+          <p class="feature-description">Access GPT-4, Claude, and Llama through a unified interface.</p>
+          <a href="/docs#chat" class="feature-link">
+            Learn more
+            <span>→</span>
+          </a>
         </div>
-        <div class="endpoint-card" style="text-align: center;">
-          <h3>🔐 Authentication</h3>
-          <p>Secure user accounts with Clerk. Sign up and manage your API keys.</p>
+
+        <div class="feature-card">
+          <div class="feature-icon">🖼️</div>
+          <h3 class="feature-title">Image API</h3>
+          <p class="feature-description">Generate stunning visuals with Flux, Stable Diffusion, and more.</p>
+          <a href="/docs#image" class="feature-link">
+            Learn more
+            <span>→</span>
+          </a>
         </div>
-        <div class="endpoint-card" style="text-align: center;">
-          <h3>🔑 API Keys</h3>
-          <p>Generate and manage your API keys from the dashboard.</p>
+
+        <div class="feature-card">
+          <div class="feature-icon">🎬</div>
+          <h3 class="feature-title">Video API</h3>
+          <p class="feature-description">Create high-quality AI videos from simple text prompts.</p>
+          <a href="/docs#video" class="feature-link">
+            Learn more
+            <span>→</span>
+          </a>
         </div>
-        <div class="endpoint-card" style="text-align: center;">
-          <h3>🌐 Multi-Provider</h3>
-          <p>Access multiple AI providers through a single unified API.</p>
+
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <h3 class="feature-title">Memory API</h3>
+          <p class="feature-description">Give your AI a long-term memory with our Substrate integration.</p>
+          <a href="/docs#memory" class="feature-link">
+            Learn more
+            <span>→</span>
+          </a>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- Code Section -->
+  <section class="code-section">
+    <div class="container">
+      <div class="code-content">
+        <div class="code-text">
+          <h2 class="code-title">Built by developers,<br>for developers.</h2>
+          <div class="benefit-list">
+            <div class="benefit-item">
+              <div class="benefit-icon">📦</div>
+              <div>
+                <h3 class="benefit-title">Single SDK</h3>
+                <p class="benefit-description">One package, infinite possibilities. No more juggling dozens of different API keys.</p>
+              </div>
+            </div>
+            <div class="benefit-item">
+              <div class="benefit-icon">🚀</div>
+              <div>
+                <h3 class="benefit-title">Edge Runtime</h3>
+                <p class="benefit-description">Deployed globally for sub-millisecond latency. Your users will love the speed.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="code-demo">
+          <div class="terminal">
+            <div class="terminal-header">
+              <div class="terminal-button red"></div>
+              <div class="terminal-button yellow"></div>
+              <div class="terminal-button green"></div>
+            </div>
+            <pre class="terminal-code">const response = await fetch('https://cloudgptapi.vercel.app/api/chat', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json',
+    'x-user-id': 'unique-user-123' // Optional: for user differentiation
+  },
+  body: JSON.stringify({
+    model: 'openai',
+    messages: [{ role: 'user', content: 'Hello AI!' }]
+  })
+});
+
+const data = await response.json();
+console.log(data.choices[0].message);</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
   <footer>
     <div class="container">
       <p>
-        Built with Next.js and deployed on Vercel •
-        <a href="https://github.com/CloudCompile/cloudgpt" target="_blank">GitHub</a> •
-        <a href="https://github.com/CloudCompile/cloudgpt/blob/main/KEYS_SETUP.md" target="_blank">Setup Guide</a>
+        © <script>document.write(new Date().getFullYear())</script> CloudGPT API. All rights reserved.
       </p>
     </div>
   </footer>
