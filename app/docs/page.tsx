@@ -1,4 +1,4 @@
-import { ArrowRight, Bot, Code, Cpu, Download, ExternalLink, Hash, Image as ImageIcon, Info, MessageSquare, Shield, Terminal, Video, Zap } from 'lucide-react';
+import { ArrowRight, Bot, Clock, Code, Cpu, Download, ExternalLink, Hash, Image as ImageIcon, Info, MessageSquare, Shield, Terminal, Video, Zap } from 'lucide-react';
 import Link from 'next/link';
 
 export default function DocsPage() {
