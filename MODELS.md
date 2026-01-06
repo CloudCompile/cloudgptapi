@@ -345,7 +345,7 @@ This document provides detailed information about all AI models available throug
 ### Specialized Models
 
 #### **ChickyTutor** (`chickytutor`)
-- **Creator**: Pollinations AI
+- **Creator**: Community/Pollinations
 - **Context Window**: 128,000 tokens
 - **Pricing**: Free tier available
 - **Response Time**: Fast (1-3 seconds)
@@ -360,7 +360,7 @@ This document provides detailed information about all AI models available throug
 - **Best For**: Educational applications, tutoring, learning platforms
 
 #### **Midijourney** (`midijourney`)
-- **Creator**: Pollinations AI
+- **Creator**: Community/Pollinations
 - **Context Window**: 128,000 tokens
 - **Pricing**: Free tier available
 - **Response Time**: Fast (1-3 seconds)
@@ -426,7 +426,7 @@ This document provides detailed information about all AI models available throug
 
 ### **Nanobanana** (`nanobanana`)
 - **Creator**: Google DeepMind
-- **Technology**: Gemini 2.5 Flash Image
+- **Technology**: Gemini-based Image Generation
 - **Pricing**: ~$0.002 per image
 - **Generation Time**: 4-8 seconds
 - **Strengths**:
@@ -441,7 +441,7 @@ This document provides detailed information about all AI models available throug
 
 ### **Nanobanana Pro** (`nanobanana-pro`)
 - **Creator**: Google DeepMind
-- **Technology**: Gemini 3 Pro Image
+- **Technology**: Gemini-based Advanced Image Generation
 - **Pricing**: ~$0.010 per image
 - **Generation Time**: 8-15 seconds
 - **Strengths**:
@@ -487,7 +487,7 @@ This document provides detailed information about all AI models available throug
 
 ### **GPT Image** (`gptimage`)
 - **Creator**: OpenAI
-- **Technology**: GPT Image 1 Mini (DALL-E based)
+- **Technology**: DALL-E based
 - **Pricing**: ~$0.040 per image
 - **Generation Time**: 8-15 seconds
 - **Strengths**:
@@ -503,7 +503,7 @@ This document provides detailed information about all AI models available throug
 
 ### **GPT Image Large** (`gptimage-large`)
 - **Creator**: OpenAI
-- **Technology**: GPT Image 1.5
+- **Technology**: Advanced DALL-E based
 - **Pricing**: ~$0.080 per image
 - **Generation Time**: 15-30 seconds
 - **Strengths**:
@@ -538,7 +538,7 @@ This document provides detailed information about all AI models available throug
 
 ### **Veo** (`veo`)
 - **Creator**: Google DeepMind
-- **Technology**: Veo 3.1 Fast
+- **Technology**: Veo (Video Generation)
 - **Max Duration**: 8 seconds
 - **Pricing**: ~$0.10-0.30 per video
 - **Generation Time**: 30-90 seconds
@@ -547,17 +547,17 @@ This document provides detailed information about all AI models available throug
   - Good motion consistency
   - Excellent prompt understanding
   - Realistic physics
-  - Preview/experimental access to cutting-edge tech
+  - Cutting-edge technology
 - **Weaknesses**:
   - Limited to 8 seconds
   - Slower generation
-  - Preview quality (may have inconsistencies)
+  - May have inconsistencies
   - Higher cost
 - **Best For**: Short video clips, product demos, social media content
 
 ### **Seedance** (`seedance`)
 - **Creator**: BytePlus/ByteDance
-- **Technology**: Seedance Lite
+- **Technology**: ByteDance Video Generation
 - **Max Duration**: 10 seconds
 - **Pricing**: ~$0.08-0.20 per video
 - **Generation Time**: 40-120 seconds
@@ -574,12 +574,12 @@ This document provides detailed information about all AI models available throug
 
 ### **Seedance Pro** (`seedance-pro`)
 - **Creator**: BytePlus/ByteDance
-- **Technology**: Seedance Pro-Fast
+- **Technology**: ByteDance Advanced Video Generation
 - **Max Duration**: 10 seconds
 - **Pricing**: ~$0.15-0.40 per video
 - **Generation Time**: 60-180 seconds
 - **Strengths**:
-  - Better prompt adherence than Lite
+  - Better prompt adherence than standard
   - Higher quality output
   - Professional-grade results
   - 10-second duration
@@ -682,7 +682,7 @@ This document provides detailed information about all AI models available throug
 
 ## Updates
 
-This document reflects model information as of January 2026. AI models are rapidly evolving:
+This document reflects model information as of January 2025. AI models are rapidly evolving:
 - New models are released frequently
 - Existing models receive updates and improvements
 - Pricing and capabilities may change
