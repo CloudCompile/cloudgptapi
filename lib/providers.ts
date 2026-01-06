@@ -3,7 +3,7 @@
 export interface ChatModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'routeway' | 'openrouter';
+  provider: 'pollinations' | 'routeway' | 'openrouter' | 'stablehorde';
   description?: string;
   contextWindow?: number;
 }
@@ -11,7 +11,7 @@ export interface ChatModel {
 export interface ImageModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'routeway' | 'openrouter' | 'appypie';
+  provider: 'pollinations' | 'routeway' | 'openrouter' | 'appypie' | 'stablehorde';
   description?: string;
 }
 
@@ -99,6 +99,12 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'google/gemma-3-12b-it:free', name: 'Google Gemma 3 12B IT', provider: 'openrouter', description: 'Google Gemma 3 12B Instruct' },
   { id: 'google/gemma-3n-e4b-it:free', name: 'Google Gemma 3N E4B IT', provider: 'openrouter', description: 'Google Gemma 3N E4B Instruct' },
   { id: 'moonshotai/kimi-k2:free', name: 'Moonshot AI Kimi K2', provider: 'openrouter', description: 'Moonshot AI Kimi K2' },
+  // Stable Horde text models (selection of popular models)
+  { id: 'stable-horde-nemotron-nano-9b', name: 'Nemotron Nano 9B V2', provider: 'stablehorde', description: 'NVIDIA Nemotron Nano 9B V2' },
+  { id: 'stable-horde-llama-3.2-3b', name: 'Llama 3.2 3B Instruct', provider: 'stablehorde', description: 'Meta Llama 3.2 3B Instruct' },
+  { id: 'stable-horde-mistral-7b', name: 'Mistral 7B Instruct', provider: 'stablehorde', description: 'Mistral AI 7B Instruct model' },
+  { id: 'stable-horde-qwen3-4b', name: 'Qwen 3 4B', provider: 'stablehorde', description: 'Qwen 3 4B model' },
+  { id: 'stable-horde-neonmaid-12b', name: 'NeonMaid-12B', provider: 'stablehorde', description: 'NeonMaid-12B v2 creative model' },
 ];
 
 // Available image models
@@ -117,6 +123,17 @@ export const IMAGE_MODELS: ImageModel[] = [
   { id: 'appypie-sdxl', name: 'AppyPie SDXL', provider: 'appypie', description: 'SDXL - High-resolution, realistic image generation' },
   { id: 'appypie-sd-inpainting', name: 'AppyPie SD Inpainting', provider: 'appypie', description: 'Stable Diffusion 1.5 Inpainting - Image editing with masks' },
   { id: 'appypie-flux-schnell', name: 'AppyPie Flux Schnell', provider: 'appypie', description: 'Flux-1 Schnell - Fast futuristic image generation' },
+  // Stable Horde models (popular selection)
+  { id: 'stable-horde-flux-schnell', name: 'Flux.1-Schnell fp8', provider: 'stablehorde', description: 'Flux.1-Schnell fp8 (Compact) - Fast high-quality generation' },
+  { id: 'stable-horde-sdxl', name: 'SDXL 1.0', provider: 'stablehorde', description: 'Stable Diffusion XL 1.0 - High quality image generation' },
+  { id: 'stable-horde-deliberate', name: 'Deliberate', provider: 'stablehorde', description: 'Deliberate - Versatile general purpose model' },
+  { id: 'stable-horde-dreamshaper', name: 'Dreamshaper', provider: 'stablehorde', description: 'Dreamshaper - Creative artistic generation' },
+  { id: 'stable-horde-realistic-vision', name: 'Realistic Vision', provider: 'stablehorde', description: 'Realistic Vision - Photo-realistic images' },
+  { id: 'stable-horde-absolute-reality', name: 'AbsoluteReality', provider: 'stablehorde', description: 'AbsoluteReality - High fidelity realistic images' },
+  { id: 'stable-horde-juggernaut-xl', name: 'Juggernaut XL', provider: 'stablehorde', description: 'Juggernaut XL - Versatile SDXL model' },
+  { id: 'stable-horde-pony-diffusion', name: 'Pony Diffusion XL', provider: 'stablehorde', description: 'Pony Diffusion XL - Anime and character focused' },
+  { id: 'stable-horde-stable-diffusion', name: 'Stable Diffusion', provider: 'stablehorde', description: 'Stable Diffusion 1.5 - Classic SD model' },
+  { id: 'stable-horde-anything-v5', name: 'Anything v5', provider: 'stablehorde', description: 'Anything v5 - Anime style generation' },
 ];
 
 // Available video models
@@ -136,4 +153,5 @@ export const PROVIDER_URLS = {
     inpainting: 'https://gateway-stable-diffusion-v1-5-inpainting.appypie.workers.dev/getImage',
     fluxSchnell: 'https://gateway.pixazo.ai/flux-1-schnell/v1/getData',
   },
+  stablehorde: 'https://stablehorde.net/api/v2',
 };
