@@ -6,9 +6,17 @@ export default function Home() {
         <p>
           Access multiple AI providers through a single, unified API. Generate text, images, and videos with ease.
         </p>
-        <a href="https://vercel.com/new/clone?repository-url=https://github.com/CloudCompile/cloudgpt" className="button" target="_blank" rel="noopener noreferrer">
-          Deploy to Vercel
-        </a>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
+          <a href="/playground" className="button" style={{ background: 'var(--primary)', color: 'white', padding: '12px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: '600' }}>
+            🎮 Try Playground
+          </a>
+          <a href="/models" className="button" style={{ border: '2px solid var(--primary)', color: 'var(--primary)', padding: '12px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: '600' }}>
+            📊 Model Monitor
+          </a>
+          <a href="/dashboard" className="button" style={{ border: '2px solid #6b7280', color: 'var(--foreground)', padding: '12px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: '600' }}>
+            🔑 Dashboard
+          </a>
+        </div>
       </section>
 
       <section className="endpoints container">
@@ -51,6 +59,16 @@ export default function Home() {
         <h2>Features</h2>
         <div className="feature-grid">
           <div className="feature-item">
+            <span style={{ fontSize: '3rem' }}>🎮</span>
+            <h3>Playground</h3>
+            <p>Test models interactively in your browser</p>
+          </div>
+          <div className="feature-item">
+            <span style={{ fontSize: '3rem' }}>📊</span>
+            <h3>Model Monitor</h3>
+            <p>Real-time status of 34+ AI models</p>
+          </div>
+          <div className="feature-item">
             <span style={{ fontSize: '3rem' }}>⚡</span>
             <h3>Edge Runtime</h3>
             <p>Fast responses with Vercel Edge Functions</p>
@@ -68,7 +86,7 @@ export default function Home() {
           <div className="feature-item">
             <span style={{ fontSize: '3rem' }}>🌐</span>
             <h3>Multi-Provider</h3>
-            <p>Access multiple AI providers seamlessly</p>
+            <p>Access Pollinations AI seamlessly</p>
           </div>
         </div>
       </section>
@@ -78,6 +96,10 @@ export default function Home() {
           Built with Next.js and deployed on Vercel •{' '}
           <a href="https://github.com/CloudCompile/cloudgpt" target="_blank" rel="noopener noreferrer">
             GitHub
+          </a>{' '}
+          •{' '}
+          <a href="/docs/index.html" target="_blank">
+            API Docs
           </a>
         </p>
       </footer>
