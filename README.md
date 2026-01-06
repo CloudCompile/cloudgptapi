@@ -168,7 +168,7 @@ For comprehensive information about all models including costs, response times, 
 | `mistral` | Mistral Large | Multilingual, European languages |
 | `qwen-coder` | Qwen 2.5 Coder | Code generation, debugging |
 
-**[View all 100+ chat models →](./MODELS.md#chat-models)**
+**[View all chat models with detailed comparisons →](./MODELS.md#chat-models)**
 
 ### Image Models (Quick Reference)
 
