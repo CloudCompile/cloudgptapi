@@ -60,3 +60,16 @@ body {
 .hero-gradient {
   background: radial-gradient(circle at top center, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
 }
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
