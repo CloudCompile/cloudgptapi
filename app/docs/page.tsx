@@ -222,7 +222,7 @@ const response = await fetch('https://cloudgptapi.vercel.app/api/mem', {
     'x-user-id': 'user_123' // Required for memory persistence
   },
   body: JSON.stringify({
-    messages: [{ role: 'user', content: 'Remember that my favorite color is blue.' }]
+    prompt: 'Remember that my favorite color is blue.'
   })
 });`}</code>
                     </pre>

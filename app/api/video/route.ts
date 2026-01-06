@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     if (body.audio) params.set('audio', 'true');
     
     const encodedPrompt = encodeURIComponent(body.prompt);
-    const pollinationsUrl = `${PROVIDER_URLS.pollinations}/image/${encodedPrompt}?${params.toString()}`;
+    const pollinationsUrl = `${PROVIDER_URLS.pollinations}/video/${encodedPrompt}?${params.toString()}`;
     
     const userId = request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`;
     const headers: Record<string, string> = {
