@@ -8,7 +8,7 @@ To enable GitHub Pages for your repository, follow these steps:
 
 ### Step 1: Enable GitHub Pages
 
-1. Go to your repository on GitHub: `https://github.com/CloudCompile/cloudgptapi`
+1. Go to your repository on GitHub: `https://github.com/<username>/<repository>`
 2. Click on **Settings** (top menu)
 3. In the left sidebar, click on **Pages** (under "Code and automation")
 
@@ -29,7 +29,7 @@ The GitHub Actions workflow will automatically deploy your site when:
 Once deployed (usually takes 1-2 minutes), your documentation will be available at:
 
 ```
-https://cloudcompile.github.io/cloudgptapi/
+https://<username>.github.io/<repository>/
 ```
 
 ## Manual Deployment
