@@ -56,15 +56,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Forward to Pollinations API
-    const pollinationsUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
+    // Determine provider URL and API key based on model provider
+    let providerUrl: string;
+    let providerApiKey: string | undefined;
     
-    const pollinationsResponse = await fetch(pollinationsUrl, {
+    if (model.provider === 'routeway') {
+      providerUrl = `${PROVIDER_URLS.routeway}/v1/chat/completions`;
+      providerApiKey = process.env.ROUTEWAY_API_KEY;
+    } else {
+      providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
+      providerApiKey = process.env.POLLINATIONS_API_KEY;
+    }
+
+    // Forward to provider API
+    const providerResponse = await fetch(providerUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(process.env.POLLINATIONS_API_KEY && {
-          'Authorization': `Bearer ${process.env.POLLINATIONS_API_KEY}`,
+        ...(providerApiKey && {
+          'Authorization': `Bearer ${providerApiKey}`,
         }),
       },
       body: JSON.stringify({
@@ -79,17 +89,17 @@ export async function POST(request: NextRequest) {
       }),
     });
 
-    if (!pollinationsResponse.ok) {
-      const errorText = await pollinationsResponse.text();
+    if (!providerResponse.ok) {
+      const errorText = await providerResponse.text();
       return NextResponse.json(
         { error: 'Upstream API error', details: errorText },
-        { status: pollinationsResponse.status }
+        { status: providerResponse.status }
       );
     }
 
     // Handle streaming response
     if (body.stream) {
-      return new NextResponse(pollinationsResponse.body, {
+      return new NextResponse(providerResponse.body, {
         headers: {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
@@ -99,7 +109,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Return JSON response
-    const data = await pollinationsResponse.json();
+    const data = await providerResponse.json();
     
     const rateLimitInfo = getRateLimitInfo(effectiveKey);
     return NextResponse.json(data, {

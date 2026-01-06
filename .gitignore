@@ -43,6 +43,7 @@ coverage/
 
 # Misc
 *.log
+.eslintrc.json
 
 # Model cache
 .models-cache/
