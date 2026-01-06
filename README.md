@@ -229,11 +229,21 @@ The `/docs` folder contains a static frontend that can be deployed to GitHub Pag
 - Interactive examples
 - Getting started guide
 
-To enable GitHub Pages:
+### Automatic Deployment
+
+GitHub Actions automatically deploys the `/docs` folder to GitHub Pages when:
+- Changes are pushed to the `main` branch that affect the `docs/` folder
+- The workflow is manually triggered
+
+### Manual Setup
+
+To enable GitHub Pages for the first time:
 1. Go to your repository Settings
 2. Navigate to Pages
-3. Set Source to "Deploy from a branch"
-4. Select the `main` branch and `/docs` folder
+3. Set Source to "GitHub Actions"
+4. The site will be deployed automatically on the next push to `main`
+
+Once deployed, your documentation will be available at: `https://<username>.github.io/<repository>/`
 
 ## 🔒 Rate Limits
 
