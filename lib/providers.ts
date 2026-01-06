@@ -156,5 +156,5 @@ export const PROVIDER_URLS = {
     fluxSchnell: 'https://gateway.pixazo.ai/flux-1-schnell/v1/getData',
   },
   stablehorde: 'https://stablehorde.net/api/v2',
-  meridian: 'https://meridianlabs.website/api',
+  meridian: 'https://meridianlabsapp.website/api',
 };

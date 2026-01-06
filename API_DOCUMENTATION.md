@@ -10,6 +10,7 @@ Complete API reference for CloudGPT - Unified AI API Gateway
 - [Error Handling](#error-handling)
 - [Endpoints](#endpoints)
   - [Chat Completions](#chat-completions)
+  - [Chat with Memory](#chat-with-memory)
   - [Image Generation](#image-generation)
   - [Video Generation](#video-generation)
   - [List Models](#list-models)
@@ -143,6 +144,45 @@ curl -X POST https://your-app.vercel.app/api/chat \
     "messages": [
       {"role": "user", "content": "Write a haiku about AI"}
     ]
+  }'
+```
+
+### Chat with Memory
+
+Generate text completions using the Meridian cognitive substrate with persistent memory. This endpoint remembers previous interactions.
+
+**Endpoint:** `POST /api/mem`
+
+**Request Body:**
+
+```json
+{
+  "prompt": "What was that project I mentioned?"
+}
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | The user prompt |
+
+**Response:**
+
+```json
+{
+  "response": "Based on our previous conversation, you mentioned the CloudGPT project..."
+}
+```
+
+**Example:**
+
+```bash
+curl -X POST https://your-app.vercel.app/api/mem \
+  -H "Authorization: Bearer cgpt_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "What was that project I mentioned?"
   }'
 ```
 
