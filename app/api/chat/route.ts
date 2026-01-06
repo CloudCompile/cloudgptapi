@@ -66,6 +66,9 @@ export async function POST(request: NextRequest) {
     } else if (model.provider === 'openrouter') {
       providerUrl = `${PROVIDER_URLS.openrouter}/api/v1/chat/completions`;
       providerApiKey = process.env.OPENROUTER_API_KEY;
+    } else if (model.provider === 'meridian') {
+      providerUrl = `${PROVIDER_URLS.meridian}/chat`;
+      providerApiKey = process.env.MERIDIAN_API_KEY;
     } else {
       providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
       providerApiKey = process.env.POLLINATIONS_API_KEY;
@@ -79,6 +82,14 @@ export async function POST(request: NextRequest) {
       }),
     };
 
+    // Meridian requires x-api-key header instead of Authorization
+    if (model.provider === 'meridian') {
+      delete headers['Authorization'];
+      if (providerApiKey) {
+        headers['x-api-key'] = providerApiKey;
+      }
+    }
+
     // OpenRouter requires additional headers
     if (model.provider === 'openrouter') {
       headers['HTTP-Referer'] = process.env.NEXT_PUBLIC_SITE_URL || 'https://cloudgptapi.vercel.app';
@@ -86,10 +97,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Forward to provider API
-    const providerResponse = await fetch(providerUrl, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
+    let requestBody: any;
+    
+    if (model.provider === 'meridian') {
+      // Meridian expects a simple "prompt" field, not "messages"
+      // Convert messages array to a single prompt string
+      const prompt = body.messages
+        .map((msg: any) => `${msg.role}: ${msg.content}`)
+        .join('\n');
+      requestBody = { prompt };
+    } else {
+      requestBody = {
         model: modelId,
         messages: body.messages,
         temperature: body.temperature,
@@ -98,7 +116,13 @@ export async function POST(request: NextRequest) {
         top_p: body.top_p,
         frequency_penalty: body.frequency_penalty,
         presence_penalty: body.presence_penalty,
-      }),
+      };
+    }
+
+    const providerResponse = await fetch(providerUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(requestBody),
     });
 
     if (!providerResponse.ok) {
@@ -123,8 +147,36 @@ export async function POST(request: NextRequest) {
     // Return JSON response
     const data = await providerResponse.json();
     
+    // Transform Meridian response to match OpenAI format
+    let responseData = data;
+    if (model.provider === 'meridian') {
+      // Meridian returns { response: "..." }
+      // Transform to OpenAI-compatible format
+      responseData = {
+        id: 'meridian-' + Date.now(),
+        object: 'chat.completion',
+        created: Math.floor(Date.now() / 1000),
+        model: modelId,
+        choices: [
+          {
+            index: 0,
+            message: {
+              role: 'assistant',
+              content: data.response || '',
+            },
+            finish_reason: 'stop',
+          },
+        ],
+        usage: {
+          prompt_tokens: 0,
+          completion_tokens: 0,
+          total_tokens: 0,
+        },
+      };
+    }
+    
     const rateLimitInfo = getRateLimitInfo(effectiveKey);
-    return NextResponse.json(data, {
+    return NextResponse.json(responseData, {
       headers: {
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
