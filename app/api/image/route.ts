@@ -196,10 +196,11 @@ async function generateStableHordeImage(body: any, model: ImageModel) {
     }
 
     // Step 2: Poll for completion (with timeout)
-    const maxAttempts = 60; // 60 attempts * 2 seconds = 2 minutes max
+    const startTime = Date.now();
+    const maxTimeout = 120000; // 2 minutes in milliseconds
     const pollInterval = 2000; // 2 seconds
     
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    while (Date.now() - startTime < maxTimeout) {
       await new Promise(resolve => setTimeout(resolve, pollInterval));
       
       const statusUrl = `${PROVIDER_URLS.stablehorde}/generate/check/${requestId}`;
@@ -210,6 +211,7 @@ async function generateStableHordeImage(body: any, model: ImageModel) {
       });
 
       if (!statusResponse.ok) {
+        console.warn(`Stable Horde status check failed for ${requestId}: ${statusResponse.status}`);
         continue; // Keep trying
       }
 
@@ -247,9 +249,11 @@ async function generateStableHordeImage(body: any, model: ImageModel) {
           }
 
           const imageBuffer = await imageResponse.arrayBuffer();
+          const contentType = imageResponse.headers.get('content-type') || 'image/webp';
+          
           return new NextResponse(imageBuffer, {
             headers: {
-              'Content-Type': 'image/webp',
+              'Content-Type': contentType,
             },
           });
         } else {
