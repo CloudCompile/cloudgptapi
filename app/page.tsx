@@ -99,7 +99,7 @@ export default function Home() {
                 </svg>
               }
               title="Memory API"
-              description="Give your AI a long-term memory with our Substrate integration."
+              description="Advanced Memory Integrated Free AI Chat with long-term cognitive recall."
               href="/docs#memory"
             />
           </div>

@@ -10,9 +10,9 @@ Complete API reference for CloudGPT - Unified AI API Gateway
 - [Error Handling](#error-handling)
 - [Custom Headers](#custom-headers)
 - [Endpoints](#endpoints)
-  - [Chat Completions](#chat-completions)
-  - [Chat with Memory](#chat-with-memory)
-  - [Image Generation](#image-generation)
+- [Chat Completions](#chat-completions)
+- [Advanced Memory Integrated Free AI Chat](#advanced-memory-integrated-free-ai-chat)
+- [Image Generation](#image-generation)
   - [Video Generation](#video-generation)
   - [List Models](#list-models)
   - [API Key Management](#api-key-management)
@@ -144,9 +144,9 @@ Standard OpenAI-compatible response format.
 }
 ```
 
-### Chat with Memory
+### Advanced Memory Integrated Free AI Chat
 
-Generate text completions using the Meridian cognitive substrate with persistent memory.
+Generate text completions with long-term cognitive recall using the Meridian substrate. This endpoint provides persistent memory across sessions at no cost.
 
 **Endpoint:** `POST /api/mem`
 
@@ -154,17 +154,30 @@ Generate text completions using the Meridian cognitive substrate with persistent
 
 ```json
 {
-  "prompt": "What was that project I mentioned?"
+  "messages": [
+    {
+      "role": "user",
+      "content": "Remember that my favorite project is CloudGPT."
+    }
+  ]
 }
 ```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `messages` | array | Yes | Array of message objects for the AI to process and remember. |
 
 **Response:**
 
 ```json
 {
-  "response": "Based on our previous conversation, you mentioned the CloudGPT project..."
+  "response": "I've noted that your favorite project is CloudGPT. I'll remember this for our future interactions!"
 }
 ```
+
+*Note: You must provide an `x-user-id` header or be logged in via Clerk for memory to persist correctly for the specific user.*
 
 ### Image Generation
 

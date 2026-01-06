@@ -19,7 +19,7 @@ export default function DocsPage() {
               <DocNavLink href="#chat" icon={<MessageSquare className="h-4 w-4" />} label="Chat Completions" />
               <DocNavLink href="#image" icon={<ImageIcon className="h-4 w-4" />} label="Image Generation" />
               <DocNavLink href="#video" icon={<Video className="h-4 w-4" />} label="Video Generation" />
-              <DocNavLink href="#memory" icon={<Bot className="h-4 w-4" />} label="Memory & Context" />
+              <DocNavLink href="#memory" icon={<Bot className="h-4 w-4" />} label="Advanced Memory" />
               
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-8 mb-4 px-3">Advanced</p>
               <DocNavLink href="#headers" icon={<Terminal className="h-4 w-4" />} label="Custom Headers" />
@@ -179,18 +179,55 @@ const imageUrl = URL.createObjectURL(blob);`}</code>
               <section id="memory" className="scroll-mt-24">
                 <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                   <Bot className="h-6 w-6 text-emerald-500" />
-                  Memory & Context
+                  Advanced Memory Integrated Free AI Chat
                 </h2>
                 <div className="space-y-6">
                   <p className="text-slate-600 dark:text-slate-400">
-                    Use our specialized Memory API to give your AI a persistent context. Powered by Meridian, this endpoint remembers previous interactions for a truly personalized experience.
+                    Our <strong>Advanced Memory Integrated Free AI Chat</strong> allows you to build sophisticated AI agents with long-term cognitive recall. Powered by Meridian Labs, this endpoint enables persistent conversations across multiple sessions at no cost.
                   </p>
+                  
+                  <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                    <div className="p-4 rounded-xl border bg-slate-50/50 dark:bg-slate-900/50">
+                      <h4 className="font-semibold mb-1 flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                        <Zap className="h-4 w-4" />
+                        Free AI Chat
+                      </h4>
+                      <p className="text-sm text-slate-500">Access advanced models with persistent memory at no cost.</p>
+                    </div>
+                    <div className="p-4 rounded-xl border bg-slate-50/50 dark:bg-slate-900/50">
+                      <h4 className="font-semibold mb-1 flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                        <Cpu className="h-4 w-4" />
+                        Cognitive Recall
+                      </h4>
+                      <p className="text-sm text-slate-500">Intelligent context retrieval for personalized AI experiences.</p>
+                    </div>
+                  </div>
+
                   <div className="bg-slate-50 dark:bg-slate-900 rounded-xl border p-1 mb-6 flex items-center h-12 w-fit">
                     <span className="px-3 py-1 font-bold text-xs bg-blue-500 text-white rounded-lg mr-2">POST</span>
                     <code className="text-sm font-mono px-2">/api/mem</code>
                   </div>
+
+                  <h3 className="text-lg font-bold">Example Usage</h3>
+                  <div className="rounded-xl bg-slate-950 p-6 shadow-2xl border border-slate-800 overflow-x-auto">
+                    <pre className="text-sm font-mono text-slate-300">
+                      <code>{`// Advanced Memory Integrated Free AI Chat Example
+const response = await fetch('https://cloudgptapi.vercel.app/api/mem', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json',
+    'x-user-id': 'user_123' // Required for memory persistence
+  },
+  body: JSON.stringify({
+    messages: [{ role: 'user', content: 'Remember that my favorite color is blue.' }]
+  })
+});`}</code>
+                    </pre>
+                  </div>
+
                   <p className="text-sm text-slate-500 bg-emerald-500/10 p-4 rounded-lg border border-emerald-500/20">
-                    <strong>Note:</strong> User differentiation is automatic. Each user's memory is isolated based on their <code>x-user-id</code> or Clerk session.
+                    <strong>Note:</strong> User differentiation is automatic. Each user's memory is isolated based on their <code>x-user-id</code> or Clerk session, ensuring complete privacy and dedicated cognitive storage.
                   </p>
                 </div>
               </section>
