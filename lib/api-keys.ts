@@ -105,16 +105,18 @@ export function checkRateLimit(key: string, limit: number = 60, type: string = '
   return true;
 }
 
-export function getRateLimitInfo(key: string, limit: number = 60, type: string = 'default'): { remaining: number; resetAt: number } {
+export function getRateLimitInfo(key: string, limit: number = 60, type: string = 'default'): { remaining: number; resetAt: number; limit: number } {
+  const now = Date.now();
   const rateLimitKey = `${type}:${key}`;
   const current = rateLimitMap.get(rateLimitKey);
   
-  if (!current) {
-    return { remaining: limit, resetAt: Date.now() + 60000 };
+  if (!current || now > current.resetAt) {
+    return { remaining: limit, resetAt: now + 60000, limit };
   }
   
   return {
     remaining: Math.max(0, limit - current.count),
     resetAt: current.resetAt,
+    limit,
   };
 }
