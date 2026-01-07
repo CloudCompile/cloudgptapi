@@ -14,13 +14,11 @@ export function getCorsHeaders() {
   };
 }
 
-// Round-robin counter for API key selection
-let pollinationsKeyIndex = 0;
-
 /**
- * Get a Pollinations API key using round-robin load balancing
+ * Get a Pollinations API key using random selection for load balancing
  * Supports multiple API keys via POLLINATIONS_API_KEY (primary) and POLLINATIONS_API_KEY_2 (secondary)
  * Returns undefined if no keys are configured
+ * Uses random selection to avoid race conditions in edge runtime environments
  */
 export function getPollinationsApiKey(): string | undefined {
   const keys = [
@@ -32,9 +30,8 @@ export function getPollinationsApiKey(): string | undefined {
     return undefined;
   }
   
-  // Use round-robin to distribute load across keys
-  const key = keys[pollinationsKeyIndex % keys.length];
-  pollinationsKeyIndex = (pollinationsKeyIndex + 1) % keys.length;
-  
-  return key;
+  // Use random selection to distribute load across keys
+  // This is thread-safe and works well in edge runtime environments
+  const randomIndex = Math.floor(Math.random() * keys.length);
+  return keys[randomIndex];
 }
