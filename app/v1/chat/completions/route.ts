@@ -69,7 +69,7 @@ async function handleStableHordeChat(
       const errorText = await generateResponse.text();
       return NextResponse.json(
         { error: 'Stable Horde API error', details: errorText },
-        { status: generateResponse.status }
+        { status: generateResponse.status, headers: getCorsHeaders() }
       );
     }
 
@@ -79,7 +79,7 @@ async function handleStableHordeChat(
     if (!requestId) {
       return NextResponse.json(
         { error: 'Failed to get generation ID from Stable Horde' },
-        { status: 500 }
+        { status: 500, headers: getCorsHeaders() }
       );
     }
 
@@ -143,6 +143,7 @@ async function handleStableHordeChat(
             },
           }, {
             headers: {
+              ...getCorsHeaders(),
               'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
               'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
             },
@@ -151,14 +152,14 @@ async function handleStableHordeChat(
         
         return NextResponse.json(
           { error: 'No text generated' },
-          { status: 500 }
+          { status: 500, headers: getCorsHeaders() }
         );
       }
       
       if (checkData.faulted) {
         return NextResponse.json(
           { error: 'Generation failed on Stable Horde' },
-          { status: 500 }
+          { status: 500, headers: getCorsHeaders() }
         );
       }
       
@@ -167,14 +168,14 @@ async function handleStableHordeChat(
     
     return NextResponse.json(
       { error: 'Generation timed out' },
-      { status: 504 }
+      { status: 504, headers: getCorsHeaders() }
     );
     
   } catch (error) {
     console.error('Stable Horde text error:', error);
     return NextResponse.json(
       { error: 'Failed to connect to Stable Horde API' },
-      { status: 500 }
+      { status: 500, headers: getCorsHeaders() }
     );
   }
 }
