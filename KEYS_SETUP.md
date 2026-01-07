@@ -53,7 +53,7 @@ You can configure multiple Pollinations API keys to split costs and improve rate
 - `POLLINATIONS_API_KEY` - Your primary API key
 - `POLLINATIONS_API_KEY_2` - Your secondary API key (optional)
 
-The system will automatically distribute requests across all configured keys using round-robin load balancing. This helps:
+The system will automatically distribute requests across all configured keys using random selection. This helps:
 - Split API costs across multiple billing accounts
 - Improve effective rate limits
 - Provide redundancy if one key reaches its limit
