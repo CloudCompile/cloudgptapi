@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
 import { CHAT_MODELS, PROVIDER_URLS } from '@/lib/providers';
-import { getCorsHeaders } from '@/lib/utils';
+import { getCorsHeaders, getPollinationsApiKey } from '@/lib/utils';
 import { retrieveMemory, rememberInteraction } from '@/lib/memory';
 
 export const runtime = 'edge';
@@ -452,7 +452,7 @@ export async function POST(request: NextRequest) {
       return await handleStableHordeChat(body, modelId, apiKeyInfo, request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`, effectiveKey, requestId, limit);
     } else {
       providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
-      providerApiKey = process.env.POLLINATIONS_API_KEY;
+      providerApiKey = getPollinationsApiKey();
     }
 
     // Build headers based on provider

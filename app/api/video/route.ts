@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
 import { VIDEO_MODELS, PROVIDER_URLS } from '@/lib/providers';
+import { getPollinationsApiKey } from '@/lib/utils';
 
 export const runtime = 'edge';
 
@@ -92,8 +93,9 @@ export async function POST(request: NextRequest) {
       'X-App-Source': apiKeyInfo ? 'CloudGPT-API' : 'CloudGPT-Website',
       'x-user-id': userId,
     };
-    if (process.env.POLLINATIONS_API_KEY) {
-      headers['Authorization'] = `Bearer ${process.env.POLLINATIONS_API_KEY}`;
+    const pollinationsApiKey = getPollinationsApiKey();
+    if (pollinationsApiKey) {
+      headers['Authorization'] = `Bearer ${pollinationsApiKey}`;
     }
     
     const pollinationsResponse = await fetch(pollinationsUrl, { headers });
