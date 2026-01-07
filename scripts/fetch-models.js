@@ -8,7 +8,12 @@
 const fs = require('fs');
 const path = require('path');
 
-const POLLINATIONS_KEY = process.env.POLLINATIONS_API_KEY || 'pk_9TfuB6vtf1x67xg5';
+const POLLINATIONS_KEY = process.env.POLLINATIONS_API_KEY;
+
+if (!POLLINATIONS_KEY) {
+  console.error('✗ Error: POLLINATIONS_API_KEY environment variable is not set.');
+  process.exit(1);
+}
 
 async function fetchModels(url, apiKey, name) {
   try {

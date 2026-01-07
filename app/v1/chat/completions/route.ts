@@ -496,6 +496,22 @@ export async function POST(request: NextRequest) {
     } else {
       providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
       providerApiKey = getPollinationsApiKey();
+      
+      if (!providerApiKey) {
+        console.warn(`[${requestId}] Missing Pollinations API key for model: ${modelId}`);
+        return NextResponse.json(
+          {
+            error: {
+              message: 'Pollinations API key is not configured. Please add POLLINATIONS_API_KEY to your environment variables.',
+              type: 'config_error',
+              param: null,
+              code: 'missing_api_key',
+              request_id: requestId
+            }
+          },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
     }
 
     // Build headers based on provider
@@ -603,8 +619,25 @@ export async function POST(request: NextRequest) {
 
     if (!providerResponse.ok) {
       const errorText = await providerResponse.text();
-      console.error(`[${requestId}] Upstream error from ${model.provider}: ${providerResponse.status} - ${errorText.substring(0, 200)}`);
+      console.error(`[${requestId}] Provider error from ${model.provider} (${providerResponse.status}):`, errorText.substring(0, 500));
       
+      // Handle XML AccessDenied errors from Pollinations (S3/CloudFront)
+      if (errorText.includes('AccessDenied') && errorText.includes('XML')) {
+        return NextResponse.json(
+          {
+            error: {
+              message: 'Access denied by the upstream provider. This usually means the API key is invalid or restricted.',
+              type: 'provider_error',
+              param: null,
+              code: 'provider_access_denied',
+              request_id: requestId,
+              upstream_status: providerResponse.status
+            }
+          },
+          { status: 403, headers: getCorsHeaders() }
+        );
+      }
+
       // Map unusual status codes to standard ones
       // 418 "I'm a teapot" is sometimes returned by proxies for rate limiting or bot detection
       let mappedStatus = providerResponse.status;
@@ -619,24 +652,29 @@ export async function POST(request: NextRequest) {
       } else if (providerResponse.status === 401 || providerResponse.status === 403) {
         errorMessage = 'Authentication error with upstream provider.';
       }
-      
-      return NextResponse.json(
-        {
-          error: {
-            message: errorMessage,
-            type: 'api_error',
-            param: null,
-            code: 'upstream_error',
-            details: errorText,
-            request_id: requestId,
-            original_status: providerResponse.status
-          }
-        },
-        {
-          status: mappedStatus,
-          headers: getCorsHeaders()
-        }
-      );
+
+      try {
+        const errorJson = JSON.parse(errorText);
+        return NextResponse.json(errorJson, { 
+          status: mappedStatus, 
+          headers: getCorsHeaders() 
+        });
+      } catch (e) {
+        return NextResponse.json(
+          { 
+            error: {
+              message: errorMessage,
+              type: 'api_error',
+              param: null,
+              code: 'upstream_error',
+              details: errorText.substring(0, 500),
+              request_id: requestId,
+              original_status: providerResponse.status
+            }
+          },
+          { status: mappedStatus, headers: getCorsHeaders() }
+        );
+      }
     }
 
     // Track usage in background if authenticated

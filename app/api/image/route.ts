@@ -411,16 +411,35 @@ export async function POST(request: NextRequest) {
       'x-user-id': userId,
     };
     const pollinationsApiKey = getPollinationsApiKey();
-    if (pollinationsApiKey) {
-      headers['Authorization'] = `Bearer ${pollinationsApiKey}`;
+    if (!pollinationsApiKey) {
+      console.warn(`[ImageAPI] Missing Pollinations API key for model: ${modelId}`);
+      return NextResponse.json(
+        { error: 'Pollinations API key is not configured. Please add POLLINATIONS_API_KEY to your environment variables.' },
+        { status: 500 }
+      );
     }
+    headers['Authorization'] = `Bearer ${pollinationsApiKey}`;
     
     const pollinationsResponse = await fetch(pollinationsUrl, { headers });
 
     if (!pollinationsResponse.ok) {
       const errorText = await pollinationsResponse.text();
+      console.error(`[ImageAPI] Upstream error (${pollinationsResponse.status}):`, errorText.substring(0, 500));
+      
+      // Handle XML AccessDenied errors from Pollinations (S3/CloudFront)
+      if (errorText.includes('AccessDenied') && errorText.includes('XML')) {
+        return NextResponse.json(
+          { 
+            error: 'Access denied by the upstream provider. This usually means the API key is invalid or restricted.',
+            details: 'The provider returned an AccessDenied XML error.',
+            status: 403
+          },
+          { status: 403 }
+        );
+      }
+
       return NextResponse.json(
-        { error: 'Upstream API error', details: errorText },
+        { error: 'Upstream API error', details: errorText.substring(0, 500) },
         { status: pollinationsResponse.status }
       );
     }
