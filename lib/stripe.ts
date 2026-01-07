@@ -5,7 +5,6 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-01-27-acacia' as any, // Using latest or specific version
   appInfo: {
     name: 'CloudGPT',
     version: '1.0.0',
