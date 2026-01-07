@@ -45,7 +45,7 @@ For complete API documentation, see [API_DOCUMENTATION.md](./API_DOCUMENTATION.m
 Generate chat completions using various LLMs.
 
 ```bash
-POST /api/chat
+POST /v1/chat/completions
 ```
 
 **Headers:**
@@ -131,7 +131,7 @@ POST /api/video
 Get available models for each modality:
 
 ```bash
-GET /api/models/chat   # List chat models
+GET /v1/models         # List chat models
 GET /api/models/image  # List image models
 GET /api/models/video  # List video models
 ```
@@ -150,7 +150,7 @@ The dashboard and API key management require user authentication via Clerk. Sign
 Use your API key in the Authorization header:
 
 ```bash
-curl -X POST https://your-app.vercel.app/api/chat \
+curl -X POST https://your-app.vercel.app/v1/chat/completions \
   -H "Authorization: Bearer cgpt_xxxxxxxxxxxxxxxxxxxx" \
   -H "Content-Type: application/json" \
   -d '{"model": "openai", "messages": [{"role": "user", "content": "Hello!"}]}'
@@ -207,14 +207,17 @@ See [KEYS_SETUP.md](./KEYS_SETUP.md) for detailed instructions on setting up:
 cloudgpt/
 ├── app/
 │   ├── api/
-│   │   ├── chat/route.ts      # Chat completions endpoint
 │   │   ├── image/route.ts     # Image generation endpoint
 │   │   ├── video/route.ts     # Video generation endpoint
 │   │   ├── keys/route.ts      # API key management
+│   │   ├── mem/route.ts       # Memory API endpoint
 │   │   └── models/
-│   │       ├── chat/route.ts  # List chat models
 │   │       ├── image/route.ts # List image models
 │   │       └── video/route.ts # List video models
+│   ├── v1/
+│   │   ├── chat/
+│   │   │   └── completions/route.ts # Chat completions endpoint
+│   │   └── models/route.ts    # List chat models
 │   ├── dashboard/
 │   │   └── page.tsx           # Dashboard page
 │   ├── layout.tsx             # Root layout with Clerk

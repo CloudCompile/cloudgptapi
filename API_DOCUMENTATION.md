@@ -114,7 +114,7 @@ While CloudGPT is stateless, our upstream providers may have different policies:
 
 Generate text completions using various LLMs.
 
-**Endpoint:** `POST /api/chat`
+**Endpoint:** `POST /v1/chat/completions`
 
 **Request Body:**
 
@@ -256,7 +256,7 @@ Returns the generated video as binary data (MP4).
 
 Get available models for each modality.
 
-- **Chat:** `GET /api/models/chat`
+- **Chat:** `GET /v1/models`
 - **Image:** `GET /api/models/image`
 - **Video:** `GET /api/models/video`
 
@@ -297,7 +297,7 @@ CloudGPT aggregates multiple top-tier AI providers:
 ### JavaScript (fetch)
 
 ```javascript
-const response = await fetch('https://cloudgptapi.vercel.app/api/chat', {
+const response = await fetch('https://cloudgptapi.vercel.app/v1/chat/completions', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',

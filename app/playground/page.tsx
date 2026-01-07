@@ -63,7 +63,7 @@ export default function PlaygroundPage() {
         setMessages(newMessages);
         setInput('');
         
-        const response = await fetch('/api/chat', {
+        const response = await fetch('/v1/chat/completions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
