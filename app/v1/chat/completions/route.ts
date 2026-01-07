@@ -498,20 +498,20 @@ export async function POST(request: NextRequest) {
       providerApiKey = getPollinationsApiKey();
       
       if (!providerApiKey) {
-        console.warn(`[${requestId}] Missing Pollinations API key for model: ${modelId}`);
-        return NextResponse.json(
-          {
-            error: {
-              message: 'Pollinations API key is not configured. Please add POLLINATIONS_API_KEY to your environment variables.',
-              type: 'config_error',
-              param: null,
-              code: 'missing_api_key',
-              request_id: requestId
-            }
-          },
-          { status: 500, headers: getCorsHeaders() }
-        );
-      }
+            console.warn(`[${requestId}] Missing Pollinations API key for model: ${modelId}`);
+            return NextResponse.json(
+              {
+                error: {
+                  message: 'Pollinations API key is not configured. Please add POLLINATIONS_API_KEY to your .env.local file.',
+                  type: 'config_error',
+                  param: null,
+                  code: 'missing_api_key',
+                  request_id: requestId
+                }
+              },
+              { status: 500, headers: getCorsHeaders() }
+            );
+          }
     }
 
     // Build headers based on provider
@@ -621,20 +621,22 @@ export async function POST(request: NextRequest) {
       const errorText = await providerResponse.text();
       console.error(`[${requestId}] Provider error from ${model.provider} (${providerResponse.status}):`, errorText.substring(0, 500));
       
-      // Handle XML AccessDenied errors from Pollinations (S3/CloudFront)
-      if (errorText.includes('AccessDenied') && errorText.includes('XML')) {
+      // Handle XML AccessDenied errors or any XML error response from Upstream (S3/CloudFront/Pollinations)
+      if (errorText.includes('<?xml') || (errorText.includes('<Error>') && errorText.includes('</Error>'))) {
+        console.warn(`[${requestId}] Detected XML error response from provider:`, errorText.substring(0, 200));
         return NextResponse.json(
           {
             error: {
-              message: 'Access denied by the upstream provider. This usually means the API key is invalid or restricted.',
+              message: 'The upstream provider returned an XML error. This usually indicates an invalid API key, restricted access, or a missing resource.',
               type: 'provider_error',
               param: null,
-              code: 'provider_access_denied',
+              code: errorText.includes('AccessDenied') ? 'provider_access_denied' : 'provider_xml_error',
               request_id: requestId,
-              upstream_status: providerResponse.status
+              upstream_status: providerResponse.status,
+              details: errorText.substring(0, 200)
             }
           },
-          { status: 403, headers: getCorsHeaders() }
+          { status: providerResponse.status === 200 ? 403 : providerResponse.status, headers: getCorsHeaders() }
         );
       }
 

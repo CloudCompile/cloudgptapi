@@ -1,7 +1,9 @@
 'use client';
 
-import { Check, Zap, Shield, Rocket, HelpCircle } from 'lucide-react';
+import { useState } from 'react';
+import { Check, Zap, Shield, Rocket, HelpCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 const plans = [
   {
@@ -33,9 +35,10 @@ const plans = [
       'Priority email support',
     ],
     buttonText: 'Upgrade to Pro',
-    buttonHref: 'https://buy.stripe.com/test_555', // Placeholder for Stripe checkout
+    buttonHref: '#',
     highlight: true,
     stripeProductId: 'prod_TkaB1ApHkafWT1',
+    stripePriceId: 'price_1Sn4OQRG5zp0rTvz6kS6Z7S9', // Standard Pro price ID
   },
   {
     name: 'Enterprise',
@@ -50,12 +53,48 @@ const plans = [
       'Custom model fine-tuning',
     ],
     buttonText: 'Contact Sales',
-    buttonHref: 'mailto:sales@cloudgptapi.com',
+    buttonHref: 'mailto:enterprise@cloudgpt.com',
     highlight: false,
   },
 ];
 
 export default function PricingPage() {
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleUpgrade = async (plan: typeof plans[0]) => {
+    if (plan.name === 'Free') return;
+    if (plan.name === 'Enterprise') {
+      window.location.href = plan.buttonHref;
+      return;
+    }
+
+    try {
+      setLoading(plan.name);
+      const response = await fetch('/api/stripe/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          priceId: (plan as any).stripePriceId,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || 'Failed to create checkout session');
+      }
+
+      const { url } = await response.json();
+      window.location.href = url;
+    } catch (error) {
+      console.error('Error upgrading:', error);
+      alert('Failed to start checkout. Please try again or contact support.');
+    } finally {
+      setLoading(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       {/* Hero Section */}
@@ -112,17 +151,32 @@ export default function PricingPage() {
                   ))}
                 </div>
 
-                <a
-                  href={plan.buttonHref}
-                  className={cn(
-                    "w-full py-4 px-6 rounded-xl font-bold text-center transition-all",
-                    plan.highlight
-                      ? "bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700"
-                  )}
-                >
-                  {plan.buttonText}
-                </a>
+                {plan.name === 'Free' ? (
+                  <Link
+                    href={plan.buttonHref}
+                    className={cn(
+                      "w-full py-4 px-6 rounded-xl font-bold text-center transition-all",
+                      "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700"
+                    )}
+                  >
+                    {plan.buttonText}
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => handleUpgrade(plan)}
+                    disabled={loading !== null}
+                    className={cn(
+                      "w-full py-4 px-6 rounded-xl font-bold text-center transition-all flex items-center justify-center gap-2",
+                      plan.highlight
+                        ? "bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700",
+                      loading === plan.name && "opacity-70 cursor-not-allowed"
+                    )}
+                  >
+                    {loading === plan.name && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {plan.buttonText}
+                  </button>
+                )}
               </div>
             ))}
           </div>

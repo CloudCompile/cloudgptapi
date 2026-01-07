@@ -426,15 +426,20 @@ export async function POST(request: NextRequest) {
       const errorText = await pollinationsResponse.text();
       console.error(`[ImageAPI] Upstream error (${pollinationsResponse.status}):`, errorText.substring(0, 500));
       
-      // Handle XML AccessDenied errors from Pollinations (S3/CloudFront)
-      if (errorText.includes('AccessDenied') && errorText.includes('XML')) {
+      // Handle XML AccessDenied errors or any XML error response from Upstream (S3/CloudFront/Pollinations)
+      if (errorText.includes('<?xml') || (errorText.includes('<Error>') && errorText.includes('</Error>'))) {
+        console.warn(`[ImageAPI] Detected XML error response from provider:`, errorText.substring(0, 200));
         return NextResponse.json(
           { 
-            error: 'Access denied by the upstream provider. This usually means the API key is invalid or restricted.',
-            details: 'The provider returned an AccessDenied XML error.',
-            status: 403
+            error: {
+              message: 'The upstream provider returned an XML error. This usually indicates an invalid API key, restricted access, or a missing resource.',
+              type: 'provider_error',
+              code: errorText.includes('AccessDenied') ? 'provider_access_denied' : 'provider_xml_error',
+              status: pollinationsResponse.status === 200 ? 403 : pollinationsResponse.status,
+              details: errorText.substring(0, 200)
+            }
           },
-          { status: 403 }
+          { status: pollinationsResponse.status === 200 ? 403 : pollinationsResponse.status }
         );
       }
 
