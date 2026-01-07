@@ -39,6 +39,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: session.url });
   } catch (error: any) {
     console.error('[STRIPE_CHECKOUT_ERROR]', error);
-    return new NextResponse('Internal Error', { status: 500 });
+    return new NextResponse(
+      JSON.stringify({ 
+        error: error.message || 'Internal Error',
+        code: error.code,
+        type: error.type
+      }), 
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }
