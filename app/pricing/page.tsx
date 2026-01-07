@@ -38,7 +38,7 @@ const plans = [
     buttonHref: '#',
     highlight: true,
     stripeProductId: 'prod_TkaB1ApHkafWT1',
-    stripePriceId: 'price_1Sn4OQRG5zp0rTvz6kS6Z7S9', // Standard Pro price ID
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || 'price_1Sn4OQRG5zp0rTvz6kS6Z7S9', // Standard Pro price ID
   },
   {
     name: 'Enterprise',
