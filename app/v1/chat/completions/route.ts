@@ -290,6 +290,18 @@ export async function POST(request: NextRequest) {
         .map((msg: any) => `${msg.role}: ${msg.content}`)
         .join('\n');
       requestBody = { prompt };
+    } else if (model.provider === 'liz') {
+      // Liz Proxy models (OpenAI compatible)
+      requestBody = {
+        model: modelId,
+        messages: body.messages,
+        temperature: body.temperature ?? 0.7,
+        max_tokens: body.max_tokens ?? 2048,
+        stream: body.stream || false,
+        top_p: body.top_p ?? 1,
+        frequency_penalty: body.frequency_penalty ?? 0,
+        presence_penalty: body.presence_penalty ?? 0,
+      };
     } else {
       requestBody = {
         model: modelId,
@@ -336,11 +348,11 @@ export async function POST(request: NextRequest) {
     // Return JSON response
     const data = await providerResponse.json();
     
-    // Transform Meridian response to match OpenAI format
+    // Transform provider responses to match OpenAI format
     let responseData = data;
+    
     if (model.provider === 'meridian') {
       // Meridian returns { response: "..." }
-      // Transform to OpenAI-compatible format
       responseData = {
         id: 'meridian-' + Date.now(),
         object: 'chat.completion',
@@ -362,6 +374,37 @@ export async function POST(request: NextRequest) {
           total_tokens: 0,
         },
       };
+    } else if (model.provider === 'pollinations') {
+      // Pollinations might return different formats, ensure it matches OpenAI
+      if (!data.choices && data.content) {
+        responseData = {
+          id: 'pollinations-' + Date.now(),
+          object: 'chat.completion',
+          created: Math.floor(Date.now() / 1000),
+          model: modelId,
+          choices: [
+            {
+              index: 0,
+              message: {
+                role: 'assistant',
+                content: data.content,
+              },
+              finish_reason: 'stop',
+            },
+          ],
+          usage: data.usage || {
+            prompt_tokens: 0,
+            completion_tokens: 0,
+            total_tokens: 0,
+          },
+        };
+      }
+    }
+    
+    // Ensure the response has the correct model ID and object type
+    if (responseData && typeof responseData === 'object') {
+      responseData.model = modelId;
+      responseData.object = responseData.object || 'chat.completion';
     }
     
     const rateLimitInfo = getRateLimitInfo(effectiveKey);

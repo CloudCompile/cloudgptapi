@@ -212,9 +212,9 @@ Generate text completions with long-term cognitive recall using the Meridian sub
 
 ### Image Generation
 
-Generate images from text prompts.
+Generate images from text prompts using OpenAI-compatible format.
 
-**Endpoint:** `POST /api/image`
+**Endpoint:** `POST /v1/images/generations`
 
 **Request Body:**
 
@@ -222,21 +222,42 @@ Generate images from text prompts.
 {
   "prompt": "A beautiful sunset over mountains, digital art",
   "model": "flux",
-  "width": 1024,
-  "height": 1024,
-  "seed": 12345
+  "n": 1,
+  "size": "1024x1024",
+  "response_format": "url"
 }
 ```
 
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Text description of the image |
+| `model` | string | No | Model ID. Default: "flux" |
+| `n` | integer | No | Number of images to generate. Default: 1 |
+| `size` | string | No | Image dimensions (e.g., "1024x1024") |
+| `response_format` | string | No | "url" or "b64_json". Default: "url" |
+
 **Response:**
 
-Returns the generated image as binary data (PNG/JPEG).
+```json
+{
+  "created": 1589478378,
+  "data": [
+    {
+      "url": "https://..."
+    }
+  ]
+}
+```
+
+*Note: You can still use the legacy `POST /api/image` to receive raw binary data directly.*
 
 ### Video Generation
 
 Generate videos from text prompts.
 
-**Endpoint:** `POST /api/video`
+**Endpoint:** `POST /v1/video/generations`
 
 **Request Body:**
 
@@ -250,15 +271,42 @@ Generate videos from text prompts.
 
 **Response:**
 
-Returns the generated video as binary data (MP4).
+```json
+{
+  "created": 1589478378,
+  "data": [
+    {
+      "url": "https://..."
+    }
+  ]
+}
+```
+
+*Note: You can still use the legacy `POST /api/video` to receive raw binary data directly.*
 
 ### List Models
 
-Get available models for each modality.
+Get available models for all modalities (Chat, Image, Video) in a single OpenAI-compatible list.
 
-- **Chat:** `GET /v1/models`
-- **Image:** `GET /api/models/image`
-- **Video:** `GET /api/models/video`
+**Endpoint:** `GET /v1/models`
+
+**Response:**
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "openai",
+      "object": "model",
+      "created": 1710000000,
+      "owned_by": "pollinations",
+      "type": "chat"
+    },
+    ...
+  ]
+}
+```
 
 ## Provider Support
 

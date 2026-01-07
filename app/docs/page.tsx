@@ -153,27 +153,74 @@ export default function DocsPage() {
                 </h2>
                 <div className="space-y-6">
                   <p className="text-slate-600 dark:text-slate-400">
-                    Create high-quality images from text descriptions.
+                    Create high-quality images from text descriptions using the OpenAI standard format.
                   </p>
                   <div className="bg-slate-50 dark:bg-slate-900 rounded-xl border p-1 mb-6 flex items-center h-12 w-fit">
                     <span className="px-3 py-1 font-bold text-xs bg-blue-500 text-white rounded-lg mr-2">POST</span>
-                    <code className="text-sm font-mono px-2">/api/image</code>
+                    <code className="text-sm font-mono px-2">/v1/images/generations</code>
                   </div>
                   <h3 className="text-lg font-bold">Example Usage</h3>
                   <div className="rounded-xl bg-slate-950 p-6 shadow-2xl border border-slate-800 overflow-x-auto">
                     <pre className="text-sm font-mono text-slate-300">
-                      <code>{`const response = await fetch('/api/image', {
+                      <code>{`const response = await fetch('/v1/images/generations', {
   method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
   body: JSON.stringify({
     prompt: "Cyberpunk city with neon lights",
-    model: "flux"
+    model: "flux",
+    response_format: "url"
   })
 });
 
-const blob = await response.blob();
-const imageUrl = URL.createObjectURL(blob);`}</code>
+const { data } = await response.json();
+const imageUrl = data[0].url;`}</code>
                     </pre>
                   </div>
+                  <p className="text-sm text-slate-500 italic">
+                    Note: For direct binary responses, you can still use the legacy <code>/api/image</code> endpoint.
+                  </p>
+                </div>
+              </section>
+
+              {/* Video API */}
+              <section id="video" className="scroll-mt-24">
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                  <Video className="h-6 w-6 text-pink-500" />
+                  Video Generation
+                </h2>
+                <div className="space-y-6">
+                  <p className="text-slate-600 dark:text-slate-400">
+                    Generate cinematic videos from text prompts.
+                  </p>
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded-xl border p-1 mb-6 flex items-center h-12 w-fit">
+                    <span className="px-3 py-1 font-bold text-xs bg-blue-500 text-white rounded-lg mr-2">POST</span>
+                    <code className="text-sm font-mono px-2">/v1/video/generations</code>
+                  </div>
+                  <h3 className="text-lg font-bold">Example Usage</h3>
+                  <div className="rounded-xl bg-slate-950 p-6 shadow-2xl border border-slate-800 overflow-x-auto">
+                    <pre className="text-sm font-mono text-slate-300">
+                      <code>{`const response = await fetch('/v1/video/generations', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    prompt: "A cat playing with a red ball",
+    model: "veo"
+  })
+});
+
+const { data } = await response.json();
+const videoUrl = data[0].url;`}</code>
+                    </pre>
+                  </div>
+                  <p className="text-sm text-slate-500 italic">
+                    Note: For direct binary responses, you can still use the legacy <code>/api/video</code> endpoint.
+                  </p>
                 </div>
               </section>
 
