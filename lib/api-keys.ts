@@ -104,16 +104,16 @@ export function checkRateLimit(apiKey: string, limit: number = 60): boolean {
   return true;
 }
 
-export function getRateLimitInfo(apiKey: string): { remaining: number; resetAt: number } {
+export function getRateLimitInfo(apiKey: string, limit: number = 60): { remaining: number; resetAt: number; limit: number } {
   const current = rateLimitMap.get(apiKey);
-  const limit = 60;
   
   if (!current) {
-    return { remaining: limit, resetAt: Date.now() + 60000 };
+    return { remaining: limit, resetAt: Date.now() + 60000, limit };
   }
   
   return {
     remaining: Math.max(0, limit - current.count),
     resetAt: current.resetAt,
+    limit,
   };
 }

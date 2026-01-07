@@ -7,6 +7,60 @@ import { retrieveMemory, rememberInteraction } from '@/lib/memory';
 
 export const runtime = 'edge';
 
+// Constants for validation
+const MAX_MESSAGE_LENGTH = 100000; // 100KB per message
+const MAX_MESSAGES_COUNT = 100;
+const PROVIDER_TIMEOUT_MS = 60000; // 60 seconds
+
+// Generate unique request ID for tracing
+function generateRequestId(): string {
+  return `req_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
+}
+
+// Validate message structure and content
+function validateMessages(messages: any[]): { valid: boolean; error?: string } {
+  if (messages.length === 0) {
+    return { valid: false, error: 'messages array cannot be empty' };
+  }
+  
+  if (messages.length > MAX_MESSAGES_COUNT) {
+    return { valid: false, error: `messages array exceeds maximum of ${MAX_MESSAGES_COUNT} messages` };
+  }
+  
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    
+    if (!msg || typeof msg !== 'object') {
+      return { valid: false, error: `messages[${i}] must be an object` };
+    }
+    
+    if (!msg.role || typeof msg.role !== 'string') {
+      return { valid: false, error: `messages[${i}].role must be a string` };
+    }
+    
+    const validRoles = ['system', 'user', 'assistant', 'function', 'tool'];
+    if (!validRoles.includes(msg.role)) {
+      return { valid: false, error: `messages[${i}].role must be one of: ${validRoles.join(', ')}` };
+    }
+    
+    if (msg.content !== null && msg.content !== undefined) {
+      if (typeof msg.content !== 'string' && !Array.isArray(msg.content)) {
+        return { valid: false, error: `messages[${i}].content must be a string or array` };
+      }
+      
+      const contentLength = typeof msg.content === 'string'
+        ? msg.content.length
+        : JSON.stringify(msg.content).length;
+        
+      if (contentLength > MAX_MESSAGE_LENGTH) {
+        return { valid: false, error: `messages[${i}].content exceeds maximum length of ${MAX_MESSAGE_LENGTH} characters` };
+      }
+    }
+  }
+  
+  return { valid: true };
+}
+
 // Map Stable Horde model IDs to actual model names
 function getStableHordeTextModelName(modelId: string): string {
   const modelMap: Record<string, string> = {
@@ -25,7 +79,9 @@ async function handleStableHordeChat(
   modelId: string,
   apiKeyInfo: ApiKey | null,
   userId: string,
-  effectiveKey: string
+  effectiveKey: string,
+  requestId: string,
+  limit: number
 ): Promise<NextResponse> {
   // '0000000000' is Stable Horde's official anonymous API key for rate-limited access
   const hordeApiKey = process.env.STABLE_HORDE_API_KEY || '0000000000';
@@ -120,7 +176,7 @@ async function handleStableHordeChat(
           }
           
           // Return OpenAI-compatible format
-          const rateLimitInfo = getRateLimitInfo(effectiveKey);
+          const rateLimitInfo = getRateLimitInfo(effectiveKey, limit);
           return NextResponse.json({
             id: 'horde-' + requestId,
             object: 'chat.completion',
@@ -220,6 +276,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
+  
   try {
     // Get user from session (for website users)
     const { userId: sessionUserId } = await auth();
@@ -241,7 +299,8 @@ export async function POST(request: NextRequest) {
     const limit = apiKeyInfo ? apiKeyInfo.rateLimit : 10;
     
     if (!checkRateLimit(effectiveKey, limit)) {
-      const rateLimitInfo = getRateLimitInfo(effectiveKey);
+      const rateLimitInfo = getRateLimitInfo(effectiveKey, limit);
+      console.warn(`[${requestId}] Rate limit exceeded for key: ${effectiveKey.substring(0, 10)}...`);
       return NextResponse.json(
         { 
           error: {
@@ -266,16 +325,39 @@ export async function POST(request: NextRequest) {
     
     // Validate required fields
     if (!body.messages || !Array.isArray(body.messages)) {
+      console.warn(`[${requestId}] Invalid request: messages array missing`);
       return NextResponse.json(
-        { 
+        {
           error: {
             message: 'messages array is required',
             type: 'invalid_request_error',
             param: 'messages',
-            code: null
+            code: null,
+            request_id: requestId
           }
         },
-        { 
+        {
+          status: 400,
+          headers: getCorsHeaders()
+        }
+      );
+    }
+    
+    // Validate message structure and content
+    const validation = validateMessages(body.messages);
+    if (!validation.valid) {
+      console.warn(`[${requestId}] Invalid messages: ${validation.error}`);
+      return NextResponse.json(
+        {
+          error: {
+            message: validation.error,
+            type: 'invalid_request_error',
+            param: 'messages',
+            code: 'invalid_messages',
+            request_id: requestId
+          }
+        },
+        {
           status: 400,
           headers: getCorsHeaders()
         }
@@ -365,7 +447,7 @@ export async function POST(request: NextRequest) {
       providerApiKey = process.env.MERIDIAN_API_KEY || 'ps_6od22i7ddomt18c1jyk9hm';
     } else if (model.provider === 'stablehorde') {
       // Handle Stable Horde text generation
-      return await handleStableHordeChat(body, modelId, apiKeyInfo, request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`, effectiveKey);
+      return await handleStableHordeChat(body, modelId, apiKeyInfo, request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`, effectiveKey, requestId, limit);
     } else {
       providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
       providerApiKey = process.env.POLLINATIONS_API_KEY;
@@ -432,25 +514,58 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    const providerResponse = await fetch(providerUrl, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(requestBody),
-    });
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS);
+    
+    let providerResponse: Response;
+    try {
+      providerResponse = await fetch(providerUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(requestBody),
+        signal: controller.signal,
+      });
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      if (fetchError.name === 'AbortError') {
+        console.error(`[${requestId}] Provider request timed out after ${PROVIDER_TIMEOUT_MS}ms`);
+        return NextResponse.json(
+          {
+            error: {
+              message: 'Request timed out',
+              type: 'timeout_error',
+              param: null,
+              code: 'request_timeout',
+              request_id: requestId
+            }
+          },
+          {
+            status: 504,
+            headers: getCorsHeaders()
+          }
+        );
+      }
+      throw fetchError;
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!providerResponse.ok) {
       const errorText = await providerResponse.text();
+      console.error(`[${requestId}] Upstream error from ${model.provider}: ${providerResponse.status} - ${errorText.substring(0, 200)}`);
       return NextResponse.json(
-        { 
+        {
           error: {
             message: 'Upstream API error',
             type: 'api_error',
             param: null,
             code: 'upstream_error',
-            details: errorText
+            details: errorText,
+            request_id: requestId
           }
         },
-        { 
+        {
           status: providerResponse.status,
           headers: getCorsHeaders()
         }
@@ -496,12 +611,33 @@ export async function POST(request: NextRequest) {
          }
       });
 
-      return new NextResponse(providerResponse.body?.pipeThrough(transformStream), {
+      // Null-safety check for streaming body
+      if (!providerResponse.body) {
+        console.error(`[${requestId}] Provider returned null body for streaming request`);
+        return NextResponse.json(
+          {
+            error: {
+              message: 'Provider returned empty response',
+              type: 'api_error',
+              param: null,
+              code: 'empty_response',
+              request_id: requestId
+            }
+          },
+          {
+            status: 502,
+            headers: getCorsHeaders()
+          }
+        );
+      }
+      
+      return new NextResponse(providerResponse.body.pipeThrough(transformStream), {
         headers: {
           ...getCorsHeaders(),
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
           'Connection': 'keep-alive',
+          'X-Request-Id': requestId,
         },
       });
     }
@@ -578,29 +714,35 @@ export async function POST(request: NextRequest) {
        }
      }
 
-    const rateLimitInfo = getRateLimitInfo(effectiveKey);
+    const rateLimitInfo = getRateLimitInfo(effectiveKey, limit);
     return NextResponse.json(responseData, {
       headers: {
         ...getCorsHeaders(),
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+        'X-RateLimit-Limit': String(rateLimitInfo.limit),
+        'X-Request-Id': requestId,
       },
     });
     
-  } catch (error) {
-    console.error('Chat API error:', error);
+  } catch (error: any) {
+    console.error(`[${requestId}] Chat API error:`, error?.message || error);
     return NextResponse.json(
-      { 
+      {
         error: {
           message: 'Internal server error',
           type: 'server_error',
           param: null,
-          code: 'internal_error'
+          code: 'internal_error',
+          request_id: requestId
         }
       },
-      { 
+      {
         status: 500,
-        headers: getCorsHeaders()
+        headers: {
+          ...getCorsHeaders(),
+          'X-Request-Id': requestId,
+        }
       }
     );
   }
