@@ -99,7 +99,7 @@ async function handleStableHordeChat(
   const generateRequest = {
     prompt,
     params: {
-      max_length: body.max_tokens || 512,
+      max_length: body.max_tokens ? Math.min(body.max_tokens, 1024) : 512,
       temperature: body.temperature || 0.7,
       top_p: body.top_p || 0.9,
       n: 1,
@@ -325,6 +325,9 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     
+    // Log request details for debugging (especially token issues)
+    console.log(`[${requestId}] Request model: ${body.model}, max_tokens: ${body.max_tokens}, messages: ${body.messages?.length}`);
+
     // Validate required fields
     if (!body.messages || !Array.isArray(body.messages)) {
       console.warn(`[${requestId}] Invalid request: messages array missing`);
@@ -484,6 +487,11 @@ export async function POST(request: NextRequest) {
     // Forward to provider API
     let requestBody: any;
     
+    // Safety cap for max_tokens to prevent "request exceeds max tokens" errors
+    // Many providers have limits around 4k-8k for free tiers
+    const maxTokensSafetyCap = 4096;
+    const effectiveMaxTokens = body.max_tokens ? Math.min(body.max_tokens, maxTokensSafetyCap) : undefined;
+
     if (model.provider === 'meridian') {
       // Meridian expects a simple "prompt" field, not "messages"
       // Convert messages array to a single prompt string
@@ -497,7 +505,7 @@ export async function POST(request: NextRequest) {
         model: modelId,
         messages: body.messages,
         temperature: body.temperature ?? 0.7,
-        max_tokens: body.max_tokens ?? 2048,
+        max_tokens: body.max_tokens ? Math.min(body.max_tokens, 4096) : 2048,
         stream: body.stream || false,
         top_p: body.top_p ?? 1,
         frequency_penalty: body.frequency_penalty ?? 0,
@@ -508,7 +516,7 @@ export async function POST(request: NextRequest) {
         model: modelId,
         messages: body.messages,
         temperature: body.temperature,
-        max_tokens: body.max_tokens,
+        max_tokens: effectiveMaxTokens,
         stream: body.stream || false,
         top_p: body.top_p,
         frequency_penalty: body.frequency_penalty,
