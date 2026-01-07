@@ -85,14 +85,15 @@ export async function trackUsage(apiKeyId: string, userId: string, modelId: stri
  */
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
-export function checkRateLimit(apiKey: string, limit: number = 60): boolean {
+export function checkRateLimit(key: string, limit: number = 60, type: string = 'default'): boolean {
   const now = Date.now();
   const windowMs = 60 * 1000; // 1 minute window
+  const rateLimitKey = `${type}:${key}`;
   
-  const current = rateLimitMap.get(apiKey);
+  const current = rateLimitMap.get(rateLimitKey);
   
   if (!current || now > current.resetAt) {
-    rateLimitMap.set(apiKey, { count: 1, resetAt: now + windowMs });
+    rateLimitMap.set(rateLimitKey, { count: 1, resetAt: now + windowMs });
     return true;
   }
   
@@ -104,9 +105,9 @@ export function checkRateLimit(apiKey: string, limit: number = 60): boolean {
   return true;
 }
 
-export function getRateLimitInfo(apiKey: string): { remaining: number; resetAt: number } {
-  const current = rateLimitMap.get(apiKey);
-  const limit = 60;
+export function getRateLimitInfo(key: string, limit: number = 60, type: string = 'default'): { remaining: number; resetAt: number } {
+  const rateLimitKey = `${type}:${key}`;
+  const current = rateLimitMap.get(rateLimitKey);
   
   if (!current) {
     return { remaining: limit, resetAt: Date.now() + 60000 };

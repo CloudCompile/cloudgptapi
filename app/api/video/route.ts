@@ -19,7 +19,8 @@ export async function POST(request: NextRequest) {
     const rawApiKey = extractApiKey(request.headers);
     
     // Check rate limit (video generation is expensive, stricter limits)
-    const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+    const clientIp = (request as any).ip || 
+                     request.headers.get('x-forwarded-for')?.split(',')[0] || 
                      request.headers.get('x-real-ip') || 
                      'anonymous';
     const effectiveKey = rawApiKey || clientIp;
@@ -31,8 +32,8 @@ export async function POST(request: NextRequest) {
 
     const limit = apiKeyInfo ? apiKeyInfo.rateLimit : 2;
     
-    if (!checkRateLimit(effectiveKey, limit)) {
-      const rateLimitInfo = getRateLimitInfo(effectiveKey);
+    if (!checkRateLimit(effectiveKey, limit, 'video')) {
+      const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'video');
       return NextResponse.json(
         { error: 'Rate limit exceeded', resetAt: rateLimitInfo.resetAt },
         { 

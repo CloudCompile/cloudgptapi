@@ -275,7 +275,12 @@ function ModelCard({ model, status, onClick }: { model: ModelType, status: Model
           {model.name}
           <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-all -translate-y-1" />
         </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 h-8 mt-1 leading-relaxed">
+        <div className="flex items-center gap-1.5 mt-1">
+          <code className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700/50">
+            {model.id}
+          </code>
+        </div>
+        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 h-8 mt-2 leading-relaxed">
           {model.description || `High-performance ${model.type} model powered by ${model.provider}.`}
         </p>
       </div>
@@ -368,6 +373,12 @@ function ModelDetailsModal({ model, status, onClose }: { model: ModelType, statu
                     <span className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase tracking-tight">Offline</span>
                   </div>
                 ) : null}
+              </div>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Model ID:</span>
+                <code className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-primary border border-slate-200 dark:border-slate-700/50 select-all cursor-copy" title="Click to copy">
+                  {model.id}
+                </code>
               </div>
               <p className="text-slate-600 dark:text-slate-400 mb-3">
                 {details?.longDescription || model.description || `High-performance ${model.type} model powered by ${model.provider}.`}

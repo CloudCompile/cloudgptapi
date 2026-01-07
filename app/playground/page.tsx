@@ -151,7 +151,7 @@ export default function PlaygroundPage() {
               className="bg-transparent text-sm font-medium outline-none border-none focus:ring-0"
             >
               {currentModels.map(m => (
-                <option key={m.id} value={m.id}>{m.name}</option>
+                <option key={m.id} value={m.id}>{m.name} ({m.id})</option>
               ))}
             </select>
           </div>
@@ -288,6 +288,9 @@ export default function PlaygroundPage() {
               <p className="text-sm font-bold mb-1">
                 {currentModels.find(m => m.id === selectedModel)?.name}
               </p>
+              <code className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-primary border border-slate-200 dark:border-slate-700/50 block w-fit mb-3">
+                {selectedModel}
+              </code>
               <p className="text-xs text-slate-500 line-clamp-3">
                 Professional grade {mode} model optimized for high-quality outputs and low latency.
               </p>

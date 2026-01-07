@@ -32,8 +32,8 @@ export async function POST(request: NextRequest) {
     }
     
     // Check rate limit
-    if (!checkRateLimit(rawApiKey, apiKeyInfo.rateLimit)) {
-      const rateLimitInfo = getRateLimitInfo(rawApiKey);
+    if (!checkRateLimit(rawApiKey, apiKeyInfo.rateLimit, 'mem')) {
+      const rateLimitInfo = getRateLimitInfo(rawApiKey, apiKeyInfo.rateLimit, 'mem');
       return NextResponse.json(
         { error: 'Rate limit exceeded', resetAt: rateLimitInfo.resetAt },
         { 

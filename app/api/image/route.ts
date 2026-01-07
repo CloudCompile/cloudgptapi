@@ -293,7 +293,8 @@ export async function POST(request: NextRequest) {
     const rawApiKey = extractApiKey(request.headers);
     
     // Check rate limit (allow anonymous with lower limits)
-    const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+    const clientIp = (request as any).ip || 
+                     request.headers.get('x-forwarded-for')?.split(',')[0] || 
                      request.headers.get('x-real-ip') || 
                      'anonymous';
     const effectiveKey = rawApiKey || clientIp;
@@ -305,8 +306,8 @@ export async function POST(request: NextRequest) {
 
     const limit = apiKeyInfo ? apiKeyInfo.rateLimit : 5;
     
-    if (!checkRateLimit(effectiveKey, limit)) {
-      const rateLimitInfo = getRateLimitInfo(effectiveKey);
+    if (!checkRateLimit(effectiveKey, limit, 'image')) {
+      const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'image');
       return NextResponse.json(
         { error: 'Rate limit exceeded', resetAt: rateLimitInfo.resetAt },
         { 
