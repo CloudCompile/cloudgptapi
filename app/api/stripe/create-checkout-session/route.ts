@@ -1,0 +1,44 @@
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
+import { stripe } from '@/lib/stripe';
+
+export async function POST(req: Request) {
+  try {
+    const { userId } = await auth();
+    const user = await currentUser();
+
+    if (!userId || !user) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    const body = await req.json();
+    const { priceId } = body;
+
+    if (!priceId) {
+      return new NextResponse('Price ID is required', { status: 400 });
+    }
+
+    // Create a Stripe Checkout Session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
+      customer_email: user.emailAddresses[0].emailAddress,
+      metadata: {
+        userId,
+      },
+    });
+
+    return NextResponse.json({ url: session.url });
+  } catch (error: any) {
+    console.error('[STRIPE_CHECKOUT_ERROR]', error);
+    return new NextResponse('Internal Error', { status: 500 });
+  }
+}
