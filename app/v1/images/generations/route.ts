@@ -2,12 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
 import { IMAGE_MODELS, PROVIDER_URLS, ImageModel } from '@/lib/providers';
+import { getCorsHeaders } from '@/lib/utils';
 
 export const runtime = 'edge';
 
 // Handle OPTIONS for CORS
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 200 });
+  return new NextResponse(null, {
+    status: 204,
+    headers: getCorsHeaders(),
+  });
+}
+
+export async function GET() {
+  return NextResponse.json({
+    message: 'Images generation endpoint is active. Use POST to generate images.',
+    example: {
+      model: 'flux',
+      prompt: 'A beautiful landscape'
+    }
+  }, {
+    headers: getCorsHeaders()
+  });
 }
 
 // Map Stable Horde model IDs to actual model names
@@ -46,10 +62,18 @@ export async function POST(request: NextRequest) {
     if (!checkRateLimit(effectiveKey, limit)) {
       const rateLimitInfo = getRateLimitInfo(effectiveKey);
       return NextResponse.json(
-        { error: 'Rate limit exceeded', resetAt: rateLimitInfo.resetAt },
+        { 
+          error: {
+            message: 'Rate limit exceeded',
+            type: 'requests',
+            param: null,
+            code: 'rate_limit_exceeded'
+          }
+        },
         { 
           status: 429,
           headers: {
+            ...getCorsHeaders(),
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
           },
@@ -59,20 +83,42 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     
+    // Validate required fields
     if (!body.prompt) {
       return NextResponse.json(
-        { error: 'prompt is required' },
-        { status: 400 }
+        { 
+          error: {
+            message: 'prompt is required',
+            type: 'invalid_request_error',
+            param: 'prompt',
+            code: null
+          }
+        },
+        { 
+          status: 400,
+          headers: getCorsHeaders()
+        }
       );
     }
 
+    // Get model or use default
     const modelId = body.model || 'flux';
     const model = IMAGE_MODELS.find(m => m.id === modelId);
     
     if (!model) {
       return NextResponse.json(
-        { error: `Unknown model: ${modelId}. Available models: ${IMAGE_MODELS.map(m => m.id).join(', ')}` },
-        { status: 400 }
+        { 
+          error: {
+            message: `Unknown model: ${modelId}. Available models: ${IMAGE_MODELS.map(m => m.id).join(', ')}`,
+            type: 'invalid_request_error',
+            param: 'model',
+            code: 'model_not_found'
+          }
+        },
+        { 
+          status: 400,
+          headers: getCorsHeaders()
+        }
       );
     }
 
@@ -82,7 +128,17 @@ export async function POST(request: NextRequest) {
     if (model.provider === 'appypie') {
       const apiKey = process.env.APPYPIE_API_KEY;
       if (!apiKey) {
-        return NextResponse.json({ error: 'APPYPIE_API_KEY not configured' }, { status: 500 });
+        return NextResponse.json(
+          { 
+            error: {
+              message: 'APPYPIE_API_KEY not configured',
+              type: 'server_error',
+              param: null,
+              code: 'configuration_error'
+            }
+          },
+          { status: 500, headers: getCorsHeaders() }
+        );
       }
 
       let url: string;
@@ -123,9 +179,20 @@ export async function POST(request: NextRequest) {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        return NextResponse.json({ error: 'AppyPie API error', details: errorText }, { status: response.status });
-      }
+          const errorText = await response.text();
+          return NextResponse.json(
+            { 
+              error: {
+                message: 'AppyPie API error',
+                type: 'api_error',
+                param: null,
+                code: 'upstream_error',
+                details: errorText
+              }
+            },
+            { status: response.status, headers: getCorsHeaders() }
+          );
+        }
 
       // AppyPie returns the image directly, we need to host it or return base64
       // For simplicity in this endpoint, we'll return a proxy URL or base64
@@ -138,13 +205,13 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           created: Math.floor(Date.now() / 1000),
           data: [{ b64_json: base64 }]
-        });
+        }, { headers: getCorsHeaders() });
       }
       
       return NextResponse.json({
         created: Math.floor(Date.now() / 1000),
         data: [{ url: `data:${mimeType};base64,${base64}` }]
-      });
+      }, { headers: getCorsHeaders() });
 
     } else if (model.provider === 'stablehorde') {
       const hordeApiKey = process.env.STABLE_HORDE_API_KEY || '0000000000';
@@ -172,7 +239,17 @@ export async function POST(request: NextRequest) {
       });
 
       if (!generateResponse.ok) {
-        return NextResponse.json({ error: 'Stable Horde API error' }, { status: generateResponse.status });
+        return NextResponse.json(
+          { 
+            error: {
+              message: 'Stable Horde API error',
+              type: 'api_error',
+              param: null,
+              code: 'upstream_error'
+            }
+          },
+          { status: generateResponse.status, headers: getCorsHeaders() }
+        );
       }
 
       const { id: requestId } = await generateResponse.json();
@@ -195,7 +272,17 @@ export async function POST(request: NextRequest) {
       }
 
       if (!imageUrl) {
-        return NextResponse.json({ error: 'Generation timed out' }, { status: 504 });
+        return NextResponse.json(
+          { 
+            error: {
+              message: 'Generation timed out',
+              type: 'server_error',
+              param: null,
+              code: 'timeout'
+            }
+          },
+          { status: 504, headers: getCorsHeaders() }
+        );
       }
 
     } else {
@@ -220,10 +307,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       created: Math.floor(Date.now() / 1000),
       data: [{ url: imageUrl }]
-    });
+    }, { headers: getCorsHeaders() });
 
   } catch (error) {
-    console.error('Images API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+      console.error('Images API error:', error);
+      return NextResponse.json(
+        { 
+          error: {
+            message: 'Internal server error',
+            type: 'server_error',
+            param: null,
+            code: 'internal_error'
+          }
+        },
+        { status: 500, headers: getCorsHeaders() }
+      );
+    }
   }
-}

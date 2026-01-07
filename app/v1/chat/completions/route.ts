@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
 import { CHAT_MODELS, PROVIDER_URLS } from '@/lib/providers';
+import { getCorsHeaders } from '@/lib/utils';
 
 export const runtime = 'edge';
 
@@ -171,7 +172,22 @@ async function handleStableHordeChat(
 
 // Handle OPTIONS for CORS
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 200 });
+  return new NextResponse(null, { 
+    status: 204, 
+    headers: getCorsHeaders() 
+  });
+}
+
+export async function GET() {
+  return NextResponse.json({
+    message: 'Chat completions endpoint is active. Use POST to send messages.',
+    example: {
+      model: 'openai',
+      messages: [{ role: 'user', content: 'Hello!' }]
+    }
+  }, {
+    headers: getCorsHeaders()
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -198,10 +214,18 @@ export async function POST(request: NextRequest) {
     if (!checkRateLimit(effectiveKey, limit)) {
       const rateLimitInfo = getRateLimitInfo(effectiveKey);
       return NextResponse.json(
-        { error: 'Rate limit exceeded', resetAt: rateLimitInfo.resetAt },
+        { 
+          error: {
+            message: 'Rate limit exceeded',
+            type: 'requests',
+            param: null,
+            code: 'rate_limit_exceeded'
+          }
+        },
         { 
           status: 429,
           headers: {
+            ...getCorsHeaders(),
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
           },
@@ -214,19 +238,57 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!body.messages || !Array.isArray(body.messages)) {
       return NextResponse.json(
-        { error: 'messages array is required' },
-        { status: 400 }
+        { 
+          error: {
+            message: 'messages array is required',
+            type: 'invalid_request_error',
+            param: 'messages',
+            code: null
+          }
+        },
+        { 
+          status: 400,
+          headers: getCorsHeaders()
+        }
       );
     }
 
     // Get model or use default
-    const modelId = body.model || 'openai';
+    let modelId = body.model || 'openai';
+    
+    // Model Aliases for compatibility with OpenAI-oriented apps
+    const modelAliases: Record<string, string> = {
+      'gpt-4o': 'openai',
+      'gpt-4o-mini': 'openai-fast',
+      'gpt-4.5': 'openai-large',
+      'gpt-4': 'openai',
+      'gpt-3.5-turbo': 'openai-fast',
+      'claude-3-5-sonnet': 'claude',
+      'claude-3-haiku': 'claude-fast',
+      'deepseek-chat': 'deepseek',
+      'deepseek-coder': 'qwen-coder',
+    };
+
+    if (modelAliases[modelId]) {
+      modelId = modelAliases[modelId];
+    }
+
     const model = CHAT_MODELS.find(m => m.id === modelId);
     
     if (!model) {
       return NextResponse.json(
-        { error: `Unknown model: ${modelId}. Available models: ${CHAT_MODELS.map(m => m.id).join(', ')}` },
-        { status: 400 }
+        { 
+          error: {
+            message: `Unknown model: ${modelId}. Available models: ${CHAT_MODELS.map(m => m.id).join(', ')}`,
+            type: 'invalid_request_error',
+            param: 'model',
+            code: 'model_not_found'
+          }
+        },
+        { 
+          status: 400,
+          headers: getCorsHeaders()
+        }
       );
     }
 
@@ -324,8 +386,19 @@ export async function POST(request: NextRequest) {
     if (!providerResponse.ok) {
       const errorText = await providerResponse.text();
       return NextResponse.json(
-        { error: 'Upstream API error', details: errorText },
-        { status: providerResponse.status }
+        { 
+          error: {
+            message: 'Upstream API error',
+            type: 'api_error',
+            param: null,
+            code: 'upstream_error',
+            details: errorText
+          }
+        },
+        { 
+          status: providerResponse.status,
+          headers: getCorsHeaders()
+        }
       );
     }
 
@@ -338,6 +411,7 @@ export async function POST(request: NextRequest) {
     if (body.stream) {
       return new NextResponse(providerResponse.body, {
         headers: {
+          ...getCorsHeaders(),
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
           'Connection': 'keep-alive',
@@ -410,6 +484,7 @@ export async function POST(request: NextRequest) {
     const rateLimitInfo = getRateLimitInfo(effectiveKey);
     return NextResponse.json(responseData, {
       headers: {
+        ...getCorsHeaders(),
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
       },
@@ -418,8 +493,18 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Chat API error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { 
+        error: {
+          message: 'Internal server error',
+          type: 'server_error',
+          param: null,
+          code: 'internal_error'
+        }
+      },
+      { 
+        status: 500,
+        headers: getCorsHeaders()
+      }
     );
   }
 }

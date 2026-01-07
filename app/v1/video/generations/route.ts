@@ -2,12 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
 import { VIDEO_MODELS, PROVIDER_URLS } from '@/lib/providers';
+import { getCorsHeaders } from '@/lib/utils';
 
 export const runtime = 'edge';
 
 // Handle OPTIONS for CORS
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 200 });
+  return new NextResponse(null, { 
+    status: 204, 
+    headers: getCorsHeaders() 
+  });
+}
+
+export async function GET() {
+  return NextResponse.json({
+    message: 'Video generation endpoint is active. Use POST to generate videos.',
+    example: {
+      model: 'veo',
+      prompt: 'A cat playing with a ball'
+    }
+  }, {
+    headers: getCorsHeaders()
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -34,10 +50,18 @@ export async function POST(request: NextRequest) {
     if (!checkRateLimit(effectiveKey, limit)) {
       const rateLimitInfo = getRateLimitInfo(effectiveKey);
       return NextResponse.json(
-        { error: 'Rate limit exceeded', resetAt: rateLimitInfo.resetAt },
+        { 
+          error: {
+            message: 'Rate limit exceeded',
+            type: 'requests',
+            param: null,
+            code: 'rate_limit_exceeded'
+          }
+        },
         { 
           status: 429,
           headers: {
+            ...getCorsHeaders(),
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
           },
@@ -50,8 +74,18 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!body.prompt) {
       return NextResponse.json(
-        { error: 'prompt is required' },
-        { status: 400 }
+        { 
+          error: {
+            message: 'prompt is required',
+            type: 'invalid_request_error',
+            param: 'prompt',
+            code: null
+          }
+        },
+        { 
+          status: 400,
+          headers: getCorsHeaders()
+        }
       );
     }
 
@@ -61,8 +95,18 @@ export async function POST(request: NextRequest) {
     
     if (!model) {
       return NextResponse.json(
-        { error: `Unknown model: ${modelId}. Available models: ${VIDEO_MODELS.map(m => m.id).join(', ')}` },
-        { status: 400 }
+        { 
+          error: {
+            message: `Unknown model: ${modelId}. Available models: ${VIDEO_MODELS.map(m => m.id).join(', ')}`,
+            type: 'invalid_request_error',
+            param: 'model',
+            code: 'model_not_found'
+          }
+        },
+        { 
+          status: 400,
+          headers: getCorsHeaders()
+        }
       );
     }
 
@@ -93,16 +137,27 @@ export async function POST(request: NextRequest) {
       ]
     }, {
       headers: {
+        ...getCorsHeaders(),
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
       },
     });
-
-  } catch (error: any) {
-    console.error('Video generation error:', error);
+    
+  } catch (error) {
+    console.error('Video API error:', error);
     return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
-      { status: 500 }
+      { 
+        error: {
+          message: 'Internal server error',
+          type: 'server_error',
+          param: null,
+          code: 'internal_error'
+        }
+      },
+      { 
+        status: 500,
+        headers: getCorsHeaders()
+      }
     );
   }
 }
