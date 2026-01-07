@@ -28,7 +28,7 @@ const plans = [
     description: 'For professional developers and growing applications.',
     features: [
       'Access to ALL Flagship models',
-      'GPT-4.5, Claude 3.5, Gemini 2.5 Pro',
+      'GPT-5.2, Claude 4.5 Opus, Gemini 3 Pro',
       'Reasoning & Specialized models',
       'High-res image & Video generation',
       '500 requests per minute',
