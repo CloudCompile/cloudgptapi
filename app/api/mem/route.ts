@@ -57,7 +57,14 @@ export async function POST(request: NextRequest) {
     }
 
     const providerUrl = 'https://meridianlabsapp.website/api/chat';
-    const substrateApiKey = 'ps_6od22i7ddomt18c1jyk9hm';
+    const substrateApiKey = process.env.MERIDIAN_API_KEY;
+
+    if (!substrateApiKey) {
+      return NextResponse.json(
+        { error: 'Memory provider API key is not configured' },
+        { status: 500 }
+      );
+    }
 
     // Build headers
     const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0] || 

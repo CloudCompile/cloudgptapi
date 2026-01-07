@@ -1,23 +1,8 @@
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateApiKey } from '@/lib/api-keys';
-
-/**
- * API Key Management Endpoint
- * 
- * IMPORTANT: This uses in-memory storage for demonstration purposes.
- * For production, replace userApiKeys Map with a database:
- * - Vercel Postgres
- * - PlanetScale
- * - MongoDB Atlas
- * - Supabase
- * 
- * Keys stored in memory will be lost on:
- * - Cold starts
- * - Deployments
- * - Multiple function instances
- */
-const userApiKeys = new Map<string, Array<{ id: string; key: string; name: string; createdAt: string }>>();
+import { supabaseAdmin } from '@/lib/supabase';
+import { syncUser } from '@/lib/admin-actions';
 
 export async function GET() {
   const { userId } = await auth();
@@ -26,14 +11,31 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const keys = userApiKeys.get(userId) || [];
+  // Sync user profile on every dashboard visit/key fetch
+  const user = await currentUser();
+  if (user) {
+    await syncUser(userId, user.emailAddresses[0].emailAddress);
+  }
+
+  const { data: keys, error } = await supabaseAdmin
+    .from('api_keys')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching API keys:', error);
+    return NextResponse.json({ error: 'Failed to fetch API keys' }, { status: 500 });
+  }
   
   // Return keys with masked values
   const maskedKeys = keys.map(k => ({
     id: k.id,
     name: k.name,
     keyPreview: `${k.key.substring(0, 12)}...${k.key.substring(k.key.length - 4)}`,
-    createdAt: k.createdAt,
+    createdAt: k.created_at,
+    usageCount: k.usage_count,
+    lastUsedAt: k.last_used_at,
   }));
 
   return NextResponse.json({ keys: maskedKeys });
@@ -49,32 +51,43 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const name = body.name || 'Unnamed Key';
 
+  // Get user's plan to set initial rate limit
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('plan')
+    .eq('id', userId)
+    .single();
+
+  const plan = profile?.plan || 'free';
+  const rateLimit = plan === 'pro' ? 500 : plan === 'enterprise' ? 1000 : 60;
+
   const newKey = {
-    id: crypto.randomUUID(),
     key: generateApiKey(),
+    user_id: userId,
     name,
-    createdAt: new Date().toISOString(),
+    rate_limit: rateLimit,
   };
 
-  const existingKeys = userApiKeys.get(userId) || [];
-  
-  // Limit to 5 keys per user
-  if (existingKeys.length >= 5) {
-    return NextResponse.json(
-      { error: 'Maximum of 5 API keys allowed per user' },
-      { status: 400 }
-    );
-  }
+  const { data, error } = await supabaseAdmin
+    .from('api_keys')
+    .insert(newKey)
+    .select()
+    .single();
 
-  existingKeys.push(newKey);
-  userApiKeys.set(userId, existingKeys);
+  if (error) {
+    console.error('Error creating API key:', error);
+    if (error.code === '23505') { // Unique violation
+      return NextResponse.json({ error: 'An error occurred. Please try again.' }, { status: 400 });
+    }
+    return NextResponse.json({ error: 'Failed to create API key' }, { status: 500 });
+  }
 
   // Return the full key only on creation
   return NextResponse.json({
-    id: newKey.id,
-    key: newKey.key,
-    name: newKey.name,
-    createdAt: newKey.createdAt,
+    id: data.id,
+    key: data.key,
+    name: data.name,
+    createdAt: data.created_at,
     message: 'Save this key securely - it will not be shown again!',
   });
 }
@@ -93,14 +106,16 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: 'Key ID is required' }, { status: 400 });
   }
 
-  const existingKeys = userApiKeys.get(userId) || [];
-  const filteredKeys = existingKeys.filter(k => k.id !== keyId);
+  const { error } = await supabaseAdmin
+    .from('api_keys')
+    .delete()
+    .eq('id', keyId)
+    .eq('user_id', userId);
   
-  if (filteredKeys.length === existingKeys.length) {
-    return NextResponse.json({ error: 'Key not found' }, { status: 404 });
+  if (error) {
+    console.error('Error deleting API key:', error);
+    return NextResponse.json({ error: 'Failed to delete API key' }, { status: 500 });
   }
-
-  userApiKeys.set(userId, filteredKeys);
 
   return NextResponse.json({ success: true });
 }

@@ -12,7 +12,9 @@ const APP_ID = 'CloudGPT';
  */
 export async function retrieveMemory(query: string, userId: string): Promise<string> {
   try {
-    const polliKey = process.env.MERIDIAN_API_KEY || 'ps_6od22i7ddomt18c1jyk9hm';
+    const polliKey = process.env.MERIDIAN_API_KEY;
+    if (!polliKey) return '';
+
     const response = await fetch(`${PROVIDER_URLS.meridian}/retrieve`, {
       method: 'POST',
       headers: {
@@ -42,7 +44,9 @@ export async function retrieveMemory(query: string, userId: string): Promise<str
  */
 export async function rememberInteraction(prompt: string, response: string, userId: string): Promise<void> {
   try {
-    const polliKey = process.env.MERIDIAN_API_KEY || 'ps_6od22i7ddomt18c1jyk9hm';
+    const polliKey = process.env.MERIDIAN_API_KEY;
+    if (!polliKey) return;
+
     await fetch(`${PROVIDER_URLS.meridian}/remember`, {
       method: 'POST',
       headers: {
@@ -50,14 +54,14 @@ export async function rememberInteraction(prompt: string, response: string, user
         'x-api-key': polliKey,
         'x-user-id': userId,
       },
-      body: JSON.stringify({ 
-        prompt, 
+      body: JSON.stringify({
+        prompt,
         response,
         app_id: APP_ID
       }),
     });
   } catch (error) {
-    console.error('[PolliStack] Error remembering interaction:', error);
+    console.error('[PolliStack] Error storing memory:', error);
   }
 }
 

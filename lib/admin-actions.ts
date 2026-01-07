@@ -1,0 +1,93 @@
+'use server';
+
+import { currentUser } from '@clerk/nextjs/server';
+import { supabaseAdmin } from './supabase';
+import { revalidatePath } from 'next/cache';
+
+const ADMIN_EMAIL = 'fricker2025@gmail.com';
+
+async function verifyAdmin() {
+  const user = await currentUser();
+  if (!user || user.emailAddresses[0].emailAddress !== ADMIN_EMAIL) {
+    throw new Error('Unauthorized: Admin access required');
+  }
+  return user;
+}
+
+export async function getAllUsers() {
+  await verifyAdmin();
+
+  const { data, error } = await supabaseAdmin
+    .from('profiles')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching users:', error);
+    return [];
+  }
+
+  return data;
+}
+
+export async function promoteUser(userId: string, role: 'user' | 'admin') {
+  await verifyAdmin();
+
+  const { error } = await supabaseAdmin
+    .from('profiles')
+    .update({ role })
+    .eq('id', userId);
+
+  if (error) {
+    throw new Error(`Failed to promote user: ${error.message}`);
+  }
+
+  revalidatePath('/admin');
+  return { success: true };
+}
+
+export async function assignPlan(userId: string, plan: 'free' | 'pro' | 'enterprise', stripeProductId?: string) {
+  await verifyAdmin();
+
+  const { error } = await supabaseAdmin
+    .from('profiles')
+    .update({ 
+      plan, 
+      stripe_product_id: stripeProductId || null 
+    })
+    .eq('id', userId);
+
+  if (error) {
+    throw new Error(`Failed to assign plan: ${error.message}`);
+  }
+
+  // Also update rate limits for their API keys if they upgrade to Pro
+  if (plan === 'pro' || plan === 'enterprise') {
+    const rateLimit = plan === 'pro' ? 500 : 1000;
+    const { error: keyError } = await supabaseAdmin
+      .from('api_keys')
+      .update({ rate_limit: rateLimit })
+      .eq('user_id', userId);
+      
+    if (keyError) {
+      console.error('Failed to update API key rate limits:', keyError);
+    }
+  }
+
+  revalidatePath('/admin');
+  return { success: true };
+}
+
+export async function syncUser(userId: string, email: string) {
+  // This can be called when a user logs in to ensure they have a profile
+  const { data, error } = await supabaseAdmin
+    .from('profiles')
+    .upsert({ 
+      id: userId, 
+      email: email,
+    }, { onConflict: 'id' });
+
+  if (error) {
+    console.error('Error syncing user profile:', error);
+  }
+}

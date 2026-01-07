@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
-import { IMAGE_MODELS, PROVIDER_URLS, ImageModel } from '@/lib/providers';
+import { IMAGE_MODELS, PROVIDER_URLS, ImageModel, PREMIUM_MODELS } from '@/lib/providers';
 import { getCorsHeaders } from '@/lib/utils';
 
 export const runtime = 'edge';
@@ -118,6 +118,27 @@ export async function POST(request: NextRequest) {
         },
         { 
           status: 400,
+          headers: getCorsHeaders()
+        }
+      );
+    }
+
+    // Check if model is premium and if user has access
+    const isPremium = PREMIUM_MODELS.has(modelId);
+    const hasProAccess = apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50; // Pro keys have 50+ RPM
+
+    if (isPremium && !hasProAccess) {
+      return NextResponse.json(
+        {
+          error: {
+            message: `The model '${modelId}' is only available on Pro and Enterprise plans. Please upgrade at ${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+            type: 'access_denied',
+            param: 'model',
+            code: 'premium_model_required'
+          }
+        },
+        {
+          status: 403,
           headers: getCorsHeaders()
         }
       );
