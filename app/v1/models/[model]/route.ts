@@ -13,9 +13,9 @@ export async function OPTIONS() {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { model: string } }
+  { params }: { params: Promise<{ model: string }> }
 ) {
-  const modelId = params.model;
+  const { model: modelId } = await params;
   
   const model = [
     ...CHAT_MODELS,
