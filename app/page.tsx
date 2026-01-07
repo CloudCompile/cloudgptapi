@@ -166,10 +166,17 @@ console.log(data.choices[0].message);`}</code>
 
       {/* Footer */}
       <footer className="mt-auto py-12 border-t">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-slate-500 text-sm">
-            © {new Date().getFullYear()} CloudGPT API. All rights reserved.
-          </p>
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <p className="text-slate-500 text-sm">
+              © {new Date().getFullYear()} CloudGPT API. All rights reserved.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-500">
+              <a href="/terms-of-service" className="hover:text-primary transition-colors">Terms of Service</a>
+              <a href="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</a>
+              <a href="mailto:support@cloudgptapi.com" className="hover:text-primary transition-colors">Contact</a>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
