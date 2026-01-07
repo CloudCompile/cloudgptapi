@@ -107,6 +107,183 @@ async function generateAppyPieImage(body: any, model: ImageModel, userId?: strin
   }
 }
 
+// Map Stable Horde model IDs to actual model names
+function getStableHordeModelName(modelId: string): string {
+  const modelMap: Record<string, string> = {
+    'stable-horde-flux-schnell': 'Flux.1-Schnell fp8 (Compact)',
+    'stable-horde-sdxl': 'SDXL 1.0',
+    'stable-horde-deliberate': 'Deliberate',
+    'stable-horde-dreamshaper': 'Dreamshaper',
+    'stable-horde-realistic-vision': 'Realistic Vision',
+    'stable-horde-absolute-reality': 'AbsoluteReality',
+    'stable-horde-juggernaut-xl': 'Juggernaut XL',
+    'stable-horde-pony-diffusion': 'Pony Diffusion XL',
+    'stable-horde-stable-diffusion': 'stable_diffusion',
+    'stable-horde-anything-v5': 'Anything v5',
+  };
+  return modelMap[modelId] || 'stable_diffusion';
+}
+
+// Generate image using Stable Horde API
+async function generateStableHordeImage(
+  body: any, 
+  model: ImageModel, 
+  userId: string | null | undefined,
+  effectiveKey: string,
+  apiKeyInfo: ApiKey | null
+) {
+  // '0000000000' is Stable Horde's official anonymous API key for rate-limited access
+  const hordeApiKey = process.env.STABLE_HORDE_API_KEY || '0000000000';
+  if (!process.env.STABLE_HORDE_API_KEY) {
+    console.warn('STABLE_HORDE_API_KEY not set, using anonymous access with reduced rate limits');
+  }
+  const hordeUrl = PROVIDER_URLS.stablehorde;
+  
+  const modelName = getStableHordeModelName(model.id);
+  
+  // Prepare generation request
+  const generateRequest = {
+    prompt: body.prompt,
+    params: {
+      sampler_name: body.sampler || 'k_euler',
+      cfg_scale: body.cfg_scale || 7,
+      height: body.height || 512,
+      width: body.width || 512,
+      steps: body.steps || 30,
+      n: 1,
+    },
+    nsfw: false,
+    censor_nsfw: true,
+    models: [modelName],
+    r2: true,
+    shared: false,
+  };
+
+  try {
+    // Submit generation request
+    const generateResponse = await fetch(`${hordeUrl}/generate/async`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': hordeApiKey,
+        'Client-Agent': 'CloudGPT:1.0:cloudgptapi@github.com',
+      },
+      body: JSON.stringify(generateRequest),
+    });
+
+    if (!generateResponse.ok) {
+      const errorText = await generateResponse.text();
+      return NextResponse.json(
+        { error: 'Stable Horde API error', details: errorText, status: generateResponse.status },
+        { status: generateResponse.status }
+      );
+    }
+
+    const generateData = await generateResponse.json();
+    const requestId = generateData.id;
+
+    if (!requestId) {
+      return NextResponse.json(
+        { error: 'Failed to get generation ID from Stable Horde' },
+        { status: 500 }
+      );
+    }
+
+    // Poll for completion (max 5 minutes)
+    const maxWaitTime = 300000; // 5 minutes
+    const pollInterval = 3000; // 3 seconds
+    const startTime = Date.now();
+    
+    while (Date.now() - startTime < maxWaitTime) {
+      const checkResponse = await fetch(`${hordeUrl}/generate/check/${requestId}`, {
+        headers: {
+          'Client-Agent': 'CloudGPT:1.0:cloudgptapi@github.com',
+        },
+      });
+      
+      if (!checkResponse.ok) {
+        await new Promise(resolve => setTimeout(resolve, pollInterval));
+        continue;
+      }
+      
+      const checkData = await checkResponse.json();
+      
+      if (checkData.done) {
+        // Get the result
+        const statusResponse = await fetch(`${hordeUrl}/generate/status/${requestId}`, {
+          headers: {
+            'Client-Agent': 'CloudGPT:1.0:cloudgptapi@github.com',
+          },
+        });
+        
+        if (!statusResponse.ok) {
+          return NextResponse.json(
+            { error: 'Failed to get generation status from Stable Horde' },
+            { status: 500 }
+          );
+        }
+        
+        const statusData = await statusResponse.json();
+        
+        if (statusData.generations && statusData.generations.length > 0) {
+          const imageUrl = statusData.generations[0].img;
+          
+          // Track usage
+          if (apiKeyInfo) {
+            await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, model.id, 'image');
+          }
+          
+          // Fetch the actual image and return it
+          const imageResponse = await fetch(imageUrl);
+          if (!imageResponse.ok) {
+            return NextResponse.json(
+              { error: 'Failed to fetch generated image' },
+              { status: 500 }
+            );
+          }
+          
+          const rateLimitInfo = getRateLimitInfo(effectiveKey);
+          
+          return new NextResponse(imageResponse.body, {
+            headers: {
+              'Content-Type': imageResponse.headers.get('content-type') || 'image/webp',
+              'Cache-Control': 'public, max-age=31536000, immutable',
+              'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
+              'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+            },
+          });
+        }
+        
+        return NextResponse.json(
+          { error: 'No images generated' },
+          { status: 500 }
+        );
+      }
+      
+      if (checkData.faulted) {
+        return NextResponse.json(
+          { error: 'Generation failed on Stable Horde' },
+          { status: 500 }
+        );
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, pollInterval));
+    }
+    
+    return NextResponse.json(
+      { error: 'Generation timed out' },
+      { status: 504 }
+    );
+    
+  } catch (error) {
+    console.error('Stable Horde fetch error:', error);
+    return NextResponse.json(
+      { error: 'Failed to connect to Stable Horde API' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Get user from session
@@ -169,6 +346,12 @@ export async function POST(request: NextRequest) {
       if (apiKeyInfo) {
         await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'image');
       }
+      return response;
+    }
+
+    // Handle Stable Horde models
+    if (model.provider === 'stablehorde') {
+      const response = await generateStableHordeImage(body, model, apiKeyInfo?.userId || sessionUserId, effectiveKey, apiKeyInfo);
       return response;
     }
 

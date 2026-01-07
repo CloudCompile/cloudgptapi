@@ -2,7 +2,7 @@ import { ArrowRight, Bot, Code, Cpu, Image as ImageIcon, MessageSquare, Video, Z
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-[calc(100-4rem)]">
+    <div className="flex flex-col min-h-[calc(100vh-4rem)]">
       {/* Hero Section */}
       <section className="relative pt-20 pb-32 overflow-hidden hero-gradient">
         <div className="container mx-auto px-4 relative z-10">
