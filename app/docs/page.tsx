@@ -226,58 +226,85 @@ const videoUrl = data[0].url;`}</code>
 
               {/* Memory API */}
               <section id="memory" className="scroll-mt-24">
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                  <Bot className="h-6 w-6 text-emerald-500" />
-                  Advanced Memory Integrated Free AI Chat
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                  <svg viewBox="0 0 24 24" className="h-8 w-8 fill-current">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/>
+                    <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" opacity="0.3"/>
+                  </svg>
+                  Infinite Memory Recall
                 </h2>
                 <div className="space-y-6">
-                  <p className="text-slate-600 dark:text-slate-400">
-                    Our <strong>Advanced Memory Integrated Free AI Chat</strong> allows you to build sophisticated AI agents with long-term cognitive recall. Powered by Meridian Labs, this endpoint enables persistent conversations across multiple sessions at no cost.
-                  </p>
+                  <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 shadow-inner">
+                    <p className="text-lg text-emerald-800 dark:text-emerald-300 font-medium">
+                      Unleash the power of <strong>Long-Term Cognitive Memory</strong>! Every chat session across all models now features automatic, persistent recall. Your AI agents will remember user preferences, past interactions, and complex context across days, weeks, or months!
+                    </p>
+                  </div>
                   
-                  <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                  <div className="grid sm:grid-cols-3 gap-4 mb-6">
                     <div className="p-4 rounded-xl border bg-slate-50/50 dark:bg-slate-900/50">
-                      <h4 className="font-semibold mb-1 flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                        <Zap className="h-4 w-4" />
-                        Free AI Chat
-                      </h4>
-                      <p className="text-sm text-slate-500">Access advanced models with persistent memory at no cost.</p>
+                      <div className="h-8 w-8 text-emerald-500 mb-2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                        </svg>
+                      </div>
+                      <h4 className="font-bold mb-1">Zero Latency</h4>
+                      <p className="text-xs text-slate-500">Instant recall integrated directly into the inference stream.</p>
                     </div>
                     <div className="p-4 rounded-xl border bg-slate-50/50 dark:bg-slate-900/50">
-                      <h4 className="font-semibold mb-1 flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                        <Cpu className="h-4 w-4" />
-                        Cognitive Recall
-                      </h4>
-                      <p className="text-sm text-slate-500">Intelligent context retrieval for personalized AI experiences.</p>
+                      <div className="h-8 w-8 text-blue-500 mb-2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                      </div>
+                      <h4 className="font-bold mb-1">User Isolation</h4>
+                      <p className="text-xs text-slate-500">Cryptographically isolated memory silos per end-user.</p>
+                    </div>
+                    <div className="p-4 rounded-xl border bg-slate-50/50 dark:bg-slate-900/50">
+                      <div className="h-8 w-8 text-purple-500 mb-2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                          <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
+                      </div>
+                      <h4 className="font-bold mb-1">Auto-Sync</h4>
+                      <p className="text-xs text-slate-500">Every response is automatically indexed for future recall.</p>
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded-xl border p-1 mb-6 flex items-center h-12 w-fit">
-                    <span className="px-3 py-1 font-bold text-xs bg-blue-500 text-white rounded-lg mr-2">POST</span>
-                    <code className="text-sm font-mono px-2">/api/mem</code>
-                  </div>
+                  <h3 className="text-xl font-bold italic text-slate-800 dark:text-slate-200">Activating Memory</h3>
+                  <p className="text-slate-600 dark:text-slate-400">
+                    Memory is enabled by default on the <code>/v1/chat/completions</code> endpoint. Simply provide a unique <code>x-user-id</code> to start building a persistent cognitive profile for your user.
+                  </p>
 
-                  <h3 className="text-lg font-bold">Example Usage</h3>
                   <div className="rounded-xl bg-slate-950 p-6 shadow-2xl border border-slate-800 overflow-x-auto">
                     <pre className="text-sm font-mono text-slate-300">
-                      <code>{`// Advanced Memory Integrated Free AI Chat Example
-const response = await fetch('https://cloudgptapi.vercel.app/api/mem', {
+                      <code>{`// Memory is AUTOMATIC when you provide a x-user-id
+const response = await fetch('https://cloudgptapi.vercel.app/v1/chat/completions', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
     'Content-Type': 'application/json',
-    'x-user-id': 'user_123' // Required for memory persistence
+    'x-user-id': 'customer_unique_id_99' // <--- This activates isolated memory!
   },
   body: JSON.stringify({
-    prompt: 'Remember that my favorite color is blue.'
+    model: 'openai',
+    messages: [{ role: 'user', content: 'My favorite coffee is an Oat Milk Latte.' }]
   })
 });`}</code>
                     </pre>
                   </div>
 
-                  <p className="text-sm text-slate-500 bg-emerald-500/10 p-4 rounded-lg border border-emerald-500/20">
-                    <strong>Note:</strong> User differentiation is automatic. Each user's memory is isolated based on their <code>x-user-id</code> or Clerk session, ensuring complete privacy and dedicated cognitive storage.
-                  </p>
+                  <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
+                    <h4 className="font-bold text-blue-600 dark:text-blue-400 mb-2 flex items-center gap-2">
+                      <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                      </svg>
+                      How it works
+                    </h4>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                      When a request includes <code>x-user-id</code>, CloudGPT queries the <strong>PolliStack Agent Engine</strong> for relevant past interactions. This context is then seamlessly woven into the system prompt, giving the AI "memories" of previous conversations without any extra work from you!
+                    </p>
+                  </div>
                 </div>
               </section>
 

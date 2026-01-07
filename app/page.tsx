@@ -92,14 +92,15 @@ export default function Home() {
             <FeatureCard 
               icon={
                 <svg viewBox="0 0 100 100" className="h-8 w-8 text-emerald-500 fill-current">
-                  <path d="M50 10 L85 30 L85 70 L50 90 L15 70 L15 30 Z" fill="none" stroke="currentColor" strokeWidth="2" />
-                  <path d="M50 25 L72 40 L72 60 L50 75 L28 60 L28 40 Z" opacity="0.6" />
-                  <circle cx="50" cy="50" r="8" className="animate-pulse" />
-                  <path d="M50 10 V90 M15 30 L85 70 M15 70 L85 30" stroke="currentColor" strokeWidth="1" opacity="0.2" />
+                  <path d="M50 5 L95 25 L95 75 L50 95 L5 75 L5 25 Z" fill="none" stroke="currentColor" strokeWidth="2" />
+                  <path d="M50 20 L80 35 L80 65 L50 80 L20 65 L20 35 Z" opacity="0.4" fill="currentColor" />
+                  <circle cx="50" cy="50" r="12" className="animate-pulse" fill="currentColor" />
+                  <path d="M50 5 V95 M5 25 L95 75 M5 75 L95 25" stroke="currentColor" strokeWidth="1" opacity="0.3" />
+                  <path d="M30 40 Q50 10 70 40" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.8" />
                 </svg>
               }
-              title="Memory API"
-              description="Advanced Memory Integrated Free AI Chat with long-term cognitive recall."
+              title="Persistent Memory"
+              description="Revolutionary long-term cognitive recall integrated into every chat session automatically."
               href="/docs#memory"
             />
           </div>

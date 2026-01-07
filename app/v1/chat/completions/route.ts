@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
 import { CHAT_MODELS, PROVIDER_URLS } from '@/lib/providers';
 import { getCorsHeaders } from '@/lib/utils';
+import { retrieveMemory, rememberInteraction } from '@/lib/memory';
 
 export const runtime = 'edge';
 
@@ -108,6 +109,14 @@ async function handleStableHordeChat(
           // Track usage
           if (apiKeyInfo) {
             await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat');
+          }
+          
+          // Remember interaction
+          const lastUserMessage = body.messages[body.messages.length - 1]?.content || '';
+          if (userId && lastUserMessage) {
+            rememberInteraction(lastUserMessage, generatedText.trim(), userId).catch(err =>
+              console.error('Failed to remember Stable Horde interaction:', err)
+            );
           }
           
           // Return OpenAI-compatible format
@@ -273,6 +282,34 @@ export async function POST(request: NextRequest) {
       modelId = modelAliases[modelId];
     }
 
+    // Pass the extracted user ID to ALL providers (PolliStack router needs this)
+    // Priority: 1. Header x-user-id (from API client) 2. API Key owner 3. Session User 4. IP-based
+    const userId = request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`;
+    
+    // Integrate PolliStack Memory
+    const lastMessage = body.messages[body.messages.length - 1]?.content || '';
+    let memoryContext = '';
+    
+    try {
+      memoryContext = await retrieveMemory(lastMessage, userId);
+      if (memoryContext && memoryContext !== 'No prior context found.') {
+        // Inject context into messages
+        const systemMessageIndex = body.messages.findIndex((m: any) => m.role === 'system');
+        const contextPrompt = `\n\n[Long-term Memory Context]:\n${memoryContext}`;
+        
+        if (systemMessageIndex !== -1) {
+          body.messages[systemMessageIndex].content += contextPrompt;
+        } else {
+          body.messages.unshift({
+            role: 'system',
+            content: `You are a helpful assistant with long-term memory. Use the following context to personalize your response if relevant.${contextPrompt}`
+          });
+        }
+      }
+    } catch (memError) {
+      console.error('Memory retrieval failed:', memError);
+    }
+
     const model = CHAT_MODELS.find(m => m.id === modelId);
     
     if (!model) {
@@ -324,8 +361,6 @@ export async function POST(request: NextRequest) {
     };
 
     // Pass the extracted user ID to ALL providers (PolliStack router needs this)
-    // Priority: 1. Header x-user-id (from API client) 2. API Key owner 3. Session User 4. IP-based
-    const userId = request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`;
     headers['x-user-id'] = userId;
 
     // Meridian requires x-api-key header instead of Authorization
@@ -409,7 +444,39 @@ export async function POST(request: NextRequest) {
 
     // Handle streaming response
     if (body.stream) {
-      return new NextResponse(providerResponse.body, {
+      const decoder = new TextDecoder();
+      let fullContent = '';
+
+      const transformStream = new TransformStream({
+        transform(chunk, controller) {
+          const text = decoder.decode(chunk, { stream: true });
+          const lines = text.split('\n');
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6).trim();
+              if (data === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(data);
+                const content = parsed.choices?.[0]?.delta?.content || '';
+                fullContent += content;
+              } catch (e) {}
+            }
+          }
+          controller.enqueue(chunk);
+        },
+        async flush() {
+           if (fullContent && userId && lastMessage) {
+             try {
+               await rememberInteraction(lastMessage, fullContent, userId);
+             } catch (err) {
+               console.error('Failed to remember streaming interaction:', err);
+             }
+           }
+         }
+      });
+
+      return new NextResponse(providerResponse.body?.pipeThrough(transformStream), {
         headers: {
           ...getCorsHeaders(),
           'Content-Type': 'text/event-stream',
@@ -481,6 +548,16 @@ export async function POST(request: NextRequest) {
       responseData.object = responseData.object || 'chat.completion';
     }
     
+    // Remember interaction in background
+     if (userId && lastMessage) {
+       const assistantMessage = responseData.choices?.[0]?.message?.content || '';
+       if (assistantMessage) {
+         rememberInteraction(lastMessage, assistantMessage, userId).catch(err => 
+           console.error('Failed to remember interaction:', err)
+         );
+       }
+     }
+
     const rateLimitInfo = getRateLimitInfo(effectiveKey);
     return NextResponse.json(responseData, {
       headers: {
