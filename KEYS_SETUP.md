@@ -13,6 +13,7 @@ CLERK_SECRET_KEY=YOUR_SECRET_KEY
 
 # AI Provider Keys (At least one recommended)
 POLLINATIONS_API_KEY=your_pollinations_api_key
+POLLINATIONS_API_KEY_2=your_second_pollinations_api_key
 ROUTEWAY_API_KEY=your_routeway_api_key
 OPENROUTER_API_KEY=your_openrouter_api_key
 MERIDIAN_API_KEY=your_meridian_api_key
@@ -45,6 +46,17 @@ Pollinations provides text, image, and video generation capabilities.
 3. Navigate to your dashboard
 4. Create a new API key (Secret Key `sk_` for server-side use)
 5. Copy the key → `POLLINATIONS_API_KEY`
+
+**Multiple API Keys for Load Distribution:**
+
+You can configure multiple Pollinations API keys to split costs and improve rate limits:
+- `POLLINATIONS_API_KEY` - Your primary API key
+- `POLLINATIONS_API_KEY_2` - Your secondary API key (optional)
+
+The system will automatically distribute requests across all configured keys using round-robin load balancing. This helps:
+- Split API costs across multiple billing accounts
+- Improve effective rate limits
+- Provide redundancy if one key reaches its limit
 
 **Note:** The API works without a key but with stricter rate limits.
 
@@ -87,6 +99,7 @@ When deploying to Vercel:
    - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
    - `CLERK_SECRET_KEY`
    - `POLLINATIONS_API_KEY`
+   - `POLLINATIONS_API_KEY_2` (optional, for load distribution)
    - `ROUTEWAY_API_KEY`
    - `OPENROUTER_API_KEY`
    - `MERIDIAN_API_KEY`
@@ -149,6 +162,7 @@ CLERK_SECRET_KEY=YOUR_SECRET_KEY
 
 # AI Providers (Optional but recommended)
 POLLINATIONS_API_KEY=your_pollinations_key_here
+POLLINATIONS_API_KEY_2=your_second_pollinations_key_here
 MAPLEAI_API_KEY=your_mapleai_key_here
 ```
 
