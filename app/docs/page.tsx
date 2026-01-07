@@ -93,7 +93,7 @@ export default function DocsPage() {
                   
                   <div className="bg-slate-50 dark:bg-slate-900 rounded-xl border p-1 mb-6 flex items-center h-12 w-fit">
                     <span className="px-3 py-1 font-bold text-xs bg-blue-500 text-white rounded-lg mr-2">POST</span>
-                    <code className="text-sm font-mono px-2">/api/chat</code>
+                    <code className="text-sm font-mono px-2">/v1/chat/completions</code>
                   </div>
 
                   <h3 className="text-lg font-bold">Request Body</h3>
@@ -133,7 +133,7 @@ export default function DocsPage() {
                   <h3 className="text-lg font-bold">Example Usage</h3>
                   <div className="rounded-xl bg-slate-950 p-6 shadow-2xl border border-slate-800 overflow-x-auto">
                     <pre className="text-sm font-mono text-slate-300">
-                      <code>{`curl -X POST https://cloudgptapi.vercel.app/api/chat \\
+                      <code>{`curl -X POST https://cloudgptapi.vercel.app/v1/chat/completions \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{

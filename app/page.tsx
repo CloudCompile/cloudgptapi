@@ -142,7 +142,7 @@ export default function Home() {
                   <div className="h-3 w-3 rounded-full bg-green-500" />
                 </div>
                 <pre className="text-sm font-mono text-slate-300 overflow-x-auto">
-                  <code>{`const response = await fetch('https://cloudgptapi.vercel.app/api/chat', {
+                  <code>{`const response = await fetch('https://cloudgptapi.vercel.app/v1/chat/completions', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
