@@ -305,10 +305,18 @@ export async function POST(request: NextRequest) {
       await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'image');
     }
 
+    const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'image');
     return NextResponse.json({
       created: Math.floor(Date.now() / 1000),
       data: [{ url: imageUrl }]
-    }, { headers: getCorsHeaders() });
+    }, { 
+      headers: {
+        ...getCorsHeaders(),
+        'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
+        'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+        'X-RateLimit-Limit': String(rateLimitInfo.limit),
+      }
+    });
 
   } catch (error) {
       console.error('Images API error:', error);

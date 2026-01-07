@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
       await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'video');
     }
 
-    const rateLimitInfo = getRateLimitInfo(effectiveKey);
+    const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'video');
 
     return NextResponse.json({
       created: Math.floor(Date.now() / 1000),
@@ -141,6 +141,7 @@ export async function POST(request: NextRequest) {
         ...getCorsHeaders(),
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+        'X-RateLimit-Limit': String(rateLimitInfo.limit),
       },
     });
     
