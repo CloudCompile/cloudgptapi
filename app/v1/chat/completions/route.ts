@@ -187,9 +187,28 @@ export async function OPTIONS() {
   });
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Check if the URL path is malformed (e.g., duplicated path segments)
+  const url = new URL(request.url);
+  const expectedPath = '/v1/chat/completions';
+  
+  if (url.pathname !== expectedPath) {
+    return NextResponse.json({
+      error: {
+        message: `Invalid endpoint path. Expected ${expectedPath}, got ${url.pathname}. Please check your base URL configuration.`,
+        type: 'invalid_request_error',
+        param: null,
+        code: 'invalid_endpoint'
+      }
+    }, {
+      status: 400,
+      headers: getCorsHeaders()
+    });
+  }
+  
   return NextResponse.json({
     message: 'Chat completions endpoint is active. Use POST to send messages.',
+    endpoint: '/v1/chat/completions',
     example: {
       model: 'openai',
       messages: [{ role: 'user', content: 'Hello!' }]
