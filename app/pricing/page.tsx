@@ -22,6 +22,22 @@ const plans = [
     highlight: false,
   },
   {
+    name: 'Developer',
+    price: '$0',
+    description: 'For hobbyists and early stage developers.',
+    features: [
+      'Increased rate limits',
+      'Access to dev-tier models',
+      'Standard image generation',
+      'Priority community support',
+    ],
+    buttonText: 'Get Dev Access',
+    buttonHref: '#',
+    highlight: false,
+    stripeProductId: 'prod_TkaCL0ZNJH6rwf',
+    stripePriceId: 'price_1Sn4OQRG5zp0rTvz6kS6Z7S9', // Standard price ID prefix
+  },
+  {
     name: 'Pro',
     price: '$1',
     period: '/month',
@@ -38,7 +54,7 @@ const plans = [
     buttonHref: '#',
     highlight: true,
     stripeProductId: 'prod_TkaB1ApHkafWT1',
-    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || 'price_1Sn4OQRG5zp0rTvz6kS6Z7S9', // Standard Pro price ID
+    stripePriceId: 'price_1Sn4OQRG5zp0rTvz6kS6Z7S9', // Standard Pro price ID
   },
   {
     name: 'Enterprise',
@@ -81,15 +97,15 @@ export default function PricingPage() {
       });
 
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error || 'Failed to create checkout session');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create checkout session');
       }
 
       const { url } = await response.json();
       window.location.href = url;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error upgrading:', error);
-      alert('Failed to start checkout. Please try again or contact support.');
+      alert(error.message || 'Failed to start checkout. Please try again or contact support.');
     } finally {
       setLoading(null);
     }
