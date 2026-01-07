@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import { BookOpen, Cloud, FileText, LayoutDashboard, Rocket, Shield, Zap } from 'lucide-react';
 import './globals.css';
+import { SyncUser } from '@/components/sync-user';
 
 export const metadata: Metadata = {
   title: 'CloudGPT - Unified AI API',
@@ -156,6 +157,7 @@ export default function RootLayout({
     <ClerkProvider publishableKey={publishableKey}>
       <html lang="en" className="scroll-smooth">
         <body className="min-h-screen bg-background antialiased selection:bg-primary/10 selection:text-primary">
+          <SyncUser />
           <LaunchBanner />
           <Header />
           <main>{children}</main>

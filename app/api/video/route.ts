@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
-import { VIDEO_MODELS, PROVIDER_URLS } from '@/lib/providers';
+import { VIDEO_MODELS, PROVIDER_URLS, VideoModel, PREMIUM_MODELS } from '@/lib/providers';
 import { getPollinationsApiKey } from '@/lib/utils';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const runtime = 'edge';
 
@@ -27,8 +28,24 @@ export async function POST(request: NextRequest) {
     const effectiveKey = rawApiKey || clientIp;
     
     let apiKeyInfo: ApiKey | null = null;
+    let userPlan = 'free';
+
     if (rawApiKey) {
       apiKeyInfo = await validateApiKey(rawApiKey);
+      if (apiKeyInfo?.plan) {
+        userPlan = apiKeyInfo.plan;
+      }
+    } else if (sessionUserId) {
+      // Fetch plan for session users if no API key is provided
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('plan')
+        .eq('id', sessionUserId)
+        .single();
+      
+      if (profile?.plan) {
+        userPlan = profile.plan;
+      }
     }
 
     const limit = apiKeyInfo ? apiKeyInfo.rateLimit : 2;
@@ -65,6 +82,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: `Unknown model: ${modelId}. Available models: ${VIDEO_MODELS.map(m => m.id).join(', ')}` },
         { status: 400 }
+      );
+    }
+
+    // Check if model is premium and if user has access
+    const isPremium = PREMIUM_MODELS.has(modelId);
+    // Pro access if they have a pro/enterprise plan OR if their rate limit is high (fallback)
+    const hasProAccess = userPlan === 'pro' || userPlan === 'enterprise' || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
+
+    if (isPremium && !hasProAccess) {
+      return NextResponse.json(
+        {
+          error: {
+            message: `The model '${modelId}' is only available on Pro and Enterprise plans. Please upgrade at ${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+            type: 'access_denied',
+            param: 'model',
+            code: 'premium_model_required'
+          }
+        },
+        { status: 403 }
       );
     }
 

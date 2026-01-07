@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
-import { CHAT_MODELS, PROVIDER_URLS } from '@/lib/providers';
+import { CHAT_MODELS, PROVIDER_URLS, PREMIUM_MODELS } from '@/lib/providers';
 import { getCorsHeaders, getPollinationsApiKey } from '@/lib/utils';
 import { retrieveMemory, rememberInteraction } from '@/lib/memory';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const runtime = 'edge';
 
@@ -294,8 +295,24 @@ export async function POST(request: NextRequest) {
     const effectiveKey = rawApiKey || clientIp;
     
     let apiKeyInfo = null;
+    let userPlan = 'free';
+
     if (rawApiKey) {
       apiKeyInfo = await validateApiKey(rawApiKey);
+      if (apiKeyInfo?.plan) {
+        userPlan = apiKeyInfo.plan;
+      }
+    } else if (sessionUserId) {
+      // Fetch plan for session users if no API key is provided
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('plan')
+        .eq('id', sessionUserId)
+        .single();
+      
+      if (profile?.plan) {
+        userPlan = profile.plan;
+      }
     }
 
     const limit = apiKeyInfo ? apiKeyInfo.rateLimit : 10;
@@ -389,6 +406,30 @@ export async function POST(request: NextRequest) {
       modelId = modelAliases[modelId];
     }
 
+    // Check if model is premium and if user has access
+    const isPremium = PREMIUM_MODELS.has(modelId);
+    // Pro access if they have a pro/enterprise plan OR if their rate limit is high (fallback)
+    const hasProAccess = userPlan === 'pro' || userPlan === 'enterprise' || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
+
+    if (isPremium && !hasProAccess) {
+      console.warn(`[${requestId}] Premium model access denied: ${modelId} for key: ${effectiveKey.substring(0, 10)}...`);
+      return NextResponse.json(
+        {
+          error: {
+            message: `The model '${modelId}' is only available on Pro and Enterprise plans. Please upgrade at ${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+            type: 'access_denied',
+            param: 'model',
+            code: 'premium_model_required',
+            request_id: requestId
+          }
+        },
+        {
+          status: 403,
+          headers: getCorsHeaders()
+        }
+      );
+    }
+
     // Pass the extracted user ID to ALL providers (PolliStack router needs this)
     // Priority: 1. Header x-user-id (from API client) 2. API Key owner 3. Session User 4. IP-based
     const userId = request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`;
@@ -445,11 +486,10 @@ export async function POST(request: NextRequest) {
       providerApiKey = process.env.OPENROUTER_API_KEY;
     } else if (model.provider === 'liz') {
       providerUrl = `${PROVIDER_URLS.liz}/v1/chat/completions`;
-      providerApiKey = process.env.LIZ_API_KEY || 'sk-946715b46e8fcd676f8cc5d4e9c80a51';
+      providerApiKey = process.env.LIZ_API_KEY;
     } else if (model.provider === 'meridian') {
       providerUrl = `${PROVIDER_URLS.meridian}/chat`;
-      // Use the hardcoded key from the prompt for meridian if not in env
-      providerApiKey = process.env.MERIDIAN_API_KEY || 'ps_6od22i7ddomt18c1jyk9hm';
+      providerApiKey = process.env.MERIDIAN_API_KEY;
     } else if (model.provider === 'stablehorde') {
       // Handle Stable Horde text generation
       return await handleStableHordeChat(body, modelId, apiKeyInfo, request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`, effectiveKey, requestId, limit);

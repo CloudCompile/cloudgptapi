@@ -86,18 +86,7 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'stable-horde-neonmaid-12b', name: 'NeonMaid-12B', provider: 'stablehorde', description: 'NeonMaid-12B v2 creative model' },
   // Meridian model
   { id: 'meridian', name: 'Meridian', provider: 'meridian', description: 'Meridian cognitive substrate with persistent memory' },
-  // Liz Proxy models
-  { id: 'claude-3-haiku', name: 'Claude 3 Haiku', provider: 'liz', description: 'Anthropic Claude 3 Haiku' },
-  { id: 'claude-3-opus', name: 'Claude 3 Opus', provider: 'liz', description: 'Anthropic Claude 3 Opus' },
-  { id: 'claude-3.5-haiku', name: 'Claude 3.5 Haiku', provider: 'liz', description: 'Anthropic Claude 3.5 Haiku' },
-  { id: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'liz', description: 'Anthropic Claude 3.5 Sonnet' },
-  { id: 'claude-3.7-sonnet', name: 'Claude 3.7 Sonnet', provider: 'liz', description: 'Anthropic Claude 3.7 Sonnet' },
-  { id: 'claude-haiku-4.5', name: 'Claude Haiku 4.5', provider: 'liz', description: 'Anthropic Claude Haiku 4.5' },
-  { id: 'claude-opus-4', name: 'Claude Opus 4', provider: 'liz', description: 'Anthropic Claude Opus 4' },
-  { id: 'claude-opus-4.1', name: 'Claude Opus 4.1', provider: 'liz', description: 'Anthropic Claude Opus 4.1' },
-  { id: 'claude-opus-4.5', name: 'Claude Opus 4.5', provider: 'liz', description: 'Anthropic Claude Opus 4.5' },
-  { id: 'claude-sonnet-4', name: 'Claude Sonnet 4', provider: 'liz', description: 'Anthropic Claude Sonnet 4' },
-  { id: 'claude-sonnet-4.5', name: 'Claude Sonnet 4.5', provider: 'liz', description: 'Anthropic Claude Sonnet 4.5' },
+  // Liz Proxy models (Non-Claude only as requested)
   { id: 'gemini-2.0-flash-001', name: 'Gemini 2.0 Flash 001', provider: 'liz', description: 'Google Gemini 2.0 Flash 001' },
   { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', provider: 'liz', description: 'Google Gemini 3 Flash Preview' },
   { id: 'gemini-2.0-flash-lite-001', name: 'Gemini 2.0 Flash Lite 001', provider: 'liz', description: 'Google Gemini 2.0 Flash Lite 001' },
@@ -123,6 +112,38 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'glm-4.6', name: 'GLM 4.6', provider: 'liz', description: 'GLM 4.6' },
   { id: 'glm-4.7', name: 'GLM 4.7', provider: 'liz', description: 'GLM 4.7' },
 ];
+
+// Premium models that require a subscription
+export const PREMIUM_MODELS = new Set([
+  // Flagship & Next-Gen Chat
+  'openai-large', // GPT-4.5
+  'openai',       // GPT-4o
+  'claude',       // Claude 3.5 Sonnet
+  'gemini-large', // Gemini 2.5 Pro
+  'gemini-2.5-pro',
+  'gemini-3-pro-preview',
+  'grok',         // Grok 3
+  
+  // Reasoning & Specialized
+  'deepseek-r1',
+  'perplexity-reasoning',
+  'kimi-k2-thinking',
+  'gemini-search',
+  'openai-audio',
+  'meridian',
+  'chickytutor',
+  'midijourney',
+  
+  // Video (All)
+  'veo',
+  'seedance',
+  'seedance-pro',
+  
+  // High-Res Image
+  'nanobanana-pro',
+  'seedream-pro',
+  'gptimage-large'
+]);
 
 // Available image models
 export const IMAGE_MODELS: ImageModel[] = [

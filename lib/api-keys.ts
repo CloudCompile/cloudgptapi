@@ -10,6 +10,7 @@ export interface ApiKey {
   lastUsedAt?: string;
   rateLimit: number;
   usageCount: number;
+  plan?: string;
 }
 
 // Generate a new API key with the cgpt_ prefix
@@ -36,7 +37,7 @@ export function extractApiKey(headers: Headers): string | null {
 export async function validateApiKey(key: string): Promise<ApiKey | null> {
   const { data, error } = await supabaseAdmin
     .from('api_keys')
-    .select('*')
+    .select('*, profiles(plan)')
     .eq('key', key)
     .single();
 
@@ -57,8 +58,9 @@ export async function validateApiKey(key: string): Promise<ApiKey | null> {
     name: data.name,
     createdAt: data.created_at,
     lastUsedAt: data.last_used_at,
-    rateLimit: data.rate_limit || 60,
+    rateLimit: data.rate_limit || 10,
     usageCount: data.usage_count || 0,
+    plan: (data as any).profiles?.plan || 'free'
   };
 }
 
