@@ -87,17 +87,6 @@ export const CHAT_MODELS: ChatModel[] = [
   // Meridian model
   { id: 'meridian', name: 'Meridian', provider: 'meridian', description: 'Meridian cognitive substrate with persistent memory' },
   // Liz Proxy models
-  { id: 'claude-3-haiku', name: 'Claude 3 Haiku', provider: 'liz', description: 'Anthropic Claude 3 Haiku' },
-  { id: 'claude-3-opus', name: 'Claude 3 Opus', provider: 'liz', description: 'Anthropic Claude 3 Opus' },
-  { id: 'claude-3.5-haiku', name: 'Claude 3.5 Haiku', provider: 'liz', description: 'Anthropic Claude 3.5 Haiku' },
-  { id: 'claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'liz', description: 'Anthropic Claude 3.5 Sonnet' },
-  { id: 'claude-3.7-sonnet', name: 'Claude 3.7 Sonnet', provider: 'liz', description: 'Anthropic Claude 3.7 Sonnet' },
-  { id: 'claude-haiku-4.5', name: 'Claude Haiku 4.5', provider: 'liz', description: 'Anthropic Claude Haiku 4.5' },
-  { id: 'claude-opus-4', name: 'Claude Opus 4', provider: 'liz', description: 'Anthropic Claude Opus 4' },
-  { id: 'claude-opus-4.1', name: 'Claude Opus 4.1', provider: 'liz', description: 'Anthropic Claude Opus 4.1' },
-  { id: 'claude-opus-4.5', name: 'Claude Opus 4.5', provider: 'liz', description: 'Anthropic Claude Opus 4.5' },
-  { id: 'claude-sonnet-4', name: 'Claude Sonnet 4', provider: 'liz', description: 'Anthropic Claude Sonnet 4' },
-  { id: 'claude-sonnet-4.5', name: 'Claude Sonnet 4.5', provider: 'liz', description: 'Anthropic Claude Sonnet 4.5' },
   { id: 'gemini-2.0-flash-001', name: 'Gemini 2.0 Flash 001', provider: 'liz', description: 'Google Gemini 2.0 Flash 001' },
   { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', provider: 'liz', description: 'Google Gemini 3 Flash Preview' },
   { id: 'gemini-2.0-flash-lite-001', name: 'Gemini 2.0 Flash Lite 001', provider: 'liz', description: 'Google Gemini 2.0 Flash Lite 001' },
