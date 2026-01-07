@@ -67,7 +67,7 @@ const PROVIDER_DISPLAY_NAMES: Record<ProviderName, string> = {
 // Alternative models to suggest when a provider fails
 const FALLBACK_SUGGESTIONS: Record<ProviderName, string[]> = {
   pollinations: ['Try a different Pollinations model like "openai-fast" or "gemini"'],
-  openrouter: ['Try a Pollinations model like "openai" or "claude"', 'Try a Liz model like "claude-3.5-sonnet"'],
+  openrouter: ['Try a Pollinations model like "openai" or "claude"', 'Try a Liz model like "gemini-2.5-flash"'],
   liz: ['Try a Pollinations model like "openai" or "claude"', 'Try an OpenRouter model'],
   stablehorde: ['Try a Pollinations model like "openai" or "mistral"', 'Stable Horde may have high queue times'],
   meridian: ['Try a Pollinations model like "openai"', 'Meridian is an experimental provider'],
