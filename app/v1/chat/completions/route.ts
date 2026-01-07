@@ -556,19 +556,36 @@ export async function POST(request: NextRequest) {
     if (!providerResponse.ok) {
       const errorText = await providerResponse.text();
       console.error(`[${requestId}] Upstream error from ${model.provider}: ${providerResponse.status} - ${errorText.substring(0, 200)}`);
+      
+      // Map unusual status codes to standard ones
+      // 418 "I'm a teapot" is sometimes returned by proxies for rate limiting or bot detection
+      let mappedStatus = providerResponse.status;
+      let errorMessage = 'Upstream API error';
+      
+      if (providerResponse.status === 418) {
+        mappedStatus = 503; // Service Unavailable
+        errorMessage = 'The upstream provider is temporarily unavailable. Please try again or use a different model.';
+        console.warn(`[${requestId}] Provider ${model.provider} returned 418 - mapping to 503`);
+      } else if (providerResponse.status >= 500) {
+        errorMessage = 'The upstream provider encountered an error. Please try again later.';
+      } else if (providerResponse.status === 401 || providerResponse.status === 403) {
+        errorMessage = 'Authentication error with upstream provider.';
+      }
+      
       return NextResponse.json(
         {
           error: {
-            message: 'Upstream API error',
+            message: errorMessage,
             type: 'api_error',
             param: null,
             code: 'upstream_error',
             details: errorText,
-            request_id: requestId
+            request_id: requestId,
+            original_status: providerResponse.status
           }
         },
         {
-          status: providerResponse.status,
+          status: mappedStatus,
           headers: getCorsHeaders()
         }
       );
