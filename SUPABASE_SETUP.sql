@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS public.api_keys (
     name TEXT NOT NULL,
     rate_limit INTEGER DEFAULT 10,
     usage_count INTEGER DEFAULT 0,
+    daily_usage_count INTEGER DEFAULT 0,
+    last_reset_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     last_used_at TIMESTAMP WITH TIME ZONE
 );
@@ -17,8 +19,13 @@ CREATE TABLE IF NOT EXISTS public.usage_logs (
     user_id TEXT NOT NULL,
     model_id TEXT NOT NULL,
     type TEXT NOT NULL, -- 'chat', 'image', 'video', 'mem'
+    tokens INTEGER, -- Estimated token usage
     timestamp TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Index for usage logs performance
+CREATE INDEX IF NOT EXISTS idx_usage_logs_api_key_id ON public.usage_logs(api_key_id);
+CREATE INDEX IF NOT EXISTS idx_usage_logs_user_id ON public.usage_logs(user_id);
 
 -- Create Profiles table to track user plans and roles
 CREATE TABLE IF NOT EXISTS public.profiles (
@@ -78,13 +85,23 @@ CREATE POLICY "Admins can manage all profiles"
     ON public.profiles FOR ALL
     USING (true); -- Authenticated via Clerk in API
 
--- Function to increment usage count
+-- Function to increment usage count and daily usage
 CREATE OR REPLACE FUNCTION public.increment_usage_count(key_id UUID)
 RETURNS void AS $$
+DECLARE
+    v_now TIMESTAMP WITH TIME ZONE := timezone('utc'::text, now());
 BEGIN
     UPDATE public.api_keys
     SET usage_count = usage_count + 1,
-        last_used_at = timezone('utc'::text, now())
+        daily_usage_count = CASE 
+            WHEN date_trunc('day', last_reset_at) < date_trunc('day', v_now) THEN 1
+            ELSE daily_usage_count + 1
+        END,
+        last_reset_at = CASE
+            WHEN date_trunc('day', last_reset_at) < date_trunc('day', v_now) THEN v_now
+            ELSE last_reset_at
+        END,
+        last_used_at = v_now
     WHERE id = key_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -170,3 +187,35 @@ CREATE POLICY "Public access to API keys"
 CREATE POLICY "Public access to usage logs"
     ON public.usage_logs FOR ALL
     USING (true); -- Authenticated via Clerk in API
+
+-- Function to check daily limit
+CREATE OR REPLACE FUNCTION public.check_daily_limit(
+    p_key_id UUID,
+    p_daily_limit INTEGER
+)
+RETURNS JSON AS $$
+DECLARE
+    v_daily_usage INTEGER;
+    v_last_reset TIMESTAMP WITH TIME ZONE;
+    v_now TIMESTAMP WITH TIME ZONE := timezone('utc'::text, now());
+BEGIN
+    SELECT daily_usage_count, last_reset_at INTO v_daily_usage, v_last_reset
+    FROM public.api_keys
+    WHERE id = p_key_id;
+
+    -- If no record exists, return true (shouldn't happen if key is valid)
+    IF v_daily_usage IS NULL THEN
+        RETURN json_build_object('allowed', true, 'usage', 0);
+    END IF;
+
+    -- Reset daily usage if it's a new day
+    IF date_trunc('day', v_last_reset) < date_trunc('day', v_now) THEN
+        RETURN json_build_object('allowed', true, 'usage', 0);
+    END IF;
+
+    RETURN json_build_object(
+        'allowed', v_daily_usage < p_daily_limit,
+        'usage', v_daily_usage
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
