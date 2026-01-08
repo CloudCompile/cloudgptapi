@@ -595,7 +595,17 @@ export async function POST(request: NextRequest) {
 
     // Optimization: Define a list of "High-Speed" models that can be raced across providers
     // Currently Pollinations is much faster (400-500ms) than Liz (1500ms+)
-    const isHighSpeedModel = ['openai', 'openai-fast', 'gemini-fast', 'gemini', 'deepseek'].includes(modelId);
+    const isHighSpeedModel = [
+      'openai', 
+      'openai-fast', 
+      'gemini-fast', 
+      'gemini', 
+      'deepseek',
+      'google/gemini-2.0-flash-exp:free',
+      'google/gemini-2.0-flash-exp',
+      'deepseek/deepseek-chat',
+      'deepseek/deepseek-v3'
+    ].includes(modelId);
 
     // Forward to provider API
     let requestBody: any;
@@ -778,6 +788,54 @@ export async function POST(request: NextRequest) {
             } catch (err) {
               console.error(`[${requestId}] OpenRouter fallback failed:`, err);
             }
+          }
+        }
+      }
+      
+      // --- CROSS-PROVIDER FALLBACK ---
+      // If we still have a 429 from OpenRouter after trying all keys, try another provider
+      if (model.provider === 'openrouter' && providerResponse.status === 429) {
+        // Fallback for Gemini models to Pollinations
+        if (modelId.includes('gemini')) {
+          console.warn(`[${requestId}] OpenRouter Gemini rate limited. Trying Pollinations fallback...`);
+          try {
+            const pollKey = getPollinationsApiKey();
+            const pollModelId = modelId.includes('2.0') ? 'gemini' : 'gemini-fast';
+            
+            const pollResponse = await fetch(`${PROVIDER_URLS.pollinations}/v1/chat/completions`, {
+              method: 'POST',
+              headers: { ...headers, 'Authorization': `Bearer ${pollKey}` },
+              body: JSON.stringify({ ...requestBody, model: pollModelId }),
+              signal: controller.signal,
+            });
+            
+            if (pollResponse.ok) {
+              console.log(`[${requestId}] Cross-provider fallback to Pollinations successful!`);
+              providerResponse = pollResponse;
+            }
+          } catch (err) {
+            console.error(`[${requestId}] Pollinations fallback failed:`, err);
+          }
+        }
+        
+        // Fallback for DeepSeek models to Pollinations
+        if (modelId.includes('deepseek') && !providerResponse.ok) {
+          console.warn(`[${requestId}] OpenRouter DeepSeek rate limited. Trying Pollinations fallback...`);
+          try {
+            const pollKey = getPollinationsApiKey();
+            const pollResponse = await fetch(`${PROVIDER_URLS.pollinations}/v1/chat/completions`, {
+              method: 'POST',
+              headers: { ...headers, 'Authorization': `Bearer ${pollKey}` },
+              body: JSON.stringify({ ...requestBody, model: 'deepseek' }),
+              signal: controller.signal,
+            });
+            
+            if (pollResponse.ok) {
+              console.log(`[${requestId}] Cross-provider fallback to Pollinations successful!`);
+              providerResponse = pollResponse;
+            }
+          } catch (err) {
+            console.error(`[${requestId}] Pollinations fallback failed:`, err);
           }
         }
       }

@@ -11,33 +11,28 @@ async function sendAnnouncement() {
   const url = `https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`;
   
   const embed = {
-    title: 'CloudGPT API: Plan-Based Rate Limits and New Video Pro Plan',
-    description: "We have implemented a robust plan-based rate limiting system and introduced a dedicated Video Pro plan for high-quality video generation.",
-    color: 0x5865F2, // Discord Blurple
+    title: '🚀 Services Restored: Pollinations & OpenRouter are Back!',
+    description: "We've successfully restored full access to all models from Pollinations and OpenRouter with enhanced reliability.",
+    color: 0x00FF00, // Green for "Back Online"
     fields: [
       {
-        name: 'New Video Pro Plan ($5/mo)',
-        value: '- **Exclusive Access:** All video models (Google Veo, Seedance Pro) now require the specific Video Pro plan.\n- **Note:** Standard Pro plan subscribers no longer have access to video models and must upgrade to Video Pro.\n- **Higher Limits:** 2 RPM and 2,000 requests per day for video generation.',
+        name: '🌈 Pollinations Restored',
+        value: 'All high-speed models (GPT-4o, Gemini 2.0, DeepSeek V3) are now fully operational with optimized routing.',
         inline: false
       },
       {
-        name: 'Updated Rate Limits (RPM)',
-        value: '- **Image Generation:** 5 RPM for all users.\n- **Chat Completions:** 100 RPM (Free) / 200 RPM (Pro).\n- **Memory API:** 20 RPM (Free) / 50 RPM (Pro).',
+        name: '🔗 OpenRouter Multi-Key Failover',
+        value: 'We\'ve implemented a new multi-key fallback system for OpenRouter. If one key hits a limit, the system automatically switches to a backup key to ensure zero downtime.',
         inline: false
       },
       {
-        name: 'Daily Request Limits (RPD)',
-        value: '- **Free Users:** 1,000 requests per day across all routes.\n- **Pro Users:** 2,000 requests per day across all routes.\n- **Resets:** Daily at 00:00 UTC.',
-        inline: false
-      },
-      {
-        name: 'Synchronization and Reliability',
-        value: '- **OpenAI V1 Sync:** All rate limits and reliability fixes are now synchronized to /v1 endpoints.\n- **Descriptive Errors:** Enhanced 429 responses with X-RateLimit and X-DailyLimit headers.',
+        name: '⚡ Performance Boost',
+        value: 'Requests are now load-balanced across multiple API keys, providing higher effective rate limits and faster response times for all users.',
         inline: false
       }
     ],
     footer: {
-      text: 'CloudGPT API - Powered by Gemini 3 Flash Preview',
+      text: 'CloudGPT API - Service Status: Operational',
       icon_url: 'https://cdn.discordapp.com/embed/avatars/0.png'
     },
     timestamp: new Date().toISOString()
@@ -50,7 +45,10 @@ async function sendAnnouncement() {
         Authorization: `Bot ${BOT_TOKEN}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ embeds: [embed] }),
+      body: JSON.stringify({ 
+        content: "@everyone 🚀 **Pollinations and OpenRouter are back online!**",
+        embeds: [embed] 
+      }),
     });
 
     if (response.ok) {

@@ -24,6 +24,8 @@ export function getPollinationsApiKey(): string | undefined {
   const keys = [
     process.env.POLLINATIONS_API_KEY,
     process.env.POLLINATIONS_API_KEY_2,
+    process.env.POLLINATIONS_API_KEY_3,
+    process.env.POLLINATIONS_KEY_3,
   ].filter(Boolean) as string[];
   
   if (keys.length === 0) {
@@ -39,12 +41,21 @@ export function getPollinationsApiKey(): string | undefined {
 /**
  * Get OpenRouter API keys for fallback and load balancing
  * Supports multiple API keys via OPENROUTER_API_KEY and OPENROUTER_FALLBACK_KEY
+ * Also looks for OPENROUTER_API_KEY_1 through OPENROUTER_API_KEY_5
  */
 export function getOpenRouterApiKeys(): string[] {
-  return [
+  const keys = [
     process.env.OPENROUTER_API_KEY,
     process.env.OPENROUTER_FALLBACK_KEY,
+    process.env.OPENROUTER_API_KEY_1,
+    process.env.OPENROUTER_API_KEY_2,
+    process.env.OPENROUTER_API_KEY_3,
+    process.env.OPENROUTER_API_KEY_4,
+    process.env.OPENROUTER_API_KEY_5,
   ].filter(Boolean) as string[];
+
+  // Return unique keys to avoid trying the same key multiple times in fallback logic
+  return Array.from(new Set(keys));
 }
 
 /**
