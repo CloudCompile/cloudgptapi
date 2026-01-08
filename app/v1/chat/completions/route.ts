@@ -662,13 +662,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Forward to provider API
-    let requestBody: any;
+    // requestBody, maxTokensSafetyCap, and effectiveMaxTokens are already declared above
     
-    // Safety cap for max_tokens to prevent "request exceeds max tokens" errors
-    // Many providers have limits around 4k-8k for free tiers
-    const maxTokensSafetyCap = 4096;
-    const effectiveMaxTokens = body.max_tokens ? Math.min(body.max_tokens, maxTokensSafetyCap) : undefined;
-
     // Log the provider request (masking the API key)
     const maskedProviderKey = providerApiKey ? `${providerApiKey.substring(0, 4)}...${providerApiKey.substring(providerApiKey.length - 4)}` : 'none';
     console.log(`[${requestId}] Forwarding to ${model.provider} (${providerUrl}) with key ${maskedProviderKey}`);
