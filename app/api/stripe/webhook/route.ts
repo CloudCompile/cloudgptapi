@@ -61,17 +61,18 @@ export async function POST(req: Request) {
     }
     
     // Also track the subscription details for audit/debugging
+    const sub = subscription as any;
     const { error: subError } = await supabaseAdmin
       .from('user_subscriptions')
       .upsert({
         user_id: userId,
-        stripe_subscription_id: subscription.id,
-        stripe_customer_id: subscription.customer as string,
+        stripe_subscription_id: sub.id,
+        stripe_customer_id: sub.customer as string,
         stripe_price_id: priceId,
         stripe_current_period_end: new Date(
-          subscription.current_period_end * 1000
+          sub.current_period_end * 1000
         ).toISOString(),
-        status: subscription.status,
+        status: sub.status,
       });
 
     if (subError) {

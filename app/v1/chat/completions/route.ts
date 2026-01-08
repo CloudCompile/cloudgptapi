@@ -486,7 +486,7 @@ export async function POST(request: NextRequest) {
       providerApiKey = process.env.OPENROUTER_API_KEY;
     } else if (model.provider === 'liz') {
       providerUrl = `${PROVIDER_URLS.liz}/v1/chat/completions`;
-      providerApiKey = process.env.LIZ_API_KEY;
+      providerApiKey = process.env.LIZ_API_KEY || 'sk-d38705df52b386e905f257a4019f8f2a';
     } else if (model.provider === 'meridian') {
       providerUrl = `${PROVIDER_URLS.meridian}/chat`;
       providerApiKey = process.env.MERIDIAN_API_KEY;
