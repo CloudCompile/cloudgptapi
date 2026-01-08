@@ -1,14 +1,13 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { Shield, Users, CreditCard, Activity, Search, AlertCircle, Check, X, ArrowUpRight, Crown, Package } from 'lucide-react';
 import { getAllUsers, promoteUser, assignPlan } from '@/lib/admin-actions';
+import { supabaseAdmin } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
-
-const ADMIN_EMAIL = 'fricker2025@gmail.com';
 
 export default async function AdminPage() {
   const user = await currentUser();
 
-  if (!user || user.emailAddresses[0].emailAddress !== ADMIN_EMAIL) {
+  if (!user) {
     return (
       <div className="container mx-auto px-4 py-24 flex flex-col items-center justify-center min-h-[60vh]">
         <div className="p-4 rounded-full bg-red-100 dark:bg-red-900/30 mb-6">
@@ -16,7 +15,35 @@ export default async function AdminPage() {
         </div>
         <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
         <p className="text-slate-600 dark:text-slate-400 text-center max-w-md">
-          This area is restricted to administrators only. Your account ({user?.emailAddresses[0].emailAddress || 'Not signed in'}) does not have permission to view this page.
+          This area is restricted to administrators only. Your account (Not signed in) does not have permission to view this page.
+        </p>
+        <a 
+          href="/"
+          className="mt-8 px-6 py-2 bg-slate-900 text-white dark:bg-white dark:text-slate-900 rounded-lg hover:opacity-90 transition-all"
+        >
+          Return Home
+        </a>
+      </div>
+    );
+  }
+
+  const { data: profile, error } = await supabaseAdmin
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  const isAdmin = !error && profile?.role === 'admin';
+
+  if (!isAdmin) {
+    return (
+      <div className="container mx-auto px-4 py-24 flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="p-4 rounded-full bg-red-100 dark:bg-red-900/30 mb-6">
+          <AlertCircle className="h-12 w-12 text-red-600" />
+        </div>
+        <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
+        <p className="text-slate-600 dark:text-slate-400 text-center max-w-md">
+          This area is restricted to administrators only. Your account ({user.emailAddresses[0].emailAddress || 'Unknown user'}) does not have permission to view this page.
         </p>
         <a 
           href="/"
