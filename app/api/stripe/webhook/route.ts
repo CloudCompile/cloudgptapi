@@ -64,6 +64,53 @@ export async function POST(req: Request) {
       console.error(`Error updating profile for user ${userId}:`, profileError);
     } else {
       console.log(`Successfully updated profile for user ${userId} to ${planName}`);
+      
+      // Notify Discord via webhook if user upgraded to Pro or Video Pro
+      if (planName === 'pro' || planName === 'video_pro') {
+        const discordWebhookUrl = process.env.DISCORD_PRO_WEBHOOK;
+        if (discordWebhookUrl) {
+          try {
+            const embed = {
+              title: 'New Subscription Purchased!',
+              description: `A user has successfully upgraded to the **${planName === 'pro' ? 'Pro' : 'Video Pro'}** plan.`,
+              color: planName === 'pro' ? 0x00ff00 : 0x9b59b6, // Green for Pro, Purple for Video Pro
+              fields: [
+                {
+                  name: 'User ID',
+                  value: userId,
+                  inline: true
+                },
+                {
+                  name: 'Plan',
+                  value: planName.toUpperCase(),
+                  inline: true
+                },
+                {
+                  name: 'Action Required',
+                  value: 'Invite the user to the exclusive Pro channels!',
+                  inline: false
+                }
+              ],
+              timestamp: new Date().toISOString(),
+              footer: {
+                text: 'CloudGPT Billing System'
+              }
+            };
+
+            await fetch(discordWebhookUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                content: `🚀 **New ${planName.toUpperCase()} Upgrade!**`,
+                embeds: [embed]
+              })
+            });
+            console.log('Discord notification sent for plan upgrade');
+          } catch (discordError) {
+            console.error('Failed to send Discord notification:', discordError);
+          }
+        }
+      }
     }
     
     // Also track the subscription details for audit/debugging
