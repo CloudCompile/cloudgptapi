@@ -34,11 +34,14 @@ export async function POST(req: Request) {
     const userId = session.metadata.userId;
     const priceId = subscription.items.data[0].price.id;
     
-    // Map price ID to plan name
+    // Map price ID to plan name using env vars if available, fallback to hardcoded IDs from pricing page
     let planName = 'free';
-    if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID) {
+    const PRO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || 'price_1Sn50iRG5zp0rTvzA3lI8SE2';
+    const DEV_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_DEV_PRICE_ID || 'price_1Sn51wRG5zp0rTvz8SeF3WXh';
+
+    if (priceId === PRO_PRICE_ID) {
       planName = 'pro';
-    } else if (priceId === process.env.NEXT_PUBLIC_STRIPE_DEV_PRICE_ID) {
+    } else if (priceId === DEV_PRICE_ID) {
       planName = 'developer';
     }
 

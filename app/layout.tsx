@@ -3,6 +3,7 @@ import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@c
 import { BookOpen, Cloud, FileText, LayoutDashboard, Rocket, Shield, Zap } from 'lucide-react';
 import './globals.css';
 import { SyncUser } from '@/components/sync-user';
+import { UserStatus } from '@/components/user-status';
 
 export const metadata: Metadata = {
   title: 'CloudGPT - Unified AI API',
@@ -83,6 +84,10 @@ function Header() {
               <Rocket className="h-4 w-4" />
               Models
             </a>
+            <a href="/pricing" className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-primary transition-colors dark:text-slate-300">
+              <Zap className="h-4 w-4 text-amber-500" />
+              Pricing
+            </a>
             <a href="/docs" className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-primary transition-colors dark:text-slate-300">
               <BookOpen className="h-4 w-4" />
               Docs
@@ -108,6 +113,7 @@ function Header() {
               </SignInButton>
             </SignedOut>
             <SignedIn>
+              <UserStatus />
               <UserButton 
                 afterSignOutUrl="/" 
                 appearance={{

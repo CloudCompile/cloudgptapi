@@ -46,7 +46,7 @@ export async function promoteUser(userId: string, role: 'user' | 'admin') {
   return { success: true };
 }
 
-export async function assignPlan(userId: string, plan: 'free' | 'pro' | 'enterprise', stripeProductId?: string) {
+export async function assignPlan(userId: string, plan: 'free' | 'developer' | 'pro' | 'enterprise', stripeProductId?: string) {
   await verifyAdmin();
 
   const { error } = await supabaseAdmin
@@ -61,9 +61,12 @@ export async function assignPlan(userId: string, plan: 'free' | 'pro' | 'enterpr
     throw new Error(`Failed to assign plan: ${error.message}`);
   }
 
-  // Also update rate limits for their API keys if they upgrade to Pro
-  if (plan === 'pro' || plan === 'enterprise') {
-    const rateLimit = plan === 'pro' ? 500 : 1000;
+  // Also update rate limits for their API keys if they upgrade
+  if (plan === 'pro' || plan === 'enterprise' || plan === 'developer') {
+    let rateLimit = 100; // Developer default
+    if (plan === 'pro') rateLimit = 500;
+    if (plan === 'enterprise') rateLimit = 1000;
+
     const { error: keyError } = await supabaseAdmin
       .from('api_keys')
       .update({ rate_limit: rateLimit })

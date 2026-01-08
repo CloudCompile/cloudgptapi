@@ -31,6 +31,12 @@ export default function Home() {
               >
                 Live Playground
               </a>
+              <a 
+                href="/pricing" 
+                className="w-full sm:w-auto px-8 py-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 font-bold text-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-all flex items-center justify-center gap-2"
+              >
+                View Pricing
+              </a>
             </div>
           </div>
         </div>

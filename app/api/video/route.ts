@@ -48,7 +48,23 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const limit = apiKeyInfo ? apiKeyInfo.rateLimit : 2;
+    // Determine limit based on plan
+    let limit = 2; // Default anonymous/free limit
+    
+    if (userPlan === 'admin' || userPlan === 'enterprise') {
+      limit = 20;
+    } else if (userPlan === 'pro') {
+      limit = 10;
+    } else if (userPlan === 'developer') {
+      limit = 5;
+    } else if (userPlan === 'free') {
+      limit = 3;
+    }
+
+    // If API key has a specific custom limit that's higher, use that
+    if (apiKeyInfo && apiKeyInfo.rateLimit > limit) {
+      limit = apiKeyInfo.rateLimit;
+    }
     
     if (!checkRateLimit(effectiveKey, limit, 'video')) {
       const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'video');

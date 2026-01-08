@@ -9,10 +9,10 @@ import { supabaseAdmin } from '@/lib/supabase';
 export const runtime = 'edge';
 
 // Constants for validation
-const MAX_MESSAGE_LENGTH = 500000; // 500KB per message
-const MAX_TOTAL_LENGTH = 2000000; // 2MB total for all messages
-const MAX_MESSAGES_COUNT = 100;
-const PROVIDER_TIMEOUT_MS = 60000; // 60 seconds
+const MAX_MESSAGE_LENGTH = 2000000; // 2MB per message (~1.5M tokens)
+const MAX_TOTAL_LENGTH = 10000000; // 10MB total for all messages
+const MAX_MESSAGES_COUNT = 500;
+const PROVIDER_TIMEOUT_MS = 120000; // 120 seconds
 
 // Generate unique request ID for tracing
 function generateRequestId(): string {
@@ -315,16 +315,41 @@ export async function POST(request: NextRequest) {
       // Fetch plan for session users if no API key is provided
       const { data: profile } = await supabaseAdmin
         .from('profiles')
-        .select('plan')
+        .select('plan, email')
         .eq('id', sessionUserId)
         .single();
       
-      if (profile?.plan) {
-        userPlan = profile.plan;
+      if (profile) {
+        userPlan = profile.plan || 'free';
+        
+        // Manual override for specific users requested by admin
+        if (profile.email === 'mschneider2492@gmail.com' && userPlan !== 'developer') {
+          await supabaseAdmin.from('profiles').update({ plan: 'developer' }).eq('id', sessionUserId);
+          userPlan = 'developer';
+        } else if ((profile.email === 'sakurananachan645@gmail.com' || profile.email === 'bakatsun09@gmail.com') && userPlan !== 'pro') {
+          await supabaseAdmin.from('profiles').update({ plan: 'pro' }).eq('id', sessionUserId);
+          userPlan = 'pro';
+        }
       }
     }
 
-    const limit = apiKeyInfo ? apiKeyInfo.rateLimit : 10;
+    // Determine limit based on plan if not explicitly set high on the key
+    let limit = 10; // Default anonymous/free limit
+    
+    if (userPlan === 'admin' || userPlan === 'enterprise') {
+      limit = 1000;
+    } else if (userPlan === 'pro') {
+      limit = 500;
+    } else if (userPlan === 'developer') {
+      limit = 100;
+    } else if (userPlan === 'free') {
+      limit = 60;
+    }
+
+    // If API key has a specific custom limit that's higher, use that
+    if (apiKeyInfo && apiKeyInfo.rateLimit > limit) {
+      limit = apiKeyInfo.rateLimit;
+    }
     
     if (!checkRateLimit(effectiveKey, limit, 'chat')) {
       const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'chat');
