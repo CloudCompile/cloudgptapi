@@ -158,7 +158,9 @@ async function generateStableHordeImage(
   model: ImageModel, 
   userId: string | null | undefined,
   effectiveKey: string,
-  apiKeyInfo: ApiKey | null
+  apiKeyInfo: ApiKey | null,
+  limit: number,
+  dailyLimit: number
 ) {
   // '0000000000' is Stable Horde's official anonymous API key for rate-limited access
   const hordeApiKey = process.env.STABLEHORDE_API_KEY || process.env.STABLE_HORDE_API_KEY || '0000000000';
@@ -270,7 +272,8 @@ async function generateStableHordeImage(
             );
           }
           
-          const rateLimitInfo = await getRateLimitInfo(effectiveKey);
+          const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'image');
+          const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
           
           return new NextResponse(imageResponse.body, {
             headers: {
@@ -278,6 +281,8 @@ async function generateStableHordeImage(
               'Cache-Control': 'public, max-age=31536000, immutable',
               'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
               'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+              'X-DailyLimit-Remaining': String(dailyLimitInfo.remaining),
+              'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
             },
           });
         }
@@ -436,8 +441,8 @@ export async function POST(request: NextRequest) {
 
     // Check if model is premium and if user has access
     const isPremium = PREMIUM_MODELS.has(modelId);
-    // Pro access if they have a pro/enterprise/developer/admin plan OR if their rate limit is high (fallback)
-    const hasProAccess = ['pro', 'enterprise', 'developer', 'admin'].includes(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
+    // Pro access if they have a pro/enterprise/developer/admin plan
+    const hasProAccess = ['pro', 'enterprise', 'developer', 'admin'].includes(userPlan);
 
     if (isPremium && !hasProAccess) {
       return NextResponse.json(
@@ -464,7 +469,15 @@ export async function POST(request: NextRequest) {
 
     // Handle Stable Horde models
     if (model.provider === 'stablehorde') {
-      const response = await generateStableHordeImage(body, model, apiKeyInfo?.userId || sessionUserId, effectiveKey, apiKeyInfo);
+      const response = await generateStableHordeImage(
+        body, 
+        model, 
+        apiKeyInfo?.userId || sessionUserId, 
+        effectiveKey, 
+        apiKeyInfo,
+        limit,
+        dailyLimit
+      );
       return response;
     }
 
@@ -572,6 +585,7 @@ export async function POST(request: NextRequest) {
     // Forward the binary response (image)
     const contentType = pollinationsResponse.headers.get('content-type');
     const rateLimitInfo = await getRateLimitInfo(effectiveKey);
+    const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
     
     return new NextResponse(pollinationsResponse.body, {
       headers: {
@@ -579,6 +593,8 @@ export async function POST(request: NextRequest) {
         'Cache-Control': 'public, max-age=31536000, immutable',
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+        'X-DailyLimit-Remaining': String(dailyLimitInfo.remaining),
+        'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
       },
     });
     

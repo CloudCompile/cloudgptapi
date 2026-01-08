@@ -179,8 +179,8 @@ export async function POST(request: NextRequest) {
 
     // Check if model is premium and if user has access
     const isPremium = PREMIUM_MODELS.has(modelId);
-    // Pro access if they have a pro/enterprise/developer/admin plan OR if their rate limit is high (fallback)
-    const hasProAccess = ['pro', 'enterprise', 'developer', 'admin'].includes(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
+    // Pro access if they have a pro/enterprise/developer/admin plan
+    const hasProAccess = ['pro', 'enterprise', 'developer', 'admin'].includes(userPlan);
 
     if (isPremium && !hasProAccess) {
       return NextResponse.json(
@@ -497,6 +497,8 @@ export async function POST(request: NextRequest) {
     }
 
     const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'image');
+    const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
+
     return NextResponse.json({
       created: Math.floor(Date.now() / 1000),
       data: [{ url: imageUrl }]
@@ -506,6 +508,9 @@ export async function POST(request: NextRequest) {
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
         'X-RateLimit-Limit': String(rateLimitInfo.limit),
+        'X-DailyLimit-Remaining': String(dailyLimitInfo.remaining),
+        'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
+        'X-DailyLimit-Limit': String(dailyLimitInfo.limit),
       }
     });
 

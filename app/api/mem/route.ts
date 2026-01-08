@@ -74,6 +74,8 @@ export async function POST(request: NextRequest) {
     // Check rate limit
     if (!await checkRateLimit(rawApiKey, limit, 'mem')) {
       const rateLimitInfo = await getRateLimitInfo(rawApiKey, limit, 'mem');
+      const dailyLimitInfo = await getDailyLimitInfo(rawApiKey, dailyLimit, apiKeyInfo.id);
+      
       return NextResponse.json(
         { error: 'Rate limit exceeded', resetAt: rateLimitInfo.resetAt },
         { 
@@ -81,6 +83,8 @@ export async function POST(request: NextRequest) {
           headers: {
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+            'X-DailyLimit-Remaining': String(dailyLimitInfo.remaining),
+            'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
           },
         }
       );
@@ -144,11 +148,15 @@ export async function POST(request: NextRequest) {
     await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, 'meridian-mem', 'mem', body.prompt);
     
     const rateLimitInfo = await getRateLimitInfo(rawApiKey);
+    const dailyLimitInfo = await getDailyLimitInfo(rawApiKey, dailyLimit, apiKeyInfo.id);
+
     return NextResponse.json(data, {
       headers: {
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
-      }
+        'X-DailyLimit-Remaining': String(dailyLimitInfo.remaining),
+        'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
+      },
     });
     
   } catch (error) {

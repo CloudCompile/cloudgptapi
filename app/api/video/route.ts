@@ -97,6 +97,8 @@ export async function POST(request: NextRequest) {
     
     if (!await checkRateLimit(effectiveKey, limit, 'video')) {
       const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'video');
+      const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
+      
       return NextResponse.json(
         { error: 'Rate limit exceeded', resetAt: rateLimitInfo.resetAt },
         { 
@@ -104,6 +106,8 @@ export async function POST(request: NextRequest) {
           headers: {
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+            'X-DailyLimit-Remaining': String(dailyLimitInfo.remaining),
+            'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
           },
         }
       );
@@ -150,8 +154,8 @@ export async function POST(request: NextRequest) {
 
     // Check if model is premium and if user has access
     const isPremium = PREMIUM_MODELS.has(modelId);
-    // Pro access if they have a pro/enterprise/developer/admin plan OR if their rate limit is high (fallback)
-    const hasProAccess = ['pro', 'enterprise', 'developer', 'admin'].includes(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
+    // Pro access if they have a pro/enterprise/developer/admin plan
+    const hasProAccess = ['pro', 'enterprise', 'developer', 'admin'].includes(userPlan);
 
     if (isPremium && !hasProAccess) {
       return NextResponse.json(
@@ -215,6 +219,7 @@ export async function POST(request: NextRequest) {
     // Check if response is JSON (error) or binary (video)
     const contentType = pollinationsResponse.headers.get('content-type');
     const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'video');
+    const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
     
     if (contentType?.includes('application/json')) {
       const data = await pollinationsResponse.json();
@@ -222,6 +227,8 @@ export async function POST(request: NextRequest) {
         headers: {
           'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
           'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+          'X-DailyLimit-Remaining': String(dailyLimitInfo.remaining),
+          'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
         },
       });
     }
@@ -233,6 +240,8 @@ export async function POST(request: NextRequest) {
         'Cache-Control': 'public, max-age=31536000, immutable',
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+        'X-DailyLimit-Remaining': String(dailyLimitInfo.remaining),
+        'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
       },
     });
     

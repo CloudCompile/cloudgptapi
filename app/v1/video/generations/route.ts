@@ -157,11 +157,11 @@ export async function POST(request: NextRequest) {
 
     // Check if model is premium and if user has access
     const isPremium = PREMIUM_MODELS.has(modelId);
-    // Pro access if they have a pro/enterprise/developer/admin plan OR if their rate limit is high (fallback)
-    const hasProAccess = ['pro', 'enterprise', 'developer', 'admin'].includes(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
+    // Pro access if they have a pro/enterprise/developer/admin plan
+    const hasProAccess = ['pro', 'enterprise', 'developer', 'admin'].includes(userPlan);
 
     // Specific video access for Video Pro, Enterprise, or Admin plans
-    const hasVideoAccess = ['video_pro', 'enterprise', 'admin'].includes(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
+    const hasVideoAccess = ['video_pro', 'enterprise', 'admin'].includes(userPlan);
 
     if (!hasVideoAccess) {
       return NextResponse.json(
@@ -215,6 +215,8 @@ export async function POST(request: NextRequest) {
 
     // Final response
     const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'video');
+    const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
+    
     return NextResponse.json({
       created: Math.floor(Date.now() / 1000),
       data: [{ url: videoUrl }]
@@ -223,6 +225,8 @@ export async function POST(request: NextRequest) {
         ...getCorsHeaders(),
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+        'X-DailyLimit-Remaining': String(dailyLimitInfo.remaining),
+        'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
       }
     });
     

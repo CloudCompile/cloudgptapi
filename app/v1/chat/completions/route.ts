@@ -38,7 +38,8 @@ async function handleStableHordeChat(
   userId: string,
   effectiveKey: string,
   requestId: string,
-  limit: number
+  limit: number,
+  dailyLimit: number
 ): Promise<NextResponse> {
   // '0000000000' is Stable Horde's official anonymous API key for rate-limited access
   const hordeApiKey = process.env.STABLE_HORDE_API_KEY || process.env.STABLEHORDE_API_KEY || '0000000000';
@@ -134,6 +135,8 @@ async function handleStableHordeChat(
           
           // Return OpenAI-compatible format
           const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'chat');
+          const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
+
           return NextResponse.json({
             id: 'horde-' + requestId,
             object: 'chat.completion',
@@ -160,6 +163,9 @@ async function handleStableHordeChat(
               'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
               'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
               'X-RateLimit-Limit': String(rateLimitInfo.limit),
+              'X-DailyLimit-Remaining': String(dailyLimitInfo.remaining),
+              'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
+              'X-DailyLimit-Limit': String(dailyLimitInfo.limit),
             },
           });
         }
@@ -323,6 +329,8 @@ export async function POST(request: NextRequest) {
 
     if (!await checkRateLimit(effectiveKey, limit, 'chat')) {
       const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'chat');
+      const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
+      
       console.warn(`[${requestId}] Rate limit exceeded for key: ${effectiveKey.substring(0, 10)}...`);
       return NextResponse.json(
         { 
@@ -339,6 +347,8 @@ export async function POST(request: NextRequest) {
             ...getCorsHeaders(),
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+            'X-DailyLimit-Remaining': String(dailyLimitInfo.remaining),
+            'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
           },
         }
       );
@@ -395,8 +405,8 @@ export async function POST(request: NextRequest) {
 
     // Check if model is premium and if user has access
     const isPremium = PREMIUM_MODELS.has(modelId);
-    // Pro access if they have a pro/enterprise/developer/admin plan OR if their rate limit is high (fallback)
-    const hasProAccess = ['pro', 'enterprise', 'developer', 'admin'].includes(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
+    // Pro access if they have a pro/enterprise/developer/admin plan
+    const hasProAccess = ['pro', 'enterprise', 'developer', 'admin'].includes(userPlan);
 
     // Diagnostic logging for access issues
     if (isPremium || userPlan !== 'free') {
@@ -487,7 +497,7 @@ export async function POST(request: NextRequest) {
       providerApiKey = process.env.MERIDIAN_API_KEY;
     } else if (model.provider === 'stablehorde') {
       // Handle Stable Horde text generation
-      return await handleStableHordeChat(body, modelId, apiKeyInfo, request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`, effectiveKey, requestId, limit);
+      return await handleStableHordeChat(body, modelId, apiKeyInfo, request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`, effectiveKey, requestId, limit, dailyLimit);
     } else {
       providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
       providerApiKey = getPollinationsApiKey();
@@ -600,6 +610,7 @@ export async function POST(request: NextRequest) {
           console.log(`[${requestId}] Fast-path success: ${Date.now() - startTime}ms via Pollinations`);
           const data = await response.json();
           const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'chat');
+          const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
           
           return NextResponse.json(data, {
             headers: {
@@ -607,6 +618,9 @@ export async function POST(request: NextRequest) {
               'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
               'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
               'X-RateLimit-Limit': String(rateLimitInfo.limit),
+              'X-DailyLimit-Remaining': String(dailyLimitInfo.remaining),
+              'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
+              'X-DailyLimit-Limit': String(dailyLimitInfo.limit),
               'X-Proxy-Provider': 'pollinations-fast',
               'X-Proxy-Latency': `${Date.now() - startTime}ms`
             }
@@ -1037,12 +1051,17 @@ export async function POST(request: NextRequest) {
      }
 
     const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'chat');
+    const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
+    
     return NextResponse.json(responseData, {
       headers: {
         ...getCorsHeaders(),
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
         'X-RateLimit-Limit': String(rateLimitInfo.limit),
+        'X-DailyLimit-Remaining': String(dailyLimitInfo.remaining),
+        'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
+        'X-DailyLimit-Limit': String(dailyLimitInfo.limit),
         'X-Request-Id': requestId,
       },
     });
