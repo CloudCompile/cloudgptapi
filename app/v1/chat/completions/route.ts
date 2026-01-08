@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
 import { CHAT_MODELS, PROVIDER_URLS, PREMIUM_MODELS } from '@/lib/providers';
-import { getCorsHeaders, getPollinationsApiKey, getOpenRouterApiKey, getOpenRouterApiKeys } from '@/lib/utils';
+import { getCorsHeaders, getPollinationsApiKey, getPollinationsApiKeys, getOpenRouterApiKey, getOpenRouterApiKeys } from '@/lib/utils';
 import { retrieveMemory, rememberInteraction } from '@/lib/memory';
 import { supabaseAdmin } from '@/lib/supabase';
 
@@ -625,6 +625,10 @@ export async function POST(request: NextRequest) {
       top_p: body.top_p ?? 1,
       frequency_penalty: body.frequency_penalty ?? 0,
       presence_penalty: body.presence_penalty ?? 0,
+      // Reasoning parameters for models like o1 or deepseek-r1
+      reasoning_effort: body.reasoning_effort,
+      include_reasoning: body.include_reasoning,
+      reasoning: body.reasoning,
     };
 
     // --- OPTIMIZED PROXY LOGIC ---
@@ -726,6 +730,8 @@ export async function POST(request: NextRequest) {
         top_p: body.top_p ?? 1,
         frequency_penalty: body.frequency_penalty ?? 0,
         presence_penalty: body.presence_penalty ?? 0,
+        reasoning_effort: body.reasoning_effort,
+        include_reasoning: body.include_reasoning,
       };
     } else {
       requestBody = {
@@ -737,6 +743,9 @@ export async function POST(request: NextRequest) {
         top_p: body.top_p,
         frequency_penalty: body.frequency_penalty,
         presence_penalty: body.presence_penalty,
+        reasoning_effort: body.reasoning_effort,
+        include_reasoning: body.include_reasoning,
+        reasoning: body.reasoning,
       };
     }
 
@@ -791,8 +800,66 @@ export async function POST(request: NextRequest) {
           }
         }
       }
-      
+
+      // Fallback for Pollinations rate limits (429) if we have multiple keys
+      if (model.provider === 'pollinations' && providerResponse.status === 429) {
+        const availableKeys = getPollinationsApiKeys();
+        if (availableKeys.length > 1) {
+          console.warn(`[${requestId}] Pollinations rate limited (429). Attempting fallback...`);
+          
+          for (const fallbackKey of availableKeys) {
+            if (fallbackKey === providerApiKey) continue;
+            
+            console.log(`[${requestId}] Trying Pollinations fallback key: ${fallbackKey.substring(0, 4)}...`);
+            try {
+              const fallbackResponse = await fetch(providerUrl, {
+                method: 'POST',
+                headers: { ...headers, 'Authorization': `Bearer ${fallbackKey}` },
+                body: JSON.stringify(requestBody),
+                signal: controller.signal,
+              });
+              
+              if (fallbackResponse.ok) {
+                console.log(`[${requestId}] Pollinations fallback successful!`);
+                providerResponse = fallbackResponse;
+                break;
+              } else if (fallbackResponse.status === 429) {
+                continue;
+              } else {
+                providerResponse = fallbackResponse;
+                break;
+              }
+            } catch (err) {
+              console.error(`[${requestId}] Pollinations fallback failed:`, err);
+            }
+          }
+        }
+      }
+
       // --- CROSS-PROVIDER FALLBACK ---
+      // If we still have a 429 from Pollinations after trying all keys, try Liz as a backup
+      if (model.provider === 'pollinations' && providerResponse.status === 429) {
+        console.warn(`[${requestId}] Pollinations rate limited after all keys. Trying Liz fallback...`);
+        try {
+          const lizUrl = `${PROVIDER_URLS.liz}/v1/chat/completions`;
+          const lizApiKey = process.env.LIZ_API_KEY || 'sk-d38705df52b386e905f257a4019f8f2a';
+          
+          const lizResponse = await fetch(lizUrl, {
+            method: 'POST',
+            headers: { ...headers, 'Authorization': `Bearer ${lizApiKey}` },
+            body: JSON.stringify(requestBody),
+            signal: controller.signal,
+          });
+          
+          if (lizResponse.ok) {
+            console.log(`[${requestId}] Cross-provider fallback to Liz successful!`);
+            providerResponse = lizResponse;
+          }
+        } catch (err) {
+          console.error(`[${requestId}] Liz fallback from Pollinations failed:`, err);
+        }
+      }
+      
       // If we still have a 429 from OpenRouter after trying all keys, try another provider
       if (model.provider === 'openrouter' && providerResponse.status === 429) {
         // Fallback for Gemini models to Pollinations
@@ -966,8 +1033,12 @@ export async function POST(request: NextRequest) {
               if (data === '[DONE]') continue;
               try {
                 const parsed = JSON.parse(data);
-                const content = parsed.choices?.[0]?.delta?.content || '';
+                const delta = parsed.choices?.[0]?.delta;
+                const content = delta?.content || '';
+                const reasoning = delta?.reasoning_content || '';
                 fullContent += content;
+                // We don't necessarily want to store reasoning in memory 
+                // but we need to ensure it's passed through (which it is via the chunk)
               } catch (e) {}
             }
           }

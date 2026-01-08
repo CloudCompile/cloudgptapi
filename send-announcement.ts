@@ -8,31 +8,36 @@ const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1458666010197495962';
 
 async function sendAnnouncement() {
+  if (!BOT_TOKEN) {
+    console.error('DISCORD_BOT_TOKEN not found in environment variables');
+    return;
+  }
+
   const url = `https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`;
   
   const embed = {
-    title: '🚀 Services Restored: Pollinations & OpenRouter are Back!',
-    description: "We've successfully restored full access to all models from Pollinations and OpenRouter with enhanced reliability.",
-    color: 0x00FF00, // Green for "Back Online"
+    title: '🎭 New Roleplaying Platform: Beta Test Starting!',
+    description: "We're excited to announce our brand new Roleplaying platform is now live for early testing! This is designed to be a powerful replacement for Janitor and Silly Tavern.",
+    color: 0x9B59B6, // Purple for RP/Creativity
     fields: [
       {
-        name: '🌈 Pollinations Restored',
-        value: 'All high-speed models (GPT-4o, Gemini 2.0, DeepSeek V3) are now fully operational with optimized routing.',
+        name: '🚀 Early Access',
+        value: 'Visit now at: [meridianlabsapp.website/RP](https://meridianlabsapp.website/RP)',
         inline: false
       },
       {
-        name: '🔗 OpenRouter Multi-Key Failover',
-        value: 'We\'ve implemented a new multi-key fallback system for OpenRouter. If one key hits a limit, the system automatically switches to a backup key to ensure zero downtime.',
+        name: '⚠️ Work in Progress',
+        value: 'This platform was just built and is in its very early stages. We need your feedback to shape its development!',
         inline: false
       },
       {
-        name: '⚡ Performance Boost',
-        value: 'Requests are now load-balanced across multiple API keys, providing higher effective rate limits and faster response times for all users.',
+        name: '💬 Your Feedback Matters',
+        value: 'Please jump in, test it out, and let us know what you think. Your input will directly determine the features we build next.',
         inline: false
       }
     ],
     footer: {
-      text: 'CloudGPT API - Service Status: Operational',
+      text: 'CloudGPT & Meridian Labs - Building the future of RP',
       icon_url: 'https://cdn.discordapp.com/embed/avatars/0.png'
     },
     timestamp: new Date().toISOString()
@@ -46,14 +51,14 @@ async function sendAnnouncement() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        content: "@everyone 🚀 **Pollinations and OpenRouter are back online!**",
+        content: "@everyone 🎭 **A new challenger in the RP space has arrived!**",
         embeds: [embed] 
       }),
     });
 
     if (response.ok) {
       const data = await response.json();
-      console.log('Announcement pushed successfully!');
+      console.log('Announcement pushed successfully to Announcements channel!');
       console.log('Message ID:', data.id);
     } else {
       const errorData = await response.json();

@@ -15,25 +15,36 @@ export function getCorsHeaders() {
 }
 
 /**
+ * Get all available Pollinations API keys
+ */
+export function getPollinationsApiKeys(): string[] {
+  const keys = [
+    process.env.POLLINATIONS_API_KEY,
+    process.env.POLLINATIONS_API_KEY_1,
+    process.env.POLLINATIONS_API_KEY_2,
+    process.env.POLLINATIONS_API_KEY_3,
+    process.env.POLLINATIONS_API_KEY_4,
+    process.env.POLLINATIONS_API_KEY_5,
+    process.env.POLLINATIONS_KEY_3,
+  ].filter(Boolean) as string[];
+  
+  return Array.from(new Set(keys));
+}
+
+/**
  * Get a Pollinations API key using random selection for load balancing
- * Supports multiple API keys via POLLINATIONS_API_KEY (primary) and POLLINATIONS_API_KEY_2 (secondary)
+ * Supports multiple API keys via POLLINATIONS_API_KEY (primary) and numbered versions
  * Returns undefined if no keys are configured
  * Uses random selection to avoid race conditions in edge runtime environments
  */
 export function getPollinationsApiKey(): string | undefined {
-  const keys = [
-    process.env.POLLINATIONS_API_KEY,
-    process.env.POLLINATIONS_API_KEY_2,
-    process.env.POLLINATIONS_API_KEY_3,
-    process.env.POLLINATIONS_KEY_3,
-  ].filter(Boolean) as string[];
+  const keys = getPollinationsApiKeys();
   
   if (keys.length === 0) {
     return undefined;
   }
   
   // Use random selection to distribute load across keys
-  // This is thread-safe and works well in edge runtime environments
   const randomIndex = Math.floor(Math.random() * keys.length);
   return keys[randomIndex];
 }
