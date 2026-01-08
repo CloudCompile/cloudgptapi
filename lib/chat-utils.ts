@@ -115,7 +115,7 @@ export function sanitizeErrorText(text: string): string {
 }
 
 export const PROVIDER_URLS = {
-  pollinations: 'https://text.pollinations.ai',
+  pollinations: 'https://gen.pollinations.ai',
   openrouter: 'https://openrouter.ai/api',
   liz: 'https://liz.it',
   stablehorde: 'https://stablehorde.net/api/v2',

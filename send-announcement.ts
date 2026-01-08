@@ -16,28 +16,23 @@ async function sendAnnouncement() {
   const url = `https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`;
   
   const embed = {
-    title: '✨ Gemini 3 Flash is now FREE!',
-    description: "We've updated our tiers to make Gemini 3 Flash available to everyone.",
-    color: 0xFFA500, // Orange
+    title: '🛠️ Scheduled Maintenance',
+    description: "We are performing a quick system migration to improve performance and stability.",
+    color: 0xFF0000, // Red for maintenance
     fields: [
       {
-        name: '🆓 Gemini 3 Flash',
-        value: 'The `gemini` model is now free for all users! Experience high-speed intelligence without a subscription.',
+        name: '⏱️ Duration',
+        value: 'Expected downtime: **2-4 minutes**.',
         inline: false
       },
       {
-        name: '💎 Gemini 3 Pro',
-        value: 'The `gemini-large` model remains a **Premium** model for our Pro and Enterprise subscribers.',
-        inline: false
-      },
-      {
-        name: '🚀 Peak Performance',
-        value: 'We\'ve optimized our routing and cleaned up the interface for a smoother experience.',
+        name: '🚀 Purpose',
+        value: 'Migration to enhanced infrastructure for better reliability.',
         inline: false
       }
     ],
     footer: {
-      text: 'CloudGPT - Always Improving',
+      text: 'CloudGPT - Scaling Up',
       icon_url: 'https://cdn.discordapp.com/embed/avatars/0.png'
     },
     timestamp: new Date().toISOString()
@@ -51,7 +46,7 @@ async function sendAnnouncement() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        content: "@everyone ✨ **Gemini 3 Flash is now available for FREE!** (Pro remains Premium)",
+        content: "@everyone 🛠️ **Scheduled Maintenance: 5-10 minute downtime for migration starting now.**",
         embeds: [embed] 
       }),
     });
