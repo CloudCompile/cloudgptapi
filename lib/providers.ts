@@ -45,7 +45,7 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'claude', name: 'Anthropic Claude Sonnet 4.5', provider: 'pollinations', description: 'Anthropic Claude Sonnet 4.5' },
   { id: 'claude-large', name: 'Anthropic Claude Opus 4.5', provider: 'pollinations', description: 'Anthropic Claude Opus 4.5' },
   { id: 'perplexity-reasoning', name: 'Perplexity Sonar Reasoning', provider: 'pollinations', description: 'Perplexity Sonar Reasoning' },
-  { id: 'gemini-large', name: 'Google Gemini 3 Pro', provider: 'pollinations', description: 'Google Gemini 3 Pro' },
+  { id: 'gemini-pro', name: 'Google Gemini 3 Pro', provider: 'pollinations', description: 'Google Gemini 3 Pro' },
   { id: 'openai-large', name: 'OpenAI GPT-5.2', provider: 'pollinations', description: '12.0 /M' },
   { id: 'openai-audio', name: 'OpenAI GPT-4o Mini Audio', provider: 'pollinations', description: 'OpenAI GPT-4o Mini Audio' },
   // OpenRouter free models
@@ -123,7 +123,7 @@ export const PREMIUM_MODELS = new Set([
   'openai',       // GPT-4o
   'claude',       // Claude 3.5 Sonnet
   'claude-large', // Claude Large
-  'gemini-large', // Google Gemini 3 Pro
+  'gemini-pro',   // Google Gemini 3 Pro
   'gemini-2.5-pro',
   'gemini-3-pro-preview',
   'grok',         // xAI Grok 4 Fast
@@ -132,7 +132,6 @@ export const PREMIUM_MODELS = new Set([
   'deepseek-r1',
   'perplexity-reasoning',
   'kimi-k2-thinking',
-  'gemini',       // Google Gemini 3 Flash
   'gemini-search',
   'openai-audio',
   'meridian',
