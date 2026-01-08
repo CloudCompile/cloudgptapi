@@ -91,8 +91,8 @@ export async function POST(request: NextRequest) {
     }
     
     // Check Daily Limit First
-    if (!checkDailyLimit(effectiveKey, dailyLimit)) {
-      const dailyInfo = getDailyLimitInfo(effectiveKey, dailyLimit);
+    if (!await checkDailyLimit(effectiveKey, dailyLimit)) {
+      const dailyInfo = await getDailyLimitInfo(effectiveKey, dailyLimit);
       return NextResponse.json(
         { 
           error: {
@@ -113,8 +113,8 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    if (!checkRateLimit(effectiveKey, limit, 'image')) {
-      const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'image');
+    if (!await checkRateLimit(effectiveKey, limit, 'image')) {
+      const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'image');
       return NextResponse.json(
         { 
           error: {
@@ -496,7 +496,7 @@ export async function POST(request: NextRequest) {
       await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'image');
     }
 
-    const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'image');
+    const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'image');
     return NextResponse.json({
       created: Math.floor(Date.now() / 1000),
       data: [{ url: imageUrl }]

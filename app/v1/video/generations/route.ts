@@ -69,8 +69,8 @@ export async function POST(request: NextRequest) {
 
     // Check daily limit first
     const { checkDailyLimit, getDailyLimitInfo } = await import('@/lib/api-keys');
-    if (rawApiKey && !checkDailyLimit(rawApiKey, dailyLimit)) {
-      const dailyInfo = getDailyLimitInfo(rawApiKey, dailyLimit);
+    if (rawApiKey && !await checkDailyLimit(rawApiKey, dailyLimit)) {
+      const dailyInfo = await getDailyLimitInfo(rawApiKey, dailyLimit);
       return NextResponse.json(
         { 
           error: {
@@ -91,8 +91,8 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    if (!checkRateLimit(effectiveKey, limit, 'video')) {
-      const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'video');
+    if (!await checkRateLimit(effectiveKey, limit, 'video')) {
+      const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'video');
       return NextResponse.json(
         { 
           error: {
@@ -213,22 +213,17 @@ export async function POST(request: NextRequest) {
       await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'video');
     }
 
-    const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'video');
-
+    // Final response
+    const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'video');
     return NextResponse.json({
       created: Math.floor(Date.now() / 1000),
-      data: [
-        {
-          url: videoUrl
-        }
-      ]
+      data: [{ url: videoUrl }]
     }, {
       headers: {
         ...getCorsHeaders(),
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
-        'X-RateLimit-Limit': String(rateLimitInfo.limit),
-      },
+      }
     });
     
   } catch (error) {

@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
 
     // Check daily limit first
     const { checkDailyLimit, getDailyLimitInfo } = await import('@/lib/api-keys');
-    if (!checkDailyLimit(rawApiKey, dailyLimit)) {
-      const dailyInfo = getDailyLimitInfo(rawApiKey, dailyLimit);
+    if (!await checkDailyLimit(rawApiKey, dailyLimit)) {
+      const dailyInfo = await getDailyLimitInfo(rawApiKey, dailyLimit);
       return NextResponse.json(
         { 
           error: `Daily request limit of ${dailyLimit} exceeded. Reset at ${new Date(dailyInfo.resetAt).toUTCString()}`,
@@ -72,8 +72,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Check rate limit
-    if (!checkRateLimit(rawApiKey, limit, 'mem')) {
-      const rateLimitInfo = getRateLimitInfo(rawApiKey, limit, 'mem');
+    if (!await checkRateLimit(rawApiKey, limit, 'mem')) {
+      const rateLimitInfo = await getRateLimitInfo(rawApiKey, limit, 'mem');
       return NextResponse.json(
         { error: 'Rate limit exceeded', resetAt: rateLimitInfo.resetAt },
         { 
@@ -141,14 +141,14 @@ export async function POST(request: NextRequest) {
     const data = await providerResponse.json();
 
     // Track usage in background
-    await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, 'meridian-mem', 'mem');
+    await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, 'meridian-mem', 'mem', body.prompt);
     
-    const rateLimitInfo = getRateLimitInfo(rawApiKey);
+    const rateLimitInfo = await getRateLimitInfo(rawApiKey);
     return NextResponse.json(data, {
       headers: {
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
-      },
+      }
     });
     
   } catch (error) {

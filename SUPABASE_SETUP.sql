@@ -93,6 +93,74 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ALTER TABLE public.api_keys ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.usage_logs ENABLE ROW LEVEL SECURITY;
 
+-- Create Rate Limits table
+CREATE TABLE IF NOT EXISTS public.rate_limits (
+    key TEXT PRIMARY KEY,
+    count INTEGER DEFAULT 0,
+    reset_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Function to check and increment rate limit
+CREATE OR REPLACE FUNCTION public.check_rate_limit(
+    p_key TEXT,
+    p_limit INTEGER,
+    p_window_ms INTEGER
+)
+RETURNS JSON AS $$
+DECLARE
+    v_count INTEGER;
+    v_reset_at TIMESTAMP WITH TIME ZONE;
+    v_now TIMESTAMP WITH TIME ZONE := timezone('utc'::text, now());
+BEGIN
+    -- Get current rate limit data
+    SELECT count, reset_at INTO v_count, v_reset_at
+    FROM public.rate_limits
+    WHERE key = p_key;
+
+    -- If no record exists or it's expired, reset
+    IF v_count IS NULL OR v_now > v_reset_at THEN
+        v_count := 1;
+        v_reset_at := v_now + (p_window_ms || ' milliseconds')::INTERVAL;
+        
+        INSERT INTO public.rate_limits (key, count, reset_at, updated_at)
+        VALUES (p_key, v_count, v_reset_at, v_now)
+        ON CONFLICT (key) DO UPDATE
+        SET count = EXCLUDED.count,
+            reset_at = EXCLUDED.reset_at,
+            updated_at = EXCLUDED.updated_at;
+            
+        RETURN json_build_object(
+            'allowed', true,
+            'remaining', p_limit - v_count,
+            'reset_at', floor(extract(epoch from v_reset_at) * 1000)
+        );
+    END IF;
+
+    -- Check if limit exceeded
+    IF v_count >= p_limit THEN
+        RETURN json_build_object(
+            'allowed', false,
+            'remaining', 0,
+            'reset_at', floor(extract(epoch from v_reset_at) * 1000)
+        );
+    END IF;
+
+    -- Increment count
+    UPDATE public.rate_limits
+    SET count = count + 1,
+        updated_at = v_now
+    WHERE key = p_key
+    RETURNING count INTO v_count;
+
+    RETURN json_build_object(
+        'allowed', true,
+        'remaining', p_limit - v_count,
+        'reset_at', floor(extract(epoch from v_reset_at) * 1000)
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Policies for api_keys
 CREATE POLICY "Public access to API keys"
     ON public.api_keys FOR ALL

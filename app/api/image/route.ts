@@ -270,7 +270,7 @@ async function generateStableHordeImage(
             );
           }
           
-          const rateLimitInfo = getRateLimitInfo(effectiveKey);
+          const rateLimitInfo = await getRateLimitInfo(effectiveKey);
           
           return new NextResponse(imageResponse.body, {
             headers: {
@@ -377,8 +377,8 @@ export async function POST(request: NextRequest) {
     }
     
     // Check Daily Limit First
-    if (!checkDailyLimit(effectiveKey, dailyLimit)) {
-      const dailyInfo = getDailyLimitInfo(effectiveKey, dailyLimit);
+    if (!await checkDailyLimit(effectiveKey, dailyLimit)) {
+      const dailyInfo = await getDailyLimitInfo(effectiveKey, dailyLimit);
       return NextResponse.json(
         { 
           error: {
@@ -398,8 +398,8 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    if (!checkRateLimit(effectiveKey, limit, 'image')) {
-      const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'image');
+    if (!await checkRateLimit(effectiveKey, limit, 'image')) {
+      const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'image');
       return NextResponse.json(
         { error: 'Rate limit exceeded', resetAt: rateLimitInfo.resetAt },
         { 
@@ -566,12 +566,12 @@ export async function POST(request: NextRequest) {
 
     // Track usage in background if authenticated
     if (apiKeyInfo) {
-      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'image');
+      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'image', body.prompt);
     }
 
     // Forward the binary response (image)
     const contentType = pollinationsResponse.headers.get('content-type');
-    const rateLimitInfo = getRateLimitInfo(effectiveKey);
+    const rateLimitInfo = await getRateLimitInfo(effectiveKey);
     
     return new NextResponse(pollinationsResponse.body, {
       headers: {

@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { supabaseAdmin } from './supabase';
+import { estimateTokens } from './chat-utils';
 
 export interface ApiKey {
   id: string;
@@ -84,9 +85,23 @@ export function extractApiKey(headers: Headers): string | null {
   }
 
   // Track usage for an API key
-export async function trackUsage(apiKeyId: string, userId: string, modelId: string, type: 'chat' | 'image' | 'video' | 'mem') {
+export async function trackUsage(
+  apiKeyId: string, 
+  userId: string, 
+  modelId: string, 
+  type: 'chat' | 'image' | 'video' | 'mem',
+  tokensOrData?: any
+) {
   // Increment usage count on the API key
   await supabaseAdmin.rpc('increment_usage_count', { key_id: apiKeyId });
+
+  // Estimate tokens if not provided
+  let estimatedTokens = 0;
+  if (typeof tokensOrData === 'number') {
+    estimatedTokens = tokensOrData;
+  } else if (tokensOrData) {
+    estimatedTokens = estimateTokens(tokensOrData);
+  }
 
   // Log detailed usage
   await supabaseAdmin
@@ -96,6 +111,7 @@ export async function trackUsage(apiKeyId: string, userId: string, modelId: stri
       user_id: userId,
       model_id: modelId,
       type: type,
+      tokens: estimatedTokens > 0 ? estimatedTokens : null,
       timestamp: new Date().toISOString(),
     });
 }
@@ -136,86 +152,111 @@ export async function applyPlanOverride(email: string, currentPlan: string, user
 }
 
 /**
- * In-memory rate limiting (Fallback if DB rate limiting is too slow)
- * For production, we'd ideally use Redis or a DB-level check.
+ * Global rate limiting using Supabase
  */
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const dailyLimitMap = new Map<string, { count: number; resetAt: number }>();
-
-export function checkRateLimit(key: string, limit: number = 60, type: string = 'default'): boolean {
-  const now = Date.now();
+export async function checkRateLimit(key: string, limit: number = 60, type: string = 'default'): Promise<boolean> {
   const windowMs = 60 * 1000; // 1 minute window
   const rateLimitKey = `${type}:${key}`;
   
-  const current = rateLimitMap.get(rateLimitKey);
-  
-  if (!current || now > current.resetAt) {
-    rateLimitMap.set(rateLimitKey, { count: 1, resetAt: now + windowMs });
-    return true;
+  try {
+    const { data, error } = await supabaseAdmin.rpc('check_rate_limit', {
+      p_key: rateLimitKey,
+      p_limit: limit,
+      p_window_ms: windowMs
+    });
+
+    if (error) {
+      console.error('[checkRateLimit] RPC error:', error.message);
+      return true; // Fallback to allow on error
+    }
+
+    return (data as any).allowed;
+  } catch (err) {
+    console.error('[checkRateLimit] Exception:', err);
+    return true; // Fallback to allow on error
   }
-  
-  if (current.count >= limit) {
-    return false;
-  }
-  
-  current.count++;
-  return true;
 }
 
-export function checkDailyLimit(key: string, limit: number = 1000): boolean {
-  const now = Date.now();
-  // 24 hour window
-  const windowMs = 24 * 60 * 60 * 1000;
+export async function checkDailyLimit(key: string, limit: number = 1000): Promise<boolean> {
+  // Calculate ms until next midnight UTC
+  const now = new Date();
+  const nextMidnight = new Date();
+  nextMidnight.setUTCHours(24, 0, 0, 0);
+  const windowMs = nextMidnight.getTime() - now.getTime();
+  
   const dailyKey = `daily:${key}`;
   
-  const current = dailyLimitMap.get(dailyKey);
-  
-  if (!current || now > current.resetAt) {
-    // Reset at the next midnight UTC
-    const nextMidnight = new Date();
-    nextMidnight.setUTCHours(24, 0, 0, 0);
-    dailyLimitMap.set(dailyKey, { count: 1, resetAt: nextMidnight.getTime() });
-    return true;
+  try {
+    const { data, error } = await supabaseAdmin.rpc('check_rate_limit', {
+      p_key: dailyKey,
+      p_limit: limit,
+      p_window_ms: windowMs
+    });
+
+    if (error) {
+      console.error('[checkDailyLimit] RPC error:', error.message);
+      return true; // Fallback to allow on error
+    }
+
+    return (data as any).allowed;
+  } catch (err) {
+    console.error('[checkDailyLimit] Exception:', err);
+    return true; // Fallback to allow on error
   }
-  
-  if (current.count >= limit) {
-    return false;
-  }
-  
-  current.count++;
-  return true;
 }
 
-export function getRateLimitInfo(key: string, limit: number = 60, type: string = 'default'): { remaining: number; resetAt: number; limit: number } {
-  const now = Date.now();
+export async function getRateLimitInfo(key: string, limit: number = 60, type: string = 'default'): Promise<{ remaining: number; resetAt: number; limit: number }> {
   const rateLimitKey = `${type}:${key}`;
-  const current = rateLimitMap.get(rateLimitKey);
   
-  if (!current || now > current.resetAt) {
-    return { remaining: limit, resetAt: now + 60000, limit };
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('rate_limits')
+      .select('count, reset_at')
+      .eq('key', rateLimitKey)
+      .single();
+
+    if (error || !data) {
+      return { remaining: limit, resetAt: Date.now() + 60000, limit };
+    }
+
+    const resetAt = new Date(data.reset_at).getTime();
+    return {
+      remaining: Math.max(0, limit - data.count),
+      resetAt,
+      limit
+    };
+  } catch (err) {
+    console.error('[getRateLimitInfo] Exception:', err);
+    return { remaining: limit, resetAt: Date.now() + 60000, limit };
   }
-  
-  return {
-    remaining: Math.max(0, limit - current.count),
-    resetAt: current.resetAt,
-    limit,
-  };
 }
 
-export function getDailyLimitInfo(key: string, limit: number = 1000): { remaining: number; resetAt: number; limit: number } {
-  const now = Date.now();
+export async function getDailyLimitInfo(key: string, limit: number = 1000): Promise<{ remaining: number; resetAt: number; limit: number }> {
   const dailyKey = `daily:${key}`;
-  const current = dailyLimitMap.get(dailyKey);
   
-  if (!current || now > current.resetAt) {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('rate_limits')
+      .select('count, reset_at')
+      .eq('key', dailyKey)
+      .single();
+
+    if (error || !data) {
+      const nextMidnight = new Date();
+      nextMidnight.setUTCHours(24, 0, 0, 0);
+      return { remaining: limit, resetAt: nextMidnight.getTime(), limit };
+    }
+
+    const resetAt = new Date(data.reset_at).getTime();
+    return {
+      remaining: Math.max(0, limit - data.count),
+      resetAt,
+      limit
+    };
+  } catch (err) {
+    console.error('[getDailyLimitInfo] Exception:', err);
     const nextMidnight = new Date();
     nextMidnight.setUTCHours(24, 0, 0, 0);
     return { remaining: limit, resetAt: nextMidnight.getTime(), limit };
   }
-  
-  return {
-    remaining: Math.max(0, limit - current.count),
-    resetAt: current.resetAt,
-    limit,
-  };
 }

@@ -16,28 +16,28 @@ async function sendAnnouncement() {
   const url = `https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`;
   
   const embed = {
-    title: '🎭 New Roleplaying Platform: Beta Test Starting!',
-    description: "We're excited to announce our brand new Roleplaying platform is now live for early testing! This is designed to be a powerful replacement for Janitor and Silly Tavern.",
-    color: 0x9B59B6, // Purple for RP/Creativity
+    title: '✨ Gemini 3 Flash is now FREE!',
+    description: "We've updated our tiers to make Gemini 3 Flash available to everyone.",
+    color: 0xFFA500, // Orange
     fields: [
       {
-        name: '🚀 Early Access',
-        value: 'Visit now at: [meridianlabsapp.website/RP](https://meridianlabsapp.website/RP)',
+        name: '🆓 Gemini 3 Flash',
+        value: 'The `gemini` model is now free for all users! Experience high-speed intelligence without a subscription.',
         inline: false
       },
       {
-        name: '⚠️ Work in Progress',
-        value: 'This platform was just built and is in its very early stages. We need your feedback to shape its development!',
+        name: '💎 Gemini 3 Pro',
+        value: 'The `gemini-large` model remains a **Premium** model for our Pro and Enterprise subscribers.',
         inline: false
       },
       {
-        name: '💬 Your Feedback Matters',
-        value: 'Please jump in, test it out, and let us know what you think. Your input will directly determine the features we build next.',
+        name: '🚀 Peak Performance',
+        value: 'We\'ve optimized our routing and cleaned up the interface for a smoother experience.',
         inline: false
       }
     ],
     footer: {
-      text: 'CloudGPT & Meridian Labs - Building the future of RP',
+      text: 'CloudGPT - Always Improving',
       icon_url: 'https://cdn.discordapp.com/embed/avatars/0.png'
     },
     timestamp: new Date().toISOString()
@@ -51,7 +51,7 @@ async function sendAnnouncement() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        content: "@everyone 🎭 **A new challenger in the RP space has arrived!**",
+        content: "@everyone ✨ **Gemini 3 Flash is now available for FREE!** (Pro remains Premium)",
         embeds: [embed] 
       }),
     });

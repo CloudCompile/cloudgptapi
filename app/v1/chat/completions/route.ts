@@ -1,76 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
-import { CHAT_MODELS, PROVIDER_URLS, PREMIUM_MODELS } from '@/lib/providers';
+import { CHAT_MODELS, PREMIUM_MODELS } from '@/lib/providers';
 import { getCorsHeaders, getPollinationsApiKey, getPollinationsApiKeys, getOpenRouterApiKey, getOpenRouterApiKeys } from '@/lib/utils';
 import { retrieveMemory, rememberInteraction } from '@/lib/memory';
 import { supabaseAdmin } from '@/lib/supabase';
+import {
+  validateMessages,
+  generateRequestId,
+  PROVIDER_URLS,
+  resolveModelId,
+  createChatTransformStream,
+  PROVIDER_TIMEOUT_MS,
+  sanitizeErrorText
+} from '@/lib/chat-utils';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max for long reasoning or slow providers
-
-// Constants for validation
-const MAX_MESSAGE_LENGTH = 2000000; // 2MB per message (~1.5M tokens)
-const MAX_TOTAL_LENGTH = 10000000; // 10MB total for all messages
-const MAX_MESSAGES_COUNT = 500;
-const PROVIDER_TIMEOUT_MS = 120000; // 120 seconds
-
-// Generate unique request ID for tracing
-function generateRequestId(): string {
-  return `req_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
-}
-
-// Validate message structure and content
-function validateMessages(messages: any[]): { valid: boolean; error?: string } {
-  if (messages.length === 0) {
-    return { valid: false, error: 'messages array cannot be empty' };
-  }
-  
-  if (messages.length > MAX_MESSAGES_COUNT) {
-    return { valid: false, error: `messages array exceeds maximum of ${MAX_MESSAGES_COUNT} messages` };
-  }
-  
-  let totalLength = 0;
-  
-  for (let i = 0; i < messages.length; i++) {
-    const msg = messages[i];
-    
-    if (!msg || typeof msg !== 'object') {
-      return { valid: false, error: `messages[${i}] must be an object` };
-    }
-    
-    if (!msg.role || typeof msg.role !== 'string') {
-      return { valid: false, error: `messages[${i}].role must be a string` };
-    }
-    
-    const validRoles = ['system', 'user', 'assistant', 'function', 'tool'];
-    if (!validRoles.includes(msg.role)) {
-      return { valid: false, error: `messages[${i}].role must be one of: ${validRoles.join(', ')}` };
-    }
-    
-    if (msg.content !== null && msg.content !== undefined) {
-      if (typeof msg.content !== 'string' && !Array.isArray(msg.content)) {
-        return { valid: false, error: `messages[${i}].content must be a string or array` };
-      }
-      
-      const contentLength = typeof msg.content === 'string'
-        ? msg.content.length
-        : JSON.stringify(msg.content).length;
-        
-      if (contentLength > MAX_MESSAGE_LENGTH) {
-        return { valid: false, error: `Message at index ${i} is too long (${contentLength} chars). Maximum allowed per message is ${MAX_MESSAGE_LENGTH} characters. Please truncate your input.` };
-      }
-      
-      totalLength += contentLength;
-    }
-  }
-  
-  if (totalLength > MAX_TOTAL_LENGTH) {
-    return { valid: false, error: `Total conversation length (${totalLength} chars) exceeds the maximum allowed limit of ${MAX_TOTAL_LENGTH} characters. Please reduce the number of messages or their content.` };
-  }
-  
-  return { valid: true };
-}
 
 // Map Stable Horde model IDs to actual model names
 function getStableHordeTextModelName(modelId: string): string {
@@ -187,7 +133,7 @@ async function handleStableHordeChat(
           }
           
           // Return OpenAI-compatible format
-          const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'chat');
+          const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'chat');
           return NextResponse.json({
             id: 'horde-' + requestId,
             object: 'chat.completion',
@@ -352,8 +298,8 @@ export async function POST(request: NextRequest) {
     }
     
     // Check Daily Limit First
-    if (!checkDailyLimit(effectiveKey, dailyLimit)) {
-      const dailyInfo = getDailyLimitInfo(effectiveKey, dailyLimit);
+    if (!await checkDailyLimit(effectiveKey, dailyLimit)) {
+      const dailyInfo = await getDailyLimitInfo(effectiveKey, dailyLimit);
       console.warn(`[${requestId}] Daily limit exceeded for key: ${effectiveKey.substring(0, 10)}...`);
       return NextResponse.json(
         { 
@@ -375,8 +321,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!checkRateLimit(effectiveKey, limit, 'chat')) {
-      const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'chat');
+    if (!await checkRateLimit(effectiveKey, limit, 'chat')) {
+      const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'chat');
       console.warn(`[${requestId}] Rate limit exceeded for key: ${effectiveKey.substring(0, 10)}...`);
       return NextResponse.json(
         { 
@@ -444,30 +390,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get model or use default
-    let modelId = body.model || 'openai';
-    
-    // Model Aliases for compatibility with OpenAI-oriented apps
-    const modelAliases: Record<string, string> = {
-      'gpt-4o': 'openai',
-      'gpt-4o-mini': 'openai-fast',
-      'gpt-4.5': 'openai-large',
-      'gpt-4': 'openai',
-      'gpt-3.5-turbo': 'openai-fast',
-      'claude-3-5-sonnet': 'claude',
-      'claude-3-haiku': 'claude-fast',
-      'deepseek-chat': 'deepseek',
-      'deepseek-coder': 'qwen-coder',
-      'deepseek-v3': 'deepseek',
-      'deepseek-r1': 'deepseek',
-      'gemini-2.0-flash': 'gemini',
-      'gemini-1.5-flash': 'gemini-fast',
-      'gemini-1.5-pro': 'gemini-large',
-    };
-
-    if (modelAliases[modelId]) {
-      modelId = modelAliases[modelId];
-    }
+    // Get model or use default, resolved through aliases via resolveModelId
+    const modelId = resolveModelId(body.model || 'openai');
 
     // Check if model is premium and if user has access
     const isPremium = PREMIUM_MODELS.has(modelId);
@@ -675,7 +599,7 @@ export async function POST(request: NextRequest) {
         if (response.ok) {
           console.log(`[${requestId}] Fast-path success: ${Date.now() - startTime}ms via Pollinations`);
           const data = await response.json();
-          const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'chat');
+          const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'chat');
           
           return NextResponse.json(data, {
             headers: {
@@ -960,38 +884,19 @@ export async function POST(request: NextRequest) {
       const errorText = await providerResponse.text();
       console.error(`[${requestId}] Provider error from ${model.provider} (${providerResponse.status}):`, errorText.substring(0, 500));
       
-      // Handle XML AccessDenied errors or any XML error response from Upstream (S3/CloudFront/Pollinations)
-      if (errorText.includes('<?xml') || (errorText.includes('<Error>') && errorText.includes('</Error>'))) {
-        console.warn(`[${requestId}] Detected XML error response from provider:`, errorText.substring(0, 200));
-        return NextResponse.json(
-          {
-            error: {
-              message: 'The upstream provider returned an XML error. This usually indicates an invalid API key, restricted access, or a missing resource.',
-              type: 'provider_error',
-              param: null,
-              code: errorText.includes('AccessDenied') ? 'provider_access_denied' : 'provider_xml_error',
-              request_id: requestId,
-              upstream_status: providerResponse.status,
-              details: errorText.substring(0, 200)
-            }
-          },
-          { status: providerResponse.status === 200 ? 403 : providerResponse.status, headers: getCorsHeaders() }
-        );
-      }
+      const sanitizedMessage = sanitizeErrorText(errorText);
 
       // Map unusual status codes to standard ones
-      // 418 "I'm a teapot" is sometimes returned by proxies for rate limiting or bot detection
       let mappedStatus = providerResponse.status;
-      let errorMessage = 'Upstream API error';
+      let errorMessage = sanitizedMessage;
       
       if (providerResponse.status === 418) {
-        mappedStatus = 503; // Service Unavailable
+        mappedStatus = 503;
         errorMessage = 'The upstream provider is temporarily unavailable. Please try again or use a different model.';
-        console.warn(`[${requestId}] Provider ${model.provider} returned 418 - mapping to 503`);
       } else if (providerResponse.status >= 500) {
-        errorMessage = 'The upstream provider encountered an error. Please try again later.';
+        errorMessage = sanitizedMessage || 'The upstream provider encountered an error. Please try again later.';
       } else if (providerResponse.status === 401 || providerResponse.status === 403) {
-        errorMessage = 'Authentication error with upstream provider.';
+        errorMessage = sanitizedMessage || 'Authentication error with upstream provider.';
       }
 
       try {
@@ -1008,7 +913,7 @@ export async function POST(request: NextRequest) {
               type: 'api_error',
               param: null,
               code: 'upstream_error',
-              details: errorText.substring(0, 500),
+              details: sanitizedMessage,
               request_id: requestId,
               original_status: providerResponse.status
             }
@@ -1020,46 +925,13 @@ export async function POST(request: NextRequest) {
 
     // Track usage in background if authenticated
     if (apiKeyInfo) {
-      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat');
+      // Pass messages for token estimation
+      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages);
     }
 
     // Handle streaming response
     if (body.stream) {
-      const decoder = new TextDecoder();
-      let fullContent = '';
-
-      const transformStream = new TransformStream({
-        transform(chunk, controller) {
-          const text = decoder.decode(chunk, { stream: true });
-          const lines = text.split('\n');
-          
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6).trim();
-              if (data === '[DONE]') continue;
-              try {
-                const parsed = JSON.parse(data);
-                const delta = parsed.choices?.[0]?.delta;
-                const content = delta?.content || '';
-                const reasoning = delta?.reasoning_content || '';
-                fullContent += content;
-                // We don't necessarily want to store reasoning in memory 
-                // but we need to ensure it's passed through (which it is via the chunk)
-              } catch (e) {}
-            }
-          }
-          controller.enqueue(chunk);
-        },
-        async flush() {
-           if (fullContent && userId && lastMessage) {
-             try {
-               await rememberInteraction(lastMessage, fullContent, userId);
-             } catch (err) {
-               console.error('Failed to remember streaming interaction:', err);
-             }
-           }
-         }
-      });
+      const transformStream = createChatTransformStream(lastMessage, userId, rememberInteraction);
 
       // Null-safety check for streaming body
       if (!providerResponse.body) {
@@ -1164,7 +1036,7 @@ export async function POST(request: NextRequest) {
        }
      }
 
-    const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'chat');
+    const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'chat');
     return NextResponse.json(responseData, {
       headers: {
         ...getCorsHeaders(),

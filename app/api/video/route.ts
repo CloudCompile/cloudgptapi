@@ -74,8 +74,8 @@ export async function POST(request: NextRequest) {
     }
     
     // Check Daily Limit First
-    if (!checkDailyLimit(effectiveKey, dailyLimit)) {
-      const dailyInfo = getDailyLimitInfo(effectiveKey, dailyLimit);
+    if (!await checkDailyLimit(effectiveKey, dailyLimit)) {
+      const dailyInfo = await getDailyLimitInfo(effectiveKey, dailyLimit);
       return NextResponse.json(
         { 
           error: {
@@ -95,8 +95,8 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    if (!checkRateLimit(effectiveKey, limit, 'video')) {
-      const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'video');
+    if (!await checkRateLimit(effectiveKey, limit, 'video')) {
+      const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'video');
       return NextResponse.json(
         { error: 'Rate limit exceeded', resetAt: rateLimitInfo.resetAt },
         { 
@@ -209,12 +209,12 @@ export async function POST(request: NextRequest) {
 
     // Track usage in background if authenticated
     if (apiKeyInfo) {
-      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'video');
+      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'video', body.prompt);
     }
 
     // Check if response is JSON (error) or binary (video)
     const contentType = pollinationsResponse.headers.get('content-type');
-    const rateLimitInfo = getRateLimitInfo(effectiveKey);
+    const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'video');
     
     if (contentType?.includes('application/json')) {
       const data = await pollinationsResponse.json();
