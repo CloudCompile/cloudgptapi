@@ -159,14 +159,14 @@ export async function POST(request: NextRequest) {
     // Pro access if they have a pro/enterprise/developer/admin plan OR if their rate limit is high (fallback)
     const hasProAccess = ['pro', 'enterprise', 'developer', 'admin'].includes(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
 
-    // Specific video access for Video Pro plan
-    const hasVideoAccess = hasProAccess || userPlan === 'video_pro';
+    // Specific video access for Video Pro, Enterprise, or Admin plans
+    const hasVideoAccess = ['video_pro', 'enterprise', 'admin'].includes(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
 
     if (!hasVideoAccess) {
       return NextResponse.json(
         { 
           error: {
-            message: 'Video generation requires a Video Pro or Pro plan. Please upgrade at /pricing to access video models.',
+            message: 'Video generation requires a Video Pro plan. Please upgrade at /pricing to access video models.',
             type: 'access_denied',
             param: 'plan',
             code: 'video_plan_required'

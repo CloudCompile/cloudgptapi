@@ -17,7 +17,7 @@ async function sendAnnouncement() {
     fields: [
       {
         name: 'New Video Pro Plan ($5/mo)',
-        value: '- **Exclusive Access:** All video models (Google Veo, Seedance Pro) now require the Video Pro or flagship Pro plan.\n- **Higher Limits:** 2 RPM and 2,000 requests per day for video generation.\n- **Commercial Rights:** Fully included for Video Pro subscribers.',
+        value: '- **Exclusive Access:** All video models (Google Veo, Seedance Pro) now require the specific Video Pro plan.\n- **Note:** Standard Pro plan subscribers no longer have access to video models and must upgrade to Video Pro.\n- **Higher Limits:** 2 RPM and 2,000 requests per day for video generation.',
         inline: false
       },
       {

@@ -109,14 +109,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Lock all video models behind video_pro, pro, enterprise, or admin plans
-    const hasVideoAccess = ['pro', 'video_pro', 'enterprise', 'admin'].includes(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
+    // Lock all video models behind video_pro, enterprise, or admin plans
+    const hasVideoAccess = ['video_pro', 'enterprise', 'admin'].includes(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
 
     if (!hasVideoAccess) {
       return NextResponse.json(
         { 
           error: {
-            message: 'Video generation requires a Video Pro or Pro plan. Please upgrade at /pricing to access video models.',
+            message: 'Video generation requires a Video Pro plan. Please upgrade at /pricing to access video models.',
             type: 'access_denied',
             param: 'plan',
             code: 'video_plan_required'
