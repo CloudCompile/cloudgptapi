@@ -16,28 +16,28 @@ async function sendAnnouncement() {
   const url = `https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`;
   
   const embed = {
-    title: '✨ CloudGPT: The Next Generation',
-    description: "The CloudGPT Studio overhaul is now live. We've completely redesigned the experience for professional AI developers. Faster, cleaner, and more powerful than ever.",
+    title: '✨ CloudGPT: UI & Model Update',
+    description: "We've rolled out a significant update to the CloudGPT interface. Experience a more fluid dashboard and access the latest cutting-edge models directly from our homepage.",
     color: 0x6366f1, // Indigo/Primary color
     fields: [
       {
-        name: '🎨 Modern UI/UX',
-        value: 'A brand new visual identity with glassmorphism, dot-grid backgrounds, and smooth animations across the entire platform.',
+        name: '🖱️ Enhanced Interactivity',
+        value: 'The dashboard sidebar has been fully optimized with improved layering (z-index) and scroll behavior for seamless navigation.',
         inline: false
       },
       {
-        name: '⚡ Performance Optimized',
-        value: 'Dashboard and documentation rewritten for sub-100ms response times and global low-latency access.',
+        name: '🚀 New Model Lineup',
+        value: 'Our homepage now features the latest industry-leading models, including Claude 3.5 Sonnet, Gemini 2.0 Flash, and DeepSeek-V3.',
         inline: false
       },
       {
-        name: '🛠️ Developer Tools',
-        value: 'Enhanced API documentation and real-time model monitoring to streamline your production workflow.',
+        name: '💎 Refined UI/UX',
+        value: 'Polished glassmorphism effects and corrected layouts across the platform for a more professional and reliable experience.',
         inline: false
       }
     ],
     footer: {
-      text: 'CloudGPT Studio — The Infrastructure for Professional AI',
+      text: 'CloudGPT — The Infrastructure for Professional AI',
       icon_url: 'https://raw.githubusercontent.com/lucide-software/lucide/main/icons/cloud.png'
     },
     timestamp: new Date().toISOString()
@@ -51,7 +51,7 @@ async function sendAnnouncement() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        content: "@everyone 🚀 **The CloudGPT Studio Overhaul is now live! Explore the next generation of AI infrastructure.**",
+        content: "@everyone 🚀 **The CloudGPT UI & Model Update is now live! Explore the latest improvements and infrastructure.**",
         embeds: [embed] 
       }),
     });

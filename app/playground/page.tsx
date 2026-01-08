@@ -17,12 +17,16 @@ import {
   History,
   Info
 } from 'lucide-react';
-import { CHAT_MODELS, IMAGE_MODELS, VIDEO_MODELS } from '@/lib/providers';
+import { CHAT_MODELS, IMAGE_MODELS, VIDEO_MODELS, PREMIUM_MODELS } from '@/lib/providers';
 import { cn } from '@/lib/utils';
+import { useUser } from '@clerk/nextjs';
+import Link from 'next/link';
 
 type Mode = 'chat' | 'image' | 'video';
 
 export default function PlaygroundPage() {
+  const { user, isLoaded } = useUser();
+  const [profile, setProfile] = useState<{ plan: string } | null>(null);
   const [mode, setMode] = useState<Mode>('chat');
   const [selectedModel, setSelectedModel] = useState(CHAT_MODELS[0].id);
   const [input, setInput] = useState('');
@@ -33,6 +37,19 @@ export default function PlaygroundPage() {
   const [error, setError] = useState('');
   
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isLoaded && user) {
+      fetch('/api/profile')
+        .then(res => res.json())
+        .then(data => {
+          if (data.profile) {
+            setProfile(data.profile);
+          }
+        })
+        .catch(err => console.error('Failed to fetch user profile:', err));
+    }
+  }, [isLoaded, user]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -53,6 +70,15 @@ export default function PlaygroundPage() {
 
   const handleSubmit = async () => {
     if (!input.trim() || loading) return;
+
+    // Check if model is premium and user is not pro
+    const isPremium = PREMIUM_MODELS.has(selectedModel);
+    const isPro = profile?.plan === 'pro' || profile?.plan === 'enterprise';
+    
+    if (isPremium && !isPro) {
+      setError('This model is only available for Pro members. Please upgrade your plan to use it.');
+      return;
+    }
 
     setLoading(true);
     setError('');
@@ -165,9 +191,14 @@ export default function PlaygroundPage() {
               onChange={(e) => setSelectedModel(e.target.value)}
               className="bg-transparent text-sm font-bold outline-none border-none focus:ring-0 cursor-pointer min-w-[140px]"
             >
-              {currentModels.map(m => (
-                <option key={m.id} value={m.id}>{m.name}</option>
-              ))}
+              {currentModels.map(m => {
+                const isPremium = PREMIUM_MODELS.has(m.id);
+                return (
+                  <option key={m.id} value={m.id} className="dark:bg-slate-900">
+                    {m.name} {isPremium ? '(PRO)' : ''}
+                  </option>
+                );
+              })}
             </select>
           </div>
         </div>
@@ -292,11 +323,21 @@ export default function PlaygroundPage() {
             )}
             
             {error && (
-              <div className="max-w-4xl mx-auto p-4 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 text-sm flex items-center gap-3 animate-in slide-in-from-top-2">
-                <div className="h-8 w-8 rounded-lg bg-red-100 dark:bg-red-500/20 flex items-center justify-center">
-                  <Info className="h-4 w-4" />
+              <div className="max-w-4xl mx-auto p-4 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 text-sm flex items-center justify-between gap-3 animate-in slide-in-from-top-2">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-red-100 dark:bg-red-500/20 flex items-center justify-center shrink-0">
+                    <Info className="h-4 w-4" />
+                  </div>
+                  <span className="font-bold">{error}</span>
                 </div>
-                <span className="font-bold">{error}</span>
+                {error.includes('Pro members') && (
+                  <Link 
+                    href="/pricing"
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-colors shrink-0"
+                  >
+                    Upgrade Now
+                  </Link>
+                )}
               </div>
             )}
           </div>
