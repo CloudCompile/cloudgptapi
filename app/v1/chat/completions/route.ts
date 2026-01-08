@@ -462,7 +462,7 @@ export async function POST(request: NextRequest) {
       'deepseek-r1': 'deepseek',
       'gemini-2.0-flash': 'gemini',
       'gemini-1.5-flash': 'gemini-fast',
-      'gemini-1.5-pro': 'gemini-pro',
+      'gemini-1.5-pro': 'gemini-large',
     };
 
     if (modelAliases[modelId]) {
@@ -873,7 +873,7 @@ export async function POST(request: NextRequest) {
           console.warn(`[${requestId}] OpenRouter Gemini rate limited. Trying Pollinations fallback...`);
           try {
             const pollKey = getPollinationsApiKey();
-            const pollModelId = modelId.includes('pro') ? 'gemini-pro' : (modelId.includes('lite') ? 'gemini-fast' : 'gemini');
+            const pollModelId = modelId.includes('large') || modelId.includes('pro') ? 'gemini-large' : (modelId.includes('lite') ? 'gemini-fast' : 'gemini');
             
             const pollResponse = await fetch(`${PROVIDER_URLS.pollinations}/v1/chat/completions`, {
               method: 'POST',
