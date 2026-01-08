@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
 import { VIDEO_MODELS, PROVIDER_URLS, VideoModel, PREMIUM_MODELS } from '@/lib/providers';
 import { getPollinationsApiKey } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -39,12 +39,14 @@ export async function POST(request: NextRequest) {
       // Fetch plan for session users if no API key is provided
       const { data: profile } = await supabaseAdmin
         .from('profiles')
-        .select('plan')
+        .select('plan, email')
         .eq('id', sessionUserId)
         .single();
       
-      if (profile?.plan) {
-        userPlan = profile.plan;
+      if (profile) {
+        userPlan = profile.plan || 'free';
+        // Manual override for specific users requested by admin
+        userPlan = await applyPlanOverride(profile.email, userPlan, sessionUserId, 'id');
       }
     }
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
 import { CHAT_MODELS, PROVIDER_URLS, PREMIUM_MODELS } from '@/lib/providers';
 import { getCorsHeaders, getPollinationsApiKey } from '@/lib/utils';
 import { retrieveMemory, rememberInteraction } from '@/lib/memory';
@@ -323,13 +323,7 @@ export async function POST(request: NextRequest) {
         userPlan = profile.plan || 'free';
         
         // Manual override for specific users requested by admin
-        if (profile.email === 'mschneider2492@gmail.com' && userPlan !== 'developer') {
-          await supabaseAdmin.from('profiles').update({ plan: 'developer' }).eq('id', sessionUserId);
-          userPlan = 'developer';
-        } else if ((profile.email === 'sakurananachan645@gmail.com' || profile.email === 'bakatsun09@gmail.com') && userPlan !== 'pro') {
-          await supabaseAdmin.from('profiles').update({ plan: 'pro' }).eq('id', sessionUserId);
-          userPlan = 'pro';
-        }
+        userPlan = await applyPlanOverride(profile.email, userPlan, sessionUserId, 'id');
       }
     }
 

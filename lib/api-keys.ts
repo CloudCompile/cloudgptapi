@@ -56,13 +56,7 @@ export async function validateApiKey(key: string): Promise<ApiKey | null> {
 
   // Manual override for specific users requested by admin
   if (userEmail) {
-    if (userEmail === 'mschneider2492@gmail.com' && userPlan !== 'developer') {
-      await supabaseAdmin.from('profiles').update({ plan: 'developer' }).eq('email', userEmail);
-      userPlan = 'developer';
-    } else if ((userEmail === 'sakurananachan645@gmail.com' || userEmail === 'bakatsun09@gmail.com') && userPlan !== 'pro') {
-      await supabaseAdmin.from('profiles').update({ plan: 'pro' }).eq('email', userEmail);
-      userPlan = 'pro';
-    }
+    userPlan = await applyPlanOverride(userEmail, userPlan, userEmail, 'email');
   }
 
   return {
@@ -78,7 +72,7 @@ export async function validateApiKey(key: string): Promise<ApiKey | null> {
   };
 }
 
-// Track usage for an API key
+  // Track usage for an API key
 export async function trackUsage(apiKeyId: string, userId: string, modelId: string, type: 'chat' | 'image' | 'video' | 'mem') {
   // Increment usage count on the API key
   await supabaseAdmin.rpc('increment_usage_count', { key_id: apiKeyId });
@@ -93,6 +87,41 @@ export async function trackUsage(apiKeyId: string, userId: string, modelId: stri
       type: type,
       timestamp: new Date().toISOString(),
     });
+}
+
+/**
+ * Apply manual plan overrides for specific users
+ * Returns the corrected plan name
+ */
+export async function applyPlanOverride(email: string, currentPlan: string, userIdOrEmail: string, identifierType: 'id' | 'email' = 'email'): Promise<string> {
+  if (!email) return currentPlan;
+
+  let newPlan = currentPlan;
+  let needsUpdate = false;
+
+  if (email === 'mschneider2492@gmail.com' && currentPlan !== 'developer') {
+    newPlan = 'developer';
+    needsUpdate = true;
+  } else if ((email === 'sakurananachan645@gmail.com' || email === 'bakatsun09@gmail.com') && currentPlan !== 'pro') {
+    newPlan = 'pro';
+    needsUpdate = true;
+  }
+
+  if (needsUpdate) {
+    try {
+      const query = supabaseAdmin.from('profiles').update({ plan: newPlan });
+      if (identifierType === 'id') {
+        await query.eq('id', userIdOrEmail);
+      } else {
+        await query.eq('email', userIdOrEmail);
+      }
+      console.log(`[PlanOverride] Updated ${email} to ${newPlan}`);
+    } catch (err) {
+      console.error(`[PlanOverride] Failed to update plan for ${email}:`, err);
+    }
+  }
+
+  return newPlan;
 }
 
 /**
