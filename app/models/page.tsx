@@ -112,20 +112,26 @@ export default function ModelsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="fixed inset-0 mesh-gradient opacity-60 dark:opacity-40" />
+      <div className="fixed inset-0 dot-grid opacity-30" />
+      
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 animate-in fade-in slide-in-from-top-4 duration-1000">
           <div>
-            <div className="flex items-center gap-2 text-primary font-semibold mb-2">
-              <Activity className="h-5 w-5" />
-              <span className="tracking-wider uppercase text-sm">System Status</span>
+            <div className="flex items-center gap-2 text-primary font-bold mb-4">
+              <div className="p-2 rounded-xl bg-primary/10 backdrop-blur-md border border-primary/20">
+                <Activity className="h-5 w-5" />
+              </div>
+              <span className="tracking-[0.2em] uppercase text-xs">System Intelligence</span>
             </div>
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
-              Model Monitor
+            <h1 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">
+              Model <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-pink-500">Monitor</span>
             </h1>
-            <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl">
-              Real-time performance metrics and availability status for our multi-modal AI infrastructure.
+            <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
+              Real-time performance metrics and availability status for our next-generation multi-modal AI infrastructure.
             </p>
           </div>
           
@@ -133,59 +139,63 @@ export default function ModelsPage() {
             <StatCard 
               label="Active Models" 
               value={`${stats.online}/${stats.total}`} 
-              icon={<CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+              icon={<CheckCircle2 className="h-5 w-5 text-emerald-500" />}
+              trend="+2 today"
             />
             <StatCard 
               label="Avg. Latency" 
               value={`${stats.avgLatency}ms`} 
-              icon={<Zap className="h-4 w-4 text-amber-500" />}
+              icon={<Zap className="h-5 w-5 text-amber-500" />}
+              trend="-12ms"
             />
           </div>
         </div>
 
         {/* Filters & Search */}
-        <div className="sticky top-20 z-30 mb-8 p-4 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-500 delay-100">
+        <div className="sticky top-24 z-30 mb-12 p-3 rounded-[2.5rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 shadow-2xl shadow-slate-200/50 dark:shadow-none flex flex-col md:flex-row items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-700 delay-200">
           <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
             <input 
               type="text" 
               placeholder="Search by model name, ID or provider..."
-              className="w-full pl-10 pr-4 py-2 bg-slate-100/50 dark:bg-slate-800/50 border-none rounded-xl focus:ring-2 focus:ring-primary/20 transition-all outline-none text-sm"
+              className="w-full pl-14 pr-6 py-4 bg-slate-100/50 dark:bg-slate-800/50 border-none rounded-[2rem] focus:ring-2 focus:ring-primary/20 transition-all outline-none text-base font-medium"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           
-          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl w-full md:w-auto">
-            <TabButton active={activeTab === 'all'} onClick={() => setActiveTab('all')} icon={<Globe className="h-3.5 w-3.5" />} label="All" />
-            <TabButton active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} icon={<MessageSquare className="h-3.5 w-3.5" />} label="Chat" />
-            <TabButton active={activeTab === 'image'} onClick={() => setActiveTab('image')} icon={<ImageIcon className="h-3.5 w-3.5" />} label="Image" />
-            <TabButton active={activeTab === 'video'} onClick={() => setActiveTab('video')} icon={<Video className="h-3.5 w-3.5" />} label="Video" />
+          <div className="flex items-center gap-2 p-2 bg-slate-100/50 dark:bg-slate-800/50 rounded-[2rem] w-full md:w-auto">
+            <TabButton active={activeTab === 'all'} onClick={() => setActiveTab('all')} icon={<Globe className="h-4 w-4" />} label="All" />
+            <TabButton active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} icon={<MessageSquare className="h-4 w-4" />} label="Chat" />
+            <TabButton active={activeTab === 'image'} onClick={() => setActiveTab('image')} icon={<ImageIcon className="h-4 w-4" />} label="Image" />
+            <TabButton active={activeTab === 'video'} onClick={() => setActiveTab('video')} icon={<Video className="h-4 w-4" />} label="Video" />
           </div>
         </div>
 
         {/* Models Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
-          {filteredModels.map((model) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+          {filteredModels.map((model, i) => (
             <ModelCard 
               key={model.id} 
               model={model} 
               status={statuses[model.id] || { id: model.id, status: 'checking' }} 
               onClick={() => handleModelClick(model)}
+              index={i}
             />
           ))}
           
           {filteredModels.length === 0 && (
-            <div className="col-span-full py-20 text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
-                <Filter className="h-8 w-8 text-slate-400" />
+            <div className="col-span-full py-32 text-center animate-in fade-in zoom-in-95 duration-500">
+              <div className="inline-flex items-center justify-center w-24 h-24 rounded-[2rem] bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-slate-800 mb-6 shadow-xl">
+                <Filter className="h-10 w-10 text-slate-400" />
               </div>
-              <h3 className="text-lg font-medium text-slate-900 dark:text-white">No models found</h3>
-              <p className="text-slate-500 dark:text-slate-400">Try adjusting your search or filters.</p>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">No models found</h3>
+              <p className="text-slate-500 dark:text-slate-400 max-w-sm mx-auto">Try adjusting your search or filters to find what you're looking for.</p>
             </div>
           )}
         </div>
       </div>
+
 
       {/* Model Details Modal */}
       {isModalOpen && selectedModel && (
@@ -199,15 +209,25 @@ export default function ModelsPage() {
   );
 }
 
-function StatCard({ label, value, icon }: { label: string, value: string, icon: React.ReactNode }) {
+function StatCard({ label, value, icon, trend }: { label: string, value: string, icon: React.ReactNode, trend?: string }) {
   return (
-    <div className="px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4 min-w-[160px]">
-      <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800">
+    <div className="px-8 py-6 rounded-[2.5rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/20 dark:border-slate-800/50 shadow-xl shadow-slate-200/40 dark:shadow-none flex items-center gap-6 min-w-[200px] transition-all hover:scale-105 hover:bg-white/80 dark:hover:bg-slate-900/80">
+      <div className="p-4 rounded-2xl bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50 shadow-inner">
         {icon}
       </div>
       <div>
-        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{label}</p>
-        <p className="text-xl font-bold text-slate-900 dark:text-white">{value}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mb-1">{label}</p>
+        <div className="flex items-baseline gap-2">
+          <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">{value}</p>
+          {trend && (
+            <span className={cn(
+              "text-[10px] font-bold px-2 py-0.5 rounded-full",
+              trend.startsWith('+') ? "bg-emerald-100/50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400" : "bg-amber-100/50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400"
+            )}>
+              {trend}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -218,10 +238,10 @@ function TabButton({ active, onClick, icon, label }: { active: boolean, onClick:
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex-1 md:flex-none justify-center",
+        "flex items-center gap-3 px-6 py-3 rounded-[1.5rem] text-sm font-bold transition-all whitespace-nowrap flex-1 md:flex-none justify-center",
         active 
-          ? "bg-white dark:bg-slate-700 text-primary shadow-sm" 
-          : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
+          ? "bg-white dark:bg-slate-700 text-primary shadow-lg scale-105 z-10" 
+          : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/30 dark:hover:bg-slate-800/30"
       )}
     >
       {icon}
@@ -230,74 +250,78 @@ function TabButton({ active, onClick, icon, label }: { active: boolean, onClick:
   );
 }
 
-function ModelCard({ model, status, onClick }: { model: ModelType, status: ModelStatus, onClick: () => void }) {
+function ModelCard({ model, status, onClick, index }: { model: ModelType, status: ModelStatus, onClick: () => void, index: number }) {
   return (
     <div 
       onClick={onClick}
-      className="group relative flex flex-col p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all hover:shadow-lg hover:-translate-y-1 overflow-hidden cursor-pointer">
+      className={cn(
+        "group relative flex flex-col p-8 rounded-[2.5rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/20 dark:border-slate-800/50 hover:border-primary/30 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 overflow-hidden cursor-pointer animate-in fade-in zoom-in-95",
+        index % 2 === 0 ? "delay-75" : "delay-150"
+      )}>
       {/* Background decoration */}
-      <div className="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute inset-0 dot-grid opacity-0 group-hover:opacity-10 transition-opacity" />
+      <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-primary/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
       
-      <div className="flex items-start justify-between mb-4 relative z-10">
+      <div className="flex items-start justify-between mb-8 relative z-10">
         <div className={cn(
-          "p-2 rounded-xl",
-          model.type === 'chat' ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600" :
-          model.type === 'image' ? "bg-purple-50 dark:bg-purple-900/20 text-purple-600" :
-          "bg-amber-50 dark:bg-amber-900/20 text-amber-600"
+          "p-4 rounded-[1.5rem] shadow-lg",
+          model.type === 'chat' ? "bg-blue-500 text-white shadow-blue-500/20" :
+          model.type === 'image' ? "bg-purple-500 text-white shadow-purple-500/20" :
+          "bg-amber-500 text-white shadow-amber-500/20"
         )}>
-          {model.type === 'chat' ? <MessageSquare className="h-5 w-5" /> :
-           model.type === 'image' ? <ImageIcon className="h-5 w-5" /> :
-           <Video className="h-5 w-5" />}
+          {model.type === 'chat' ? <MessageSquare className="h-6 w-6" /> :
+           model.type === 'image' ? <ImageIcon className="h-6 w-6" /> :
+           <Video className="h-6 w-6" />}
         </div>
         
         <div className="flex items-center gap-2">
           {status.status === 'online' ? (
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-tight">Online</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 backdrop-blur-md">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Online</span>
             </div>
           ) : status.status === 'offline' ? (
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-900/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-              <span className="text-[10px] font-bold text-rose-600 uppercase tracking-tight">Offline</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/20 backdrop-blur-md">
+              <span className="w-2 h-2 rounded-full bg-rose-500" />
+              <span className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest">Offline</span>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse" />
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Checking</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-500/10 dark:bg-slate-500/20 border border-slate-500/20 backdrop-blur-md">
+              <span className="w-2 h-2 rounded-full bg-slate-400 animate-pulse" />
+              <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Checking</span>
             </div>
           )}
         </div>
       </div>
 
-      <div className="mb-4 relative z-10">
-        <h3 className="font-bold text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors flex items-center gap-2">
+      <div className="mb-8 relative z-10">
+        <h3 className="text-2xl font-black text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors flex items-center gap-2 tracking-tight">
           {model.name}
-          <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-all -translate-y-1" />
+          <ArrowUpRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-all -translate-y-1" />
         </h3>
-        <div className="flex items-center gap-1.5 mt-1">
-          <code className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700/50">
+        <div className="flex items-center gap-2 mt-2">
+          <code className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800/50 px-2 py-1 rounded-lg text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 font-bold">
             {model.id}
           </code>
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 h-8 mt-2 leading-relaxed">
+        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 h-10 mt-4 leading-relaxed font-medium">
           {model.description || `High-performance ${model.type} model powered by ${model.provider}.`}
         </p>
       </div>
 
-      <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between relative z-10">
+      <div className="mt-auto pt-6 border-t border-slate-100 dark:border-slate-800/50 flex items-center justify-between relative z-10">
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase text-slate-400 dark:text-slate-500 font-bold tracking-wider">Provider</span>
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 capitalize">{model.provider}</span>
+            <span className="text-[9px] uppercase text-slate-400 dark:text-slate-500 font-black tracking-[0.2em]">Provider</span>
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 capitalize">{model.provider}</span>
           </div>
         </div>
         
         {status.latency && (
           <div className="flex flex-col items-end">
-            <span className="text-[10px] uppercase text-slate-400 dark:text-slate-500 font-bold tracking-wider">Latency</span>
-            <div className="flex items-center gap-1 text-xs font-mono font-semibold text-slate-700 dark:text-slate-300">
-              <Clock className="h-3 w-3 text-slate-400" />
+            <span className="text-[9px] uppercase text-slate-400 dark:text-slate-500 font-black tracking-[0.2em]">Latency</span>
+            <div className="flex items-center gap-1.5 text-xs font-mono font-black text-slate-900 dark:text-white">
+              <Clock className="h-3 w-3 text-primary" />
               {status.latency}ms
             </div>
           </div>
@@ -306,6 +330,7 @@ function ModelCard({ model, status, onClick }: { model: ModelType, status: Model
     </div>
   );
 }
+
 
 function ModelDetailsModal({ model, status, onClose }: { model: ModelType, status: ModelStatus, onClose: () => void }) {
   const details = getModelDetails(model.id, model.type);
@@ -329,132 +354,141 @@ function ModelDetailsModal({ model, status, onClose }: { model: ModelType, statu
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in duration-300"
       onClick={onClose}
     >
       <div 
-        className="relative w-full max-w-4xl max-h-[90vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300"
+        className="relative w-full max-w-4xl max-h-[90vh] bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[3rem] shadow-2xl border border-white/20 dark:border-slate-800/50 overflow-hidden animate-in zoom-in-95 duration-500"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Background mesh in modal */}
+        <div className="absolute inset-0 mesh-gradient opacity-20" />
+        <div className="absolute inset-0 dot-grid opacity-10" />
+
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 border-b border-slate-200 dark:border-slate-800 p-6">
+        <div className="sticky top-0 z-10 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 p-8">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-xl bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 transition-colors"
+            className="absolute top-6 right-6 p-3 rounded-2xl bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 transition-all hover:rotate-90 shadow-lg border border-slate-200/50 dark:border-slate-700/50"
           >
             <X className="h-5 w-5 text-slate-600 dark:text-slate-400" />
           </button>
           
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-8">
             <div className={cn(
-              "p-3 rounded-2xl",
-              model.type === 'chat' ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600" :
-              model.type === 'image' ? "bg-purple-100 dark:bg-purple-900/30 text-purple-600" :
-              "bg-amber-100 dark:bg-amber-900/30 text-amber-600"
+              "p-6 rounded-[2rem] shadow-2xl",
+              model.type === 'chat' ? "bg-blue-500 text-white shadow-blue-500/20" :
+              model.type === 'image' ? "bg-purple-500 text-white shadow-purple-500/20" :
+              "bg-amber-500 text-white shadow-amber-500/20"
             )}>
-              {model.type === 'chat' ? <MessageSquare className="h-8 w-8" /> :
-               model.type === 'image' ? <ImageIcon className="h-8 w-8" /> :
-               <Video className="h-8 w-8" />}
+              {model.type === 'chat' ? <MessageSquare className="h-10 w-10" /> :
+               model.type === 'image' ? <ImageIcon className="h-10 w-10" /> :
+               <Video className="h-10 w-10" />}
             </div>
             
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
+            <div className="flex-1 pt-2">
+              <div className="flex flex-wrap items-center gap-4 mb-3">
+                <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">
                   {model.name}
                 </h2>
                 {status.status === 'online' ? (
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-900/50">
+                  <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 backdrop-blur-md">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-tight">Online</span>
+                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Online</span>
                   </div>
                 ) : status.status === 'offline' ? (
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-900/50">
+                  <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/20 backdrop-blur-md">
                     <span className="w-2 h-2 rounded-full bg-rose-500" />
-                    <span className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase tracking-tight">Offline</span>
+                    <span className="text-xs font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest">Offline</span>
                   </div>
                 ) : null}
               </div>
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Model ID:</span>
-                <code className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-primary border border-slate-200 dark:border-slate-700/50 select-all cursor-copy" title="Click to copy">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Model ID:</span>
+                <code className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl text-primary border border-slate-200 dark:border-slate-700/50 select-all cursor-copy font-bold" title="Click to copy">
                   {model.id}
                 </code>
               </div>
-              <p className="text-slate-600 dark:text-slate-400 mb-3">
+              <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
                 {details?.longDescription || model.description || `High-performance ${model.type} model powered by ${model.provider}.`}
               </p>
-              <div className="flex flex-wrap gap-2">
-                <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  {model.provider}
-                </span>
-                {details?.family && (
-                  <span className="px-3 py-1 rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                    {details.family}
-                  </span>
-                )}
-                <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 capitalize">
-                  {model.type}
-                </span>
-              </div>
             </div>
           </div>
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6">
+        <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-10 relative z-10">
+          <div className="flex flex-wrap gap-3 mb-10">
+            <span className="px-5 py-2 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-md text-xs font-black text-slate-700 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50 uppercase tracking-widest">
+              {model.provider}
+            </span>
+            {details?.family && (
+              <span className="px-5 py-2 rounded-2xl bg-primary/10 text-xs font-black text-primary border border-primary/20 backdrop-blur-md uppercase tracking-widest">
+                {details.family}
+              </span>
+            )}
+            <span className="px-5 py-2 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-md text-xs font-black text-slate-700 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50 capitalize uppercase tracking-widest">
+              {model.type}
+            </span>
+          </div>
+
           {details ? (
-            <div className="space-y-6">
+            <div className="space-y-10">
               {/* Strengths */}
               {details.strengths && details.strengths.length > 0 && (
-                <section>
-                  <div className="flex items-center gap-2 mb-3">
-                    <TrendingUp className="h-5 w-5 text-emerald-600" />
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Strengths</h3>
+                <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600">
+                      <TrendingUp className="h-6 w-6" />
+                    </div>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Capabilities</h3>
                   </div>
-                  <ul className="space-y-2">
+                  <div className="grid sm:grid-cols-2 gap-4">
                     {details.strengths.map((strength, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-slate-700 dark:text-slate-300">{strength}</span>
-                      </li>
+                      <div key={idx} className="flex items-start gap-3 p-4 rounded-2xl bg-white/50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50 group hover:border-emerald-500/30 transition-colors">
+                        <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">{strength}</span>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </section>
               )}
 
               {/* Weaknesses */}
               {details.weaknesses && details.weaknesses.length > 0 && (
-                <section>
-                  <div className="flex items-center gap-2 mb-3">
-                    <TrendingDown className="h-5 w-5 text-amber-600" />
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Limitations</h3>
+                <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600">
+                      <TrendingDown className="h-6 w-6" />
+                    </div>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Limitations</h3>
                   </div>
-                  <ul className="space-y-2">
+                  <div className="grid sm:grid-cols-2 gap-4">
                     {details.weaknesses.map((weakness, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <Info className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-slate-700 dark:text-slate-300">{weakness}</span>
-                      </li>
+                      <div key={idx} className="flex items-start gap-3 p-4 rounded-2xl bg-white/50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50 group hover:border-amber-500/30 transition-colors">
+                        <Info className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">{weakness}</span>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </section>
               )}
 
+
               {/* Use Cases */}
               {details.useCases && details.useCases.length > 0 && (
-                <section>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Target className="h-5 w-5 text-blue-600" />
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Best For</h3>
+                <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600">
+                      <Target className="h-6 w-6" />
+                    </div>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Best Use Cases</h3>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-3">
                     {details.useCases.map((useCase, idx) => (
-                      <span 
-                        key={idx}
-                        className="px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-sm font-medium text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-900/30"
-                      >
+                      <div key={idx} className="px-6 py-3 rounded-2xl bg-primary/5 dark:bg-primary/10 border border-primary/10 text-slate-700 dark:text-slate-300 font-bold text-sm hover:bg-primary/10 transition-colors cursor-default">
                         {useCase}
-                      </span>
+                      </div>
                     ))}
                   </div>
                 </section>
@@ -462,35 +496,37 @@ function ModelDetailsModal({ model, status, onClose }: { model: ModelType, statu
 
               {/* Technical Specifications */}
               {details.technicalSpecs && (
-                <section>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Settings className="h-5 w-5 text-purple-600" />
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Technical Specifications</h3>
+                <section className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 rounded-xl bg-purple-500/10 text-purple-600">
+                      <Cpu className="h-6 w-6" />
+                    </div>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Technical Specs</h3>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {details.technicalSpecs.contextWindow && (
-                      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mb-1">Context Window</p>
-                        <p className="text-lg font-bold text-slate-900 dark:text-white">{details.technicalSpecs.contextWindow}</p>
+                      <div className="p-6 rounded-[2rem] bg-white/50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em] mb-2">Context</p>
+                        <p className="text-xl font-black text-slate-900 dark:text-white tracking-tight">{details.technicalSpecs.contextWindow}</p>
                       </div>
                     )}
                     {details.technicalSpecs.architecture && (
-                      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mb-1">Architecture</p>
-                        <p className="text-lg font-bold text-slate-900 dark:text-white">{details.technicalSpecs.architecture}</p>
+                      <div className="p-6 rounded-[2rem] bg-white/50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em] mb-2">Arch</p>
+                        <p className="text-xl font-black text-slate-900 dark:text-white tracking-tight">{details.technicalSpecs.architecture}</p>
                       </div>
                     )}
                     {details.technicalSpecs.releaseDate && (
-                      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mb-1">Release Date</p>
-                        <p className="text-lg font-bold text-slate-900 dark:text-white">{details.technicalSpecs.releaseDate}</p>
+                      <div className="p-6 rounded-[2rem] bg-white/50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em] mb-2">Released</p>
+                        <p className="text-xl font-black text-slate-900 dark:text-white tracking-tight">{details.technicalSpecs.releaseDate}</p>
                       </div>
                     )}
                     {status.latency && (
-                      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mb-1">Current Latency</p>
-                        <p className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-slate-400" />
+                      <div className="p-6 rounded-[2rem] bg-white/50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em] mb-2">Latency</p>
+                        <p className="text-xl font-black text-primary tracking-tight flex items-center gap-2">
+                          <Zap className="h-5 w-5" />
                           {status.latency}ms
                         </p>
                       </div>
@@ -500,23 +536,14 @@ function ModelDetailsModal({ model, status, onClose }: { model: ModelType, statu
               )}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <Info className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Limited Information Available</h3>
-              <p className="text-slate-600 dark:text-slate-400 mb-4">
-                Detailed information for this model is not yet available.
-              </p>
-              <div className="inline-block p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  <strong>Model ID:</strong> {model.id}
-                </p>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  <strong>Provider:</strong> {model.provider}
-                </p>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  <strong>Type:</strong> {model.type}
-                </p>
+            <div className="flex flex-col items-center justify-center py-24 text-center animate-in fade-in zoom-in-95 duration-500">
+              <div className="p-8 rounded-[2.5rem] bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50 mb-8 shadow-inner">
+                <Settings className="h-16 w-16 text-slate-400 animate-spin-slow" />
               </div>
+              <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">System Analysis</h3>
+              <p className="text-lg text-slate-500 dark:text-slate-400 max-w-sm mx-auto font-medium leading-relaxed">
+                Detailed intelligence for this model is currently being indexed. Full metrics will be available in the next sync.
+              </p>
             </div>
           )}
         </div>
@@ -524,3 +551,4 @@ function ModelDetailsModal({ model, status, onClose }: { model: ModelType, statu
     </div>
   );
 }
+

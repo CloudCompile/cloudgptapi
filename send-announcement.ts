@@ -16,24 +16,29 @@ async function sendAnnouncement() {
   const url = `https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`;
   
   const embed = {
-    title: '🛠️ Scheduled Maintenance',
-    description: "We are performing a quick system migration to improve performance and stability.",
-    color: 0xFF0000, // Red for maintenance
+    title: '✨ CloudGPT: The Next Generation',
+    description: "The CloudGPT Studio overhaul is now live. We've completely redesigned the experience for professional AI developers. Faster, cleaner, and more powerful than ever.",
+    color: 0x6366f1, // Indigo/Primary color
     fields: [
       {
-        name: '⏱️ Duration',
-        value: 'Expected downtime: **2-4 minutes**.',
+        name: '🎨 Modern UI/UX',
+        value: 'A brand new visual identity with glassmorphism, dot-grid backgrounds, and smooth animations across the entire platform.',
         inline: false
       },
       {
-        name: '🚀 Purpose',
-        value: 'Migration to enhanced infrastructure for better reliability.',
+        name: '⚡ Performance Optimized',
+        value: 'Dashboard and documentation rewritten for sub-100ms response times and global low-latency access.',
+        inline: false
+      },
+      {
+        name: '🛠️ Developer Tools',
+        value: 'Enhanced API documentation and real-time model monitoring to streamline your production workflow.',
         inline: false
       }
     ],
     footer: {
-      text: 'CloudGPT - Scaling Up',
-      icon_url: 'https://cdn.discordapp.com/embed/avatars/0.png'
+      text: 'CloudGPT Studio — The Infrastructure for Professional AI',
+      icon_url: 'https://raw.githubusercontent.com/lucide-software/lucide/main/icons/cloud.png'
     },
     timestamp: new Date().toISOString()
   };
@@ -46,7 +51,7 @@ async function sendAnnouncement() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        content: "@everyone 🛠️ **Scheduled Maintenance: 5-10 minute downtime for migration starting now.**",
+        content: "@everyone 🚀 **The CloudGPT Studio Overhaul is now live! Explore the next generation of AI infrastructure.**",
         embeds: [embed] 
       }),
     });

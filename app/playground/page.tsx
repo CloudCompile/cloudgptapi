@@ -118,200 +118,296 @@ export default function PlaygroundPage() {
   const currentModels = mode === 'chat' ? CHAT_MODELS : mode === 'image' ? IMAGE_MODELS : VIDEO_MODELS;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-white dark:bg-slate-950 overflow-hidden">
-      {/* Top Controls Bar */}
-      <div className="h-14 border-b flex items-center justify-between px-4 glass shrink-0">
-        <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-900 rounded-lg">
-          <ModeButton 
-            active={mode === 'chat'} 
-            onClick={() => handleModeChange('chat')}
-            icon={<MessageSquare className="h-4 w-4" />}
-            label="Chat"
-          />
-          <ModeButton 
-            active={mode === 'image'} 
-            onClick={() => handleModeChange('image')}
-            icon={<ImageIcon className="h-4 w-4" />}
-            label="Image"
-          />
-          <ModeButton 
-            active={mode === 'video'} 
-            onClick={() => handleModeChange('video')}
-            icon={<Video className="h-4 w-4" />}
-            label="Video"
-          />
-        </div>
+    <div className="flex flex-col h-[calc(100vh-4rem)] bg-white dark:bg-slate-950 overflow-hidden relative">
+      <div className="absolute inset-0 mesh-gradient opacity-30 pointer-events-none" />
+      <div className="absolute inset-0 dot-grid opacity-[0.03] pointer-events-none" />
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-white dark:bg-slate-950 shadow-sm">
-            <Settings2 className="h-4 w-4 text-slate-500" />
+      {/* Top Controls Bar */}
+      <div className="h-16 border-b flex items-center justify-between px-6 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shrink-0 z-20">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-1 p-1 bg-slate-100/50 dark:bg-slate-900/50 rounded-2xl border border-border/50">
+            <ModeButton 
+              active={mode === 'chat'} 
+              onClick={() => handleModeChange('chat')}
+              icon={<MessageSquare className="h-4 w-4" />}
+              label="Chat"
+            />
+            <ModeButton 
+              active={mode === 'image'} 
+              onClick={() => handleModeChange('image')}
+              icon={<ImageIcon className="h-4 w-4" />}
+              label="Image"
+            />
+            <ModeButton 
+              active={mode === 'video'} 
+              onClick={() => handleModeChange('video')}
+              icon={<Video className="h-4 w-4" />}
+              label="Video"
+            />
+          </div>
+
+          <div className="h-6 w-px bg-border/50" />
+
+          <div className="flex items-center gap-3 px-4 py-2 rounded-xl border bg-white dark:bg-slate-900 shadow-sm hover:border-primary/30 transition-colors group">
+            <Settings2 className="h-4 w-4 text-slate-400 group-hover:text-primary transition-colors" />
             <select 
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
-              className="bg-transparent text-sm font-medium outline-none border-none focus:ring-0"
+              className="bg-transparent text-sm font-bold outline-none border-none focus:ring-0 cursor-pointer min-w-[140px]"
             >
               {currentModels.map(m => (
-                <option key={m.id} value={m.id}>{m.name} ({m.id})</option>
+                <option key={m.id} value={m.id}>{m.name}</option>
               ))}
             </select>
           </div>
+        </div>
+
+        <div className="flex items-center gap-3">
           <button 
             onClick={() => handleModeChange(mode)}
-            className="p-2 text-slate-500 hover:text-red-500 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all text-sm font-bold"
             title="Clear Session"
           >
             <Trash2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Clear</span>
           </button>
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative z-10">
         {/* Left Panel: Conversation/Result Area */}
-        <div className="flex-1 flex flex-col min-w-0 bg-slate-50/30 dark:bg-slate-900/10">
+        <div className="flex-1 flex flex-col min-w-0">
           <div 
             ref={scrollRef}
-            className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scroll-smooth"
+            className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 scroll-smooth"
           >
             {mode === 'chat' ? (
               messages.length === 0 ? (
-                <EmptyState icon={<Sparkles className="h-10 w-10" />} title="Ready for Chat" description="Select a model and start a conversation." />
+                <EmptyState 
+                  icon={<Sparkles className="h-12 w-12" />} 
+                  title="Universal Chat" 
+                  description="Experience the power of any LLM through our unified interface. Start by typing a message below." 
+                />
               ) : (
-                messages.map((m, i) => (
-                  <div key={i} className={cn(
-                    "flex gap-4 max-w-3xl animate-in fade-in slide-in-from-bottom-2 duration-300",
-                    m.role === 'user' ? "ml-auto flex-row-reverse" : "mr-auto"
-                  )}>
-                    <div className={cn(
-                      "h-8 w-8 rounded-full shrink-0 flex items-center justify-center",
-                      m.role === 'user' ? "bg-primary" : "bg-slate-200 dark:bg-slate-800"
+                <div className="max-w-4xl mx-auto space-y-8">
+                  {messages.map((m, i) => (
+                    <div key={i} className={cn(
+                      "flex gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500",
+                      m.role === 'user' ? "flex-row-reverse" : "flex-row"
                     )}>
-                      {m.role === 'user' ? <User className="h-4 w-4 text-white" /> : <Bot className="h-4 w-4" />}
+                      <div className={cn(
+                        "h-10 w-10 rounded-2xl shrink-0 flex items-center justify-center border shadow-sm",
+                        m.role === 'user' 
+                          ? "bg-primary border-primary/20 text-white shadow-primary/20" 
+                          : "bg-white dark:bg-slate-900 border-border"
+                      )}>
+                        {m.role === 'user' ? <User className="h-5 w-5" /> : <Bot className="h-5 w-5" />}
+                      </div>
+                      <div className={cn(
+                        "flex-1 p-6 rounded-[2rem] text-sm leading-relaxed border transition-all duration-300",
+                        m.role === 'user' 
+                          ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-xl" 
+                          : "bg-white dark:bg-slate-900 border-border shadow-sm hover:border-primary/20"
+                      )}>
+                        <div className="prose dark:prose-invert max-w-none">
+                          {m.content}
+                        </div>
+                      </div>
                     </div>
-                    <div className={cn(
-                      "p-4 rounded-2xl text-sm leading-relaxed",
-                      m.role === 'user' 
-                        ? "bg-primary text-white shadow-lg shadow-primary/10" 
-                        : "bg-white dark:bg-slate-900 border shadow-sm text-slate-800 dark:text-slate-200"
-                    )}>
-                      {m.content}
-                    </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )
             ) : mode === 'image' ? (
               imageUrl ? (
-                <div className="flex flex-col items-center justify-center h-full">
-                  <div className="relative group rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 animate-in zoom-in-95 duration-500">
-                    <img src={imageUrl} alt="Generated" className="max-w-full max-h-[70vh] object-contain" />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                      <a href={imageUrl} download="generated-image.png" className="p-3 bg-white rounded-full text-black hover:scale-110 transition-transform">
+                <div className="flex flex-col items-center justify-center h-full p-4">
+                  <div className="relative group rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white dark:border-slate-900 animate-in zoom-in-95 duration-700 max-w-4xl w-full">
+                    <img src={imageUrl} alt="Generated" className="w-full h-auto object-contain" />
+                    <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center gap-6 backdrop-blur-sm">
+                      <a 
+                        href={imageUrl} 
+                        download="generated-image.png" 
+                        className="h-16 w-16 bg-white rounded-full text-slate-950 flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-2xl"
+                      >
+                        <Download className="h-8 w-8" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <EmptyState 
+                  icon={<ImageIcon className="h-12 w-12" />} 
+                  title="Creative Studio" 
+                  description="Transform text into breathtaking visuals using state-of-the-art diffusion models." 
+                />
+              )
+            ) : (
+              videoUrl ? (
+                <div className="flex flex-col items-center justify-center h-full p-4">
+                  <div className="relative group rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white dark:border-slate-900 animate-in zoom-in-95 duration-700 max-w-4xl w-full">
+                    <video src={videoUrl} controls className="w-full h-auto" />
+                    <div className="absolute top-8 right-8 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                      <a 
+                        href={videoUrl} 
+                        download="generated-video.mp4" 
+                        className="h-12 w-12 bg-white rounded-full text-slate-950 flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-2xl"
+                      >
                         <Download className="h-6 w-6" />
                       </a>
                     </div>
                   </div>
                 </div>
               ) : (
-                <EmptyState icon={<ImageIcon className="h-10 w-10" />} title="Image Generation" description="Enter a detailed prompt to create an image." />
-              )
-            ) : (
-              videoUrl ? (
-                <div className="flex flex-col items-center justify-center h-full">
-                  <div className="relative group rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 animate-in zoom-in-95 duration-500">
-                    <video src={videoUrl} controls className="max-w-full max-h-[70vh]" />
-                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <a href={videoUrl} download="generated-video.mp4" className="p-2 bg-white rounded-full text-black hover:scale-110 transition-transform flex items-center justify-center">
-                        <Download className="h-5 w-5" />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <EmptyState icon={<Video className="h-10 w-10" />} title="Video Generation" description="Transform your ideas into high-quality AI video." />
+                <EmptyState 
+                  icon={<Video className="h-12 w-12" />} 
+                  title="Motion Forge" 
+                  description="Bring your ideas to life with cinematic AI video generation. Describe your scene below." 
+                />
               )
             )}
             
             {loading && (
-              <div className="flex gap-4 max-w-3xl mr-auto animate-pulse">
-                <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-800 shrink-0 flex items-center justify-center">
-                  <Bot className="h-4 w-4" />
+              <div className="max-w-4xl mx-auto flex gap-6 animate-pulse">
+                <div className="h-10 w-10 rounded-2xl bg-slate-200 dark:bg-slate-800 shrink-0 flex items-center justify-center border border-border">
+                  <Bot className="h-5 w-5 text-slate-400" />
                 </div>
-                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border text-sm flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  Generating response...
+                <div className="flex-1 p-6 rounded-[2rem] bg-white/50 dark:bg-slate-900/50 border border-border/50 text-sm flex items-center gap-3">
+                  <div className="flex gap-1">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" />
+                  </div>
+                  <span className="text-slate-500 font-medium">CloudGPT is thinking...</span>
                 </div>
               </div>
             )}
             
             {error && (
-              <div className="p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
-                <Info className="h-4 w-4" />
-                {error}
+              <div className="max-w-4xl mx-auto p-4 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 text-sm flex items-center gap-3 animate-in slide-in-from-top-2">
+                <div className="h-8 w-8 rounded-lg bg-red-100 dark:bg-red-500/20 flex items-center justify-center">
+                  <Info className="h-4 w-4" />
+                </div>
+                <span className="font-bold">{error}</span>
               </div>
             )}
           </div>
 
           {/* Input Area */}
-          <div className="p-4 md:p-6 border-t bg-white dark:bg-slate-950">
-            <div className="max-w-3xl mx-auto relative">
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSubmit();
-                  }
-                }}
-                placeholder={mode === 'chat' ? "Type a message..." : "Describe what you want to create..."}
-                className="w-full pl-4 pr-14 py-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none resize-none min-h-[60px] max-h-[200px]"
-                rows={1}
-              />
-              <button
-                onClick={handleSubmit}
-                disabled={!input.trim() || loading}
-                className="absolute right-2 top-2 bottom-2 w-12 rounded-xl bg-primary text-white flex items-center justify-center disabled:opacity-50 disabled:bg-slate-400 hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 active:scale-95"
-              >
-                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-              </button>
+          <div className="p-6 md:p-10 bg-gradient-to-t from-white dark:from-slate-950 via-white/80 dark:via-slate-950/80 to-transparent">
+            <div className="max-w-4xl mx-auto relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-blue-500/20 to-emerald-500/20 rounded-[2.5rem] blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+              <div className="relative">
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit();
+                    }
+                  }}
+                  placeholder={mode === 'chat' ? "Ask anything... (Shift + Enter for new line)" : "Describe your creation in detail..."}
+                  className="w-full pl-6 pr-20 py-6 rounded-[2rem] border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:ring-0 focus:border-primary transition-all outline-none resize-none min-h-[80px] max-h-[300px] text-base font-medium shadow-xl shadow-slate-200/50 dark:shadow-none"
+                  rows={1}
+                />
+                <button
+                  onClick={handleSubmit}
+                  disabled={!input.trim() || loading}
+                  className="absolute right-3 top-3 bottom-3 w-14 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center disabled:opacity-30 hover:scale-105 active:scale-95 transition-all shadow-lg z-10"
+                >
+                  {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
+                </button>
+              </div>
             </div>
-            <p className="text-[10px] text-center mt-3 text-slate-400 uppercase tracking-widest font-bold">
-              Powered by CloudGPT Unified API
-            </p>
+            <div className="flex items-center justify-center gap-6 mt-6">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">API Online</span>
+              </div>
+              <div className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700" />
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                {currentModels.find(m => m.id === selectedModel)?.name}
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Right Panel: Sidebar Info (Hidden on Mobile) */}
-        <div className="hidden lg:flex w-72 border-l flex-col bg-slate-50/50 dark:bg-slate-950/50 p-6 space-y-8">
-          <div>
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Model Info</h3>
-            <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border shadow-sm">
-              <p className="text-sm font-bold mb-1">
-                {currentModels.find(m => m.id === selectedModel)?.name}
-              </p>
-              <code className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-primary border border-slate-200 dark:border-slate-700/50 block w-fit mb-3">
-                {selectedModel}
-              </code>
-              <p className="text-xs text-slate-500 line-clamp-3">
-                Professional grade {mode} model optimized for high-quality outputs and low latency.
-              </p>
+        <div className="hidden xl:flex w-80 border-l border-border/50 flex-col bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm p-8 space-y-10 overflow-y-auto">
+          <section>
+            <div className="flex items-center gap-2 mb-6">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Bot className="h-4 w-4 text-primary" />
+              </div>
+              <h3 className="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-[0.2em]">Model Config</h3>
             </div>
-          </div>
+            
+            <div className="space-y-6">
+              <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border-2 border-border shadow-sm hover:border-primary/30 transition-all group">
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Provider</div>
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                  CloudGPT Unified
+                  <Zap className="h-3 w-3 text-amber-500 fill-amber-500" />
+                </p>
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Model ID</div>
+                <code className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg text-primary border border-border block w-fit">
+                  {selectedModel}
+                </code>
+              </div>
 
-          <div>
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Session Info</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-500 flex items-center gap-1.5"><History className="h-3.5 w-3.5" /> Tokens</span>
-                <span className="font-mono font-bold text-primary">0</span>
+              <div className="p-5 rounded-3xl bg-slate-100/50 dark:bg-slate-900/50 border border-dashed border-border">
+                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Capabilities</h4>
+                <div className="flex flex-wrap gap-2">
+                  {['High Speed', 'Context Aware', 'JSON Mode', 'Function Calling'].map(cap => (
+                    <span key={cap} className="text-[9px] font-bold px-2 py-1 rounded-md bg-white dark:bg-slate-800 border border-border text-slate-600 dark:text-slate-400">
+                      {cap}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-500 flex items-center gap-1.5"><Zap className="h-3.5 w-3.5" /> Latency</span>
-                <span className="font-mono font-bold text-primary">0ms</span>
+            </div>
+          </section>
+
+          <section>
+            <div className="flex items-center gap-2 mb-6">
+              <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <History className="h-4 w-4 text-emerald-500" />
               </div>
+              <h3 className="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-[0.2em]">Live Metrics</h3>
+            </div>
+            
+            <div className="grid gap-4">
+              <MetricCard label="Tokens" value="0" sub="Approximate" />
+              <MetricCard label="Latency" value="0ms" sub="Response time" />
+              <MetricCard label="Context" value="128k" sub="Max window" />
+            </div>
+          </section>
+
+          <div className="mt-auto p-6 rounded-[2rem] bg-slate-900 dark:bg-white text-white dark:text-slate-900 relative overflow-hidden group">
+            <div className="absolute inset-0 dot-grid opacity-10 group-hover:opacity-20 transition-opacity" />
+            <div className="relative z-10">
+              <h4 className="text-sm font-black mb-2">Need more power?</h4>
+              <p className="text-[11px] font-bold opacity-70 mb-4 leading-relaxed">
+                Unlock specialized models and higher rate limits with Pro.
+              </p>
+              <button className="w-full py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl">
+                Upgrade Now
+              </button>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function MetricCard({ label, value, sub }: { label: string, value: string, sub: string }) {
+  return (
+    <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-border shadow-sm">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</span>
+        <span className="text-[9px] font-bold text-slate-400">{sub}</span>
+      </div>
+      <div className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">{value}</div>
     </div>
   );
 }
@@ -321,26 +417,41 @@ function ModeButton({ active, onClick, icon, label }: { active: boolean, onClick
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all",
+        "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300",
         active 
-          ? "bg-white dark:bg-slate-800 text-primary shadow-sm" 
-          : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
+          ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-lg shadow-slate-200/50 dark:shadow-none scale-105" 
+          : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/50"
       )}
     >
       {icon}
-      {label}
+      <span className="hidden sm:inline">{label}</span>
     </button>
   );
 }
 
 function EmptyState({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
   return (
-    <div className="h-full flex flex-col items-center justify-center text-center animate-in fade-in zoom-in-95 duration-700">
-      <div className="h-20 w-20 rounded-3xl bg-primary/5 flex items-center justify-center mb-6 border-2 border-primary/10">
-        <div className="text-primary">{icon}</div>
+    <div className="h-full flex flex-col items-center justify-center text-center p-8 animate-in fade-in zoom-in-95 duration-1000">
+      <div className="relative mb-8 group">
+        <div className="absolute -inset-4 bg-primary/10 rounded-[2.5rem] blur-2xl group-hover:bg-primary/20 transition-all duration-700" />
+        <div className="relative h-24 w-24 rounded-[2rem] bg-white dark:bg-slate-900 border-2 border-primary/20 flex items-center justify-center shadow-2xl shadow-primary/10 group-hover:scale-110 transition-transform duration-700">
+          <div className="text-primary group-hover:rotate-12 transition-transform duration-700">{icon}</div>
+        </div>
       </div>
-      <h3 className="text-xl font-bold mb-2">{title}</h3>
-      <p className="text-slate-500 max-w-xs">{description}</p>
+      <h3 className="text-3xl font-black mb-4 tracking-tight text-slate-900 dark:text-white">{title}</h3>
+      <p className="text-slate-500 dark:text-slate-400 max-w-md text-base font-medium leading-relaxed">{description}</p>
+      
+      <div className="grid grid-cols-2 gap-4 mt-12 w-full max-w-sm">
+        {[
+          { label: "High Precision", icon: <Zap className="h-3 w-3" /> },
+          { label: "Low Latency", icon: <History className="h-3 w-3" /> }
+        ].map(item => (
+          <div key={item.label} className="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-border">
+            <span className="text-primary">{item.icon}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.label}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

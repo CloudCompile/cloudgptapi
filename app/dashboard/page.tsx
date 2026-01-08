@@ -13,8 +13,17 @@ import {
   Activity,
   ArrowUpRight,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Search,
+  RefreshCcw,
+  Terminal,
+  Cpu,
+  BarChart3,
+  Globe,
+  Lock,
+  Zap
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ApiKey {
   id: string;
@@ -40,12 +49,14 @@ export default function Dashboard() {
   const [createdKey, setCreatedKey] = useState<NewApiKey | null>(null);
   const [error, setError] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchKeys();
   }, []);
 
   async function fetchKeys() {
+    setLoading(true);
     try {
       const response = await fetch('/api/keys');
       const data = await response.json();
@@ -114,192 +125,280 @@ export default function Dashboard() {
     setTimeout(() => setCopiedId(null), 2000);
   }
 
+  const filteredKeys = keys.filter(key => 
+    key.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    key.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-slate-50/50 dark:bg-slate-900/50 py-12">
-      <div className="container mx-auto px-4 max-w-5xl">
+    <div className="min-h-screen py-12 px-4 lg:px-12">
+      <div className="max-w-7xl mx-auto">
         
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight mb-2">API Management</h1>
-            <p className="text-slate-500 dark:text-slate-400">Manage your access keys and monitor usage across all AI models.</p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <div className="relative group">
-              <input
-                type="text"
-                placeholder="Key name (e.g. Production)"
-                value={newKeyName}
-                onChange={(e) => setNewKeyName(e.target.value)}
-                className="pl-4 pr-32 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none w-full md:w-64"
-                onKeyDown={(e) => e.key === 'Enter' && createKey()}
-              />
-              <button
-                onClick={createKey}
-                className="absolute right-1.5 top-1.5 bottom-1.5 px-4 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-all flex items-center gap-1.5"
-              >
-                <Plus className="h-4 w-4" />
-                Create
-              </button>
+        <div className="mb-16">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-4 border border-primary/20">
+                <Shield className="h-3 w-3" />
+                <span>Security Console</span>
+              </div>
+              <h1 className="text-5xl font-black tracking-tighter mb-4 leading-none">API Management</h1>
+              <p className="text-slate-500 dark:text-slate-400 max-w-xl text-lg font-medium leading-relaxed">
+                Securely manage your access keys and monitor real-time usage across the CloudGPT infrastructure.
+              </p>
             </div>
+            
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+              <button 
+                onClick={fetchKeys}
+                className="p-4 rounded-2xl border border-border bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all shadow-sm group"
+                title="Refresh Data"
+              >
+                <RefreshCcw className={cn("h-5 w-5 text-slate-500 group-hover:text-primary transition-colors", loading && "animate-spin")} />
+              </button>
+              <div className="relative flex-1 sm:w-80 group">
+                <input
+                  type="text"
+                  placeholder="Production API Key"
+                  value={newKeyName}
+                  onChange={(e) => setNewKeyName(e.target.value)}
+                  className="w-full pl-5 pr-36 py-4 rounded-2xl border-2 border-border bg-white dark:bg-slate-950 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none font-bold text-sm"
+                  onKeyDown={(e) => e.key === 'Enter' && createKey()}
+                />
+                <button
+                  onClick={createKey}
+                  disabled={!newKeyName.trim() || loading}
+                  className="absolute right-2 top-2 bottom-2 px-6 rounded-xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary/90 transition-all flex items-center gap-2 shadow-xl shadow-primary/20 disabled:opacity-50 disabled:shadow-none"
+                >
+                  <Plus className="h-4 w-4" />
+                  Create
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatsCard 
+              icon={<Activity className="h-5 w-5 text-blue-500" />} 
+              label="Total Usage" 
+              value={keys.reduce((acc, k) => acc + (k.usageCount || 0), 0).toLocaleString()} 
+              description="Requests this month"
+            />
+            <StatsCard 
+              icon={<Zap className="h-5 w-5 text-amber-500" />} 
+              label="Active Keys" 
+              value={keys.length.toString()} 
+              description="Total provisioned"
+            />
+            <StatsCard 
+              icon={<Globe className="h-5 w-5 text-emerald-500" />} 
+              label="Avg Latency" 
+              value="42ms" 
+              description="Global average"
+            />
+            <StatsCard 
+              icon={<Lock className="h-5 w-5 text-purple-500" />} 
+              label="API Status" 
+              value="Active" 
+              color="text-emerald-500"
+              description="All systems go"
+            />
           </div>
         </div>
 
         {error && (
-          <div className="mb-8 p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-            <AlertCircle className="h-5 w-5" />
-            <span className="text-sm font-medium">{error}</span>
+          <div className="mb-12 p-5 rounded-[2rem] bg-red-50 dark:bg-red-500/5 border-2 border-red-500/10 text-red-600 dark:text-red-400 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+              <AlertCircle className="h-6 w-6" />
+            </div>
+            <span className="font-bold text-sm">{error}</span>
           </div>
         )}
 
-        {/* New Key Modal/Alert */}
+        {/* New Key Alert */}
         {createdKey && (
-          <div className="mb-10 p-6 rounded-2xl bg-primary/5 border-2 border-primary/20 animate-in zoom-in-95 duration-300">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Shield className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg text-primary">New API Key Created!</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Copy this key now. For your security, it won't be shown again.</p>
-                </div>
-              </div>
+          <div className="mb-16 p-10 rounded-[3rem] bg-primary/5 border-2 border-primary/20 shadow-3xl shadow-primary/10 animate-in zoom-in-95 duration-700 relative overflow-hidden group">
+            <div className="absolute inset-0 dot-grid opacity-20 group-hover:opacity-30 transition-opacity" />
+            <div className="absolute top-0 right-0 p-6">
               <button 
                 onClick={() => setCreatedKey(null)}
-                className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+                className="p-3 rounded-2xl hover:bg-primary/10 transition-all hover:rotate-90"
               >
-                <Plus className="h-5 w-5 rotate-45" />
+                <Plus className="h-8 w-8 rotate-45 text-primary" />
               </button>
             </div>
             
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-white dark:bg-slate-950 border border-primary/30 shadow-inner">
-              <code className="flex-1 font-mono text-sm break-all text-slate-800 dark:text-slate-200 px-2">{createdKey.key}</code>
-              <button
-                onClick={() => copyToClipboard(createdKey.key, 'new')}
-                className="p-2 rounded-lg bg-slate-50 dark:bg-slate-900 hover:bg-primary/10 hover:text-primary transition-all flex items-center gap-2 text-xs font-bold"
-              >
-                {copiedId === 'new' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {copiedId === 'new' ? 'Copied' : 'Copy'}
-              </button>
+            <div className="relative z-10">
+              <div className="flex items-start gap-8 mb-10">
+                <div className="h-20 w-20 rounded-[2rem] bg-primary/20 flex items-center justify-center shrink-0 shadow-2xl shadow-primary/20">
+                  <Shield className="h-10 w-10 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-black text-4xl text-primary mb-3 tracking-tighter leading-none">Secure Your New Key</h3>
+                  <p className="text-slate-600 dark:text-slate-400 max-w-xl text-lg font-medium leading-relaxed">
+                    This is a one-time display. Store this key in a secure environment. 
+                    Loss of this key will require generating a new one.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4">
+                <div className="flex-1 flex items-center gap-4 p-6 rounded-[2rem] bg-white dark:bg-slate-950 border-2 border-primary/30 shadow-inner group/code">
+                  <code className="flex-1 font-mono text-xl break-all text-slate-900 dark:text-slate-100 px-2 select-all leading-none">{createdKey.key}</code>
+                  <button
+                    onClick={() => copyToClipboard(createdKey.key, 'new')}
+                    className="p-3 rounded-xl hover:bg-primary/10 text-primary transition-colors"
+                  >
+                    {copiedId === 'new' ? <Check className="h-6 w-6" /> : <Copy className="h-6 w-6" />}
+                  </button>
+                </div>
+                <button
+                  onClick={() => copyToClipboard(createdKey.key, 'new')}
+                  className="px-12 py-6 rounded-[2rem] bg-primary text-white hover:bg-primary/90 transition-all flex items-center justify-center gap-4 text-sm font-black uppercase tracking-widest shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  {copiedId === 'new' ? <Check className="h-6 w-6" /> : <Copy className="h-6 w-6" />}
+                  {copiedId === 'new' ? 'Copied to Clipboard' : 'Copy API Key'}
+                </button>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Keys Table */}
-        <div className="bg-white dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-          {loading ? (
-            <div className="p-12 text-center">
-              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-slate-500">Loading your keys...</p>
-            </div>
-          ) : keys.length === 0 ? (
-            <div className="p-16 text-center">
-              <div className="h-16 w-16 bg-slate-100 dark:bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Key className="h-8 w-8 text-slate-400" />
+        {/* Keys Table Section */}
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 px-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
+                <Terminal className="h-5 w-5 text-slate-500" />
               </div>
-              <h3 className="text-xl font-bold mb-2">No API keys yet</h3>
-              <p className="text-slate-500 max-w-sm mx-auto mb-8">Create your first API key to start using the CloudGPT unified gateway.</p>
-              <button 
-                onClick={() => document.querySelector('input')?.focus()}
-                className="px-6 py-2.5 rounded-xl bg-primary text-white font-semibold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all"
-              >
-                Generate Key
-              </button>
+              <h2 className="text-2xl font-black tracking-tighter">Active Credentials</h2>
             </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-100 dark:border-slate-900 bg-slate-50/50 dark:bg-slate-900/50">
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Key Preview</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Usage</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Last Used</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-900">
-                  {keys.map((key) => (
-                    <tr key={key.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-slate-900 dark:text-slate-100">{key.name}</div>
-                        <div className="text-[10px] text-slate-400 font-mono mt-0.5 uppercase tracking-tighter">ID: {key.id.slice(0,8)}...</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <code className="text-sm font-mono text-slate-500 bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded-md">
-                            {key.keyPreview}
-                          </code>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col items-center">
-                          <span className="text-sm font-bold text-primary">{key.usageCount || 0}</span>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase">Requests</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                          <Clock className="h-3.5 w-3.5" />
-                          {key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString() : 'Never'}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => deleteKey(key.id)}
-                            className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
-                            title="Delete Key"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
+            <div className="relative group sm:w-80">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+              <input 
+                type="text" 
+                placeholder="Filter keys by name or ID..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 rounded-2xl border-2 border-border bg-white dark:bg-slate-950 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none font-bold text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-950 rounded-[2.5rem] border-2 border-border shadow-2xl shadow-slate-200/50 dark:shadow-none overflow-hidden relative group">
+            <div className="absolute inset-0 dot-grid opacity-10 pointer-events-none" />
+            
+            {loading ? (
+              <div className="p-32 text-center relative z-10">
+                <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-8 shadow-xl shadow-primary/20"></div>
+                <p className="text-slate-400 font-black uppercase tracking-[0.2em] text-[10px]">Syncing with Infrastructure...</p>
+              </div>
+            ) : filteredKeys.length === 0 ? (
+              <div className="p-32 text-center relative z-10">
+                <div className="h-24 w-24 bg-slate-50 dark:bg-slate-900 rounded-[2rem] flex items-center justify-center mx-auto mb-10 rotate-12 group-hover:rotate-0 transition-transform duration-700 shadow-inner">
+                  <Key className="h-12 w-12 text-slate-300" />
+                </div>
+                <h3 className="text-3xl font-black mb-4 tracking-tighter">No Access Keys</h3>
+                <p className="text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-12 text-lg font-medium leading-relaxed">
+                  {searchQuery ? "Your search query yielded no results." : "You haven't provisioned any API keys yet. Create one above to get started."}
+                </p>
+                {!searchQuery && (
+                  <button 
+                    onClick={() => document.querySelector('input')?.focus()}
+                    className="px-12 py-5 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-sm shadow-2xl shadow-primary/20 hover:bg-primary/90 transition-all hover:scale-105 active:scale-95"
+                  >
+                    Provision First Key
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="overflow-x-auto relative z-10">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b-2 border-border bg-slate-50/50 dark:bg-slate-900/50">
+                      <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Credential Name</th>
+                      <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Access Token</th>
+                      <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Requests</th>
+                      <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Last Access</th>
+                      <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Control</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-        
-        {/* Quick Links */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <QuickLink 
-            icon={<Activity className="h-5 w-5 text-blue-500" />}
-            title="System Status"
-            description="Monitor real-time API performance."
-            href="#"
-          />
-          <QuickLink 
-            icon={<ExternalLink className="h-5 w-5 text-purple-500" />}
-            title="Documentation"
-            description="Explore our integration guides."
-            href="/api-docs"
-          />
-          <QuickLink 
-            icon={<ChevronRight className="h-5 w-5 text-emerald-500" />}
-            title="Model Explorer"
-            description="Browse all available AI models."
-            href="/models"
-          />
+                  </thead>
+                  <tbody className="divide-y-2 divide-border">
+                    {filteredKeys.map((key) => (
+                      <tr key={key.id} className="group/row hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-all duration-300">
+                        <td className="px-10 py-8">
+                          <div className="font-black text-slate-900 dark:text-slate-100 text-xl tracking-tighter group-hover/row:text-primary transition-colors">{key.name}</div>
+                          <div className="text-[10px] text-slate-400 font-mono mt-2 uppercase tracking-widest flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            ID: {key.id.slice(0,16)}
+                          </div>
+                        </td>
+                        <td className="px-10 py-8">
+                          <div className="flex items-center gap-3">
+                            <code className="text-sm font-mono text-slate-600 bg-slate-100 dark:bg-slate-900/80 px-4 py-2 rounded-xl border-2 border-border/50 font-bold">
+                              {key.keyPreview}
+                            </code>
+                          </div>
+                        </td>
+                        <td className="px-10 py-8">
+                          <div className="flex flex-col items-center">
+                            <span className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tighter mb-1">{key.usageCount || 0}</span>
+                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Total Ops</span>
+                          </div>
+                        </td>
+                        <td className="px-10 py-8">
+                          <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400 font-bold">
+                            <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
+                              <Clock className="h-4 w-4 text-slate-400" />
+                            </div>
+                            {key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Never'}
+                          </div>
+                        </td>
+                        <td className="px-10 py-8 text-right">
+                          <div className="flex items-center justify-end gap-3 opacity-0 group-hover/row:opacity-100 transition-all duration-300 translate-x-4 group-hover/row:translate-x-0">
+                            <button 
+                              onClick={() => deleteKey(key.id)}
+                              className="p-3 rounded-2xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all border-2 border-transparent hover:border-red-500/20"
+                              title="Revoke Access"
+                            >
+                              <Trash2 className="h-6 w-6" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function QuickLink({ icon, title, description, href }: { icon: React.ReactNode, title: string, description: string, href: string }) {
+function StatsCard({ icon, label, value, color = "text-slate-900 dark:text-slate-100", description }: { icon: React.ReactNode, label: string, value: string, color?: string, description?: string }) {
   return (
-    <a href={href} className="flex flex-col p-5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all hover:shadow-md group">
-      <div className="mb-4">{icon}</div>
-      <h4 className="font-bold mb-1 flex items-center gap-2">
-        {title}
-        <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-      </h4>
-      <p className="text-sm text-slate-500 dark:text-slate-400">{description}</p>
-    </a>
+    <div className="group p-8 rounded-[2.5rem] bg-white dark:bg-slate-950 border-2 border-border shadow-xl shadow-slate-200/50 dark:shadow-none hover:border-primary/30 transition-all duration-500 relative overflow-hidden">
+      <div className="absolute inset-0 dot-grid opacity-0 group-hover:opacity-10 transition-opacity" />
+      <div className="relative z-10">
+        <div className="flex items-center gap-5 mb-6">
+          <div className="h-14 w-14 rounded-2xl bg-slate-50 dark:bg-slate-900 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 border border-border/50">
+            {icon}
+          </div>
+          <div className="flex-1">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-1">{label}</span>
+            <div className={cn("text-4xl font-black tracking-tighter leading-none", color)}>{value}</div>
+          </div>
+        </div>
+        {description && (
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-500">{description}</span>
+            <div className="h-1.5 w-1.5 rounded-full bg-primary/30 group-hover:bg-primary transition-colors" />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

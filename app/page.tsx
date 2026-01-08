@@ -1,187 +1,247 @@
-import { ArrowRight, Bot, Code, Cpu, Image as ImageIcon, MessageSquare, Video, Zap } from 'lucide-react';
+import { ArrowRight, Bot, Code, Cpu, Image as ImageIcon, MessageSquare, Video, Zap, Terminal, Sparkles, Globe, Shield, Cloud, Layers, Database, Activity, Lock, Cpu as CpuIcon } from 'lucide-react';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-[calc(100vh-4rem)]">
+    <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative pt-20 pb-32 overflow-hidden hero-gradient">
+      <section className="relative pt-32 pb-20 overflow-hidden dot-grid">
+        <div className="absolute inset-0 mesh-gradient opacity-60" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6 animate-in fade-in slide-in-from-bottom-3 duration-700">
-              <Zap className="h-4 w-4 fill-current" />
-              <span>The fastest AI API Gateway</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold tracking-wider uppercase mb-8 animate-in fade-in slide-in-from-bottom-3 duration-700 shadow-sm border border-primary/20">
+              <Sparkles className="h-3.5 w-3.5 fill-current" />
+              <span>Next Generation AI Infrastructure</span>
             </div>
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-              Unified API for <span className="text-primary">Every AI Model</span>
+            <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 leading-[0.9]">
+              The <span className="text-primary">Studio</span> for <br />Professional AI
             </h1>
-            <p className="text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-5 duration-700 delay-200">
-              Access chat, image, video, and memory-enhanced models through a single, lightning-fast endpoint. Build AI apps in minutes, not months.
+            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-5 duration-700 delay-200">
+              A unified API gateway for the world's most powerful AI models. 
+              Build, scale, and innovate with enterprise-grade reliability and lightning speed.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
-              <a 
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
+              <Link 
                 href="/dashboard" 
-                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-primary text-white font-bold text-lg shadow-xl shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-10 py-4 rounded-2xl bg-primary text-white font-black text-lg shadow-2xl shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
-                Get Started Free
+                Start Building
                 <ArrowRight className="h-5 w-5" />
-              </a>
-              <a 
+              </Link>
+              <Link 
                 href="/playground" 
-                className="w-full sm:w-auto px-8 py-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 font-bold text-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-10 py-4 rounded-2xl bg-white dark:bg-slate-950 border border-border font-black text-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-all flex items-center justify-center gap-2"
               >
-                Live Playground
-              </a>
-              <a 
-                href="/pricing" 
-                className="w-full sm:w-auto px-8 py-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 font-bold text-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-all flex items-center justify-center gap-2"
-              >
-                View Pricing
-              </a>
+                Open Playground
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section className="py-24 bg-slate-50 dark:bg-slate-900/50">
+      {/* Stats/Showcase Section */}
+      <section className="py-12 border-y border-border bg-white dark:bg-slate-950 relative overflow-hidden">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Powerful Endpoints</h2>
-            <p className="text-slate-600 dark:text-slate-400">Everything you need to build production-ready AI applications.</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center">
+            <div className="flex flex-col items-center gap-1 group cursor-default">
+              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">GPT-4o</span>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">OpenAI</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 group cursor-default">
+              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">Claude 3.5</span>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">Anthropic</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 group cursor-default">
+              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">Gemini 1.5</span>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">Google</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 group cursor-default">
+              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">Llama 3.1</span>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">Meta</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 group cursor-default">
+              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">Flux.1</span>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">Black Forest</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 group cursor-default">
+              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">Mistral</span>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">Mistral AI</span>
+            </div>
           </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        </div>
+      </section>
+
+      {/* Core Features */}
+      <section className="py-32 relative">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mb-24">
+            <h2 className="text-5xl font-black tracking-tighter mb-6 leading-none">Engineered for Developers.</h2>
+            <p className="text-slate-600 dark:text-slate-400 text-xl leading-relaxed font-medium">
+              We've abstracted the complexity of multiple AI providers into a single, elegant interface. 
+              Focus on your product, not your infrastructure.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
             <FeatureCard 
-              icon={
-                <svg viewBox="0 0 24 24" className="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 13.4876 3.36093 14.891 4 16.1272L3 21L7.8728 20C9.10898 20.6391 10.5124 21 12 21Z" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M8 9H16" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
-                  <path d="M8 12H16" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M8 15H13" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
-                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 2" className="animate-spin-slow" />
-                </svg>
-              }
-              title="Chat API"
-              description="Access GPT-4, Claude, and Llama through a unified interface."
+              icon={<MessageSquare className="h-6 w-6" />}
+              title="Chat & Reasoning"
+              description="Access the most advanced LLMs with unified parameters and streaming support."
               href="/docs#chat"
+              color="blue"
             />
             <FeatureCard 
-              icon={
-                <svg viewBox="0 0 24 24" className="h-8 w-8 text-purple-500" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <rect x="3" y="3" width="18" height="18" rx="3" strokeLinecap="round" strokeLinejoin="round" />
-                  <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
-                  <path d="M21 15L16 10L5 21" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M11 10L14 7L21 14" strokeLinecap="round" strokeLinejoin="round" opacity="0.6" />
-                  <path d="M12 3V21M3 12H21" stroke="currentColor" strokeWidth="0.5" opacity="0.2" />
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="0.2" strokeDasharray="1 3" />
-                </svg>
-              }
-              title="Image API"
-              description="Generate stunning visuals with Flux, Stable Diffusion, and more."
+              icon={<ImageIcon className="h-6 w-6" />}
+              title="Image Generation"
+              description="State-of-the-art text-to-image models with high-resolution output."
               href="/docs#image"
+              color="purple"
             />
             <FeatureCard 
-              icon={
-                <svg viewBox="0 0 24 24" className="h-8 w-8 text-pink-500" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M23 7L16 12L23 17V7Z" strokeLinecap="round" strokeLinejoin="round" />
-                  <rect x="1" y="5" width="15" height="14" rx="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <circle cx="8.5" cy="12" r="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M5 8.5C5 8.5 6.5 7 8.5 7C10.5 7 12 8.5 12 8.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4" />
-                  <path d="M1 12H16" stroke="currentColor" strokeWidth="0.5" opacity="0.3" />
-                  <path d="M8.5 5V19" stroke="currentColor" strokeWidth="0.5" opacity="0.3" />
-                </svg>
-              }
-              title="Video API"
-              description="Create high-quality AI videos from simple text prompts."
+              icon={<Video className="h-6 w-6" />}
+              title="Video & Motion"
+              description="Create cinematic AI videos and animations from simple descriptions."
               href="/docs#video"
+              color="pink"
             />
             <FeatureCard 
-              icon={
-                <svg viewBox="0 0 100 100" className="h-8 w-8 text-emerald-500 fill-current">
-                  <path d="M50 5 L95 25 L95 75 L50 95 L5 75 L5 25 Z" fill="none" stroke="currentColor" strokeWidth="2" />
-                  <path d="M50 20 L80 35 L80 65 L50 80 L20 65 L20 35 Z" opacity="0.4" fill="currentColor" />
-                  <circle cx="50" cy="50" r="12" className="animate-pulse" fill="currentColor" />
-                  <path d="M50 5 V95 M5 25 L95 75 M5 75 L95 25" stroke="currentColor" strokeWidth="1" opacity="0.3" />
-                  <path d="M30 40 Q50 10 70 40" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.8" />
-                </svg>
-              }
-              title="Persistent Memory"
-              description="Revolutionary long-term cognitive recall integrated into every chat session automatically."
-              href="/docs#memory"
+              icon={<Terminal className="h-6 w-6" />}
+              title="Unified API"
+              description="One schema to rule them all. Switch models by changing a single string."
+              href="/docs"
+              color="emerald"
+            />
+            <FeatureCard 
+              icon={<Activity className="h-6 w-6" />}
+              title="Real-time Analytics"
+              description="Monitor usage, latency, and costs across all models in a single dashboard."
+              href="/dashboard"
+              color="orange"
+            />
+            <FeatureCard 
+              icon={<Lock className="h-6 w-6" />}
+              title="Enterprise Security"
+              description="Granular API key permissions and comprehensive audit logging."
+              href="/pricing"
+              color="cyan"
             />
           </div>
         </div>
       </section>
 
-      {/* Code Snippet Section */}
-      <section className="py-24">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
+      {/* Integration Section */}
+      <section className="py-32 bg-slate-950 text-white overflow-hidden relative dot-grid">
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-950/90 to-slate-950" />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-20">
             <div className="lg:w-1/2">
-              <h2 className="text-4xl font-bold mb-6 italic">Built by developers,<br />for developers.</h2>
-              <div className="space-y-6">
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Code className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold mb-1">Single SDK</h3>
-                    <p className="text-slate-600 dark:text-slate-400">One package, infinite possibilities. No more juggling dozens of different API keys.</p>
-                  </div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-black tracking-widest uppercase mb-8 border border-blue-500/20">
+                <Code className="h-3.5 w-3.5" />
+                <span>Developer Experience</span>
+              </div>
+              <h2 className="text-6xl font-black tracking-tighter mb-8 leading-[0.9]">
+                One API.<br />Infinite Models.
+              </h2>
+              <p className="text-slate-400 text-xl mb-10 leading-relaxed font-medium">
+                Replace dozens of API keys and libraries with a single, elegant integration. 
+                Switch models on the fly without changing a single line of your core logic.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-8">
+                <div>
+                  <div className="text-4xl font-black tracking-tighter text-white">100+</div>
+                  <div className="text-xs text-slate-500 font-black uppercase tracking-widest mt-1">Models</div>
                 </div>
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                    <Cpu className="h-5 w-5 text-orange-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold mb-1">Edge Runtime</h3>
-                    <p className="text-slate-600 dark:text-slate-400">Deployed globally for sub-millisecond latency. Your users will love the speed.</p>
-                  </div>
+                <div>
+                  <div className="text-4xl font-black tracking-tighter text-white">&lt;100ms</div>
+                  <div className="text-xs text-slate-500 font-black uppercase tracking-widest mt-1">Latency</div>
+                </div>
+                <div>
+                  <div className="text-4xl font-black tracking-tighter text-white">99.9%</div>
+                  <div className="text-xs text-slate-500 font-black uppercase tracking-widest mt-1">Uptime</div>
+                </div>
+                <div>
+                  <div className="text-4xl font-black tracking-tighter text-white">SDK</div>
+                  <div className="text-xs text-slate-500 font-black uppercase tracking-widest mt-1">Type-safe</div>
                 </div>
               </div>
             </div>
-            
+
             <div className="lg:w-1/2 w-full">
-              <div className="rounded-2xl bg-slate-950 p-6 shadow-2xl border border-slate-800">
-                <div className="flex gap-2 mb-4">
-                  <div className="h-3 w-3 rounded-full bg-red-500" />
-                  <div className="h-3 w-3 rounded-full bg-yellow-500" />
-                  <div className="h-3 w-3 rounded-full bg-green-500" />
-                </div>
-                <pre className="text-sm font-mono text-slate-300 overflow-x-auto">
-                  <code>{`const response = await fetch('https://cloudgptapi.vercel.app/v1/chat/completions', {
-  method: 'POST',
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY',
-    'Content-Type': 'application/json',
-    'x-user-id': 'unique-user-123' // Optional: for user differentiation
-  },
-  body: JSON.stringify({
-    model: 'openai',
-    messages: [{ role: 'user', content: 'Hello AI!' }]
-  })
+              <div className="rounded-3xl bg-black border border-slate-800 p-1 shadow-2xl shadow-blue-500/10">
+                <div className="bg-slate-900/50 rounded-[1.4rem] p-8">
+                  <div className="flex gap-1.5 mb-8">
+                    <div className="h-3 w-3 rounded-full bg-red-500/20" />
+                    <div className="h-3 w-3 rounded-full bg-yellow-500/20" />
+                    <div className="h-3 w-3 rounded-full bg-green-500/20" />
+                  </div>
+                  <pre className="text-sm font-mono text-blue-400 leading-relaxed overflow-x-auto">
+                    <code>{`// Switch models with one parameter
+const response = await cloudgpt.chat.create({
+  model: 'claude-3-5-sonnet',
+  messages: [
+    { role: 'user', content: 'Design a space station' }
+  ],
+  temperature: 0.7,
+  max_tokens: 1024
 });
 
-const data = await response.json();
-console.log(data.choices[0].message);`}</code>
-                </pre>
+console.log(response.content);`}</code>
+                  </pre>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-40 relative overflow-hidden">
+        <div className="absolute inset-0 dot-grid opacity-40" />
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <h2 className="text-6xl md:text-7xl font-black tracking-tighter mb-8 leading-none">Ready to build?</h2>
+          <p className="text-slate-600 dark:text-slate-400 mb-12 max-w-xl mx-auto text-xl leading-relaxed font-medium">
+            Join thousands of developers building the next generation of AI applications on CloudGPT.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <Link 
+              href="/dashboard" 
+              className="w-full sm:w-auto px-12 py-5 rounded-2xl bg-primary text-white font-black text-xl shadow-2xl shadow-primary/20 hover:bg-primary/90 hover:scale-105 transition-all flex items-center justify-center gap-3"
+            >
+              Get API Key
+              <ArrowRight className="h-6 w-6" />
+            </Link>
+            <Link 
+              href="/docs" 
+              className="w-full sm:w-auto px-12 py-5 rounded-2xl bg-white dark:bg-slate-950 border-2 border-border font-black text-xl hover:bg-slate-50 dark:hover:bg-slate-900 transition-all flex items-center justify-center gap-3"
+            >
+              Read Docs
+            </Link>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="mt-auto py-12 border-t">
+      <footer className="py-20 border-t border-border bg-slate-50/50 dark:bg-slate-950/50">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center gap-3 text-center">
-            <p className="text-slate-500 text-sm">
-              © {new Date().getFullYear()} CloudGPT API. All rights reserved.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-500">
-              <a href="/terms-of-service" className="hover:text-primary transition-colors">Terms of Service</a>
-              <a href="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</a>
-              <a href="mailto:support@cloudgptapi.com" className="hover:text-primary transition-colors">Contact</a>
+          <div className="flex flex-col md:flex-row justify-between items-center gap-10">
+            <div className="flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20">
+                <Cloud className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-2xl font-black tracking-tighter">CloudGPT</span>
+            </div>
+            <div className="flex flex-wrap justify-center gap-10 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+              <Link href="/models" className="hover:text-primary transition-colors">Models</Link>
+              <Link href="/pricing" className="hover:text-primary transition-colors">Pricing</Link>
+              <Link href="/docs" className="hover:text-primary transition-colors">Documentation</Link>
+              <Link href="/terms-of-service" className="hover:text-primary transition-colors">Terms</Link>
+              <Link href="/privacy-policy" className="hover:text-primary transition-colors">Privacy</Link>
+            </div>
+            <div className="text-sm text-slate-400 font-bold">
+              © {new Date().getFullYear()} CloudGPT Studio.
             </div>
           </div>
         </div>
@@ -190,18 +250,27 @@ console.log(data.choices[0].message);`}</code>
   );
 }
 
-function FeatureCard({ icon, title, description, href }: { icon: React.ReactNode, title: string, description: string, href: string }) {
+function FeatureCard({ icon, title, description, href, color }: { icon: React.ReactNode, title: string, description: string, href: string, color: string }) {
+  const colorMap: Record<string, string> = {
+    blue: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    purple: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+    pink: 'bg-pink-500/10 text-pink-500 border-pink-500/20',
+    emerald: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+    orange: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
+    cyan: 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20',
+  };
+
   return (
-    <div className="p-8 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-primary/50 dark:hover:border-primary/50 transition-all hover:shadow-xl group">
-      <div className="h-12 w-12 rounded-xl bg-slate-50 dark:bg-slate-900 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+    <Link href={href} className="group p-8 rounded-[2.5rem] bg-white dark:bg-slate-950 border border-border hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 relative overflow-hidden">
+      <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500 border", colorMap[color])}>
         {icon}
       </div>
-      <h3 className="text-xl font-bold mb-3">{title}</h3>
-      <p className="text-slate-600 dark:text-slate-400 mb-6 line-clamp-2">{description}</p>
-      <a href={href} className="text-primary font-semibold flex items-center gap-2 group-hover:gap-3 transition-all">
-        Learn more
+      <h3 className="text-2xl font-black mb-4 tracking-tighter">{title}</h3>
+      <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-8 font-medium">{description}</p>
+      <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-[-10px] group-hover:translate-x-0">
+        Learn More
         <ArrowRight className="h-4 w-4" />
-      </a>
-    </div>
+      </div>
+    </Link>
   );
 }

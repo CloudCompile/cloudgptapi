@@ -3,80 +3,165 @@ import Link from 'next/link';
 
 export default function DocsPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950">
-      <div className="container mx-auto px-4 py-12">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="fixed inset-0 mesh-gradient opacity-60 dark:opacity-40" />
+      <div className="fixed inset-0 dot-grid opacity-30" />
+
+      <div className="max-w-7xl mx-auto relative z-10">
         <div className="flex flex-col lg:flex-row gap-12">
           
           {/* Sidebar Navigation */}
-          <aside className="lg:w-64 shrink-0 lg:sticky lg:top-24 h-fit">
-            <nav className="space-y-1">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 px-3">Getting Started</p>
-              <DocNavLink href="#introduction" icon={<Info className="h-4 w-4" />} label="Introduction" />
-              <DocNavLink href="#authentication" icon={<Shield className="h-4 w-4" />} label="Authentication" />
-              <DocNavLink href="#base-url" icon={<Hash className="h-4 w-4" />} label="Base URL" />
-              
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-8 mb-4 px-3">Endpoints</p>
-              <DocNavLink href="#memory" icon={<Bot className="h-4 w-4" />} label="Advanced Memory" />
-              <DocNavLink href="#chat" icon={<MessageSquare className="h-4 w-4" />} label="Chat Completions" />
-              <DocNavLink href="#image" icon={<ImageIcon className="h-4 w-4" />} label="Image Generation" />
-              <DocNavLink href="#video" icon={<Video className="h-4 w-4" />} label="Video Generation" />
-              
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-8 mb-4 px-3">Advanced</p>
-              <DocNavLink href="#headers" icon={<Terminal className="h-4 w-4" />} label="Custom Headers" />
-              <DocNavLink href="#ratelimits" icon={<Clock className="h-4 w-4" />} label="Rate Limits" />
-              <DocNavLink href="#transparency" icon={<Shield className="h-4 w-4" />} label="Data & Privacy" />
-              <DocNavLink href="#error-handling" icon={<Zap className="h-4 w-4" />} label="Error Handling" />
+          <aside className="lg:w-72 shrink-0 lg:sticky lg:top-32 h-fit animate-in fade-in slide-in-from-left-8 duration-1000">
+            <nav className="p-6 rounded-[2.5rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 shadow-2xl shadow-slate-200/50 dark:shadow-none space-y-2">
+              <div className="px-4 py-2 mb-4">
+                <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Documentation</p>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">API Guide</h3>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-4 mt-6 mb-2">Getting Started</p>
+                <DocNavLink href="#introduction" icon={<Info className="h-4 w-4" />} label="Introduction" />
+                <DocNavLink href="#authentication" icon={<Shield className="h-4 w-4" />} label="Authentication" />
+                <DocNavLink href="#base-url" icon={<Hash className="h-4 w-4" />} label="Base URL" />
+                
+                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-4 mt-8 mb-2">Endpoints</p>
+                <DocNavLink href="#memory" icon={<Bot className="h-4 w-4" />} label="Advanced Memory" />
+                <DocNavLink href="#chat" icon={<MessageSquare className="h-4 w-4" />} label="Chat Completions" />
+                <DocNavLink href="#image" icon={<ImageIcon className="h-4 w-4" />} label="Image Generation" />
+                <DocNavLink href="#video" icon={<Video className="h-4 w-4" />} label="Video Generation" />
+                
+                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-4 mt-8 mb-2">Advanced</p>
+                <DocNavLink href="#headers" icon={<Terminal className="h-4 w-4" />} label="Custom Headers" />
+                <DocNavLink href="#ratelimits" icon={<Clock className="h-4 w-4" />} label="Rate Limits" />
+                <DocNavLink href="#transparency" icon={<Shield className="h-4 w-4" />} label="Data & Privacy" />
+                <DocNavLink href="#error-handling" icon={<Zap className="h-4 w-4" />} label="Error Handling" />
+              </div>
+
+              <div className="mt-8 p-4 rounded-3xl bg-primary/10 border border-primary/20">
+                <p className="text-xs font-bold text-primary mb-2 flex items-center gap-2">
+                  <Zap className="h-3 w-3" />
+                  Need Help?
+                </p>
+                <p className="text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed mb-3">
+                  Our developer support team is available 24/7 for Enterprise customers.
+                </p>
+                <button className="w-full py-2 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-transform">
+                  Contact Support
+                </button>
+              </div>
             </nav>
           </aside>
 
           {/* Main Content */}
-          <main className="flex-1 max-w-4xl">
-            <header className="mb-12">
-              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Documentation</h1>
-              <p className="text-xl text-slate-600 dark:text-slate-400">
-                Everything you need to integrate CloudGPT into your applications.
+          <main className="flex-1 max-w-4xl animate-in fade-in slide-in-from-right-8 duration-1000">
+            <header className="mb-16">
+              <div className="flex items-center gap-2 text-primary font-bold mb-4">
+                <div className="p-2 rounded-xl bg-primary/10 backdrop-blur-md border border-primary/20">
+                  <Code className="h-5 w-5" />
+                </div>
+                <span className="tracking-[0.2em] uppercase text-xs">Developer Portal</span>
+              </div>
+              <h1 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">
+                Documentation
+              </h1>
+              <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
+                Everything you need to integrate <span className="text-primary font-black">CloudGPT</span>'s powerful multi-modal AI infrastructure into your production applications.
               </p>
             </header>
 
-            <div className="space-y-20">
+            <div className="space-y-24 pb-24">
               
               {/* Introduction */}
-              <section id="introduction" className="scroll-mt-24">
-                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <Info className="h-6 w-6 text-primary" />
-                  Introduction
-                </h2>
-                <div className="prose prose-slate dark:prose-invert max-w-none">
-                  <p>
-                    CloudGPT is a unified AI API gateway that allows you to access multiple top-tier AI providers through a single, consistent interface. We handle the complexity of different API formats, authentication methods, and rate limits so you can focus on building your application.
-                  </p>
+              <section id="introduction" className="scroll-mt-32">
+                <div className="p-10 rounded-[2.5rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 shadow-2xl shadow-slate-200/50 dark:shadow-none group hover:border-primary/30 transition-all duration-500">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+                      <Info className="h-6 w-6" />
+                    </div>
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Introduction</h2>
+                  </div>
+                  <div className="prose prose-slate dark:prose-invert max-w-none">
+                    <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
+                      CloudGPT provides a unified API for accessing the world's most advanced AI models. Whether you need text generation, image creation, or complex video synthesis, our infrastructure handles the heavy lifting.
+                    </p>
+                    <div className="grid sm:grid-cols-2 gap-4 mt-8">
+                      <div className="p-6 rounded-3xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50">
+                        <h4 className="font-black text-slate-900 dark:text-white mb-2">Unified Access</h4>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">One API key, dozens of models. Switch between providers with a single parameter.</p>
+                      </div>
+                      <div className="p-6 rounded-3xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50">
+                        <h4 className="font-black text-slate-900 dark:text-white mb-2">Enterprise Scale</h4>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">99.99% uptime guarantee and global low-latency edge deployment.</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </section>
 
               {/* Authentication */}
-              <section id="authentication" className="scroll-mt-24">
-                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <Shield className="h-6 w-6 text-emerald-500" />
-                  Authentication
-                </h2>
-                <p className="mb-6 text-slate-600 dark:text-slate-400">
-                  All API requests require authentication using a Bearer token in the <code>Authorization</code> header. You can generate API keys from your <Link href="/dashboard" className="text-primary hover:underline">Dashboard</Link>.
-                </p>
-                <div className="rounded-xl bg-slate-950 p-6 font-mono text-sm text-slate-300 border border-slate-800 shadow-xl">
-                  <span className="text-slate-500"># HTTP Header</span><br />
-                  <span className="text-primary">Authorization</span>: Bearer <span className="text-amber-400">cgpt_your_api_key_here</span>
+              <section id="authentication" className="scroll-mt-32">
+                <div className="p-10 rounded-[2.5rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 shadow-2xl shadow-slate-200/50 dark:shadow-none group hover:border-primary/30 transition-all duration-500">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-600 group-hover:scale-110 transition-transform">
+                      <Shield className="h-6 w-6" />
+                    </div>
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Authentication</h2>
+                  </div>
+                  <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-8">
+                    Secure your requests using standard Bearer token authentication. Your API key should be included in the <code className="px-2 py-1 rounded-lg bg-primary/10 text-primary font-bold">Authorization</code> header.
+                  </p>
+                  <div className="relative group">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary to-purple-600 rounded-[2rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                    <div className="relative rounded-[2rem] bg-slate-900 overflow-hidden">
+                      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/50">
+                        <span className="text-xs font-black text-slate-500 uppercase tracking-widest">HTTP Header</span>
+                        <div className="flex gap-1.5">
+                          <div className="w-2.5 h-2.5 rounded-full bg-slate-800"></div>
+                          <div className="w-2.5 h-2.5 rounded-full bg-slate-800"></div>
+                          <div className="w-2.5 h-2.5 rounded-full bg-slate-800"></div>
+                        </div>
+                      </div>
+                      <div className="p-8">
+                        <code className="text-sm sm:text-base text-emerald-400 font-mono leading-relaxed block whitespace-pre-wrap">
+                          Authorization: Bearer YOUR_API_KEY
+                        </code>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </section>
 
               {/* Base URL */}
-              <section id="base-url" className="scroll-mt-24">
-                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <Hash className="h-6 w-6 text-blue-500" />
-                  Base URL
-                </h2>
-                <p className="mb-4 text-slate-600 dark:text-slate-400">All API endpoints are relative to the following base URL:</p>
-                <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-900 font-mono text-primary text-lg border border-slate-200 dark:border-slate-800">
-                  https://cloudgptapi.vercel.app
+              <section id="base-url" className="scroll-mt-32">
+                <div className="p-10 rounded-[2.5rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 shadow-2xl shadow-slate-200/50 dark:shadow-none group hover:border-primary/30 transition-all duration-500">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-600 group-hover:scale-110 transition-transform">
+                      <Hash className="h-6 w-6" />
+                    </div>
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Base URL</h2>
+                  </div>
+                  <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-8">
+                    All API requests should be made to our primary global endpoint:
+                  </p>
+                  <div className="relative group">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-[2rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                    <div className="relative rounded-[2rem] bg-slate-900 overflow-hidden">
+                      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/50">
+                        <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Endpoint</span>
+                        <div className="flex gap-1.5">
+                          <div className="w-2.5 h-2.5 rounded-full bg-slate-800"></div>
+                          <div className="w-2.5 h-2.5 rounded-full bg-slate-800"></div>
+                          <div className="w-2.5 h-2.5 rounded-full bg-slate-800"></div>
+                        </div>
+                      </div>
+                      <div className="p-8">
+                        <code className="text-sm sm:text-base text-blue-400 font-mono leading-relaxed block whitespace-pre-wrap">
+                          https://cloudgptapi.vercel.app/v1
+                        </code>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </section>
 
