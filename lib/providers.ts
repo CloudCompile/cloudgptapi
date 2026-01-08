@@ -25,29 +25,29 @@ export interface VideoModel {
 
 // Available chat models
 export const CHAT_MODELS: ChatModel[] = [
-  { id: 'nova-micro', name: 'Nova Micro', provider: 'pollinations', description: 'Compact Nova model' },
-  { id: 'qwen-coder', name: 'Qwen 2.5 Coder', provider: 'pollinations', description: 'Qwen 2.5 Coder 32B' },
+  { id: 'nova-micro', name: 'Amazon Nova Micro', provider: 'pollinations', description: 'Amazon Nova Micro' },
+  { id: 'qwen-coder', name: 'Qwen3 Coder 30B', provider: 'pollinations', description: 'Qwen3 Coder 30B' },
   { id: 'mistral', name: 'Mistral Large', provider: 'pollinations', description: 'Mistral AI Large' },
-  { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'pollinations', description: 'Google Gemini 2.0 Flash' },
-  { id: 'openai-fast', name: 'OpenAI GPT-4o Mini', provider: 'pollinations', description: 'Faster OpenAI model' },
-  { id: 'grok', name: 'Grok 3', provider: 'pollinations', description: 'xAI Grok 3' },
-  { id: 'openai', name: 'OpenAI GPT-4o', provider: 'pollinations', description: 'OpenAI GPT-4o model' },
-  { id: 'perplexity-fast', name: 'Perplexity Fast', provider: 'pollinations', description: 'Fast Perplexity model' },
-  { id: 'gemini-2.0-flash-thinking', name: 'Gemini 2.0 Thinking', provider: 'pollinations', description: 'Gemini 2.0 Flash with reasoning' },
-  { id: 'gemini-search', name: 'Gemini Search', provider: 'pollinations', description: 'Gemini with Google Search' },
-  { id: 'chickytutor', name: 'ChickyTutor', provider: 'pollinations', description: 'Educational AI tutor' },
-  { id: 'minimax', name: 'MiniMax', provider: 'pollinations', description: 'MiniMax model' },
-  { id: 'claude-fast', name: 'Claude 3 Haiku', provider: 'pollinations', description: 'Fast Claude model' },
-  { id: 'deepseek', name: 'DeepSeek V3', provider: 'pollinations', description: 'DeepSeek V3 model' },
-  { id: 'glm', name: 'GLM', provider: 'pollinations', description: 'GLM model' },
-  { id: 'kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'pollinations', description: 'Kimi K2 reasoning model' },
-  { id: 'midijourney', name: 'Midijourney', provider: 'pollinations', description: 'Creative AI assistant' },
-  { id: 'claude', name: 'Claude 3.5 Sonnet', provider: 'pollinations', description: 'Anthropic Claude 3.5 Sonnet' },
-  { id: 'claude-large', name: 'Claude Large', provider: 'pollinations', description: 'Large Claude model' },
-  { id: 'perplexity-reasoning', name: 'Perplexity Reasoning', provider: 'pollinations', description: 'Perplexity with reasoning' },
-  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'pollinations', description: 'Google Gemini 2.5 Pro' },
-  { id: 'openai-large', name: 'OpenAI GPT-4.5', provider: 'pollinations', description: 'Large OpenAI model' },
-  { id: 'openai-audio', name: 'OpenAI Audio', provider: 'pollinations', description: 'OpenAI with audio support' },
+  { id: 'gemini-fast', name: 'Google Gemini 2.5 Flash Lite', provider: 'pollinations', description: 'Google Gemini 2.5 Flash Lite' },
+  { id: 'openai-fast', name: 'OpenAI GPT-5 Nano', provider: 'pollinations', description: 'OpenAI GPT-5 Nano' },
+  { id: 'grok', name: 'xAI Grok 4 Fast', provider: 'pollinations', description: 'xAI Grok 4 Fast' },
+  { id: 'openai', name: 'OpenAI GPT-5 Mini', provider: 'pollinations', description: 'OpenAI GPT-5 Mini' },
+  { id: 'perplexity-fast', name: 'Perplexity Sonar', provider: 'pollinations', description: 'Perplexity Sonar' },
+  { id: 'gemini', name: 'Google Gemini 3 Flash', provider: 'pollinations', description: 'Google Gemini 3 Flash' },
+  { id: 'gemini-search', name: 'Google Gemini 3 Flash', provider: 'pollinations', description: 'Google Gemini 3 Flash (Search)' },
+  { id: 'chickytutor', name: 'ChickyTutor AI Language Tutor', provider: 'pollinations', description: 'ChickyTutor AI Language Tutor' },
+  { id: 'minimax', name: 'MiniMax M2.1', provider: 'pollinations', description: 'MiniMax M2.1' },
+  { id: 'claude-fast', name: 'Anthropic Claude Haiku 4.5', provider: 'pollinations', description: 'Anthropic Claude Haiku 4.5' },
+  { id: 'deepseek', name: 'DeepSeek V3.2', provider: 'pollinations', description: 'DeepSeek V3.2' },
+  { id: 'glm', name: 'Z.ai GLM-4.7', provider: 'pollinations', description: 'Z.ai GLM-4.7' },
+  { id: 'kimi-k2-thinking', name: 'Moonshot Kimi K2 Thinking', provider: 'pollinations', description: 'Moonshot Kimi K2 Thinking' },
+  { id: 'midijourney', name: 'MIDIjourney', provider: 'pollinations', description: '2.5 /M' },
+  { id: 'claude', name: 'Anthropic Claude Sonnet 4.5', provider: 'pollinations', description: 'Anthropic Claude Sonnet 4.5' },
+  { id: 'claude-large', name: 'Anthropic Claude Opus 4.5', provider: 'pollinations', description: 'Anthropic Claude Opus 4.5' },
+  { id: 'perplexity-reasoning', name: 'Perplexity Sonar Reasoning', provider: 'pollinations', description: 'Perplexity Sonar Reasoning' },
+  { id: 'gemini-large', name: 'Google Gemini 3 Pro', provider: 'pollinations', description: 'Google Gemini 3 Pro' },
+  { id: 'openai-large', name: 'OpenAI GPT-5.2', provider: 'pollinations', description: '12.0 /M' },
+  { id: 'openai-audio', name: 'OpenAI GPT-4o Mini Audio', provider: 'pollinations', description: 'OpenAI GPT-4o Mini Audio' },
   // OpenRouter free models
   { id: 'xiaomi/mimo-v2-flash:free', name: 'Xiaomi Mimo V2 Flash', provider: 'openrouter', description: 'Xiaomi Mimo V2 Flash model' },
   { id: 'mistralai/devstral-2512:free', name: 'Mistral Devstral 2512', provider: 'openrouter', description: 'Mistral AI Devstral 2512' },
@@ -123,15 +123,16 @@ export const PREMIUM_MODELS = new Set([
   'openai',       // GPT-4o
   'claude',       // Claude 3.5 Sonnet
   'claude-large', // Claude Large
+  'gemini-large', // Google Gemini 3 Pro
   'gemini-2.5-pro',
   'gemini-3-pro-preview',
-  'grok',         // Grok 3
+  'grok',         // xAI Grok 4 Fast
   
   // Reasoning & Specialized
   'deepseek-r1',
   'perplexity-reasoning',
   'kimi-k2-thinking',
-  'gemini-2.0-flash-thinking',
+  'gemini',       // Google Gemini 3 Flash
   'gemini-search',
   'openai-audio',
   'meridian',
@@ -187,6 +188,7 @@ export const VIDEO_MODELS: VideoModel[] = [
   { id: 'seedance-pro', name: 'Seedance Pro', provider: 'pollinations', description: 'Seedance Pro-Fast - BytePlus video generation (better prompt adherence)' },
   { id: 'seedance', name: 'Seedance', provider: 'pollinations', description: 'Seedance Lite - BytePlus video generation (better quality)' },
   { id: 'veo', name: 'Veo', provider: 'pollinations', description: "Veo 3.1 Fast - Google's video generation model (preview)" },
+  { id: 'openai-audio', name: 'OpenAI GPT-4o Mini Audio', provider: 'pollinations', description: 'OpenAI GPT-4o Mini Audio' },
 ];
 
 // Provider base URLs

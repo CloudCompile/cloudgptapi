@@ -596,16 +596,16 @@ export async function POST(request: NextRequest) {
     // Optimization: Define a list of "High-Speed" models that can be raced across providers
     // Currently Pollinations is much faster (400-500ms) than Liz (1500ms+)
     const isHighSpeedModel = [
-      'openai', 
-      'openai-fast', 
-      'gemini-2.0-flash', 
-      'gemini-2.0-flash-thinking', 
-      'deepseek',
-      'google/gemini-2.0-flash-exp:free',
-      'google/gemini-2.0-flash-exp',
-      'deepseek/deepseek-chat',
-      'deepseek/deepseek-v3'
-    ].includes(modelId);
+       'openai', 
+       'openai-fast', 
+       'gemini-fast', 
+       'gemini', 
+       'deepseek',
+       'google/gemini-2.0-flash-exp:free',
+       'google/gemini-2.0-flash-exp',
+       'deepseek/deepseek-chat',
+       'deepseek/deepseek-v3'
+     ].includes(modelId);
 
     // Forward to provider API
     let requestBody: any;
@@ -869,7 +869,7 @@ export async function POST(request: NextRequest) {
           console.warn(`[${requestId}] OpenRouter Gemini rate limited. Trying Pollinations fallback...`);
           try {
             const pollKey = getPollinationsApiKey();
-            const pollModelId = modelId.includes('thinking') ? 'gemini-2.0-flash-thinking' : 'gemini-2.0-flash';
+            const pollModelId = modelId.includes('pro') ? 'gemini-large' : (modelId.includes('lite') ? 'gemini-fast' : 'gemini');
             
             const pollResponse = await fetch(`${PROVIDER_URLS.pollinations}/v1/chat/completions`, {
               method: 'POST',
