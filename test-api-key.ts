@@ -34,7 +34,7 @@ async function testApiKey(key: string) {
       console.error('Error Response:', errorText);
       console.log('\n--- TEST FAILED ---');
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error('Fetch error:', err.message);
     console.log('\n--- TEST FAILED (Connection Error) ---');
     console.log('Note: Make sure the local dev server is running (npm run dev)');

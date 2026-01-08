@@ -70,7 +70,7 @@ async function createKeyForUser(email: string) {
     console.log('--------------------------------------\n');
 
     return newKey;
-  } catch (err) {
+  } catch (err: any) {
     console.error('System error:', err.message);
   }
 }
