@@ -9,7 +9,8 @@ import { supabaseAdmin } from '@/lib/supabase';
 export const runtime = 'edge';
 
 // Constants for validation
-const MAX_MESSAGE_LENGTH = 100000; // 100KB per message
+const MAX_MESSAGE_LENGTH = 500000; // 500KB per message
+const MAX_TOTAL_LENGTH = 2000000; // 2MB total for all messages
 const MAX_MESSAGES_COUNT = 100;
 const PROVIDER_TIMEOUT_MS = 60000; // 60 seconds
 
@@ -27,6 +28,8 @@ function validateMessages(messages: any[]): { valid: boolean; error?: string } {
   if (messages.length > MAX_MESSAGES_COUNT) {
     return { valid: false, error: `messages array exceeds maximum of ${MAX_MESSAGES_COUNT} messages` };
   }
+  
+  let totalLength = 0;
   
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
@@ -54,9 +57,15 @@ function validateMessages(messages: any[]): { valid: boolean; error?: string } {
         : JSON.stringify(msg.content).length;
         
       if (contentLength > MAX_MESSAGE_LENGTH) {
-        return { valid: false, error: `messages[${i}].content exceeds maximum length of ${MAX_MESSAGE_LENGTH} characters` };
+        return { valid: false, error: `Message at index ${i} is too long (${contentLength} chars). Maximum allowed per message is ${MAX_MESSAGE_LENGTH} characters. Please truncate your input.` };
       }
+      
+      totalLength += contentLength;
     }
+  }
+  
+  if (totalLength > MAX_TOTAL_LENGTH) {
+    return { valid: false, error: `Total conversation length (${totalLength} chars) exceeds the maximum allowed limit of ${MAX_TOTAL_LENGTH} characters. Please reduce the number of messages or their content.` };
   }
   
   return { valid: true };
