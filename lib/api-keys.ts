@@ -37,7 +37,7 @@ export function extractApiKey(headers: Headers): string | null {
 export async function validateApiKey(key: string): Promise<ApiKey | null> {
   const { data, error } = await supabaseAdmin
     .from('api_keys')
-    .select('*, profiles(plan)')
+    .select('*, profiles(plan, email)')
     .eq('key', key)
     .single();
 
@@ -51,6 +51,20 @@ export async function validateApiKey(key: string): Promise<ApiKey | null> {
     .update({ last_used_at: new Date().toISOString() })
     .eq('id', data.id);
 
+  let userPlan = (data as any).profiles?.plan || 'free';
+  const userEmail = (data as any).profiles?.email;
+
+  // Manual override for specific users requested by admin
+  if (userEmail) {
+    if (userEmail === 'mschneider2492@gmail.com' && userPlan !== 'developer') {
+      await supabaseAdmin.from('profiles').update({ plan: 'developer' }).eq('email', userEmail);
+      userPlan = 'developer';
+    } else if ((userEmail === 'sakurananachan645@gmail.com' || userEmail === 'bakatsun09@gmail.com') && userPlan !== 'pro') {
+      await supabaseAdmin.from('profiles').update({ plan: 'pro' }).eq('email', userEmail);
+      userPlan = 'pro';
+    }
+  }
+
   return {
     id: data.id,
     key: data.key,
@@ -60,7 +74,7 @@ export async function validateApiKey(key: string): Promise<ApiKey | null> {
     lastUsedAt: data.last_used_at,
     rateLimit: data.rate_limit || 10,
     usageCount: data.usage_count || 0,
-    plan: (data as any).profiles?.plan || 'free'
+    plan: userPlan
   };
 }
 
