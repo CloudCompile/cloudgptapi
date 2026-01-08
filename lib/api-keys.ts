@@ -33,44 +33,55 @@ export function extractApiKey(headers: Headers): string | null {
   return null;
 }
 
-// Validate API key and return user info
-export async function validateApiKey(key: string): Promise<ApiKey | null> {
-  const { data, error } = await supabaseAdmin
-    .from('api_keys')
-    .select('*, profiles(plan, email)')
-    .eq('key', key)
-    .single();
-
-  if (error || !data) {
-    return null;
+  // Validate API key and return user info
+  export async function validateApiKey(key: string): Promise<ApiKey | null> {
+    // First get the API key
+    const { data, error } = await supabaseAdmin
+      .from('api_keys')
+      .select('*')
+      .eq('key', key)
+      .single();
+  
+    if (error || !data) {
+      console.error('[validateApiKey] Key not found or error:', error?.message);
+      return null;
+    }
+  
+    // Then get the profile separately to avoid relationship issues
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('plan, email')
+      .eq('id', data.user_id)
+      .single();
+  
+    // Update last used at
+    await supabaseAdmin
+      .from('api_keys')
+      .update({ last_used_at: new Date().toISOString() })
+      .eq('id', data.id);
+  
+    let userPlan = profile?.plan || 'free';
+    const userEmail = profile?.email;
+  
+    console.log(`[validateApiKey] Key validated for user: ${data.user_id}, profile email: ${userEmail}, db plan: ${userPlan}`);
+  
+    // Manual override for specific users requested by admin
+    if (userEmail) {
+      userPlan = await applyPlanOverride(userEmail, userPlan, userEmail, 'email');
+    }
+  
+    return {
+      id: data.id,
+      key: data.key,
+      userId: data.user_id,
+      name: data.name,
+      createdAt: data.created_at,
+      lastUsedAt: data.last_used_at,
+      rateLimit: data.rate_limit || 10,
+      usageCount: data.usage_count || 0,
+      plan: userPlan
+    };
   }
-
-  // Update last used at
-  await supabaseAdmin
-    .from('api_keys')
-    .update({ last_used_at: new Date().toISOString() })
-    .eq('id', data.id);
-
-  let userPlan = (data as any).profiles?.plan || 'free';
-  const userEmail = (data as any).profiles?.email;
-
-  // Manual override for specific users requested by admin
-  if (userEmail) {
-    userPlan = await applyPlanOverride(userEmail, userPlan, userEmail, 'email');
-  }
-
-  return {
-    id: data.id,
-    key: data.key,
-    userId: data.user_id,
-    name: data.name,
-    createdAt: data.created_at,
-    lastUsedAt: data.last_used_at,
-    rateLimit: data.rate_limit || 10,
-    usageCount: data.usage_count || 0,
-    plan: userPlan
-  };
-}
 
   // Track usage for an API key
 export async function trackUsage(apiKeyId: string, userId: string, modelId: string, type: 'chat' | 'image' | 'video' | 'mem') {
