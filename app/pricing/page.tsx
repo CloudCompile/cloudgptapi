@@ -35,7 +35,7 @@ const plans = [
     buttonHref: '#',
     highlight: false,
     stripeProductId: 'prod_TkaCL0ZNJH6rwf',
-    stripePriceId: 'price_1Sn4OQRG5zp0rTvz6kS6Z7S9', // Standard price ID prefix
+    stripePriceId: 'price_1Sn51wRG5zp0rTvz8SeF3WXh', // Developer price ID
   },
   {
     name: 'Pro',
@@ -44,7 +44,7 @@ const plans = [
     description: 'For professional developers and growing applications.',
     features: [
       'Access to ALL Flagship models',
-      'GPT-5.2, Claude 4.5 Opus, Gemini 3 Pro',
+      'GPT-4.5, Claude 3.5, Gemini 2.5 Pro',
       'Reasoning & Specialized models',
       'High-res image & Video generation',
       '500 requests per minute',
@@ -54,7 +54,7 @@ const plans = [
     buttonHref: '#',
     highlight: true,
     stripeProductId: 'prod_TkaB1ApHkafWT1',
-    stripePriceId: 'price_1Sn4OQRG5zp0rTvz6kS6Z7S9', // Standard Pro price ID
+    stripePriceId: 'price_1Sn50iRG5zp0rTvzA3lI8SE2', // Pro price ID
   },
   {
     name: 'Enterprise',
