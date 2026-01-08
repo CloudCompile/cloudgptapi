@@ -57,9 +57,9 @@ export async function POST(request: NextRequest) {
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 20;
       dailyLimit = 100000;
-    } else if (userPlan === 'pro') {
+    } else if (userPlan === 'pro' || userPlan === 'video_pro') {
       limit = 2; // 2 RPM for video as requested
-      dailyLimit = 2000; // 2000 RPD for pro
+      dailyLimit = 2000; // 2000 RPD for pro/video_pro
     } else if (userPlan === 'developer') {
       limit = 5;
       dailyLimit = 5000;
@@ -106,6 +106,23 @@ export async function POST(request: NextRequest) {
             'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
           },
         }
+      );
+    }
+
+    // Lock all video models behind video_pro, pro, enterprise, or admin plans
+    const hasVideoAccess = ['pro', 'video_pro', 'enterprise', 'admin'].includes(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
+
+    if (!hasVideoAccess) {
+      return NextResponse.json(
+        { 
+          error: {
+            message: 'Video generation requires a Video Pro or Pro plan. Please upgrade at /pricing to access video models.',
+            type: 'access_denied',
+            param: 'plan',
+            code: 'video_plan_required'
+          }
+        },
+        { status: 403 }
       );
     }
 

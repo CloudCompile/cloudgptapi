@@ -38,6 +38,24 @@ const plans = [
     stripePriceId: 'price_1Sn51wRG5zp0rTvz8SeF3WXh', // Developer price ID
   },
   {
+    name: 'Video Pro',
+    price: '$5',
+    period: '/month',
+    description: 'Unlock high-quality AI video generation.',
+    features: [
+      'Access to ALL Video models',
+      'Google Veo, Seedance Pro',
+      'Up to 10s video duration',
+      'High-priority generation',
+      'Commercial usage rights',
+    ],
+    buttonText: 'Get Video Pro',
+    buttonHref: '#',
+    highlight: false,
+    stripeProductId: 'prod_video_pro',
+    stripePriceId: 'price_1SnLTHRG5zp0rTvzT7KuRE8v',
+  },
+  {
     name: 'Pro',
     price: '$1',
     period: '/month',

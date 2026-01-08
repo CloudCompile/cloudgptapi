@@ -38,11 +38,14 @@ export async function POST(req: Request) {
     let planName = 'free';
     const PRO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || 'price_1Sn50iRG5zp0rTvzA3lI8SE2';
     const DEV_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_DEV_PRICE_ID || 'price_1Sn51wRG5zp0rTvz8SeF3WXh';
+    const VIDEO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_VIDEO_PRICE_ID || 'price_1SnLTHRG5zp0rTvzT7KuRE8v';
 
     if (priceId === PRO_PRICE_ID) {
       planName = 'pro';
     } else if (priceId === DEV_PRICE_ID) {
       planName = 'developer';
+    } else if (priceId === VIDEO_PRICE_ID) {
+      planName = 'video_pro';
     }
 
     console.log(`Updating user ${userId} to plan ${planName} (price: ${priceId})`);
