@@ -141,8 +141,9 @@ export async function POST(request: NextRequest) {
     const model = VIDEO_MODELS.find(m => m.id === modelId);
     
     if (!model) {
+      const popularModels = VIDEO_MODELS.slice(0, 10).map(m => m.id).join(', ');
       return NextResponse.json(
-        { error: `Unknown model: ${modelId}. Available models: ${VIDEO_MODELS.map(m => m.id).join(', ')}` },
+        { error: `Unknown model: ${modelId}. Popular models: ${popularModels}. Use /v1/models to see all ${VIDEO_MODELS.length} models.` },
         { status: 400 }
       );
     }

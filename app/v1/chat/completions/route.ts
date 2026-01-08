@@ -528,13 +528,16 @@ export async function POST(request: NextRequest) {
     const model = CHAT_MODELS.find(m => m.id === modelId);
     
     if (!model) {
+      const popularModels = CHAT_MODELS.slice(0, 10).map(m => m.id).join(', ');
+      console.warn(`[${requestId}] Unknown model: ${modelId}`);
       return NextResponse.json(
         { 
           error: {
-            message: `Unknown model: ${modelId}. Available models: ${CHAT_MODELS.map(m => m.id).join(', ')}`,
+            message: `Unknown model: ${modelId}. Popular models: ${popularModels}, and more. Use /v1/models to see the full list of ${CHAT_MODELS.length} models.`,
             type: 'invalid_request_error',
             param: 'model',
-            code: 'model_not_found'
+            code: 'model_not_found',
+            request_id: requestId
           }
         },
         { 
