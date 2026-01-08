@@ -328,16 +328,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Determine limit based on plan if not explicitly set high on the key
-    let limit = 10; // Default anonymous/free limit
+    let limit = 60; // Default baseline limit (60 RPM)
     
     if (userPlan === 'admin' || userPlan === 'enterprise') {
-      limit = 1000;
+      limit = 10000; // Near unlimited for enterprise
     } else if (userPlan === 'pro') {
-      limit = 500;
+      limit = 5000; // Near unlimited for pro
     } else if (userPlan === 'developer') {
-      limit = 100;
+      limit = 1000; // High limit for developers
     } else if (userPlan === 'free') {
-      limit = 60;
+      limit = 60; // Standard baseline
     }
 
     // If API key has a specific custom limit that's higher, use that
@@ -428,6 +428,7 @@ export async function POST(request: NextRequest) {
       'claude-3-haiku': 'claude-fast',
       'deepseek-chat': 'deepseek',
       'deepseek-coder': 'qwen-coder',
+      'gemini-2.5-pro': 'gemini-large',
     };
 
     if (modelAliases[modelId]) {

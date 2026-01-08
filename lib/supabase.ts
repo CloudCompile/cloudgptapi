@@ -12,10 +12,12 @@ let _supabaseAdmin: SupabaseClient | null = null;
 export const supabase = new Proxy({} as SupabaseClient, {
   get(_, prop) {
     if (!_supabase) {
-      if (!supabaseUrl || !supabaseAnonKey) {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      if (!url || !key) {
         throw new Error('Supabase environment variables are not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
       }
-      _supabase = createClient(supabaseUrl, supabaseAnonKey);
+      _supabase = createClient(url, key);
     }
     return (_supabase as any)[prop];
   }
@@ -25,10 +27,12 @@ export const supabase = new Proxy({} as SupabaseClient, {
 export const supabaseAdmin = new Proxy({} as SupabaseClient, {
   get(_, prop) {
     if (!_supabaseAdmin) {
-      if (!supabaseUrl || !supabaseServiceKey) {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (!url || !key) {
         throw new Error('Supabase environment variables are not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.');
       }
-      _supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+      _supabaseAdmin = createClient(url, key, {
         auth: {
           autoRefreshToken: false,
           persistSession: false
