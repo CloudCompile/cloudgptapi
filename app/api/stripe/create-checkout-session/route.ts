@@ -1,6 +1,6 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { stripe } from '../../../../lib/stripe';
+import { stripe } from '@/lib/stripe';
 
 export async function POST(req: Request) {
   try {

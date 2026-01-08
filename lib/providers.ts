@@ -177,6 +177,9 @@ export const IMAGE_MODELS: ImageModel[] = [
   { id: 'stable-horde-pony-diffusion', name: 'Pony Diffusion XL', provider: 'stablehorde', description: 'Pony Diffusion XL - Anime and character focused' },
   { id: 'stable-horde-stable-diffusion', name: 'Stable Diffusion', provider: 'stablehorde', description: 'Stable Diffusion 1.5 - Classic SD model' },
   { id: 'stable-horde-anything-v5', name: 'Anything v5', provider: 'stablehorde', description: 'Anything v5 - Anime style generation' },
+  { id: 'stable-horde-flux-dev', name: 'Flux.1-Dev', provider: 'stablehorde', description: 'Flux.1-Dev - High quality Flux model' },
+  { id: 'stable-horde-icbinp', name: "I Can't Believe It's Not Photo", provider: 'stablehorde', description: 'ICBINP - Extremely realistic photographic style' },
+  { id: 'stable-horde-dreamlike-photoreal', name: 'Dreamlike Photoreal', provider: 'stablehorde', description: 'Dreamlike Photoreal - Artistic photographic style' },
 ];
 
 // Available video models
@@ -192,8 +195,8 @@ export const PROVIDER_URLS = {
   openrouter: 'https://openrouter.ai',
   liz: 'https://lizley.zeabur.app',
   appypie: {
-    sdxl: 'https://gateway.appypie.com/getImage/v1/getSDXLImage',
-    inpainting: 'https://gateway-stable-diffusion-v1-5-inpainting.appypie.workers.dev/getImage',
+    sdxl: 'https://gateway.pixazo.ai/sdxl/v1/getData',
+    inpainting: 'https://gateway.pixazo.ai/inpainting/v1/getData',
     fluxSchnell: 'https://gateway.pixazo.ai/flux-1-schnell/v1/getData',
   },
   stablehorde: 'https://stablehorde.net/api/v2',

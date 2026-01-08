@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
 import { IMAGE_MODELS, PROVIDER_URLS, ImageModel, PREMIUM_MODELS } from '@/lib/providers';
-import { getCorsHeaders } from '@/lib/utils';
+import { getCorsHeaders, getPollinationsApiKey } from '@/lib/utils';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max for long image generation
@@ -30,7 +30,7 @@ export async function GET() {
 // Map Stable Horde model IDs to actual model names
 function getStableHordeModelName(modelId: string): string {
   const modelMap: Record<string, string> = {
-    'stable-horde-flux-schnell': 'Flux.1-Schnell fp8 (Compact)',
+    'stable-horde-flux-schnell': 'FLUX.1 [schnell]',
     'stable-horde-sdxl': 'SDXL 1.0',
     'stable-horde-deliberate': 'Deliberate',
     'stable-horde-dreamshaper': 'Dreamshaper',
@@ -40,6 +40,9 @@ function getStableHordeModelName(modelId: string): string {
     'stable-horde-pony-diffusion': 'Pony Diffusion XL',
     'stable-horde-stable-diffusion': 'stable_diffusion',
     'stable-horde-anything-v5': 'Anything v5',
+    'stable-horde-flux-dev': 'FLUX.1 [dev]',
+    'stable-horde-icbinp': "I Can't Believe It's Not Photo",
+    'stable-horde-dreamlike-photoreal': 'Dreamlike Photoreal',
   };
   return modelMap[modelId] || 'stable_diffusion';
 }
@@ -217,12 +220,40 @@ export async function POST(request: NextRequest) {
           );
         }
 
-      // AppyPie returns the image directly, we need to host it or return base64
-      // For simplicity in this endpoint, we'll return a proxy URL or base64
-      const blob = await response.blob();
-      const buffer = Buffer.from(await blob.arrayBuffer());
-      const base64 = buffer.toString('base64');
-      const mimeType = response.headers.get('content-type') || 'image/png';
+      // AppyPie can return the image directly or a JSON with a URL
+      const contentType = response.headers.get('content-type');
+      let base64: string;
+      let mimeType: string;
+
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        const imageUrl = data.image_url || data.url || (data.data && data.data[0] && data.data[0].url);
+        
+        if (!imageUrl) {
+          return NextResponse.json(
+            { error: { message: 'AppyPie returned JSON without an image URL', type: 'api_error', details: data } },
+            { status: 500, headers: getCorsHeaders() }
+          );
+        }
+
+        const imageResponse = await fetch(imageUrl);
+        if (!imageResponse.ok) {
+          return NextResponse.json(
+            { error: { message: 'Failed to fetch image from AppyPie URL', type: 'api_error' } },
+            { status: 500, headers: getCorsHeaders() }
+          );
+        }
+        
+        const blob = await imageResponse.blob();
+        const buffer = Buffer.from(await blob.arrayBuffer());
+        base64 = buffer.toString('base64');
+        mimeType = imageResponse.headers.get('content-type') || 'image/png';
+      } else {
+        const blob = await response.blob();
+        const buffer = Buffer.from(await blob.arrayBuffer());
+        base64 = buffer.toString('base64');
+        mimeType = response.headers.get('content-type') || 'image/png';
+      }
       
       if (body.response_format === 'b64_json') {
         return NextResponse.json({
@@ -237,7 +268,7 @@ export async function POST(request: NextRequest) {
       }, { headers: getCorsHeaders() });
 
     } else if (model.provider === 'stablehorde') {
-      const hordeApiKey = process.env.STABLE_HORDE_API_KEY || process.env.STABLEHORDE_API_KEY || '0000000000';
+      const hordeApiKey = process.env.STABLEHORDE_API_KEY || process.env.STABLE_HORDE_API_KEY || '0000000000';
       const hordeUrl = PROVIDER_URLS.stablehorde;
       const modelName = getStableHordeModelName(model.id);
       
@@ -277,20 +308,47 @@ export async function POST(request: NextRequest) {
 
       const { id: requestId } = await generateResponse.json();
       
-      // Poll for completion (simplified for this endpoint)
+      // Poll for completion (increased to 5 minutes to match image API)
       let attempts = 0;
-      while (attempts < 60) {
+      const maxAttempts = 150; // 150 * 2s = 300s (5 minutes)
+      while (attempts < maxAttempts) {
         await new Promise(r => setTimeout(r, 2000));
-        const check = await fetch(`${hordeUrl}/generate/check/${requestId}`);
+        const check = await fetch(`${hordeUrl}/generate/check/${requestId}`, {
+          headers: { 'Client-Agent': 'CloudGPT:1.0:cloudgptapi@github.com' }
+        });
+        
+        if (!check.ok) {
+          attempts++;
+          continue;
+        }
+
         const checkData = await check.json();
+        
         if (checkData.done) {
-          const status = await fetch(`${hordeUrl}/generate/status/${requestId}`);
+          const status = await fetch(`${hordeUrl}/generate/status/${requestId}`, {
+            headers: { 'Client-Agent': 'CloudGPT:1.0:cloudgptapi@github.com' }
+          });
           const statusData = await status.json();
           if (statusData.generations?.[0]?.img) {
             imageUrl = statusData.generations[0].img;
             break;
           }
         }
+
+        if (checkData.faulted) {
+          return NextResponse.json(
+            { 
+              error: {
+                message: 'Generation failed on Stable Horde',
+                type: 'api_error',
+                param: null,
+                code: 'horde_faulted'
+              }
+            },
+            { status: 500, headers: getCorsHeaders() }
+          );
+        }
+
         attempts++;
       }
 
@@ -298,10 +356,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           { 
             error: {
-              message: 'Generation timed out after 2 minutes. Stable Horde is currently busy or has a long queue. Try a different model or provider like Flux or AppyPie for faster results.',
-              type: 'server_error',
+              message: 'Generation timed out after 5 minutes. Stable Horde is currently busy or has a long queue. Try a different model or provider like Flux or AppyPie for faster results.',
+              type: 'api_error',
               param: null,
-              code: 'timeout'
+              code: 'horde_timeout'
             }
           },
           { status: 504, headers: getCorsHeaders() }
@@ -322,10 +380,53 @@ export async function POST(request: NextRequest) {
       
       const pollinationsUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(body.prompt)}?${params.toString()}`;
       
-      // We should verify the image exists or just return the URL
-      // To avoid 504/405 issues with proxying, we'll return the direct URL 
-      // but we could also fetch it to ensure it's valid.
-      imageUrl = pollinationsUrl;
+      // We'll verify the image exists and proxy it to handle errors better
+      // and provide a direct link to our own API if needed.
+      const pollinationsApiKey = getPollinationsApiKey();
+      const headers: Record<string, string> = {
+        'x-user-id': userId,
+      };
+      if (pollinationsApiKey) {
+        headers['Authorization'] = `Bearer ${pollinationsApiKey}`;
+      }
+
+      let retryCount = 0;
+      const maxRetries = 2;
+      let pollinationsResponse;
+
+      while (retryCount <= maxRetries) {
+        try {
+          pollinationsResponse = await fetch(pollinationsUrl, { headers });
+          if (pollinationsResponse.ok) break;
+          
+          if (pollinationsResponse.status === 500 || pollinationsResponse.status === 504) {
+            retryCount++;
+            await new Promise(r => setTimeout(r, 1000 * retryCount));
+            continue;
+          }
+          break;
+        } catch (e) {
+          retryCount++;
+          await new Promise(r => setTimeout(r, 1000 * retryCount));
+        }
+      }
+
+      if (pollinationsResponse && pollinationsResponse.ok) {
+        // If we want to return a URL, we can return the direct one, 
+        // but now we know it's valid (or at least was a moment ago).
+        imageUrl = pollinationsUrl;
+      } else {
+        return NextResponse.json(
+          { 
+            error: {
+              message: 'Pollinations generation failed or timed out',
+              type: 'api_error',
+              status: pollinationsResponse?.status || 500
+            }
+          },
+          { status: pollinationsResponse?.status || 500, headers: getCorsHeaders() }
+        );
+      }
     }
 
     if (apiKeyInfo) {

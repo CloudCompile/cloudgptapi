@@ -1,7 +1,7 @@
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { stripe } from '../../../../lib/stripe';
-import { supabaseAdmin } from '../../../../lib/supabase'; // We'll need a service role client for this
+import { stripe } from '@/lib/stripe';
+import { supabaseAdmin } from '@/lib/supabase'; // We'll need a service role client for this
 
 export async function POST(req: Request) {
   const body = await req.text();

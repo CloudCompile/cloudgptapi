@@ -100,6 +100,28 @@ async function generateAppyPieImage(body: any, model: ImageModel, userId?: strin
       );
     }
 
+    // Check if the response is JSON (often AppyPie returns JSON with an image URL)
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      const data = await response.json();
+      let imageUrl = data.image_url || data.url || (data.data && data.data[0] && data.data[0].url);
+      
+      if (imageUrl) {
+        const imageResponse = await fetch(imageUrl);
+        if (imageResponse.ok) {
+          return new NextResponse(imageResponse.body, {
+            headers: {
+              'Content-Type': imageResponse.headers.get('content-type') || 'image/png',
+              'Cache-Control': 'public, max-age=31536000, immutable',
+            },
+          });
+        }
+      }
+      
+      // If we couldn't find or fetch an image URL, return the JSON as is (though client might fail)
+      return NextResponse.json(data);
+    }
+
     return response;
   } catch (error) {
     console.error('AppyPie fetch error:', error);
@@ -113,7 +135,7 @@ async function generateAppyPieImage(body: any, model: ImageModel, userId?: strin
 // Map Stable Horde model IDs to actual model names
 function getStableHordeModelName(modelId: string): string {
   const modelMap: Record<string, string> = {
-    'stable-horde-flux-schnell': 'Flux.1-Schnell fp8 (Compact)',
+    'stable-horde-flux-schnell': 'FLUX.1 [schnell]',
     'stable-horde-sdxl': 'SDXL 1.0',
     'stable-horde-deliberate': 'Deliberate',
     'stable-horde-dreamshaper': 'Dreamshaper',
@@ -123,6 +145,9 @@ function getStableHordeModelName(modelId: string): string {
     'stable-horde-pony-diffusion': 'Pony Diffusion XL',
     'stable-horde-stable-diffusion': 'stable_diffusion',
     'stable-horde-anything-v5': 'Anything v5',
+    'stable-horde-flux-dev': 'FLUX.1 [dev]',
+    'stable-horde-icbinp': "I Can't Believe It's Not Photo",
+    'stable-horde-dreamlike-photoreal': 'Dreamlike Photoreal',
   };
   return modelMap[modelId] || 'stable_diffusion';
 }
@@ -136,9 +161,9 @@ async function generateStableHordeImage(
   apiKeyInfo: ApiKey | null
 ) {
   // '0000000000' is Stable Horde's official anonymous API key for rate-limited access
-  const hordeApiKey = process.env.STABLE_HORDE_API_KEY || process.env.STABLEHORDE_API_KEY || '0000000000';
-  if (!process.env.STABLE_HORDE_API_KEY && !process.env.STABLEHORDE_API_KEY) {
-    console.warn('STABLE_HORDE_API_KEY not set, using anonymous access with reduced rate limits');
+  const hordeApiKey = process.env.STABLEHORDE_API_KEY || process.env.STABLE_HORDE_API_KEY || '0000000000';
+  if (!process.env.STABLEHORDE_API_KEY && !process.env.STABLE_HORDE_API_KEY) {
+    console.warn('STABLEHORDE_API_KEY not set, using anonymous access with reduced rate limits');
   }
   const hordeUrl = PROVIDER_URLS.stablehorde;
   
@@ -265,7 +290,7 @@ async function generateStableHordeImage(
       
       if (checkData.faulted) {
         return NextResponse.json(
-          { error: 'Generation failed on Stable Horde' },
+          { error: 'Generation failed on Stable Horde. The request might have been rejected or the worker failed.' },
           { status: 500 }
         );
       }
@@ -433,21 +458,45 @@ export async function POST(request: NextRequest) {
       'x-user-id': userId,
     };
     const pollinationsApiKey = getPollinationsApiKey();
-    if (!pollinationsApiKey) {
-      // Fallback to direct redirect if no API key is available
-      return NextResponse.redirect(pollinationsUrl);
+    if (pollinationsApiKey) {
+      headers['Authorization'] = `Bearer ${pollinationsApiKey}`;
     }
-    headers['Authorization'] = `Bearer ${pollinationsApiKey}`;
     
-    // Log the request (masking the API key)
-    const maskedKey = `${pollinationsApiKey.substring(0, 4)}...${pollinationsApiKey.substring(pollinationsApiKey.length - 4)}`;
+    // Log the request (masking the API key if present)
+    const maskedKey = pollinationsApiKey ? `${pollinationsApiKey.substring(0, 4)}...${pollinationsApiKey.substring(pollinationsApiKey.length - 4)}` : 'none';
     console.log(`[ImageAPI] Fetching from Pollinations: ${pollinationsUrl} with key ${maskedKey}`);
     
-    const pollinationsResponse = await fetch(pollinationsUrl, { headers });
+    // Retry mechanism for Pollinations (max 2 retries)
+    let pollinationsResponse;
+    let retryCount = 0;
+    const maxRetries = 2;
 
-    if (!pollinationsResponse.ok) {
-      const errorText = await pollinationsResponse.text();
-      console.error(`[ImageAPI] Upstream error (${pollinationsResponse.status}):`, errorText.substring(0, 1000));
+    while (retryCount <= maxRetries) {
+      try {
+        pollinationsResponse = await fetch(pollinationsUrl, { headers });
+        if (pollinationsResponse.ok) break;
+        
+        // If it's a 500 or 504, wait a bit and retry
+        if (pollinationsResponse.status === 500 || pollinationsResponse.status === 504) {
+          console.warn(`[ImageAPI] Pollinations returned ${pollinationsResponse.status}, retrying (${retryCount + 1}/${maxRetries})...`);
+          retryCount++;
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+          continue;
+        }
+        
+        // For other errors, don't retry
+        break;
+      } catch (error) {
+        console.error(`[ImageAPI] Fetch error from Pollinations, retrying...`, error);
+        retryCount++;
+        await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+      }
+    }
+
+    if (!pollinationsResponse || !pollinationsResponse.ok) {
+      const resp = pollinationsResponse; // Local alias for type safety
+      const errorText = resp ? await resp.text() : 'Failed to connect';
+      console.error(`[ImageAPI] Upstream error (${resp?.status || 'unknown'}):`, errorText.substring(0, 1000));
       
       // Handle XML AccessDenied errors or any XML error response from Upstream (S3/CloudFront/Pollinations)
       if (errorText.includes('<?xml') || (errorText.includes('<Error>') && errorText.includes('</Error>'))) {
@@ -458,16 +507,16 @@ export async function POST(request: NextRequest) {
               message: 'The upstream provider (Pollinations/S3) returned an XML error. This usually indicates an invalid API key, restricted access, or an expired session.',
               type: 'provider_error',
               code: errorText.includes('AccessDenied') ? 'provider_access_denied' : 'provider_xml_error',
-              status: pollinationsResponse.status === 200 ? 403 : pollinationsResponse.status,
+              status: resp?.status === 200 ? 403 : (resp?.status || 500),
               details: errorText.substring(0, 500)
             }
           },
-          { status: pollinationsResponse.status === 200 ? 403 : pollinationsResponse.status }
+          { status: resp?.status === 200 ? 403 : (resp?.status || 500) }
         );
       }
 
       // Handle 401 Unauthorized specifically
-      if (pollinationsResponse.status === 401) {
+      if (resp?.status === 401) {
         return NextResponse.json(
           { 
             error: {
@@ -483,7 +532,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json(
         { error: 'Upstream API error', details: errorText.substring(0, 500) },
-        { status: pollinationsResponse.status }
+        { status: resp?.status || 500 }
       );
     }
 
