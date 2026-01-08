@@ -1,14 +1,21 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { Shield, Users, CreditCard, Activity, Search, AlertCircle, Check, X, ArrowUpRight, Crown, Package } from 'lucide-react';
 import { getAllUsers, promoteUser, assignPlan } from '@/lib/admin-actions';
+import { supabaseAdmin } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
-
-const ADMIN_EMAIL = 'fricker2025@gmail.com';
 
 export default async function AdminPage() {
   const user = await currentUser();
 
-  if (!user || user.emailAddresses[0].emailAddress !== ADMIN_EMAIL) {
+  const { data: profile, error } = await supabaseAdmin
+    .from('profiles')
+    .select('role')
+    .eq('id', user?.id || '')
+    .single();
+
+  const isAdmin = !!profile && profile.role === 'admin' && !error;
+
+  if (!user || !isAdmin) {
     return (
       <div className="container mx-auto px-4 py-24 flex flex-col items-center justify-center min-h-[60vh]">
         <div className="p-4 rounded-full bg-red-100 dark:bg-red-900/30 mb-6">

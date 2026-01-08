@@ -4,13 +4,23 @@ import { currentUser } from '@clerk/nextjs/server';
 import { supabaseAdmin } from './supabase';
 import { revalidatePath } from 'next/cache';
 
-const ADMIN_EMAIL = 'fricker2025@gmail.com';
-
 async function verifyAdmin() {
   const user = await currentUser();
-  if (!user || user.emailAddresses[0].emailAddress !== ADMIN_EMAIL) {
+
+  if (!user) {
     throw new Error('Unauthorized: Admin access required');
   }
+
+  const { data: profile, error } = await supabaseAdmin
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (error || !profile || profile.role !== 'admin') {
+    throw new Error('Unauthorized: Admin access required');
+  }
+
   return user;
 }
 
