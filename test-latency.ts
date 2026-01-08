@@ -10,7 +10,7 @@ const PROVIDERS = [
   { name: 'Liz Proxy', url: 'https://lizley.zeabur.app/v1/chat/completions', auth: `Bearer ${process.env.LIZ_API_KEY || 'sk-d38705df52b386e905f257a4019f8f2a'}` },
 ];
 
-async function measureLatency(provider: typeof PROVIDERS[0], model: string) {
+async function measureLatency(provider: any, model: string) {
   const start = Date.now();
   
   try {
@@ -41,6 +41,22 @@ async function measureLatency(provider: typeof PROVIDERS[0], model: string) {
   }
 }
 
+async function measureImageLatency() {
+  const url = 'https://gen.pollinations.ai/image/a%20beautiful%20sunset?model=flux&width=512&height=512&nologo=true';
+  const start = Date.now();
+  
+  try {
+    const response = await fetch(url);
+    const end = Date.now();
+    if (response.ok) {
+      return end - start;
+    }
+    return null;
+  } catch (err) {
+    return null;
+  }
+}
+
 async function runTests() {
   console.log('--- Provider Latency Test (Optimized) ---');
   
@@ -50,35 +66,27 @@ async function runTests() {
     { name: 'Gemini 2.0 Flash', id: 'gemini' }
   ];
 
-  const imageModels = [
-    { name: 'Flux', id: 'flux' },
-    { name: 'GPT Image', id: 'gptimage' },
-    { name: 'Stable Horde SDXL', id: 'stable-horde-sdxl' }
-  ];
-
-  for (const m of modelsToTest) {
-    // ... existing chat tests ...
-  }
-
-  console.log('\n--- Image Provider Test ---');
-  for (const m of imageModels) {
-    const start = Date.now();
-    try {
-      const response = await fetch('http://localhost:3000/api/image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: 'a small red cube', model: m.id })
-      });
-      const duration = Date.now() - start;
-      console.log(`Model ${m.id}: ${response.status} (${duration}ms)`);
-      if (!response.ok) {
-        const err = await response.text();
-        console.log(`  Error: ${err.substring(0, 100)}`);
+  for (const model of modelsToTest) {
+    console.log(`\nModel: ${model.name}`);
+    for (const provider of PROVIDERS) {
+      const latency = await measureLatency(provider, model.id);
+      if (latency) {
+        console.log(`${provider.name}: ${latency}ms`);
+      } else {
+        console.log(`${provider.name}: FAILED`);
       }
-    } catch (e: any) {
-      console.log(`Model ${m.id}: FAILED (${e.message})`);
     }
   }
+
+  console.log('\n--- Image Generation Latency ---');
+  const imageLatency = await measureImageLatency();
+  if (imageLatency) {
+    console.log(`Pollinations Flux: ${imageLatency}ms`);
+  } else {
+    console.log('Pollinations Flux: FAILED');
+  }
+
+  console.log('\n--- Done ---');
 }
 
-runTests();
+runTests().catch(console.error);

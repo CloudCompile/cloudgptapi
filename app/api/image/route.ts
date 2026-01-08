@@ -425,7 +425,7 @@ export async function POST(request: NextRequest) {
     if (body.enhance) params.set('enhance', 'true');
     
     const encodedPrompt = encodeURIComponent(body.prompt);
-    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?${params.toString()}`;
+    const pollinationsUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?${params.toString()}`;
     
     const userId = request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`;
     const headers: Record<string, string> = {

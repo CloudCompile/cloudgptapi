@@ -320,7 +320,7 @@ export async function POST(request: NextRequest) {
       if (body.seed) params.set('seed', String(body.seed));
       params.set('nologo', 'true');
       
-      const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(body.prompt)}?${params.toString()}`;
+      const pollinationsUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(body.prompt)}?${params.toString()}`;
       
       // We should verify the image exists or just return the URL
       // To avoid 504/405 issues with proxying, we'll return the direct URL 
