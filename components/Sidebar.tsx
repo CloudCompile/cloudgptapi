@@ -149,7 +149,7 @@ export function Sidebar() {
               }}
             />
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-black truncate">{user.fullName || user.username}</div>
+              <div className="text-sm font-black truncate">{user?.fullName || user?.username || 'User'}</div>
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">Developer</div>
             </div>
           </div>
