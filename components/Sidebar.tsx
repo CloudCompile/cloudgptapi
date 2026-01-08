@@ -42,8 +42,6 @@ export function Sidebar() {
   const pathname = usePathname();
   const { user } = useUser();
 
-  if (!user) return null;
-
   return (
     <div className="hidden lg:flex lg:flex-col lg:w-72 lg:fixed lg:inset-y-0 bg-white/50 dark:bg-slate-950/50 backdrop-blur-xl border-r border-border/50">
       <div className="flex flex-col flex-grow pt-8 pb-6 overflow-y-auto">

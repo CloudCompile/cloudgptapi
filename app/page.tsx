@@ -57,16 +57,16 @@ export default function Home() {
               <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">Google</span>
             </div>
             <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">Llama 3.1</span>
+              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">Llama 3.3</span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">Meta</span>
             </div>
             <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">Flux.1</span>
+              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">Flux.1 Pro</span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">Black Forest</span>
             </div>
             <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">Mistral</span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">Mistral AI</span>
+              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">DeepSeek V3</span>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">DeepSeek</span>
             </div>
           </div>
         </div>

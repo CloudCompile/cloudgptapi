@@ -72,9 +72,12 @@ export default function PlaygroundPage() {
           })
         });
 
-        if (!response.ok) throw new Error('Failed to get response');
-
         const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error?.message || 'Failed to get response');
+        }
+
         const assistantMessage = data.choices?.[0]?.message?.content || 'No response';
         setMessages([...newMessages, { role: 'assistant', content: assistantMessage }]);
       } else if (mode === 'image') {
@@ -87,11 +90,15 @@ export default function PlaygroundPage() {
           })
         });
 
-        if (!response.ok) throw new Error('Failed to generate image');
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to generate image');
+        }
 
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
         setImageUrl(url);
+        setInput('');
       } else if (mode === 'video') {
         const response = await fetch('/api/video', {
           method: 'POST',
@@ -102,14 +109,17 @@ export default function PlaygroundPage() {
           })
         });
 
-        if (!response.ok) throw new Error('Failed to generate video');
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to generate video');
+        }
 
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        setVideoUrl(url);
+        const data = await response.json();
+        setVideoUrl(data.url);
+        setInput('');
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } catch (err: any) {
+      setError(err.message || 'An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }

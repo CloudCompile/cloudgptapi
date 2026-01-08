@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from '@clerk/nextjs';
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
 import { Cloud, LayoutDashboard, Zap, Rocket, BookOpen, FileText, Shield, Menu, X } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { UserStatus } from './user-status';
@@ -104,9 +104,12 @@ function Header({ isAppPage }: { isAppPage: boolean }) {
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { user, isLoaded } = useUser();
   
-  const isAppPage = pathname !== '/' && !!user;
+  const isAppPage = pathname.startsWith('/dashboard') || 
+                   pathname.startsWith('/playground') || 
+                   pathname.startsWith('/models') || 
+                   pathname.startsWith('/docs') ||
+                   pathname.startsWith('/pricing');
   const isLandingPage = pathname === '/';
 
   return (
