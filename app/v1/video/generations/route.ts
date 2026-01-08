@@ -69,8 +69,8 @@ export async function POST(request: NextRequest) {
 
     // Check daily limit first
     const { checkDailyLimit, getDailyLimitInfo } = await import('@/lib/api-keys');
-    if (rawApiKey && !await checkDailyLimit(rawApiKey, dailyLimit)) {
-      const dailyInfo = await getDailyLimitInfo(rawApiKey, dailyLimit);
+    if (!await checkDailyLimit(effectiveKey, dailyLimit, apiKeyInfo?.id)) {
+      const dailyInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
       return NextResponse.json(
         { 
           error: {

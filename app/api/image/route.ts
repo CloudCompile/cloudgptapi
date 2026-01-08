@@ -377,8 +377,8 @@ export async function POST(request: NextRequest) {
     }
     
     // Check Daily Limit First
-    if (!await checkDailyLimit(effectiveKey, dailyLimit)) {
-      const dailyInfo = await getDailyLimitInfo(effectiveKey, dailyLimit);
+    if (!await checkDailyLimit(effectiveKey, dailyLimit, apiKeyInfo?.id)) {
+      const dailyInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
       return NextResponse.json(
         { 
           error: {

@@ -177,7 +177,28 @@ export async function checkRateLimit(key: string, limit: number = 60, type: stri
   }
 }
 
-export async function checkDailyLimit(key: string, limit: number = 1000): Promise<boolean> {
+export async function checkDailyLimit(key: string, limit: number = 1000, apiKeyId?: string): Promise<boolean> {
+  // If we have an API key ID, use the more accurate api_keys table tracking
+  if (apiKeyId) {
+    try {
+      const { data, error } = await supabaseAdmin.rpc('check_daily_limit', {
+        p_key_id: apiKeyId,
+        p_daily_limit: limit
+      });
+
+      if (error) {
+        console.error('[checkDailyLimit] RPC error:', error.message);
+        return true; // Fallback to allow on error
+      }
+
+      return (data as any).allowed;
+    } catch (err) {
+      console.error('[checkDailyLimit] Exception:', err);
+      return true; // Fallback to allow on error
+    }
+  }
+
+  // Fallback for IP-based or generic tracking using rate_limits table
   // Calculate ms until next midnight UTC
   const now = new Date();
   const nextMidnight = new Date();
@@ -194,13 +215,13 @@ export async function checkDailyLimit(key: string, limit: number = 1000): Promis
     });
 
     if (error) {
-      console.error('[checkDailyLimit] RPC error:', error.message);
+      console.error('[checkDailyLimit] RPC error (generic):', error.message);
       return true; // Fallback to allow on error
     }
 
     return (data as any).allowed;
   } catch (err) {
-    console.error('[checkDailyLimit] Exception:', err);
+    console.error('[checkDailyLimit] Exception (generic):', err);
     return true; // Fallback to allow on error
   }
 }
@@ -231,7 +252,43 @@ export async function getRateLimitInfo(key: string, limit: number = 60, type: st
   }
 }
 
-export async function getDailyLimitInfo(key: string, limit: number = 1000): Promise<{ remaining: number; resetAt: number; limit: number }> {
+export async function getDailyLimitInfo(key: string, limit: number = 1000, apiKeyId?: string): Promise<{ remaining: number; resetAt: number; limit: number }> {
+  // If we have an API key ID, use the api_keys table
+  if (apiKeyId) {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('api_keys')
+        .select('daily_usage_count, last_reset_at')
+        .eq('id', apiKeyId)
+        .single();
+
+      const nextMidnight = new Date();
+      nextMidnight.setUTCHours(24, 0, 0, 0);
+      const resetAt = nextMidnight.getTime();
+
+      if (error || !data) {
+        return { remaining: limit, resetAt, limit };
+      }
+
+      // Check if it's a new day
+      const lastReset = new Date(data.last_reset_at);
+      const isNewDay = lastReset.getUTCDate() !== new Date().getUTCDate();
+      const currentUsage = isNewDay ? 0 : data.daily_usage_count;
+
+      return {
+        remaining: Math.max(0, limit - currentUsage),
+        resetAt,
+        limit
+      };
+    } catch (err) {
+      console.error('[getDailyLimitInfo] Exception:', err);
+      const nextMidnight = new Date();
+      nextMidnight.setUTCHours(24, 0, 0, 0);
+      return { remaining: limit, resetAt: nextMidnight.getTime(), limit };
+    }
+  }
+
+  // Fallback for IP-based or generic tracking
   const dailyKey = `daily:${key}`;
   
   try {

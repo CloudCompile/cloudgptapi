@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
 
     // Check daily limit first
     const { checkDailyLimit, getDailyLimitInfo } = await import('@/lib/api-keys');
-    if (!await checkDailyLimit(rawApiKey, dailyLimit)) {
-      const dailyInfo = await getDailyLimitInfo(rawApiKey, dailyLimit);
+    if (!await checkDailyLimit(rawApiKey, dailyLimit, apiKeyInfo.id)) {
+      const dailyInfo = await getDailyLimitInfo(rawApiKey, dailyLimit, apiKeyInfo.id);
       return NextResponse.json(
         { 
           error: `Daily request limit of ${dailyLimit} exceeded. Reset at ${new Date(dailyInfo.resetAt).toUTCString()}`,
