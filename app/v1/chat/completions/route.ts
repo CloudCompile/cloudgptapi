@@ -548,6 +548,10 @@ export async function POST(request: NextRequest) {
     const maxTokensSafetyCap = 4096;
     const effectiveMaxTokens = body.max_tokens ? Math.min(body.max_tokens, maxTokensSafetyCap) : undefined;
 
+    // Log the provider request (masking the API key)
+    const maskedProviderKey = providerApiKey ? `${providerApiKey.substring(0, 4)}...${providerApiKey.substring(providerApiKey.length - 4)}` : 'none';
+    console.log(`[${requestId}] Forwarding to ${model.provider} (${providerUrl}) with key ${maskedProviderKey}`);
+
     if (model.provider === 'meridian') {
       // Meridian expects a simple "prompt" field, not "messages"
       // Convert messages array to a single prompt string
@@ -592,6 +596,25 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify(requestBody),
         signal: controller.signal,
       });
+      
+      if (!providerResponse.ok) {
+        const errorText = await providerResponse.text();
+        console.error(`[${requestId}] Provider ${model.provider} error (${providerResponse.status}):`, errorText.substring(0, 1000));
+        
+        // Return the error text if it's JSON, otherwise wrap it
+        try {
+          const errorJson = JSON.parse(errorText);
+          return NextResponse.json(
+            { error: `Provider ${model.provider} Error`, details: errorJson, status: providerResponse.status },
+            { status: providerResponse.status, headers: getCorsHeaders() }
+          );
+        } catch (e) {
+          return NextResponse.json(
+            { error: `Provider ${model.provider} Error`, details: errorText, status: providerResponse.status },
+            { status: providerResponse.status, headers: getCorsHeaders() }
+          );
+        }
+      }
     } catch (fetchError: any) {
       clearTimeout(timeoutId);
       if (fetchError.name === 'AbortError') {
