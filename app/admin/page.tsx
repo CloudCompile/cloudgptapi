@@ -15,7 +15,7 @@ export default async function AdminPage() {
         </div>
         <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
         <p className="text-slate-600 dark:text-slate-400 text-center max-w-md">
-          This area is restricted to administrators only. Your account ({user?.emailAddresses[0].emailAddress || 'Not signed in'}) does not have permission to view this page.
+          This area is restricted to administrators only. Your account (Not signed in) does not have permission to view this page.
         </p>
         <a 
           href="/"
@@ -43,7 +43,7 @@ export default async function AdminPage() {
         </div>
         <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
         <p className="text-slate-600 dark:text-slate-400 text-center max-w-md">
-          This area is restricted to administrators only. Your account ({user?.emailAddresses[0].emailAddress || 'Not signed in'}) does not have permission to view this page.
+          This area is restricted to administrators only. Your account ({user.emailAddresses[0].emailAddress || 'Unknown user'}) does not have permission to view this page.
         </p>
         <a 
           href="/"
