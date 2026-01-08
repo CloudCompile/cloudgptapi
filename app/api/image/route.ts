@@ -420,26 +420,45 @@ export async function POST(request: NextRequest) {
     }
     headers['Authorization'] = `Bearer ${pollinationsApiKey}`;
     
+    // Log the request (masking the API key)
+    const maskedKey = `${pollinationsApiKey.substring(0, 4)}...${pollinationsApiKey.substring(pollinationsApiKey.length - 4)}`;
+    console.log(`[ImageAPI] Fetching from Pollinations: ${pollinationsUrl} with key ${maskedKey}`);
+    
     const pollinationsResponse = await fetch(pollinationsUrl, { headers });
 
     if (!pollinationsResponse.ok) {
       const errorText = await pollinationsResponse.text();
-      console.error(`[ImageAPI] Upstream error (${pollinationsResponse.status}):`, errorText.substring(0, 500));
+      console.error(`[ImageAPI] Upstream error (${pollinationsResponse.status}):`, errorText.substring(0, 1000));
       
       // Handle XML AccessDenied errors or any XML error response from Upstream (S3/CloudFront/Pollinations)
       if (errorText.includes('<?xml') || (errorText.includes('<Error>') && errorText.includes('</Error>'))) {
-        console.warn(`[ImageAPI] Detected XML error response from provider:`, errorText.substring(0, 200));
+        console.warn(`[ImageAPI] Detected XML error response from provider:`, errorText.substring(0, 500));
         return NextResponse.json(
           { 
             error: {
-              message: 'The upstream provider returned an XML error. This usually indicates an invalid API key, restricted access, or a missing resource.',
+              message: 'The upstream provider (Pollinations/S3) returned an XML error. This usually indicates an invalid API key, restricted access, or an expired session.',
               type: 'provider_error',
               code: errorText.includes('AccessDenied') ? 'provider_access_denied' : 'provider_xml_error',
               status: pollinationsResponse.status === 200 ? 403 : pollinationsResponse.status,
-              details: errorText.substring(0, 200)
+              details: errorText.substring(0, 500)
             }
           },
           { status: pollinationsResponse.status === 200 ? 403 : pollinationsResponse.status }
+        );
+      }
+
+      // Handle 401 Unauthorized specifically
+      if (pollinationsResponse.status === 401) {
+        return NextResponse.json(
+          { 
+            error: {
+              message: 'Pollinations API key is invalid or expired.',
+              type: 'authentication_error',
+              code: 'invalid_api_key',
+              status: 401
+            }
+          },
+          { status: 401 }
         );
       }
 

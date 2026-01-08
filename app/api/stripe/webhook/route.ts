@@ -27,27 +27,56 @@ export async function POST(req: Request) {
     );
 
     if (!session?.metadata?.userId) {
+      console.error('Webhook Error: User id is required in session metadata', session.id);
       return new NextResponse('User id is required', { status: 400 });
     }
 
-    // Here you would update your database (Supabase) with the subscription info
-    // For now, we'll log it. You'll need to define your schema for subscriptions.
-    console.log(`User ${session.metadata.userId} subscribed to ${subscription.id}`);
+    const userId = session.metadata.userId;
+    const priceId = subscription.items.data[0].price.id;
     
-    // Example Supabase update (requires a subscriptions table):
-    /*
-    await supabaseAdmin
+    // Map price ID to plan name
+    let planName = 'free';
+    if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID) {
+      planName = 'pro';
+    } else if (priceId === process.env.NEXT_PUBLIC_STRIPE_DEV_PRICE_ID) {
+      planName = 'developer';
+    }
+
+    console.log(`Updating user ${userId} to plan ${planName} (price: ${priceId})`);
+
+    // Update the profile plan in Supabase
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .update({ 
+        plan: planName,
+        stripe_product_id: subscription.items.data[0].plan.product as string,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (profileError) {
+      console.error(`Error updating profile for user ${userId}:`, profileError);
+    } else {
+      console.log(`Successfully updated profile for user ${userId} to ${planName}`);
+    }
+    
+    // Also track the subscription details for audit/debugging
+    const { error: subError } = await supabaseAdmin
       .from('user_subscriptions')
       .upsert({
-        user_id: session.metadata.userId,
+        user_id: userId,
         stripe_subscription_id: subscription.id,
         stripe_customer_id: subscription.customer as string,
-        stripe_price_id: subscription.items.data[0].price.id,
+        stripe_price_id: priceId,
         stripe_current_period_end: new Date(
           subscription.current_period_end * 1000
         ).toISOString(),
+        status: subscription.status,
       });
-    */
+
+    if (subError) {
+      console.error(`Error logging subscription for user ${userId}:`, subError);
+    }
   }
 
   if (event.type === 'invoice.payment_succeeded') {
@@ -73,7 +102,39 @@ export async function POST(req: Request) {
   if (event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object as any;
     console.log(`Subscription cancelled/deleted: ${subscription.id}`);
-    // Remove access or mark as inactive in database
+    
+    // Find the user with this subscription
+    const { data: subData, error: subQueryError } = await supabaseAdmin
+      .from('user_subscriptions')
+      .select('user_id')
+      .eq('stripe_subscription_id', subscription.id)
+      .single();
+
+    if (subQueryError || !subData) {
+      console.error(`Error finding user for deleted subscription ${subscription.id}:`, subQueryError);
+    } else {
+      const userId = subData.user_id;
+      console.log(`Reverting user ${userId} to free plan due to subscription deletion`);
+      
+      // Update the profile plan to 'free'
+      const { error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .update({ 
+          plan: 'free',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId);
+
+      if (profileError) {
+        console.error(`Error reverting profile for user ${userId}:`, profileError);
+      }
+      
+      // Update subscription status in database
+      await supabaseAdmin
+        .from('user_subscriptions')
+        .update({ status: 'canceled' })
+        .eq('stripe_subscription_id', subscription.id);
+    }
   }
 
   return new NextResponse(null, { status: 200 });

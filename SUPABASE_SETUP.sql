@@ -31,6 +31,27 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- User Subscriptions tracking table
+CREATE TABLE IF NOT EXISTS public.user_subscriptions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT NOT NULL,
+    stripe_subscription_id TEXT UNIQUE NOT NULL,
+    stripe_customer_id TEXT NOT NULL,
+    stripe_price_id TEXT NOT NULL,
+    stripe_current_period_end TIMESTAMP WITH TIME ZONE NOT NULL,
+    status TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS for user_subscriptions
+ALTER TABLE public.user_subscriptions ENABLE ROW LEVEL SECURITY;
+
+-- Policy for user_subscriptions
+CREATE POLICY "Users can view their own subscriptions"
+    ON public.user_subscriptions FOR SELECT
+    USING (true); -- Authenticated via Clerk in API
+
 -- Function to handle user role and plan updates
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
 RETURNS TRIGGER AS $$
