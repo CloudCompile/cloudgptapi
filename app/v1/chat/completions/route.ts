@@ -626,7 +626,8 @@ export async function POST(request: NextRequest) {
       frequency_penalty: body.frequency_penalty ?? 0,
       presence_penalty: body.presence_penalty ?? 0,
       // Reasoning parameters for models like o1 or deepseek-r1
-      reasoning_effort: body.reasoning_effort,
+      // Force reasoning_effort: "medium" for Pollinations models
+      reasoning_effort: model.provider === 'pollinations' ? 'medium' : body.reasoning_effort,
       include_reasoning: body.include_reasoning,
       reasoning: body.reasoning,
     };
@@ -743,7 +744,8 @@ export async function POST(request: NextRequest) {
         top_p: body.top_p,
         frequency_penalty: body.frequency_penalty,
         presence_penalty: body.presence_penalty,
-        reasoning_effort: body.reasoning_effort,
+        // Force reasoning_effort: "medium" for Pollinations models
+        reasoning_effort: model.provider === 'pollinations' ? 'medium' : body.reasoning_effort,
         include_reasoning: body.include_reasoning,
         reasoning: body.reasoning,
       };

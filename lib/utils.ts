@@ -19,6 +19,7 @@ export function getCorsHeaders() {
  */
 export function getPollinationsApiKeys(): string[] {
   const keys = [
+    'sk_ErW9QCrg33NJapix0eaTQAKIOTBYxk9d', // New main key
     process.env.POLLINATIONS_API_KEY,
     process.env.POLLINATIONS_API_KEY_1,
     process.env.POLLINATIONS_API_KEY_2,
