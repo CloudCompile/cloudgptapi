@@ -123,6 +123,7 @@ export const PREMIUM_MODELS = new Set([
   'openai',       // GPT-4o
   'claude',       // Claude 3.5 Sonnet
   'claude-large', // Claude Large
+  'gemini-large', // Google Gemini 3 Pro
   'gemini-2.5-pro',
   'gemini-3-pro-preview',
   'grok',         // xAI Grok 4 Fast
