@@ -28,12 +28,12 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'nova-micro', name: 'Nova Micro', provider: 'pollinations', description: 'Compact Nova model' },
   { id: 'qwen-coder', name: 'Qwen 2.5 Coder', provider: 'pollinations', description: 'Qwen 2.5 Coder 32B' },
   { id: 'mistral', name: 'Mistral Large', provider: 'pollinations', description: 'Mistral AI Large' },
-  { id: 'gemini-fast', name: 'Gemini Fast', provider: 'pollinations', description: 'Fast Gemini model' },
+  { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'pollinations', description: 'Google Gemini 2.0 Flash' },
   { id: 'openai-fast', name: 'OpenAI GPT-4o Mini', provider: 'pollinations', description: 'Faster OpenAI model' },
   { id: 'grok', name: 'Grok 3', provider: 'pollinations', description: 'xAI Grok 3' },
   { id: 'openai', name: 'OpenAI GPT-4o', provider: 'pollinations', description: 'OpenAI GPT-4o model' },
   { id: 'perplexity-fast', name: 'Perplexity Fast', provider: 'pollinations', description: 'Fast Perplexity model' },
-  { id: 'gemini', name: 'Gemini 2.0 Flash', provider: 'pollinations', description: 'Google Gemini 2.0 Flash' },
+  { id: 'gemini-2.0-flash-thinking', name: 'Gemini 2.0 Thinking', provider: 'pollinations', description: 'Gemini 2.0 Flash with reasoning' },
   { id: 'gemini-search', name: 'Gemini Search', provider: 'pollinations', description: 'Gemini with Google Search' },
   { id: 'chickytutor', name: 'ChickyTutor', provider: 'pollinations', description: 'Educational AI tutor' },
   { id: 'minimax', name: 'MiniMax', provider: 'pollinations', description: 'MiniMax model' },
@@ -45,7 +45,7 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'claude', name: 'Claude 3.5 Sonnet', provider: 'pollinations', description: 'Anthropic Claude 3.5 Sonnet' },
   { id: 'claude-large', name: 'Claude Large', provider: 'pollinations', description: 'Large Claude model' },
   { id: 'perplexity-reasoning', name: 'Perplexity Reasoning', provider: 'pollinations', description: 'Perplexity with reasoning' },
-  { id: 'gemini-large', name: 'Gemini 2.5 Pro', provider: 'pollinations', description: 'Google Gemini 2.5 Pro' },
+  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'pollinations', description: 'Google Gemini 2.5 Pro' },
   { id: 'openai-large', name: 'OpenAI GPT-4.5', provider: 'pollinations', description: 'Large OpenAI model' },
   { id: 'openai-audio', name: 'OpenAI Audio', provider: 'pollinations', description: 'OpenAI with audio support' },
   // OpenRouter free models
@@ -123,7 +123,6 @@ export const PREMIUM_MODELS = new Set([
   'openai',       // GPT-4o
   'claude',       // Claude 3.5 Sonnet
   'claude-large', // Claude Large
-  'gemini-large', // Gemini 2.5 Pro
   'gemini-2.5-pro',
   'gemini-3-pro-preview',
   'grok',         // Grok 3
@@ -132,6 +131,7 @@ export const PREMIUM_MODELS = new Set([
   'deepseek-r1',
   'perplexity-reasoning',
   'kimi-k2-thinking',
+  'gemini-2.0-flash-thinking',
   'gemini-search',
   'openai-audio',
   'meridian',

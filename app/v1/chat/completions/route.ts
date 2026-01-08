@@ -598,8 +598,8 @@ export async function POST(request: NextRequest) {
     const isHighSpeedModel = [
       'openai', 
       'openai-fast', 
-      'gemini-fast', 
-      'gemini', 
+      'gemini-2.0-flash', 
+      'gemini-2.0-flash-thinking', 
       'deepseek',
       'google/gemini-2.0-flash-exp:free',
       'google/gemini-2.0-flash-exp',
@@ -869,7 +869,7 @@ export async function POST(request: NextRequest) {
           console.warn(`[${requestId}] OpenRouter Gemini rate limited. Trying Pollinations fallback...`);
           try {
             const pollKey = getPollinationsApiKey();
-            const pollModelId = modelId.includes('2.0') ? 'gemini' : 'gemini-fast';
+            const pollModelId = modelId.includes('thinking') ? 'gemini-2.0-flash-thinking' : 'gemini-2.0-flash';
             
             const pollResponse = await fetch(`${PROVIDER_URLS.pollinations}/v1/chat/completions`, {
               method: 'POST',
