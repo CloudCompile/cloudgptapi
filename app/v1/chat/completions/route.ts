@@ -428,7 +428,6 @@ export async function POST(request: NextRequest) {
       'claude-3-haiku': 'claude-fast',
       'deepseek-chat': 'deepseek',
       'deepseek-coder': 'qwen-coder',
-      'gemini-2.5-pro': 'gemini-large',
     };
 
     if (modelAliases[modelId]) {
@@ -439,6 +438,11 @@ export async function POST(request: NextRequest) {
     const isPremium = PREMIUM_MODELS.has(modelId);
     // Pro access if they have a pro/enterprise plan OR if their rate limit is high (fallback)
     const hasProAccess = userPlan === 'pro' || userPlan === 'enterprise' || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
+
+    // Diagnostic logging for access issues
+    if (isPremium || userPlan !== 'free') {
+      console.log(`[${requestId}] Access Check: model=${modelId}, plan=${userPlan}, isPremium=${isPremium}, hasProAccess=${hasProAccess}`);
+    }
 
     if (isPremium && !hasProAccess) {
       console.warn(`[${requestId}] Premium model access denied: ${modelId} for key: ${effectiveKey.substring(0, 10)}...`);
