@@ -5,7 +5,8 @@ import { IMAGE_MODELS, PROVIDER_URLS, ImageModel, PREMIUM_MODELS } from '@/lib/p
 import { getPollinationsApiKey } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
+export const maxDuration = 300; // 5 minutes max for long image generation
 
 // Handle OPTIONS for CORS
 export async function OPTIONS() {
@@ -135,8 +136,8 @@ async function generateStableHordeImage(
   apiKeyInfo: ApiKey | null
 ) {
   // '0000000000' is Stable Horde's official anonymous API key for rate-limited access
-  const hordeApiKey = process.env.STABLE_HORDE_API_KEY || '0000000000';
-  if (!process.env.STABLE_HORDE_API_KEY) {
+  const hordeApiKey = process.env.STABLE_HORDE_API_KEY || process.env.STABLEHORDE_API_KEY || '0000000000';
+  if (!process.env.STABLE_HORDE_API_KEY && !process.env.STABLEHORDE_API_KEY) {
     console.warn('STABLE_HORDE_API_KEY not set, using anonymous access with reduced rate limits');
   }
   const hordeUrl = PROVIDER_URLS.stablehorde;
@@ -273,7 +274,10 @@ async function generateStableHordeImage(
     }
     
     return NextResponse.json(
-      { error: 'Generation timed out' },
+      { 
+        error: 'Generation timed out after 5 minutes. Stable Horde is currently busy or has a long queue. Try a different model or provider like Flux or AppyPie for faster results.',
+        code: 'horde_timeout'
+      },
       { status: 504 }
     );
     
@@ -421,7 +425,7 @@ export async function POST(request: NextRequest) {
     if (body.enhance) params.set('enhance', 'true');
     
     const encodedPrompt = encodeURIComponent(body.prompt);
-    const pollinationsUrl = `${PROVIDER_URLS.pollinations}/image/${encodedPrompt}?${params.toString()}`;
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?${params.toString()}`;
     
     const userId = request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`;
     const headers: Record<string, string> = {
@@ -430,11 +434,8 @@ export async function POST(request: NextRequest) {
     };
     const pollinationsApiKey = getPollinationsApiKey();
     if (!pollinationsApiKey) {
-      console.warn(`[ImageAPI] Missing Pollinations API key for model: ${modelId}`);
-      return NextResponse.json(
-        { error: 'Pollinations API key is not configured. Please add POLLINATIONS_API_KEY to your environment variables.' },
-        { status: 500 }
-      );
+      // Fallback to direct redirect if no API key is available
+      return NextResponse.redirect(pollinationsUrl);
     }
     headers['Authorization'] = `Bearer ${pollinationsApiKey}`;
     

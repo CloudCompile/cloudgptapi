@@ -4,7 +4,8 @@ import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimit
 import { IMAGE_MODELS, PROVIDER_URLS, ImageModel, PREMIUM_MODELS } from '@/lib/providers';
 import { getCorsHeaders } from '@/lib/utils';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
+export const maxDuration = 300; // 5 minutes max for long image generation
 
 // Handle OPTIONS for CORS
 export async function OPTIONS() {
@@ -236,7 +237,7 @@ export async function POST(request: NextRequest) {
       }, { headers: getCorsHeaders() });
 
     } else if (model.provider === 'stablehorde') {
-      const hordeApiKey = process.env.STABLE_HORDE_API_KEY || '0000000000';
+      const hordeApiKey = process.env.STABLE_HORDE_API_KEY || process.env.STABLEHORDE_API_KEY || '0000000000';
       const hordeUrl = PROVIDER_URLS.stablehorde;
       const modelName = getStableHordeModelName(model.id);
       
@@ -297,7 +298,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           { 
             error: {
-              message: 'Generation timed out',
+              message: 'Generation timed out after 2 minutes. Stable Horde is currently busy or has a long queue. Try a different model or provider like Flux or AppyPie for faster results.',
               type: 'server_error',
               param: null,
               code: 'timeout'
@@ -319,7 +320,12 @@ export async function POST(request: NextRequest) {
       if (body.seed) params.set('seed', String(body.seed));
       params.set('nologo', 'true');
       
-      imageUrl = `${PROVIDER_URLS.pollinations}/image/${encodeURIComponent(body.prompt)}?${params.toString()}`;
+      const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(body.prompt)}?${params.toString()}`;
+      
+      // We should verify the image exists or just return the URL
+      // To avoid 504/405 issues with proxying, we'll return the direct URL 
+      // but we could also fetch it to ensure it's valid.
+      imageUrl = pollinationsUrl;
     }
 
     if (apiKeyInfo) {

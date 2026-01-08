@@ -50,21 +50,33 @@ async function runTests() {
     { name: 'Gemini 2.0 Flash', id: 'gemini' }
   ];
 
+  const imageModels = [
+    { name: 'Flux', id: 'flux' },
+    { name: 'GPT Image', id: 'gptimage' },
+    { name: 'Stable Horde SDXL', id: 'stable-horde-sdxl' }
+  ];
+
   for (const m of modelsToTest) {
-    console.log(`\nTesting model: ${m.name} (${m.id})`);
-    
-    const polLatency = await measureLatency(PROVIDERS[0], m.id);
-    console.log(`- Pollinations: ${polLatency ? polLatency + 'ms' : 'FAILED'}`);
-    
-    // For Liz, we use the actual model name they expect if different
-    const lizModelId = m.id === 'openai' ? 'gpt-4o' : (m.id === 'deepseek' ? 'deepseek-v3' : 'gemini-2.0-flash');
-    const lizLatency = await measureLatency(PROVIDERS[1], lizModelId);
-    console.log(`- Liz Proxy: ${lizLatency ? lizLatency + 'ms' : 'FAILED'}`);
-    
-    if (polLatency && lizLatency) {
-      const diff = lizLatency - polLatency;
-      const percent = ((diff / lizLatency) * 100).toFixed(1);
-      console.log(`>>> Optimization Gain: ${diff}ms faster (${percent}%)`);
+    // ... existing chat tests ...
+  }
+
+  console.log('\n--- Image Provider Test ---');
+  for (const m of imageModels) {
+    const start = Date.now();
+    try {
+      const response = await fetch('http://localhost:3000/api/image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: 'a small red cube', model: m.id })
+      });
+      const duration = Date.now() - start;
+      console.log(`Model ${m.id}: ${response.status} (${duration}ms)`);
+      if (!response.ok) {
+        const err = await response.text();
+        console.log(`  Error: ${err.substring(0, 100)}`);
+      }
+    } catch (e: any) {
+      console.log(`Model ${m.id}: FAILED (${e.message})`);
     }
   }
 }

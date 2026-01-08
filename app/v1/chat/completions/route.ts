@@ -6,7 +6,8 @@ import { getCorsHeaders, getPollinationsApiKey } from '@/lib/utils';
 import { retrieveMemory, rememberInteraction } from '@/lib/memory';
 import { supabaseAdmin } from '@/lib/supabase';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
+export const maxDuration = 300; // 5 minutes max for long reasoning or slow providers
 
 // Constants for validation
 const MAX_MESSAGE_LENGTH = 2000000; // 2MB per message (~1.5M tokens)
@@ -94,8 +95,8 @@ async function handleStableHordeChat(
   limit: number
 ): Promise<NextResponse> {
   // '0000000000' is Stable Horde's official anonymous API key for rate-limited access
-  const hordeApiKey = process.env.STABLE_HORDE_API_KEY || '0000000000';
-  if (!process.env.STABLE_HORDE_API_KEY) {
+  const hordeApiKey = process.env.STABLE_HORDE_API_KEY || process.env.STABLEHORDE_API_KEY || '0000000000';
+  if (!process.env.STABLE_HORDE_API_KEY && !process.env.STABLEHORDE_API_KEY) {
     console.warn('STABLE_HORDE_API_KEY not set, using anonymous access with reduced rate limits');
   }
   const hordeUrl = PROVIDER_URLS.stablehorde;
