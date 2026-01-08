@@ -140,6 +140,7 @@ export async function applyPlanOverride(email: string, currentPlan: string, user
  * For production, we'd ideally use Redis or a DB-level check.
  */
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const dailyLimitMap = new Map<string, { count: number; resetAt: number }>();
 
 export function checkRateLimit(key: string, limit: number = 60, type: string = 'default'): boolean {
   const now = Date.now();
@@ -161,6 +162,30 @@ export function checkRateLimit(key: string, limit: number = 60, type: string = '
   return true;
 }
 
+export function checkDailyLimit(key: string, limit: number = 1000): boolean {
+  const now = Date.now();
+  // 24 hour window
+  const windowMs = 24 * 60 * 60 * 1000;
+  const dailyKey = `daily:${key}`;
+  
+  const current = dailyLimitMap.get(dailyKey);
+  
+  if (!current || now > current.resetAt) {
+    // Reset at the next midnight UTC
+    const nextMidnight = new Date();
+    nextMidnight.setUTCHours(24, 0, 0, 0);
+    dailyLimitMap.set(dailyKey, { count: 1, resetAt: nextMidnight.getTime() });
+    return true;
+  }
+  
+  if (current.count >= limit) {
+    return false;
+  }
+  
+  current.count++;
+  return true;
+}
+
 export function getRateLimitInfo(key: string, limit: number = 60, type: string = 'default'): { remaining: number; resetAt: number; limit: number } {
   const now = Date.now();
   const rateLimitKey = `${type}:${key}`;
@@ -168,6 +193,24 @@ export function getRateLimitInfo(key: string, limit: number = 60, type: string =
   
   if (!current || now > current.resetAt) {
     return { remaining: limit, resetAt: now + 60000, limit };
+  }
+  
+  return {
+    remaining: Math.max(0, limit - current.count),
+    resetAt: current.resetAt,
+    limit,
+  };
+}
+
+export function getDailyLimitInfo(key: string, limit: number = 1000): { remaining: number; resetAt: number; limit: number } {
+  const now = Date.now();
+  const dailyKey = `daily:${key}`;
+  const current = dailyLimitMap.get(dailyKey);
+  
+  if (!current || now > current.resetAt) {
+    const nextMidnight = new Date();
+    nextMidnight.setUTCHours(24, 0, 0, 0);
+    return { remaining: limit, resetAt: nextMidnight.getTime(), limit };
   }
   
   return {

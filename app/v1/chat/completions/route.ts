@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
 import { CHAT_MODELS, PROVIDER_URLS, PREMIUM_MODELS } from '@/lib/providers';
 import { getCorsHeaders, getPollinationsApiKey } from '@/lib/utils';
 import { retrieveMemory, rememberInteraction } from '@/lib/memory';
@@ -329,16 +329,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Determine limit based on plan if not explicitly set high on the key
-    let limit = 60; // Default baseline limit (60 RPM)
+    let limit = 100; // Default baseline limit (100 RPM)
+    let dailyLimit = 1000; // Default 1000 RPD
     
     if (userPlan === 'admin' || userPlan === 'enterprise') {
-      limit = 10000; // Near unlimited for enterprise
+      limit = 10000; 
+      dailyLimit = 100000;
     } else if (userPlan === 'pro') {
-      limit = 5000; // Near unlimited for pro
+      limit = 200; // Higher RPM for Pro
+      dailyLimit = 2000; // 2000 RPD for pro
     } else if (userPlan === 'developer') {
-      limit = 1000; // High limit for developers
+      limit = 1000;
+      dailyLimit = 5000;
     } else if (userPlan === 'free') {
-      limit = 60; // Standard baseline
+      limit = 100; // 100 RPM for free
+      dailyLimit = 1000; // 1000 RPD for free
     }
 
     // If API key has a specific custom limit that's higher, use that
@@ -346,6 +351,30 @@ export async function POST(request: NextRequest) {
       limit = apiKeyInfo.rateLimit;
     }
     
+    // Check Daily Limit First
+    if (!checkDailyLimit(effectiveKey, dailyLimit)) {
+      const dailyInfo = getDailyLimitInfo(effectiveKey, dailyLimit);
+      console.warn(`[${requestId}] Daily limit exceeded for key: ${effectiveKey.substring(0, 10)}...`);
+      return NextResponse.json(
+        { 
+          error: {
+            message: `Daily request limit exceeded (${dailyLimit} RPD). Your limit resets at ${new Date(dailyInfo.resetAt).toUTCString()}. Upgrade for higher limits.`,
+            type: 'requests',
+            param: null,
+            code: 'daily_limit_exceeded'
+          }
+        },
+        { 
+          status: 429,
+          headers: {
+            ...getCorsHeaders(),
+            'X-DailyLimit-Remaining': String(dailyInfo.remaining),
+            'X-DailyLimit-Reset': String(dailyInfo.resetAt),
+          },
+        }
+      );
+    }
+
     if (!checkRateLimit(effectiveKey, limit, 'chat')) {
       const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'chat');
       console.warn(`[${requestId}] Rate limit exceeded for key: ${effectiveKey.substring(0, 10)}...`);
@@ -441,8 +470,8 @@ export async function POST(request: NextRequest) {
 
     // Check if model is premium and if user has access
     const isPremium = PREMIUM_MODELS.has(modelId);
-    // Pro access if they have a pro/enterprise plan OR if their rate limit is high (fallback)
-    const hasProAccess = userPlan === 'pro' || userPlan === 'enterprise' || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
+    // Pro access if they have a pro/enterprise/developer/admin plan OR if their rate limit is high (fallback)
+    const hasProAccess = ['pro', 'enterprise', 'developer', 'admin'].includes(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
 
     // Diagnostic logging for access issues
     if (isPremium || userPlan !== 'free') {

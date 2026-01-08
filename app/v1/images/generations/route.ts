@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey } from '@/lib/api-keys';
 import { IMAGE_MODELS, PROVIDER_URLS, ImageModel, PREMIUM_MODELS } from '@/lib/providers';
 import { getCorsHeaders, getPollinationsApiKey } from '@/lib/utils';
 
@@ -58,11 +58,60 @@ export async function POST(request: NextRequest) {
     const effectiveKey = rawApiKey || clientIp;
     
     let apiKeyInfo: ApiKey | null = null;
+    let userPlan = 'free';
+
     if (rawApiKey) {
       apiKeyInfo = await validateApiKey(rawApiKey);
+      if (apiKeyInfo?.plan) {
+        userPlan = apiKeyInfo.plan;
+      }
     }
 
-    const limit = apiKeyInfo ? apiKeyInfo.rateLimit : 5;
+    // Determine limit based on plan
+    let limit = 5; // Default anonymous/free limit (5 RPM for images)
+    let dailyLimit = 1000; // Default 1000 RPD
+    
+    if (userPlan === 'admin' || userPlan === 'enterprise') {
+      limit = 100;
+      dailyLimit = 100000;
+    } else if (userPlan === 'pro') {
+      limit = 5; // 5 RPM for images as requested
+      dailyLimit = 2000; // 2000 RPD for pro
+    } else if (userPlan === 'developer') {
+      limit = 20;
+      dailyLimit = 5000;
+    } else if (userPlan === 'free') {
+      limit = 5; // 5 RPM for images
+      dailyLimit = 1000; // 1000 RPD for free
+    }
+
+    // If API key has a specific custom limit that's higher, use that
+    if (apiKeyInfo && apiKeyInfo.rateLimit > limit) {
+      limit = apiKeyInfo.rateLimit;
+    }
+    
+    // Check Daily Limit First
+    if (!checkDailyLimit(effectiveKey, dailyLimit)) {
+      const dailyInfo = getDailyLimitInfo(effectiveKey, dailyLimit);
+      return NextResponse.json(
+        { 
+          error: {
+            message: `Daily request limit exceeded (${dailyLimit} RPD). Your limit resets at ${new Date(dailyInfo.resetAt).toUTCString()}. Upgrade for higher limits.`,
+            type: 'requests',
+            param: null,
+            code: 'daily_limit_exceeded'
+          }
+        },
+        { 
+          status: 429,
+          headers: {
+            ...getCorsHeaders(),
+            'X-DailyLimit-Remaining': String(dailyInfo.remaining),
+            'X-DailyLimit-Reset': String(dailyInfo.resetAt),
+          },
+        }
+      );
+    }
     
     if (!checkRateLimit(effectiveKey, limit, 'image')) {
       const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'image');
@@ -129,7 +178,8 @@ export async function POST(request: NextRequest) {
 
     // Check if model is premium and if user has access
     const isPremium = PREMIUM_MODELS.has(modelId);
-    const hasProAccess = apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50; // Pro keys have 50+ RPM
+    // Pro access if they have a pro/enterprise/developer/admin plan OR if their rate limit is high (fallback)
+    const hasProAccess = ['pro', 'enterprise', 'developer', 'admin'].includes(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
 
     if (isPremium && !hasProAccess) {
       return NextResponse.json(
@@ -194,31 +244,37 @@ export async function POST(request: NextRequest) {
         };
       }
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Ocp-Apim-Subscription-Key': apiKey,
-          'x-user-id': userId,
-        },
-        body: JSON.stringify(appyPieBody),
-      });
+      let response;
+      try {
+        response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Ocp-Apim-Subscription-Key': apiKey,
+            'x-user-id': userId,
+          },
+          body: JSON.stringify(appyPieBody),
+        });
+      } catch (e) {
+        return NextResponse.json(
+          { error: { message: 'Failed to connect to AppyPie API', type: 'api_error' } },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
 
       if (!response.ok) {
-          const errorText = await response.text();
-          return NextResponse.json(
-            { 
-              error: {
-                message: 'AppyPie API error',
-                type: 'api_error',
-                param: null,
-                code: 'upstream_error',
-                details: errorText
-              }
-            },
-            { status: response.status, headers: getCorsHeaders() }
-          );
-        }
+        const errorText = await response.text();
+        return NextResponse.json(
+          { 
+            error: { 
+              message: `AppyPie API error: ${response.status}`, 
+              type: 'api_error',
+              details: errorText.substring(0, 500)
+            } 
+          },
+          { status: response.status, headers: getCorsHeaders() }
+        );
+      }
 
       // AppyPie can return the image directly or a JSON with a URL
       const contentType = response.headers.get('content-type');
@@ -227,19 +283,19 @@ export async function POST(request: NextRequest) {
 
       if (contentType && contentType.includes('application/json')) {
         const data = await response.json();
-        const imageUrl = data.image_url || data.url || (data.data && data.data[0] && data.data[0].url);
+        const imageUrlFromData = data.image_url || data.url || (data.data && data.data[0] && data.data[0].url);
         
-        if (!imageUrl) {
+        if (!imageUrlFromData) {
           return NextResponse.json(
-            { error: { message: 'AppyPie returned JSON without an image URL', type: 'api_error', details: data } },
+            { error: { message: 'AppyPie returned JSON but no image URL was found', type: 'api_error', data } },
             { status: 500, headers: getCorsHeaders() }
           );
         }
 
-        const imageResponse = await fetch(imageUrl);
+        const imageResponse = await fetch(imageUrlFromData);
         if (!imageResponse.ok) {
           return NextResponse.json(
-            { error: { message: 'Failed to fetch image from AppyPie URL', type: 'api_error' } },
+            { error: { message: 'Failed to fetch image from AppyPie JSON URL', type: 'api_error' } },
             { status: 500, headers: getCorsHeaders() }
           );
         }
@@ -248,6 +304,10 @@ export async function POST(request: NextRequest) {
         const buffer = Buffer.from(await blob.arrayBuffer());
         base64 = buffer.toString('base64');
         mimeType = imageResponse.headers.get('content-type') || 'image/png';
+        
+        if (body.response_format !== 'b64_json') {
+          imageUrl = imageUrlFromData;
+        }
       } else {
         const blob = await response.blob();
         const buffer = Buffer.from(await blob.arrayBuffer());
@@ -262,10 +322,9 @@ export async function POST(request: NextRequest) {
         }, { headers: getCorsHeaders() });
       }
       
-      return NextResponse.json({
-        created: Math.floor(Date.now() / 1000),
-        data: [{ url: `data:${mimeType};base64,${base64}` }]
-      }, { headers: getCorsHeaders() });
+      if (!imageUrl) {
+        imageUrl = `data:${mimeType};base64,${base64}`;
+      }
 
     } else if (model.provider === 'stablehorde') {
       const hordeApiKey = process.env.STABLEHORDE_API_KEY || process.env.STABLE_HORDE_API_KEY || '0000000000';
@@ -390,8 +449,9 @@ export async function POST(request: NextRequest) {
         headers['Authorization'] = `Bearer ${pollinationsApiKey}`;
       }
 
+      // Use a more robust retry mechanism for Pollinations
       let retryCount = 0;
-      const maxRetries = 2;
+      const maxRetries = 3; // 3 retries for v1 to be extra safe
       let pollinationsResponse;
 
       while (retryCount <= maxRetries) {
@@ -399,15 +459,17 @@ export async function POST(request: NextRequest) {
           pollinationsResponse = await fetch(pollinationsUrl, { headers });
           if (pollinationsResponse.ok) break;
           
-          if (pollinationsResponse.status === 500 || pollinationsResponse.status === 504) {
+          if (pollinationsResponse.status === 500 || pollinationsResponse.status === 504 || pollinationsResponse.status === 429) {
+            console.warn(`[V1-Images] Pollinations returned ${pollinationsResponse.status}, retrying (${retryCount + 1}/${maxRetries})...`);
             retryCount++;
-            await new Promise(r => setTimeout(r, 1000 * retryCount));
+            await new Promise(r => setTimeout(r, 2000 * retryCount)); // Exponential backoff
             continue;
           }
           break;
         } catch (e) {
+          console.error(`[V1-Images] Pollinations fetch error:`, e);
           retryCount++;
-          await new Promise(r => setTimeout(r, 1000 * retryCount));
+          await new Promise(r => setTimeout(r, 2000 * retryCount));
         }
       }
 

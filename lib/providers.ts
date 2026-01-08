@@ -195,8 +195,8 @@ export const PROVIDER_URLS = {
   openrouter: 'https://openrouter.ai',
   liz: 'https://lizley.zeabur.app',
   appypie: {
-    sdxl: 'https://gateway.pixazo.ai/sdxl/v1/getData',
-    inpainting: 'https://gateway.pixazo.ai/inpainting/v1/getData',
+    sdxl: 'https://gateway.appypie.com/getImage/v1/getSDXLImage',
+    inpainting: 'https://gateway-stable-diffusion-v1-5-inpainting.appypie.workers.dev/getImage',
     fluxSchnell: 'https://gateway.pixazo.ai/flux-1-schnell/v1/getData',
   },
   stablehorde: 'https://stablehorde.net/api/v2',

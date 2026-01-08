@@ -31,9 +31,49 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    // Determine plan and limits
+    const userPlan = apiKeyInfo.plan || 'free';
+    
+    // Determine limit based on plan
+    let limit = 20; // Default baseline limit for mem
+    let dailyLimit = 1000; // Default 1000 RPD
+    
+    if (userPlan === 'admin' || userPlan === 'enterprise') {
+      limit = 1000;
+      dailyLimit = 100000;
+    } else if (userPlan === 'pro') {
+      limit = 50;
+      dailyLimit = 2000; // 2000 RPD for pro
+    } else if (userPlan === 'developer') {
+      limit = 100;
+      dailyLimit = 5000;
+    } else if (userPlan === 'free') {
+      limit = 20;
+      dailyLimit = 1000; // 1000 RPD for free
+    }
+
+    // Check daily limit first
+    const { checkDailyLimit, getDailyLimitInfo } = await import('@/lib/api-keys');
+    if (!checkDailyLimit(rawApiKey, dailyLimit)) {
+      const dailyInfo = getDailyLimitInfo(rawApiKey, dailyLimit);
+      return NextResponse.json(
+        { 
+          error: `Daily request limit of ${dailyLimit} exceeded. Reset at ${new Date(dailyInfo.resetAt).toUTCString()}`,
+          resetAt: dailyInfo.resetAt 
+        },
+        { 
+          status: 429,
+          headers: {
+            'X-DailyLimit-Remaining': '0',
+            'X-DailyLimit-Reset': String(dailyInfo.resetAt),
+          },
+        }
+      );
+    }
+
     // Check rate limit
-    if (!checkRateLimit(rawApiKey, apiKeyInfo.rateLimit, 'mem')) {
-      const rateLimitInfo = getRateLimitInfo(rawApiKey, apiKeyInfo.rateLimit, 'mem');
+    if (!checkRateLimit(rawApiKey, limit, 'mem')) {
+      const rateLimitInfo = getRateLimitInfo(rawApiKey, limit, 'mem');
       return NextResponse.json(
         { error: 'Rate limit exceeded', resetAt: rateLimitInfo.resetAt },
         { 

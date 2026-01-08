@@ -46,7 +46,50 @@ export async function POST(request: NextRequest) {
       apiKeyInfo = await validateApiKey(rawApiKey);
     }
 
-    const limit = apiKeyInfo ? apiKeyInfo.rateLimit : 2;
+    // Determine plan and limits
+    const userPlan = apiKeyInfo?.plan || 'free';
+    
+    // Determine limit based on plan
+    let limit = 2; // Default anonymous/free limit (2 RPM for video)
+    let dailyLimit = 1000; // Default 1000 RPD
+    
+    if (userPlan === 'admin' || userPlan === 'enterprise') {
+      limit = 20;
+      dailyLimit = 100000;
+    } else if (userPlan === 'pro') {
+      limit = 2; // 2 RPM for video as requested
+      dailyLimit = 2000; // 2000 RPD for pro
+    } else if (userPlan === 'developer') {
+      limit = 5;
+      dailyLimit = 5000;
+    } else if (userPlan === 'free') {
+      limit = 2; // 2 RPM for video
+      dailyLimit = 1000; // 1000 RPD for free
+    }
+
+    // Check daily limit first
+    const { checkDailyLimit, getDailyLimitInfo } = await import('@/lib/api-keys');
+    if (rawApiKey && !checkDailyLimit(rawApiKey, dailyLimit)) {
+      const dailyInfo = getDailyLimitInfo(rawApiKey, dailyLimit);
+      return NextResponse.json(
+        { 
+          error: {
+            message: `Daily request limit of ${dailyLimit} exceeded. Reset at ${new Date(dailyInfo.resetAt).toUTCString()}`,
+            type: 'requests',
+            param: null,
+            code: 'daily_limit_exceeded'
+          }
+        },
+        { 
+          status: 429,
+          headers: {
+            ...getCorsHeaders(),
+            'X-DailyLimit-Remaining': '0',
+            'X-DailyLimit-Reset': String(dailyInfo.resetAt),
+          },
+        }
+      );
+    }
     
     if (!checkRateLimit(effectiveKey, limit, 'video')) {
       const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'video');
@@ -113,7 +156,8 @@ export async function POST(request: NextRequest) {
 
     // Check if model is premium and if user has access
     const isPremium = PREMIUM_MODELS.has(modelId);
-    const hasProAccess = apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50; // Pro keys have 50+ RPM
+    // Pro access if they have a pro/enterprise/developer/admin plan OR if their rate limit is high (fallback)
+    const hasProAccess = ['pro', 'enterprise', 'developer', 'admin'].includes(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
 
     if (isPremium && !hasProAccess) {
       return NextResponse.json(

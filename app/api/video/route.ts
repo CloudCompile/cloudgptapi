@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
 import { VIDEO_MODELS, PROVIDER_URLS, VideoModel, PREMIUM_MODELS } from '@/lib/providers';
 import { getPollinationsApiKey } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -51,21 +51,48 @@ export async function POST(request: NextRequest) {
     }
 
     // Determine limit based on plan
-    let limit = 2; // Default anonymous/free limit
+    let limit = 2; // Default anonymous/free limit (2 RPM for video)
+    let dailyLimit = 1000; // Default 1000 RPD
     
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 20;
+      dailyLimit = 100000;
     } else if (userPlan === 'pro') {
-      limit = 10;
+      limit = 2; // 2 RPM for video as requested
+      dailyLimit = 2000; // 2000 RPD for pro
     } else if (userPlan === 'developer') {
       limit = 5;
+      dailyLimit = 5000;
     } else if (userPlan === 'free') {
-      limit = 3;
+      limit = 2; // 2 RPM for video
+      dailyLimit = 1000; // 1000 RPD for free
     }
 
     // If API key has a specific custom limit that's higher, use that
     if (apiKeyInfo && apiKeyInfo.rateLimit > limit) {
       limit = apiKeyInfo.rateLimit;
+    }
+    
+    // Check Daily Limit First
+    if (!checkDailyLimit(effectiveKey, dailyLimit)) {
+      const dailyInfo = getDailyLimitInfo(effectiveKey, dailyLimit);
+      return NextResponse.json(
+        { 
+          error: {
+            message: `Daily request limit exceeded (${dailyLimit} RPD). Your limit resets at ${new Date(dailyInfo.resetAt).toUTCString()}. Upgrade for higher limits.`,
+            type: 'requests',
+            param: null,
+            code: 'daily_limit_exceeded'
+          }
+        },
+        { 
+          status: 429,
+          headers: {
+            'X-DailyLimit-Remaining': String(dailyInfo.remaining),
+            'X-DailyLimit-Reset': String(dailyInfo.resetAt),
+          },
+        }
+      );
     }
     
     if (!checkRateLimit(effectiveKey, limit, 'video')) {
@@ -105,8 +132,8 @@ export async function POST(request: NextRequest) {
 
     // Check if model is premium and if user has access
     const isPremium = PREMIUM_MODELS.has(modelId);
-    // Pro access if they have a pro/enterprise plan OR if their rate limit is high (fallback)
-    const hasProAccess = userPlan === 'pro' || userPlan === 'enterprise' || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
+    // Pro access if they have a pro/enterprise/developer/admin plan OR if their rate limit is high (fallback)
+    const hasProAccess = ['pro', 'enterprise', 'developer', 'admin'].includes(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
 
     if (isPremium && !hasProAccess) {
       return NextResponse.json(

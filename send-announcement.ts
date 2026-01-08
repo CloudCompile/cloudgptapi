@@ -1,3 +1,8 @@
+import * as dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables from .env.local
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '1458666010197495962';
@@ -6,18 +11,23 @@ async function sendAnnouncement() {
   const url = `https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`;
   
   const embed = {
-    title: '⚡ CloudGPT API Optimization Update',
-    description: 'We have successfully deployed a major update to our proxy routing system, significantly reducing latency across flagship models.',
-    color: 0x00ffcc, // Cyan/Aqua
+    title: '🚀 CloudGPT API: Plan-Based Rate Limits & Performance Update',
+    description: "We've implemented a robust plan-based rate limiting system and synchronized performance fixes across all core API routes (Images, Video, Chat, and Memory).",
+    color: 0x5865F2, // Discord Blurple
     fields: [
       {
-        name: '🚀 Performance Gains',
-        value: '• **GPT-4o:** 1088ms → **327ms** (70% Faster)\n• **Gemini & DeepSeek:** Optimized routing with fast-path fallbacks.\n• **New Path:** Prioritizing ultra-low latency providers.',
+        name: '📊 Plan-Based Rate Limits (RPM)',
+        value: '• **Image Generation:** 5 RPM for all users.\n• **Video Generation:** 2 RPM for all users.\n• **Chat Completions:** 100 RPM (Free) / 200 RPM (Pro).\n• **Memory API:** 20 RPM (Free) / 50 RPM (Pro).',
         inline: false
       },
       {
-        name: '🛠️ Technical Improvements',
-        value: '• Implemented **High-Speed Path** for core models.\n• Improved **Model Aliasing** for better compatibility.\n• Smart fallback logic for 99.9% reliability.',
+        name: '📅 Daily Request Limits (RPD)',
+        value: '• **Free Users:** 1,000 requests per day across all routes.\n• **Pro Users:** 2,000 requests per day across all routes.\n• **Resets:** Daily at 00:00 UTC.',
+        inline: false
+      },
+      {
+        name: '🔌 Synchronization & Reliability',
+        value: '• **OpenAI V1 Sync:** All rate limits and reliability fixes are now synchronized to `/v1` endpoints.\n• **Descriptive Errors:** Enhanced 429 responses with `X-RateLimit` and `X-DailyLimit` headers.\n• **Stability:** Overhauled image/video pipelines for near-100% success rates.',
         inline: false
       }
     ],
