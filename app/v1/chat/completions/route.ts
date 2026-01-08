@@ -428,6 +428,10 @@ export async function POST(request: NextRequest) {
       'claude-3-haiku': 'claude-fast',
       'deepseek-chat': 'deepseek',
       'deepseek-coder': 'qwen-coder',
+      'deepseek-v3': 'deepseek',
+      'deepseek-r1': 'deepseek',
+      'gemini-2.0-flash': 'gemini',
+      'gemini-1.5-flash': 'gemini-fast',
     };
 
     if (modelAliases[modelId]) {
@@ -559,6 +563,90 @@ export async function POST(request: NextRequest) {
     // Pass the extracted user ID to ALL providers (PolliStack router needs this)
     headers['x-user-id'] = userId;
 
+    // Optimization: Define a list of "High-Speed" models that can be raced across providers
+    // Currently Pollinations is much faster (400-500ms) than Liz (1500ms+)
+    const isHighSpeedModel = ['openai', 'openai-fast', 'gemini-fast', 'gemini', 'deepseek'].includes(modelId);
+
+    // Forward to provider API
+    let requestBody: any;
+    
+    // Safety cap for max_tokens to prevent "request exceeds max tokens" errors
+    // Many providers have limits around 4k-8k for free tiers
+    const maxTokensSafetyCap = 4096;
+    const effectiveMaxTokens = body.max_tokens ? Math.min(body.max_tokens, maxTokensSafetyCap) : undefined;
+
+    // Prepare standard request body
+    const standardBody = {
+      model: modelId,
+      messages: body.messages,
+      temperature: body.temperature ?? 0.7,
+      max_tokens: effectiveMaxTokens,
+      stream: body.stream ?? false,
+      top_p: body.top_p ?? 1,
+      frequency_penalty: body.frequency_penalty ?? 0,
+      presence_penalty: body.presence_penalty ?? 0,
+    };
+
+    // --- OPTIMIZED PROXY LOGIC ---
+    if (isHighSpeedModel && !body.stream) {
+      console.log(`[${requestId}] Racing fast model: ${modelId}`);
+      
+      // Attempt racing across Pollinations and a backup if possible
+      // For now, we'll implement a prioritized sequential fetch with a shorter timeout
+      // to ensure we get the fastest response without wasting too many resources.
+      
+      const fastFetch = async (url: string, auth: string) => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout for "fast" models
+        
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+              ...headers,
+              'Authorization': `Bearer ${auth}`
+            },
+            body: JSON.stringify(standardBody),
+            signal: controller.signal
+          });
+          clearTimeout(timeout);
+          return res;
+        } catch (e) {
+          clearTimeout(timeout);
+          throw e;
+        }
+      };
+
+      try {
+        // Try Pollinations first (it's the fastest)
+        const pollKey = getPollinationsApiKey();
+        const startTime = Date.now();
+        const response = await fastFetch(`${PROVIDER_URLS.pollinations}/v1/chat/completions`, pollKey || '');
+        
+        if (response.ok) {
+          console.log(`[${requestId}] Fast-path success: ${Date.now() - startTime}ms via Pollinations`);
+          const data = await response.json();
+          const rateLimitInfo = getRateLimitInfo(effectiveKey, limit, 'chat');
+          
+          return NextResponse.json(data, {
+            headers: {
+              ...getCorsHeaders(),
+              'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
+              'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+              'X-RateLimit-Limit': String(rateLimitInfo.limit),
+              'X-Proxy-Provider': 'pollinations-fast',
+              'X-Proxy-Latency': `${Date.now() - startTime}ms`
+            }
+          });
+        }
+        console.warn(`[${requestId}] Fast-path failed for Pollinations, falling back...`);
+      } catch (e) {
+        console.warn(`[${requestId}] Fast-path error for Pollinations:`, e);
+      }
+    }
+
+    // --- STANDARD PROXY LOGIC (FALLBACK) ---
+    
     // Meridian requires x-api-key header instead of Authorization
     if (model.provider === 'meridian') {
       delete headers['Authorization'];
