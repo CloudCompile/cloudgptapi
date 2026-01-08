@@ -35,3 +35,25 @@ export function getPollinationsApiKey(): string | undefined {
   const randomIndex = Math.floor(Math.random() * keys.length);
   return keys[randomIndex];
 }
+
+/**
+ * Get OpenRouter API keys for fallback and load balancing
+ * Supports multiple API keys via OPENROUTER_API_KEY and OPENROUTER_FALLBACK_KEY
+ */
+export function getOpenRouterApiKeys(): string[] {
+  return [
+    process.env.OPENROUTER_API_KEY,
+    process.env.OPENROUTER_FALLBACK_KEY,
+  ].filter(Boolean) as string[];
+}
+
+/**
+ * Get a single OpenRouter API key using random selection
+ */
+export function getOpenRouterApiKey(): string | undefined {
+  const keys = getOpenRouterApiKeys();
+  if (keys.length === 0) return undefined;
+  
+  const randomIndex = Math.floor(Math.random() * keys.length);
+  return keys[randomIndex];
+}

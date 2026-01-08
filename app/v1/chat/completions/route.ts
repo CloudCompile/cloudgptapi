@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
 import { CHAT_MODELS, PROVIDER_URLS, PREMIUM_MODELS } from '@/lib/providers';
-import { getCorsHeaders, getPollinationsApiKey } from '@/lib/utils';
+import { getCorsHeaders, getPollinationsApiKey, getOpenRouterApiKey, getOpenRouterApiKeys } from '@/lib/utils';
 import { retrieveMemory, rememberInteraction } from '@/lib/memory';
 import { supabaseAdmin } from '@/lib/supabase';
 
@@ -550,7 +550,7 @@ export async function POST(request: NextRequest) {
     
     if (model.provider === 'openrouter') {
       providerUrl = `${PROVIDER_URLS.openrouter}/api/v1/chat/completions`;
-      providerApiKey = process.env.OPENROUTER_API_KEY;
+      providerApiKey = getOpenRouterApiKey();
     } else if (model.provider === 'liz') {
       providerUrl = `${PROVIDER_URLS.liz}/v1/chat/completions`;
       providerApiKey = process.env.LIZ_API_KEY || 'sk-d38705df52b386e905f257a4019f8f2a';
@@ -742,6 +742,45 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify(requestBody),
         signal: controller.signal,
       });
+      
+      // Fallback for OpenRouter rate limits (429) if we have multiple keys
+      if (model.provider === 'openrouter' && providerResponse.status === 429) {
+        const availableKeys = getOpenRouterApiKeys();
+        if (availableKeys.length > 1) {
+          console.warn(`[${requestId}] OpenRouter rate limited (429) with primary key. Attempting fallback...`);
+          
+          // Try all other available keys
+          for (const fallbackKey of availableKeys) {
+            if (fallbackKey === providerApiKey) continue;
+            
+            console.log(`[${requestId}] Trying OpenRouter fallback key: ${fallbackKey.substring(0, 4)}...`);
+            const fallbackHeaders = { ...headers, 'Authorization': `Bearer ${fallbackKey}` };
+            
+            try {
+              const fallbackResponse = await fetch(providerUrl, {
+                method: 'POST',
+                headers: fallbackHeaders,
+                body: JSON.stringify(requestBody),
+                signal: controller.signal,
+              });
+              
+              if (fallbackResponse.ok) {
+                console.log(`[${requestId}] OpenRouter fallback successful!`);
+                providerResponse = fallbackResponse;
+                break;
+              } else if (fallbackResponse.status === 429) {
+                console.warn(`[${requestId}] OpenRouter fallback key also rate limited.`);
+                continue;
+              } else {
+                providerResponse = fallbackResponse;
+                break;
+              }
+            } catch (err) {
+              console.error(`[${requestId}] OpenRouter fallback failed:`, err);
+            }
+          }
+        }
+      }
       
       if (!providerResponse.ok) {
         const errorText = await providerResponse.text();
