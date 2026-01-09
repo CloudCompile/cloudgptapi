@@ -35,11 +35,42 @@ import { cn } from '@/lib/utils';
 
 interface ModelStatus {
   id: string;
-  status: 'online' | 'offline' | 'checking';
+  status: 'online' | 'offline' | 'checking' | 'maintenance';
   latency?: number;
 }
 
 type ModelType = (ChatModel | ImageModel | VideoModel) & { type: 'chat' | 'image' | 'video' };
+
+// Countdown hook for downtime
+function useCountdown(targetDate?: string) {
+  const [timeLeft, setTimeLeft] = useState<{hours: number, minutes: number, seconds: number} | null>(null);
+
+  useEffect(() => {
+    if (!targetDate) return;
+
+    const calculateTimeLeft = () => {
+      const difference = new Date(targetDate).getTime() - Date.now();
+      
+      if (difference <= 0) {
+        setTimeLeft(null);
+        return;
+      }
+
+      const hours = Math.floor(difference / (1000 * 60 * 60));
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+      setTimeLeft({ hours, minutes, seconds });
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  return timeLeft;
+}
 
 const ALL_MODELS: ModelType[] = [
   ...CHAT_MODELS.map(m => ({ ...m, type: 'chat' as const })),
@@ -67,9 +98,12 @@ export default function ModelsPage() {
     const timer = setTimeout(() => {
       const updatedStatuses: Record<string, ModelStatus> = {};
       ALL_MODELS.forEach(m => {
+        // Check if model has active downtime
+        const isInDowntime = m.downtimeUntil && new Date(m.downtimeUntil).getTime() > Date.now();
+        
         updatedStatuses[m.id] = { 
           id: m.id, 
-          status: Math.random() > 0.05 ? 'online' : 'offline',
+          status: isInDowntime ? 'maintenance' : (Math.random() > 0.05 ? 'online' : 'offline'),
           latency: Math.floor(Math.random() * 800 + 100)
         };
       });
@@ -251,6 +285,8 @@ function TabButton({ active, onClick, icon, label }: { active: boolean, onClick:
 }
 
 function ModelCard({ model, status, onClick, index }: { model: ModelType, status: ModelStatus, onClick: () => void, index: number }) {
+  const countdown = useCountdown(model.downtimeUntil);
+  
   return (
     <div 
       onClick={onClick}
@@ -275,7 +311,14 @@ function ModelCard({ model, status, onClick, index }: { model: ModelType, status
         </div>
         
         <div className="flex items-center gap-2">
-          {status.status === 'online' ? (
+          {status.status === 'maintenance' && countdown ? (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 backdrop-blur-md">
+              <Clock className="w-3 h-3 text-amber-500 animate-pulse" />
+              <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">
+                {countdown.hours}h {countdown.minutes}m {countdown.seconds}s
+              </span>
+            </div>
+          ) : status.status === 'online' ? (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 backdrop-blur-md">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Online</span>
@@ -334,6 +377,7 @@ function ModelCard({ model, status, onClick, index }: { model: ModelType, status
 
 function ModelDetailsModal({ model, status, onClose }: { model: ModelType, status: ModelStatus, onClose: () => void }) {
   const details = getModelDetails(model.id, model.type);
+  const countdown = useCountdown(model.downtimeUntil);
   
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -391,7 +435,19 @@ function ModelDetailsModal({ model, status, onClose }: { model: ModelType, statu
                 <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">
                   {model.name}
                 </h2>
-                {status.status === 'online' ? (
+                {status.status === 'maintenance' && countdown ? (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 backdrop-blur-md">
+                      <Clock className="w-3 h-3 text-amber-500 animate-pulse" />
+                      <span className="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">Maintenance</span>
+                    </div>
+                    <div className="text-center px-4 py-2 rounded-full bg-amber-500/20 dark:bg-amber-500/30 border border-amber-500/30">
+                      <span className="text-2xl font-mono font-black text-amber-700 dark:text-amber-300">
+                        {String(countdown.hours).padStart(2, '0')}:{String(countdown.minutes).padStart(2, '0')}:{String(countdown.seconds).padStart(2, '0')}
+                      </span>
+                    </div>
+                  </div>
+                ) : status.status === 'online' ? (
                   <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 backdrop-blur-md">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Online</span>
@@ -418,6 +474,25 @@ function ModelDetailsModal({ model, status, onClose }: { model: ModelType, statu
 
         {/* Content */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-10 relative z-10">
+          {/* Maintenance Notice */}
+          {status.status === 'maintenance' && countdown && (
+            <div className="mb-8 p-6 rounded-[2rem] bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-xl bg-amber-500/20 text-amber-600">
+                  <Clock className="h-6 w-6" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-lg font-black text-amber-900 dark:text-amber-200 mb-2">Scheduled Maintenance</h4>
+                  <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+                    This model is currently undergoing scheduled maintenance. Service will be restored in{' '}
+                    <span className="font-mono font-bold">{countdown.hours}h {countdown.minutes}m {countdown.seconds}s</span>.
+                    Please try again later or use an alternative model.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="flex flex-wrap gap-3 mb-10">
             <span className="px-5 py-2 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-md text-xs font-black text-slate-700 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50 uppercase tracking-widest">
               {model.provider}

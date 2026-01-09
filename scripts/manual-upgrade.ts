@@ -105,5 +105,5 @@ async function upgradeUserByEmail(email: string) {
   }
 }
 
-const targetEmail = process.argv[2] || 'habibiea356@gmail.com';
+const targetEmail = process.argv[2] || 'mschneider2492@gmail.com';
 upgradeUserByEmail(targetEmail);
