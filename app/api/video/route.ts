@@ -2,21 +2,61 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
 import { VIDEO_MODELS, PROVIDER_URLS, VideoModel, PREMIUM_MODELS } from '@/lib/providers';
-import { getPollinationsApiKey } from '@/lib/utils';
+import { getPollinationsApiKey, safeResponseJson } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
+export const maxDuration = 300; // 5 minutes max for video generation
 
 // Handle OPTIONS for CORS
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200 });
 }
 
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const prompt = searchParams.get('prompt');
+  
+  if (!prompt) {
+    return NextResponse.json({
+      status: 'active',
+      message: 'Video generation API is running. Use POST or GET with ?prompt= to generate videos.',
+      endpoints: {
+        post: '/api/video',
+        description: 'Generate videos using various AI models'
+      }
+    });
+  }
+
+  // Convert GET params to body format for the handler
+  const body = {
+    prompt,
+    model: searchParams.get('model') || 'veo',
+    duration: searchParams.get('duration') ? Number(searchParams.get('duration')) : undefined,
+    aspectRatio: searchParams.get('aspectRatio') || undefined,
+    seed: searchParams.get('seed') ? Number(searchParams.get('seed')) : undefined,
+  };
+
+  return handleVideoGeneration(request, body);
+}
+
 export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    return handleVideoGeneration(request, body);
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: 'Invalid request body', message: error.message },
+      { status: 400 }
+    );
+  }
+}
+
+async function handleVideoGeneration(request: NextRequest, body: any) {
   try {
     // Get user from session
     const { userId: sessionUserId } = await auth();
-
+    
     // Extract and validate API key
     const rawApiKey = extractApiKey(request.headers);
     
@@ -49,6 +89,9 @@ export async function POST(request: NextRequest) {
         userPlan = await applyPlanOverride(profile.email, userPlan, sessionUserId, 'id');
       }
     }
+
+    // Ensure plan is lowercase for consistency
+    userPlan = userPlan?.toLowerCase() || 'free';
 
     // Determine limit based on plan
     let limit = 2; // Default anonymous/free limit (2 RPM for video)
@@ -130,8 +173,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
-    
     // Validate required fields
     if (!body.prompt) {
       return NextResponse.json(
@@ -183,12 +224,13 @@ export async function POST(request: NextRequest) {
     // Build Pollinations URL with query params
     const params = new URLSearchParams();
     params.set('model', modelId);
+    // duration is supported by some video models
     if (body.duration) params.set('duration', String(body.duration));
     if (body.aspectRatio) params.set('aspectRatio', body.aspectRatio);
-    if (body.image) params.set('image', body.image);
-    if (body.audio) params.set('audio', 'true');
+    if (body.seed) params.set('seed', String(body.seed));
     
     const encodedPrompt = encodeURIComponent(body.prompt);
+    // Use the /image/ endpoint for video models as recommended
     const pollinationsUrl = `${PROVIDER_URLS.pollinations}/image/${encodedPrompt}?${params.toString()}`;
     
     const userId = request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`;
@@ -222,7 +264,15 @@ export async function POST(request: NextRequest) {
     const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
     
     if (contentType?.includes('application/json')) {
-      const data = await pollinationsResponse.json();
+      const data = await safeResponseJson(pollinationsResponse, null);
+      
+      if (!data) {
+        return NextResponse.json(
+          { error: 'Empty or malformed JSON from upstream API' },
+          { status: 502 }
+        );
+      }
+      
       return NextResponse.json(data, {
         headers: {
           'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
@@ -245,10 +295,10 @@ export async function POST(request: NextRequest) {
       },
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Video API error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', message: error.message },
       { status: 500 }
     );
   }

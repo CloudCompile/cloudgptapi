@@ -101,7 +101,14 @@ export default function PlaygroundPage() {
         const data = await response.json();
         
         if (!response.ok) {
-          throw new Error(data.error?.message || 'Failed to get response');
+          let errorMessage = 'Failed to get response';
+          try {
+            const data = await response.json();
+            errorMessage = data.error?.message || data.error || errorMessage;
+          } catch (e) {
+            errorMessage = response.statusText || errorMessage;
+          }
+          throw new Error(errorMessage);
         }
 
         const assistantMessage = data.choices?.[0]?.message?.content || 'No response';
@@ -117,8 +124,14 @@ export default function PlaygroundPage() {
         });
 
         if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Failed to generate image');
+          let errorMessage = 'Failed to generate image';
+          try {
+            const data = await response.json();
+            errorMessage = data.error?.message || data.error || errorMessage;
+          } catch (e) {
+            errorMessage = response.statusText || errorMessage;
+          }
+          throw new Error(errorMessage);
         }
 
         const blob = await response.blob();
@@ -126,7 +139,7 @@ export default function PlaygroundPage() {
         setImageUrl(url);
         setInput('');
       } else if (mode === 'video') {
-        const response = await fetch('/api/video', {
+        const response = await fetch('/v1/video/generations', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -136,12 +149,22 @@ export default function PlaygroundPage() {
         });
 
         if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Failed to generate video');
+          let errorMessage = 'Failed to generate video';
+          try {
+            const data = await response.json();
+            errorMessage = data.error?.message || data.error || errorMessage;
+          } catch (e) {
+            errorMessage = response.statusText || errorMessage;
+          }
+          throw new Error(errorMessage);
         }
 
         const data = await response.json();
-        setVideoUrl(data.url);
+        if (data.data && data.data[0] && data.data[0].url) {
+          setVideoUrl(data.data[0].url);
+        } else {
+          throw new Error('No video URL returned from API');
+        }
         setInput('');
       }
     } catch (err: any) {

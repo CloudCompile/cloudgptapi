@@ -1,0 +1,33 @@
+{
+  "name": "@cloudgpt/memory",
+  "version": "1.0.0",
+  "description": "The unified AI substrate with built-in persistent memory.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "ai",
+    "memory",
+    "llm",
+    "substrate",
+    "openai",
+    "claude",
+    "gemini",
+    "cloudgpt"
+  ],
+  "author": "CloudGPT Team",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.0"
+  },
+  "type": "module"
+}

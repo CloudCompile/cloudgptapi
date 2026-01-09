@@ -10,7 +10,8 @@ export async function GET() {
     endpoints: [
       '/v1/chat/completions',
       '/v1/models',
-      '/v1/images/generations'
+      '/v1/images/generations',
+      '/v1/video/generations'
     ]
   }, {
     headers: getCorsHeaders()

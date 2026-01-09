@@ -51,6 +51,30 @@ export function getPollinationsApiKey(): string | undefined {
 }
 
 /**
+ * Safely parse JSON string
+ */
+export function safeJsonParse<T>(text: string, fallback: T): T {
+  if (!text || text.trim() === '') return fallback;
+  try {
+    return JSON.parse(text) as T;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+/**
+ * Safely parse response as JSON
+ */
+export async function safeResponseJson<T>(response: Response, fallback: T): Promise<T> {
+  try {
+    const text = await response.text();
+    return safeJsonParse(text, fallback);
+  } catch (e) {
+    return fallback;
+  }
+}
+
+/**
  * Get OpenRouter API keys for fallback and load balancing
  * Supports multiple API keys via OPENROUTER_API_KEY and OPENROUTER_FALLBACK_KEY
  * Also looks for OPENROUTER_API_KEY_1 through OPENROUTER_API_KEY_5

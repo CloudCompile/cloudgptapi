@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
 import { IMAGE_MODELS, PROVIDER_URLS, ImageModel, PREMIUM_MODELS } from '@/lib/providers';
-import { getCorsHeaders, getPollinationsApiKey } from '@/lib/utils';
+import { getCorsHeaders, getPollinationsApiKey, safeResponseJson } from '@/lib/utils';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max for long image generation
@@ -65,7 +66,23 @@ export async function POST(request: NextRequest) {
       if (apiKeyInfo?.plan) {
         userPlan = apiKeyInfo.plan;
       }
+    } else if (sessionUserId) {
+      // Fetch plan for session users if no API key is provided
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('plan, email')
+        .eq('id', sessionUserId)
+        .single();
+      
+      if (profile) {
+        userPlan = profile.plan || 'free';
+        // Manual override for specific users requested by admin
+        userPlan = await applyPlanOverride(profile.email, userPlan, sessionUserId, 'id');
+      }
     }
+
+    // Ensure plan is lowercase for consistency
+    userPlan = userPlan?.toLowerCase() || 'free';
 
     // Determine limit based on plan
     let limit = 5; // Default anonymous/free limit (5 RPM for images)
@@ -283,8 +300,8 @@ export async function POST(request: NextRequest) {
       let mimeType: string;
 
       if (contentType && contentType.includes('application/json')) {
-        const data = await response.json();
-        const imageUrlFromData = data.image_url || data.url || (data.data && data.data[0] && data.data[0].url);
+        const data = await safeResponseJson(response, null as any);
+        const imageUrlFromData = data?.image_url || data?.url || (data?.data && data.data[0] && data.data[0].url);
         
         if (!imageUrlFromData) {
           return NextResponse.json(

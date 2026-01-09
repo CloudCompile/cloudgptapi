@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
 import { CHAT_MODELS, PREMIUM_MODELS } from '@/lib/providers';
-import { getCorsHeaders, getPollinationsApiKey, getPollinationsApiKeys, getOpenRouterApiKey, getOpenRouterApiKeys } from '@/lib/utils';
+import { getCorsHeaders, getPollinationsApiKey, getPollinationsApiKeys, getOpenRouterApiKey, getOpenRouterApiKeys, safeResponseJson } from '@/lib/utils';
 import { retrieveMemory, rememberInteraction } from '@/lib/memory';
 import { supabaseAdmin } from '@/lib/supabase';
 import {
@@ -564,8 +564,7 @@ export async function POST(request: NextRequest) {
       frequency_penalty: body.frequency_penalty ?? 0,
       presence_penalty: body.presence_penalty ?? 0,
       // Reasoning parameters for models like o1 or deepseek-r1
-      // Force reasoning_effort: "medium" for Pollinations models
-      reasoning_effort: model.provider === 'pollinations' ? 'medium' : body.reasoning_effort,
+      reasoning_effort: body.reasoning_effort,
       include_reasoning: body.include_reasoning,
       reasoning: body.reasoning,
     };
@@ -608,7 +607,7 @@ export async function POST(request: NextRequest) {
         
         if (response.ok) {
           console.log(`[${requestId}] Fast-path success: ${Date.now() - startTime}ms via Pollinations`);
-          const data = await response.json();
+          const data = await safeResponseJson(response, null as any);
           const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'chat');
           const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
           
@@ -686,8 +685,7 @@ export async function POST(request: NextRequest) {
         top_p: body.top_p,
         frequency_penalty: body.frequency_penalty,
         presence_penalty: body.presence_penalty,
-        // Force reasoning_effort: "medium" for Pollinations models
-        reasoning_effort: model.provider === 'pollinations' ? 'medium' : body.reasoning_effort,
+        reasoning_effort: body.reasoning_effort,
         include_reasoning: body.include_reasoning,
         reasoning: body.reasoning,
       };
@@ -979,12 +977,34 @@ export async function POST(request: NextRequest) {
     }
 
     // Return JSON response
-    const data = await providerResponse.json();
+    const data = await safeResponseJson(providerResponse, null as any);
     
     // Transform provider responses to match OpenAI format
-    let responseData = data;
+    let responseData: any = data;
     
-    if (model.provider === 'meridian') {
+    // Liz Proxy transformation
+    if (model.provider === 'liz' && data) {
+      responseData = {
+        id: data.id || `chatcmpl-${requestId}`,
+        object: 'chat.completion',
+        created: data.created || Math.floor(Date.now() / 1000),
+        model: modelId,
+        choices: (data.choices || []).map((choice: any) => ({
+          index: choice.index || 0,
+          message: {
+            role: 'assistant',
+            content: choice.message?.content || choice.text || '',
+            reasoning_content: choice.message?.reasoning_content,
+          },
+          finish_reason: choice.finish_reason || 'stop'
+        })),
+        usage: data.usage || {
+          prompt_tokens: 0,
+          completion_tokens: 0,
+          total_tokens: 0
+        }
+      };
+    } else if (model.provider === 'meridian') {
       // Meridian returns { response: "..." }
       responseData = {
         id: 'meridian-' + Date.now(),
@@ -996,7 +1016,7 @@ export async function POST(request: NextRequest) {
             index: 0,
             message: {
               role: 'assistant',
-              content: data.response || '',
+              content: (data as any)?.response || '',
             },
             finish_reason: 'stop',
           },
@@ -1009,7 +1029,7 @@ export async function POST(request: NextRequest) {
       };
     } else if (model.provider === 'pollinations') {
       // Pollinations might return different formats, ensure it matches OpenAI
-      if (!data.choices && data.content) {
+      if (data && !(data as any).choices && (data as any).content) {
         responseData = {
           id: 'pollinations-' + Date.now(),
           object: 'chat.completion',
@@ -1020,12 +1040,12 @@ export async function POST(request: NextRequest) {
               index: 0,
               message: {
                 role: 'assistant',
-                content: data.content,
+                content: (data as any).content,
               },
               finish_reason: 'stop',
             },
           ],
-          usage: data.usage || {
+          usage: (data as any).usage || {
             prompt_tokens: 0,
             completion_tokens: 0,
             total_tokens: 0,
@@ -1034,10 +1054,10 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // Ensure the response has the correct model ID and object type
-    if (responseData && typeof responseData === 'object') {
+    // Ensure object type and model are correct in the final response
+    if (responseData) {
       responseData.model = modelId;
-      responseData.object = responseData.object || 'chat.completion';
+      responseData.object = 'chat.completion';
     }
     
     // Remember interaction in background
@@ -1053,7 +1073,7 @@ export async function POST(request: NextRequest) {
     const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'chat');
     const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
     
-    return NextResponse.json(responseData, {
+    return NextResponse.json(responseData || { error: 'Empty response from provider' }, {
       headers: {
         ...getCorsHeaders(),
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),

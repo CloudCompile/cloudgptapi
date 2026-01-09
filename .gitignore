@@ -47,3 +47,4 @@ coverage/
 
 # Model cache
 .models-cache/
+.env*.local

@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, ApiKey } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
 import { VIDEO_MODELS, PROVIDER_URLS, PREMIUM_MODELS } from '@/lib/providers';
 import { getCorsHeaders } from '@/lib/utils';
+import { supabaseAdmin } from '@/lib/supabase';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
+export const maxDuration = 300; // 5 minutes max for video generation
 
 // Handle OPTIONS for CORS
 export async function OPTIONS() {
@@ -42,13 +44,31 @@ export async function POST(request: NextRequest) {
     const effectiveKey = rawApiKey || clientIp;
     
     let apiKeyInfo: ApiKey | null = null;
+    let userPlan = 'free';
+
     if (rawApiKey) {
       apiKeyInfo = await validateApiKey(rawApiKey);
+      if (apiKeyInfo?.plan) {
+        userPlan = apiKeyInfo.plan;
+      }
+    } else if (sessionUserId) {
+      // Fetch plan for session users if no API key is provided
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('plan, email')
+        .eq('id', sessionUserId)
+        .single();
+      
+      if (profile) {
+        userPlan = profile.plan || 'free';
+        // Manual override for specific users requested by admin
+        userPlan = await applyPlanOverride(profile.email, userPlan, sessionUserId, 'id');
+      }
     }
 
-    // Determine plan and limits
-    const userPlan = apiKeyInfo?.plan || 'free';
-    
+    // Ensure plan is lowercase for consistency
+    userPlan = userPlan?.toLowerCase() || 'free';
+
     // Determine limit based on plan
     let limit = 2; // Default anonymous/free limit (2 RPM for video)
     let dailyLimit = 1000; // Default 1000 RPD
@@ -68,7 +88,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Check daily limit first
-    const { checkDailyLimit, getDailyLimitInfo } = await import('@/lib/api-keys');
     if (!await checkDailyLimit(effectiveKey, dailyLimit, apiKeyInfo?.id)) {
       const dailyInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
       return NextResponse.json(
@@ -198,15 +217,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Build Pollinations URL
+    // Build params for our internal proxy or direct link
     const params = new URLSearchParams();
     params.set('model', modelId);
     if (body.duration) params.set('duration', String(body.duration));
     if (body.aspectRatio) params.set('aspectRatio', body.aspectRatio);
-    if (body.image) params.set('image', body.image);
-    if (body.audio) params.set('audio', 'true');
+    if (body.seed) params.set('seed', String(body.seed));
+    params.set('prompt', body.prompt);
     
-    const encodedPrompt = encodeURIComponent(body.prompt);
-    const videoUrl = `${PROVIDER_URLS.pollinations}/image/${encodedPrompt}?${params.toString()}`;
+    // We point to our own /api/video endpoint because it handles authentication,
+    // usage tracking, and proxies the binary response from Pollinations.
+    const videoUrl = `${process.env.NEXT_PUBLIC_APP_URL || ''}/api/video?${params.toString()}`;
     
     // Track usage
     if (apiKeyInfo) {

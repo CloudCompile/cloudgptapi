@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
 import { IMAGE_MODELS, PROVIDER_URLS, ImageModel, PREMIUM_MODELS } from '@/lib/providers';
-import { getPollinationsApiKey } from '@/lib/utils';
+import { getPollinationsApiKey, safeResponseJson, safeJsonParse } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export const runtime = 'nodejs';
@@ -209,12 +209,12 @@ async function generateStableHordeImage(
       );
     }
 
-    const generateData = await generateResponse.json();
-    const requestId = generateData.id;
+    const generateData = await safeResponseJson(generateResponse, null as any);
+    const requestId = generateData?.id;
 
     if (!requestId) {
       return NextResponse.json(
-        { error: 'Failed to get generation ID from Stable Horde' },
+        { error: 'Failed to get generation ID from Stable Horde', details: generateData },
         { status: 500 }
       );
     }
@@ -236,7 +236,7 @@ async function generateStableHordeImage(
         continue;
       }
       
-      const checkData = await checkResponse.json();
+      const checkData = await safeResponseJson(checkResponse, { done: false, faulted: false });
       
       if (checkData.done) {
         // Get the result
@@ -253,9 +253,9 @@ async function generateStableHordeImage(
           );
         }
         
-        const statusData = await statusResponse.json();
+        const statusData = await safeResponseJson(statusResponse, null as any);
         
-        if (statusData.generations && statusData.generations.length > 0) {
+        if (statusData?.generations && statusData.generations.length > 0) {
           const imageUrl = statusData.generations[0].img;
           
           // Track usage
@@ -357,6 +357,9 @@ export async function POST(request: NextRequest) {
         userPlan = await applyPlanOverride(profile.email, userPlan, sessionUserId, 'id');
       }
     }
+
+    // Ensure plan is lowercase for consistency
+    userPlan = userPlan?.toLowerCase() || 'free';
 
     // Determine limit based on plan
     let limit = 5; // Default anonymous/free limit (5 RPM for images)

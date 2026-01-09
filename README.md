@@ -92,27 +92,25 @@ x-user-id: unique-user-123 (optional)
 Generate images from text prompts.
 
 ```bash
-POST /api/image
+POST /v1/images/generations
 ```
 
 **Request:**
 ```json
 {
   "prompt": "A beautiful sunset over mountains",
-  "model": "flux",
-  "width": 1024,
-  "height": 1024
+  "model": "flux"
 }
 ```
 
-**Response:** Returns the generated image (PNG/JPEG)
+**Response:** Returns JSON with image URL. Use `POST /api/image` for raw binary.
 
 ### Video Generation
 
 Generate videos from text prompts.
 
 ```bash
-POST /api/video
+POST /v1/video/generations
 ```
 
 **Request:**
@@ -124,16 +122,14 @@ POST /api/video
 }
 ```
 
-**Response:** Returns the generated video (MP4)
+**Response:** Returns JSON with video URL. Use `POST /api/video` for raw binary.
 
 ### Model Listings
 
-Get available models for each modality:
+Get available models for all modalities:
 
 ```bash
-GET /v1/models         # List chat models
-GET /api/models/image  # List image models
-GET /api/models/video  # List video models
+GET /v1/models
 ```
 
 ## 🔑 Authentication

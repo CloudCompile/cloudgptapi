@@ -2,7 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
 // API routes that use API key authentication instead of Clerk session
-const isApiKeyRoute = createRouteMatcher(["/v1(.*)", "/api/keys(.*)"]);
+const isApiKeyRoute = createRouteMatcher(["/v1(.*)", "/api/keys(.*)", "/api/video(.*)", "/api/image(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   // Skip Clerk auth for API routes - they use API key authentication

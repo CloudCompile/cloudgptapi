@@ -16,23 +16,23 @@ async function sendAnnouncement() {
   const url = `https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`;
   
   const embed = {
-    title: '✨ CloudGPT: UI & Model Update',
-    description: "We've rolled out a significant update to the CloudGPT interface. Experience a more fluid dashboard and access the latest cutting-edge models directly from our homepage.",
+    title: '💎 CloudGPT Pro: Pricing Update & Early Access',
+    description: "CloudGPT Pro is currently available for just **$1/month**. We're announcing that the price will be increasing soon as we expand our infrastructure and model offerings.",
     color: 0x6366f1, // Indigo/Primary color
     fields: [
       {
-        name: '🖱️ Enhanced Interactivity',
-        value: 'The dashboard sidebar has been fully optimized with improved layering (z-index) and scroll behavior for seamless navigation.',
+        name: '� Lock In Your Price',
+        value: "If you purchase your Pro plan now at **$1**, you will be grandfathered into this price. Your subscription will stay at **$1/month** even after the general price increase.",
         inline: false
       },
       {
-        name: '🚀 New Model Lineup',
-        value: 'Our homepage now features the latest industry-leading models, including Claude 3.5 Sonnet, Gemini 2.0 Flash, and DeepSeek-V3.',
+        name: '🚀 Unlimited Potential',
+        value: 'Pro members get priority access to premium models including Claude 3.5 Sonnet, Gemini 2.0 Flash, and our upcoming specialized agents.',
         inline: false
       },
       {
-        name: '💎 Refined UI/UX',
-        value: 'Polished glassmorphism effects and corrected layouts across the platform for a more professional and reliable experience.',
+        name: '�️ UI & Model Update',
+        value: 'Experience our newly optimized dashboard with improved sidebar interactivity and a refined model lineup directly on the homepage.',
         inline: false
       }
     ],
@@ -51,7 +51,7 @@ async function sendAnnouncement() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        content: "@everyone 🚀 **The CloudGPT UI & Model Update is now live! Explore the latest improvements and infrastructure.**",
+        content: "@everyone � **Pro Pricing Update: Lock in your $1/month plan before the price increases!**",
         embeds: [embed] 
       }),
     });
