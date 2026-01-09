@@ -122,7 +122,9 @@ async function handleStableHordeChat(
           
           // Track usage
           if (apiKeyInfo) {
-            await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat');
+            const model = CHAT_MODELS.find(m => m.id === modelId);
+            const usageWeight = model?.usageWeight || 1;
+            await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages, usageWeight);
           }
           
           // Remember interaction
@@ -518,6 +520,25 @@ export async function POST(request: NextRequest) {
     } else if (model.provider === 'meridian') {
       providerUrl = `${PROVIDER_URLS.meridian}/chat`;
       providerApiKey = process.env.MERIDIAN_API_KEY;
+    } else if (model.provider === 'github') {
+      providerUrl = `${PROVIDER_URLS.github}/chat/completions`;
+      providerApiKey = process.env.GITHUB_TOKEN;
+      
+      if (!providerApiKey) {
+        console.warn(`[${requestId}] Missing GitHub token for model: ${modelId}`);
+        return NextResponse.json(
+          {
+            error: {
+              message: 'GitHub Models token is not configured. Please add GITHUB_TOKEN to your .env.local file.',
+              type: 'config_error',
+              param: null,
+              code: 'missing_api_key',
+              request_id: requestId
+            }
+          },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
     } else if (model.provider === 'stablehorde') {
       // Handle Stable Horde text generation
       return await handleStableHordeChat(body, modelId, apiKeyInfo, request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`, effectiveKey, requestId, limit, dailyLimit);
@@ -568,9 +589,6 @@ export async function POST(request: NextRequest) {
        'deepseek/deepseek-v3'
      ].includes(modelId);
 
-    // Forward to provider API
-    let requestBody: any;
-    
     // Safety cap for max_tokens to prevent "request exceeds max tokens" errors
     // Many providers have limits around 4k-8k for free tiers
     const maxTokensSafetyCap = 4096;
@@ -631,6 +649,13 @@ export async function POST(request: NextRequest) {
         if (response.ok) {
           console.log(`[${requestId}] Fast-path success: ${Date.now() - startTime}ms via Pollinations`);
           const data = await safeResponseJson(response, null as any);
+          
+          // Track usage for fast-path success
+          if (apiKeyInfo) {
+            const usageWeight = model.usageWeight || 1;
+            await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages, usageWeight);
+          }
+
           const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'chat');
           const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
           
@@ -670,16 +695,11 @@ export async function POST(request: NextRequest) {
       headers['X-Title'] = 'CloudGPT API';
     }
 
-    // Forward to provider API
-    // requestBody, maxTokensSafetyCap, and effectiveMaxTokens are already declared above
+    // Prepare request body based on provider
+    let requestBody: any;
     
-    // Log the provider request (masking the API key)
-    const maskedProviderKey = providerApiKey ? `${providerApiKey.substring(0, 4)}...${providerApiKey.substring(providerApiKey.length - 4)}` : 'none';
-    console.log(`[${requestId}] Forwarding to ${model.provider} (${providerUrl}) with key ${maskedProviderKey}`);
-
     if (model.provider === 'meridian') {
       // Meridian expects a simple "prompt" field, not "messages"
-      // Convert messages array to a single prompt string
       const prompt = body.messages
         .map((msg: any) => `${msg.role}: ${msg.content}`)
         .join('\n');
@@ -698,27 +718,35 @@ export async function POST(request: NextRequest) {
         reasoning_effort: body.reasoning_effort,
         include_reasoning: body.include_reasoning,
       };
+    } else if (model.provider === 'github') {
+      // GitHub Inference API (OpenAI compatible but strict on reasoning model parameters)
+      requestBody = { ...standardBody };
+      
+      // Models that don't support temperature/top_p on GitHub
+      const isReasoningModel = [
+        'o1', 'o1-preview', 'o1-mini', 
+        'o3', 'o3-mini', 'o4-mini',
+        'Phi-4-reasoning', 'Phi-4-mini-reasoning',
+        'MAI-DS-R1'
+      ].includes(modelId);
+
+      if (isReasoningModel) {
+        delete requestBody.temperature;
+        delete requestBody.top_p;
+        // Reasoning models often don't support these either
+        delete requestBody.frequency_penalty;
+        delete requestBody.presence_penalty;
+      }
     } else {
-      requestBody = {
-        model: modelId,
-        messages: body.messages,
-        temperature: body.temperature,
-        max_tokens: effectiveMaxTokens,
-        stream: body.stream || false,
-        top_p: body.top_p,
-        frequency_penalty: body.frequency_penalty,
-        presence_penalty: body.presence_penalty,
-        reasoning_effort: body.reasoning_effort,
-        include_reasoning: body.include_reasoning,
-        reasoning: body.reasoning,
-      };
+      // Standard OpenAI format
+      requestBody = standardBody;
     }
 
-    // Create abort controller for timeout
+    // Forward to provider API
+    let providerResponse: Response;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS);
     
-    let providerResponse: Response;
     try {
       providerResponse = await fetch(providerUrl, {
         method: 'POST',
@@ -788,11 +816,6 @@ export async function POST(request: NextRequest) {
                 console.log(`[${requestId}] Pollinations fallback successful!`);
                 providerResponse = fallbackResponse;
                 break;
-              } else if (fallbackResponse.status === 429) {
-                continue;
-              } else {
-                providerResponse = fallbackResponse;
-                break;
               }
             } catch (err) {
               console.error(`[${requestId}] Pollinations fallback failed:`, err);
@@ -801,23 +824,20 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // --- CROSS-PROVIDER FALLBACK ---
-      // If we still have a 429 from Pollinations after trying all keys, try Liz as a backup
-      if (model.provider === 'pollinations' && providerResponse.status === 429) {
-        console.warn(`[${requestId}] Pollinations rate limited after all keys. Trying Liz fallback...`);
+      // Fallback for Pollinations 503/errors to Liz (Anthropic models often use this)
+      if (model.provider === 'pollinations' && !providerResponse.ok && (modelId.includes('claude') || modelId.includes('sonnet') || modelId.includes('opus'))) {
+        console.warn(`[${requestId}] Pollinations failed for Anthropic model. Trying Liz fallback...`);
         try {
-          const lizUrl = `${PROVIDER_URLS.liz}/v1/chat/completions`;
-          const lizApiKey = process.env.LIZ_API_KEY || 'sk-d38705df52b386e905f257a4019f8f2a';
-          
-          const lizResponse = await fetch(lizUrl, {
+          const lizKey = process.env.LIZ_API_KEY || 'sk-d38705df52b386e905f257a4019f8f2a';
+          const lizResponse = await fetch(`${PROVIDER_URLS.liz}/v1/chat/completions`, {
             method: 'POST',
-            headers: { ...headers, 'Authorization': `Bearer ${lizApiKey}` },
+            headers: { ...headers, 'Authorization': `Bearer ${lizKey}` },
             body: JSON.stringify(requestBody),
             signal: controller.signal,
           });
           
           if (lizResponse.ok) {
-            console.log(`[${requestId}] Cross-provider fallback to Liz successful!`);
+            console.log(`[${requestId}] Liz fallback successful!`);
             providerResponse = lizResponse;
           }
         } catch (err) {
@@ -871,25 +891,6 @@ export async function POST(request: NextRequest) {
           }
         }
       }
-      
-      if (!providerResponse.ok) {
-        const errorText = await providerResponse.text();
-        console.error(`[${requestId}] Provider ${model.provider} error (${providerResponse.status}):`, errorText.substring(0, 1000));
-        
-        // Return the error text if it's JSON, otherwise wrap it
-        try {
-          const errorJson = JSON.parse(errorText);
-          return NextResponse.json(
-            { error: `Provider ${model.provider} Error`, details: errorJson, status: providerResponse.status },
-            { status: providerResponse.status, headers: getCorsHeaders() }
-          );
-        } catch (e) {
-          return NextResponse.json(
-            { error: `Provider ${model.provider} Error`, details: errorText, status: providerResponse.status },
-            { status: providerResponse.status, headers: getCorsHeaders() }
-          );
-        }
-      }
     } catch (fetchError: any) {
       clearTimeout(timeoutId);
       if (fetchError.name === 'AbortError') {
@@ -931,16 +932,36 @@ export async function POST(request: NextRequest) {
       } else if (providerResponse.status >= 500) {
         errorMessage = sanitizedMessage || 'The upstream provider encountered an error. Please try again later.';
       } else if (providerResponse.status === 401 || providerResponse.status === 403) {
-        errorMessage = sanitizedMessage || 'Authentication error with upstream provider.';
+        errorMessage = sanitizedMessage || `Authentication error with upstream provider (${model.provider}).`;
       }
 
+      // Try to return the exact JSON from upstream if it's already OpenAI compatible
       try {
         const errorJson = JSON.parse(errorText);
-        return NextResponse.json(errorJson, { 
-          status: mappedStatus, 
-          headers: getCorsHeaders() 
-        });
+        if (errorJson.error) {
+          return NextResponse.json(errorJson, { 
+            status: mappedStatus, 
+            headers: getCorsHeaders() 
+          });
+        }
+        
+        // Wrap it if it's JSON but not standard OpenAI format
+        return NextResponse.json(
+          { 
+            error: {
+              message: errorMessage,
+              type: 'api_error',
+              param: null,
+              code: errorJson.code || 'upstream_error',
+              details: errorJson,
+              request_id: requestId,
+              original_status: providerResponse.status
+            }
+          },
+          { status: mappedStatus, headers: getCorsHeaders() }
+        );
       } catch (e) {
+        // Fallback for non-JSON errors
         return NextResponse.json(
           { 
             error: {
@@ -960,8 +981,9 @@ export async function POST(request: NextRequest) {
 
     // Track usage in background if authenticated
     if (apiKeyInfo) {
-      // Pass messages for token estimation
-      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages);
+      // Pass messages for token estimation and include usage weight for RPD logic
+      const usageWeight = model.usageWeight || 1;
+      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages, usageWeight);
     }
 
     // Handle streaming response

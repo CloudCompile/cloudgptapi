@@ -3,27 +3,30 @@
 export interface ChatModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'liz';
+  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'liz' | 'github';
   description?: string;
   contextWindow?: number;
   downtimeUntil?: string; // ISO timestamp for maintenance countdown
+  usageWeight?: number; // How many "requests" this model counts as for daily limits
 }
 
 export interface ImageModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'appypie' | 'stablehorde';
+  provider: 'pollinations' | 'openrouter' | 'appypie' | 'stablehorde' | 'github';
   description?: string;
   downtimeUntil?: string; // ISO timestamp for maintenance countdown
+  usageWeight?: number; // How many "requests" this model counts as for daily limits
 }
 
 export interface VideoModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter';
+  provider: 'pollinations' | 'openrouter' | 'github';
   description?: string;
   maxDuration?: number;
   downtimeUntil?: string; // ISO timestamp for maintenance countdown
+  usageWeight?: number; // How many "requests" this model counts as for daily limits
 }
 
 // Calculate downtime timestamp (until 2PM EST)
@@ -58,15 +61,15 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'xiaomi/mimo-v2-flash:free', name: 'Xiaomi Mimo V2 Flash', provider: 'openrouter', description: 'Xiaomi Mimo V2 Flash model' },
   { id: 'mistralai/devstral-2512:free', name: 'Mistral Devstral 2512', provider: 'openrouter', description: 'Mistral AI Devstral 2512' },
   { id: 'kwaipilot/kat-coder-pro:free', name: 'Kwai KAT Coder Pro', provider: 'openrouter', description: 'Kwai Pilot KAT Coder Pro' },
-  { id: 'tngtech/deepseek-r1t2-chimera:free', name: 'TNG DeepSeek R1T2 Chimera', provider: 'openrouter', description: 'TNG Tech DeepSeek R1T2 Chimera' },
   { id: 'nex-agi/deepseek-v3.1-nex-n1:free', name: 'Nex DeepSeek V3.1 Nex N1', provider: 'openrouter', description: 'Nex AGI DeepSeek V3.1 Nex N1' },
+  { id: 'tngtech/deepseek-r1t2-chimera:free', name: 'TNG DeepSeek R1T2 Chimera', provider: 'openrouter', description: 'TNG Tech DeepSeek R1T2 Chimera' },
   { id: 'tngtech/deepseek-r1t-chimera:free', name: 'TNG DeepSeek R1T Chimera', provider: 'openrouter', description: 'TNG Tech DeepSeek R1T Chimera' },
+  { id: 'tngtech/tng-r1t-chimera:free', name: 'TNG R1T Chimera', provider: 'openrouter', description: 'TNG Tech R1T Chimera' },
+  { id: 'deepseek/deepseek-r1-0528:free', name: 'DeepSeek R1 0528', provider: 'openrouter', description: 'DeepSeek R1 0528 model' },
   { id: 'nvidia/nemotron-3-nano-30b-a3b:free', name: 'NVIDIA Nemotron 3 Nano 30B', provider: 'openrouter', description: 'NVIDIA Nemotron 3 Nano 30B A3B' },
   { id: 'nvidia/nemotron-nano-12b-v2-vl:free', name: 'NVIDIA Nemotron Nano 12B V2 VL', provider: 'openrouter', description: 'NVIDIA Nemotron Nano 12B V2 Vision-Language' },
   { id: 'qwen/qwen3-coder:free', name: 'Qwen 3 Coder', provider: 'openrouter', description: 'Qwen 3 Coder model' },
   { id: 'ai/glm-4.5-air:free', name: 'GLM 4.5 Air', provider: 'openrouter', description: 'Z-AI GLM 4.5 Air' },
-  { id: 'tngtech/tng-r1t-chimera:free', name: 'TNG R1T Chimera', provider: 'openrouter', description: 'TNG Tech R1T Chimera' },
-  { id: 'deepseek/deepseek-r1-0528:free', name: 'DeepSeek R1 0528', provider: 'openrouter', description: 'DeepSeek R1 0528 model' },
   { id: 'google/gemma-3-27b-it:free', name: 'Google Gemma 3 27B IT', provider: 'openrouter', description: 'Google Gemma 3 27B Instruct' },
   { id: 'meta-llama/llama-3.3-70b-instruct:free', name: 'Meta Llama 3.3 70B Instruct', provider: 'openrouter', description: 'Meta Llama 3.3 70B Instruct' },
   { id: 'google/gemini-2.0-flash-exp:free', name: 'Google Gemini 2.0 Flash Exp', provider: 'openrouter', description: 'Google Gemini 2.0 Flash Experimental' },
@@ -120,6 +123,46 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'glm-4.5v', name: 'GLM 4.5V', provider: 'liz', description: 'GLM 4.5 Vision' },
   { id: 'glm-4.6', name: 'GLM 4.6', provider: 'liz', description: 'GLM 4.6' },
   { id: 'glm-4.7', name: 'GLM 4.7', provider: 'liz', description: 'GLM 4.7' },
+  // GitHub Models
+  { id: 'AI21-Jamba-1.5-Large', name: 'AI21 Jamba 1.5 Large', provider: 'github', usageWeight: 10 },
+  { id: 'Phi-4-reasoning', name: 'Phi-4 Reasoning', provider: 'github', usageWeight: 25 },
+  { id: 'Phi-4-multimodal-instruct', name: 'Phi-4 Multimodal', provider: 'github', usageWeight: 5 },
+  { id: 'Phi-4-mini-reasoning', name: 'Phi-4 Mini Reasoning', provider: 'github', usageWeight: 10 },
+  { id: 'Phi-4-mini-instruct', name: 'Phi-4 Mini Instruct', provider: 'github', usageWeight: 1 },
+  { id: 'Phi-4', name: 'Phi-4', provider: 'github', usageWeight: 3 },
+  { id: 'text-embedding-3-small', name: 'OpenAI Text Embedding 3 (small)', provider: 'github', usageWeight: 1 },
+  { id: 'text-embedding-3-large', name: 'OpenAI Text Embedding 3 (large)', provider: 'github', usageWeight: 2 },
+  { id: 'o4-mini', name: 'OpenAI o4-mini', provider: 'github', usageWeight: 15 },
+  { id: 'o3-mini', name: 'OpenAI o3-mini', provider: 'github', usageWeight: 15 },
+  { id: 'o3', name: 'OpenAI o3', provider: 'github', usageWeight: 30 },
+  { id: 'o1-preview', name: 'OpenAI o1-preview', provider: 'github', usageWeight: 25 },
+  { id: 'o1-mini', name: 'OpenAI o1-mini', provider: 'github', usageWeight: 10 },
+  { id: 'o1', name: 'OpenAI o1', provider: 'github', usageWeight: 30 },
+  { id: 'gpt-5-nano', name: 'OpenAI gpt-5-nano', provider: 'github', usageWeight: 40 },
+  { id: 'gpt-5-mini', name: 'OpenAI gpt-5-mini', provider: 'github', usageWeight: 50 },
+  { id: 'gpt-5-chat', name: 'OpenAI gpt-5-chat (preview)', provider: 'github', usageWeight: 75 },
+  { id: 'gpt-5', name: 'OpenAI gpt-5', provider: 'github', usageWeight: 100 },
+  { id: 'gpt-4o-mini', name: 'OpenAI GPT-4o mini', provider: 'github', usageWeight: 1 },
+  { id: 'gpt-4o', name: 'OpenAI GPT-4o', provider: 'github', usageWeight: 10 },
+  { id: 'gpt-4.1-nano', name: 'OpenAI GPT-4.1-nano', provider: 'github', usageWeight: 15 },
+  { id: 'gpt-4.1-mini', name: 'OpenAI GPT-4.1-mini', provider: 'github', usageWeight: 25 },
+  { id: 'gpt-4.1', name: 'OpenAI GPT-4.1', provider: 'github', usageWeight: 50 },
+  { id: 'Meta-Llama-3.1-8B-Instruct', name: 'Meta-Llama-3.1-8B-Instruct', provider: 'github', usageWeight: 2 },
+  { id: 'Meta-Llama-3.1-405B-Instruct', name: 'Meta-Llama-3.1-405B-Instruct', provider: 'github', usageWeight: 20 },
+  { id: 'MAI-DS-R1', name: 'MAI-DS-R1', provider: 'github', usageWeight: 25 },
+  { id: 'Llama-3.3-70B-Instruct', name: 'Llama-3.3-70B-Instruct', provider: 'github', usageWeight: 10 },
+  { id: 'Llama-3.2-90B-Vision-Instruct', name: 'Llama-3.2-90B-Vision-Instruct', provider: 'github', usageWeight: 15 },
+  { id: 'Llama-3.2-11B-Vision-Instruct', name: 'Llama-3.2-11B-Vision-Instruct', provider: 'github', usageWeight: 5 },
+  { id: 'Llama-4-Scout-17B-16E-Instruct', name: 'Llama 4 Scout 17B 16E Instruct', provider: 'github', usageWeight: 30 },
+  { id: 'Llama-4-Maverick-17B-128E-Instruct-FP8', name: 'Llama 4 Maverick 17B 128E Instruct FP8', provider: 'github', usageWeight: 50 },
+  { id: 'Cohere-command-r-plus-08-2024', name: 'Cohere Command R+ 08-2024', provider: 'github', usageWeight: 15 },
+  { id: 'Cohere-command-r-08-2024', name: 'Cohere Command R 08-2024', provider: 'github', usageWeight: 5 },
+  { id: 'Cohere-command-a', name: 'Cohere Command A', provider: 'github', usageWeight: 3 },
+  { id: 'Mistral-small-3.1', name: 'Mistral Small 3.1', provider: 'github', usageWeight: 3 },
+  { id: 'Codestral-25.01', name: 'Codestral 25.01', provider: 'github', usageWeight: 5 },
+  { id: 'Mistral-medium-3-25.05', name: 'Mistral Medium 3 (25.05)', provider: 'github', usageWeight: 10 },
+  { id: 'Ministral-3B', name: 'Ministral 3B', provider: 'github', usageWeight: 1 },
+  { id: 'DeepSeek-V3-0324', name: 'DeepSeek-V3-0324', provider: 'github', usageWeight: 10 },
 ];
 
 // Premium models that require a subscription
@@ -145,6 +188,35 @@ export const PREMIUM_MODELS = new Set([
   'midijourney',
   'minimax',
   
+  // GitHub Premium Models
+  'AI21-Jamba-1.5-Large',
+  'Phi-4-reasoning',
+  'o4-mini',
+  'o3-mini',
+  'o3',
+  'o1-preview',
+  'o1-mini',
+  'o1',
+  'gpt-5-nano',
+  'gpt-5-mini',
+  'gpt-5-chat',
+  'gpt-5',
+  'gpt-4.1-nano',
+  'gpt-4.1-mini',
+  'gpt-4.1',
+  'Meta-Llama-3.1-405B-Instruct',
+  'MAI-DS-R1',
+  'Llama-3.3-70B-Instruct',
+  'Llama-3.2-90B-Vision-Instruct',
+  'Llama-4-Scout-17B-16E-Instruct',
+  'Llama-4-Maverick-17B-128E-Instruct-FP8',
+  'Cohere-command-r-plus-08-2024',
+  'Mistral-medium-3-25.05',
+  'DeepSeek-V3-0324',
+  'Stable-Diffusion-3.5-Large',
+  'HunyuanImage-3.0',
+  'Qwen-Image',
+  
   // Video (All)
   'veo',
   'seedance',
@@ -158,42 +230,46 @@ export const PREMIUM_MODELS = new Set([
 
 // Available image models
 export const IMAGE_MODELS: ImageModel[] = [
-  { id: 'flux', name: 'Flux', provider: 'pollinations', description: 'Flux Schnell - Fast high-quality image generation', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'zimage', name: 'Z-Image', provider: 'pollinations', description: 'Z-Image Turbo - Fast 6B Flux with 2x upscaling', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'turbo', name: 'Turbo', provider: 'pollinations', description: 'SDXL Turbo - Single-step real-time generation', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'gptimage', name: 'GPT Image', provider: 'pollinations', description: "GPT Image 1 Mini - OpenAI's image generation model", downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'gptimage-large', name: 'GPT Image Large', provider: 'pollinations', description: "GPT Image 1.5 - OpenAI's advanced image generation model", downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'seedream', name: 'Seedream', provider: 'pollinations', description: 'Seedream 4.0 - ByteDance ARK (better quality)', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'kontext', name: 'Kontext', provider: 'pollinations', description: 'FLUX.1 Kontext - In-context editing & generation', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'nanobanana', name: 'Nanobanana', provider: 'pollinations', description: 'NanoBanana - Gemini 2.5 Flash Image', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'seedream-pro', name: 'Seedream Pro', provider: 'pollinations', description: 'Seedream 4.5 Pro - ByteDance ARK (4K, Multi-Image)', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'nanobanana-pro', name: 'Nanobanana Pro', provider: 'pollinations', description: 'NanoBanana Pro - Gemini 3 Pro Image (4K, Thinking)', downtimeUntil: POLLINATIONS_DOWNTIME },
+  { id: 'flux', name: 'Flux', provider: 'pollinations', description: 'Flux Schnell - Fast high-quality image generation', downtimeUntil: POLLINATIONS_DOWNTIME, usageWeight: 5 },
+  { id: 'zimage', name: 'Z-Image', provider: 'pollinations', description: 'Z-Image Turbo - Fast 6B Flux with 2x upscaling', downtimeUntil: POLLINATIONS_DOWNTIME, usageWeight: 5 },
+  { id: 'turbo', name: 'Turbo', provider: 'pollinations', description: 'SDXL Turbo - Single-step real-time generation', downtimeUntil: POLLINATIONS_DOWNTIME, usageWeight: 5 },
+  { id: 'gptimage', name: 'GPT Image', provider: 'pollinations', description: "GPT Image 1 Mini - OpenAI's image generation model", downtimeUntil: POLLINATIONS_DOWNTIME, usageWeight: 5 },
+  { id: 'gptimage-large', name: 'GPT Image Large', provider: 'pollinations', description: "GPT Image 1.5 - OpenAI's advanced image generation model", downtimeUntil: POLLINATIONS_DOWNTIME, usageWeight: 15 },
+  { id: 'seedream', name: 'Seedream', provider: 'pollinations', description: 'Seedream 4.0 - ByteDance ARK (better quality)', downtimeUntil: POLLINATIONS_DOWNTIME, usageWeight: 5 },
+  { id: 'kontext', name: 'Kontext', provider: 'pollinations', description: 'FLUX.1 Kontext - In-context editing & generation', downtimeUntil: POLLINATIONS_DOWNTIME, usageWeight: 5 },
+  { id: 'nanobanana', name: 'Nanobanana', provider: 'pollinations', description: 'NanoBanana - Gemini 2.5 Flash Image', downtimeUntil: POLLINATIONS_DOWNTIME, usageWeight: 5 },
+  { id: 'seedream-pro', name: 'Seedream Pro', provider: 'pollinations', description: 'Seedream 4.5 Pro - ByteDance ARK (4K, Multi-Image)', downtimeUntil: POLLINATIONS_DOWNTIME, usageWeight: 15 },
+  { id: 'nanobanana-pro', name: 'Nanobanana Pro', provider: 'pollinations', description: 'NanoBanana Pro - Gemini 3 Pro Image (4K, Thinking)', downtimeUntil: POLLINATIONS_DOWNTIME, usageWeight: 15 },
   // AppyPie models
-  { id: 'appypie-sdxl', name: 'AppyPie SDXL', provider: 'appypie', description: 'SDXL - High-resolution, realistic image generation' },
-  { id: 'appypie-sd-inpainting', name: 'AppyPie SD Inpainting', provider: 'appypie', description: 'Stable Diffusion 1.5 Inpainting - Image editing with masks' },
-  { id: 'appypie-flux-schnell', name: 'AppyPie Flux Schnell', provider: 'appypie', description: 'Flux-1 Schnell - Fast futuristic image generation' },
+  { id: 'appypie-sdxl', name: 'AppyPie SDXL', provider: 'appypie', description: 'SDXL - High-resolution, realistic image generation', usageWeight: 15 },
+  { id: 'appypie-sd-inpainting', name: 'AppyPie SD Inpainting', provider: 'appypie', description: 'Stable Diffusion 1.5 Inpainting - Image editing with masks', usageWeight: 10 },
+  { id: 'appypie-flux-schnell', name: 'AppyPie Flux Schnell', provider: 'appypie', description: 'Flux-1 Schnell - Fast futuristic image generation', usageWeight: 10 },
+  // GitHub Models
+  { id: 'Stable-Diffusion-3.5-Large', name: 'Stable Diffusion 3.5 Large', provider: 'github', description: 'Stability AI Stable Diffusion 3.5 Large', usageWeight: 10 },
+  { id: 'HunyuanImage-3.0', name: 'Hunyuan Image 3.0', provider: 'github', description: 'Tencent Hunyuan Image 3.0', usageWeight: 15 },
+  { id: 'Qwen-Image', name: 'Qwen Image', provider: 'github', description: 'Alibaba Qwen Image multimodal model', usageWeight: 5 },
   // Stable Horde models (popular selection)
-  { id: 'stable-horde-flux-schnell', name: 'Flux.1-Schnell fp8', provider: 'stablehorde', description: 'Flux.1-Schnell fp8 (Compact) - Fast high-quality generation' },
-  { id: 'stable-horde-sdxl', name: 'SDXL 1.0', provider: 'stablehorde', description: 'Stable Diffusion XL 1.0 - High quality image generation' },
-  { id: 'stable-horde-deliberate', name: 'Deliberate', provider: 'stablehorde', description: 'Deliberate - Versatile general purpose model' },
-  { id: 'stable-horde-dreamshaper', name: 'Dreamshaper', provider: 'stablehorde', description: 'Dreamshaper - Creative artistic generation' },
-  { id: 'stable-horde-realistic-vision', name: 'Realistic Vision', provider: 'stablehorde', description: 'Realistic Vision - Photo-realistic images' },
-  { id: 'stable-horde-absolute-reality', name: 'AbsoluteReality', provider: 'stablehorde', description: 'AbsoluteReality - High fidelity realistic images' },
-  { id: 'stable-horde-juggernaut-xl', name: 'Juggernaut XL', provider: 'stablehorde', description: 'Juggernaut XL - Versatile SDXL model' },
-  { id: 'stable-horde-pony-diffusion', name: 'Pony Diffusion XL', provider: 'stablehorde', description: 'Pony Diffusion XL - Anime and character focused' },
-  { id: 'stable-horde-stable-diffusion', name: 'Stable Diffusion', provider: 'stablehorde', description: 'Stable Diffusion 1.5 - Classic SD model' },
-  { id: 'stable-horde-anything-v5', name: 'Anything v5', provider: 'stablehorde', description: 'Anything v5 - Anime style generation' },
-  { id: 'stable-horde-flux-dev', name: 'Flux.1-Dev', provider: 'stablehorde', description: 'Flux.1-Dev - High quality Flux model' },
-  { id: 'stable-horde-icbinp', name: "I Can't Believe It's Not Photo", provider: 'stablehorde', description: 'ICBINP - Extremely realistic photographic style' },
-  { id: 'stable-horde-dreamlike-photoreal', name: 'Dreamlike Photoreal', provider: 'stablehorde', description: 'Dreamlike Photoreal - Artistic photographic style' },
+  { id: 'stable-horde-flux-schnell', name: 'Flux.1-Schnell fp8', provider: 'stablehorde', description: 'Flux.1-Schnell fp8 (Compact) - Fast high-quality generation', usageWeight: 5 },
+  { id: 'stable-horde-sdxl', name: 'SDXL 1.0', provider: 'stablehorde', description: 'Stable Diffusion XL 1.0 - High quality image generation', usageWeight: 5 },
+  { id: 'stable-horde-deliberate', name: 'Deliberate', provider: 'stablehorde', description: 'Deliberate - Versatile general purpose model', usageWeight: 5 },
+  { id: 'stable-horde-dreamshaper', name: 'Dreamshaper', provider: 'stablehorde', description: 'Dreamshaper - Creative artistic generation', usageWeight: 5 },
+  { id: 'stable-horde-realistic-vision', name: 'Realistic Vision', provider: 'stablehorde', description: 'Realistic Vision - Photo-realistic images', usageWeight: 5 },
+  { id: 'stable-horde-absolute-reality', name: 'AbsoluteReality', provider: 'stablehorde', description: 'AbsoluteReality - High fidelity realistic images', usageWeight: 5 },
+  { id: 'stable-horde-juggernaut-xl', name: 'Juggernaut XL', provider: 'stablehorde', description: 'Juggernaut XL - Versatile SDXL model', usageWeight: 5 },
+  { id: 'stable-horde-pony-diffusion', name: 'Pony Diffusion XL', provider: 'stablehorde', description: 'Pony Diffusion XL - Anime and character focused', usageWeight: 5 },
+  { id: 'stable-horde-stable-diffusion', name: 'Stable Diffusion', provider: 'stablehorde', description: 'Stable Diffusion 1.5 - Classic SD model', usageWeight: 5 },
+  { id: 'stable-horde-anything-v5', name: 'Anything v5', provider: 'stablehorde', description: 'Anything v5 - Anime style generation', usageWeight: 5 },
+  { id: 'stable-horde-flux-dev', name: 'Flux.1-Dev', provider: 'stablehorde', description: 'Flux.1-Dev - High quality Flux model', usageWeight: 10 },
+  { id: 'stable-horde-icbinp', name: "I Can't Believe It's Not Photo", provider: 'stablehorde', description: 'ICBINP - Extremely realistic photographic style', usageWeight: 5 },
+  { id: 'stable-horde-dreamlike-photoreal', name: 'Dreamlike Photoreal', provider: 'stablehorde', description: 'Dreamlike Photoreal - Artistic photographic style', usageWeight: 5 },
 ];
 
 // Available video models
 export const VIDEO_MODELS: VideoModel[] = [
-  { id: 'seedance-pro', name: 'Seedance Pro', provider: 'pollinations', description: 'Seedance Pro-Fast - BytePlus video generation (better prompt adherence)', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'seedance', name: 'Seedance', provider: 'pollinations', description: 'Seedance Lite - BytePlus video generation (better quality)', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'veo', name: 'Veo', provider: 'pollinations', description: "Veo 3.1 Fast - Google's video generation model (preview)", downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'openai-audio', name: 'OpenAI GPT-4o Mini Audio', provider: 'pollinations', description: 'OpenAI GPT-4o Mini Audio', downtimeUntil: POLLINATIONS_DOWNTIME },
+  { id: 'seedance-pro', name: 'Seedance Pro', provider: 'pollinations', description: 'Seedance Pro-Fast - BytePlus video generation (better prompt adherence)', downtimeUntil: POLLINATIONS_DOWNTIME, usageWeight: 50 },
+  { id: 'seedance', name: 'Seedance', provider: 'pollinations', description: 'Seedance Lite - BytePlus video generation (better quality)', downtimeUntil: POLLINATIONS_DOWNTIME, usageWeight: 50 },
+  { id: 'veo', name: 'Veo', provider: 'pollinations', description: "Veo 3.1 Fast - Google's video generation model (preview)", downtimeUntil: POLLINATIONS_DOWNTIME, usageWeight: 50 },
+  { id: 'openai-audio', name: 'OpenAI GPT-4o Mini Audio', provider: 'pollinations', description: 'OpenAI GPT-4o Mini Audio', downtimeUntil: POLLINATIONS_DOWNTIME, usageWeight: 25 },
 ];
 
 // Provider base URLs
@@ -208,4 +284,5 @@ export const PROVIDER_URLS = {
   },
   stablehorde: 'https://stablehorde.net/api/v2',
   meridian: 'https://meridianlabsapp.website/api',
+  github: 'https://models.inference.ai.azure.com',
 };

@@ -443,6 +443,98 @@ export async function POST(request: NextRequest) {
         );
       }
 
+    } else if (model.provider === 'github') {
+      const providerApiKey = process.env.GITHUB_TOKEN;
+      
+      if (!providerApiKey) {
+        return NextResponse.json(
+          {
+            error: {
+              message: 'GitHub Models token is not configured. Please add GITHUB_TOKEN to your .env.local file.',
+              type: 'config_error',
+              param: null,
+              code: 'missing_api_key'
+            }
+          },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
+
+      try {
+        const response = await fetch(`${PROVIDER_URLS.github}/images/generations`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${providerApiKey}`,
+            'x-user-id': userId,
+          },
+          body: JSON.stringify({
+            model: model.id,
+            prompt: body.prompt,
+            n: 1,
+            size: body.size || '1024x1024',
+            response_format: body.response_format || 'url',
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`[V1-Images] GitHub Models error (${response.status}):`, errorText.substring(0, 1000));
+          
+          try {
+            const errorJson = JSON.parse(errorText);
+            if (errorJson.error) {
+              return NextResponse.json(errorJson, { 
+                status: response.status, 
+                headers: getCorsHeaders() 
+              });
+            }
+            
+            return NextResponse.json(
+              { 
+                error: { 
+                  message: errorJson.message || `GitHub Models API error: ${response.status}`, 
+                  type: 'api_error',
+                  code: errorJson.code || 'upstream_error',
+                  details: errorJson
+                } 
+              },
+              { status: response.status, headers: getCorsHeaders() }
+            );
+          } catch (e) {
+            return NextResponse.json(
+              { 
+                error: { 
+                  message: `GitHub Models API error: ${response.status}`, 
+                  type: 'api_error',
+                  code: 'upstream_error',
+                  details: errorText.substring(0, 500)
+                } 
+              },
+              { status: response.status, headers: getCorsHeaders() }
+            );
+          }
+        }
+
+        const data = await response.json();
+        
+        if (body.response_format === 'b64_json') {
+          return NextResponse.json(data, { headers: getCorsHeaders() });
+        }
+        
+        imageUrl = data.data?.[0]?.url;
+        if (!imageUrl) {
+          return NextResponse.json(
+            { error: { message: 'GitHub Models returned no image URL', type: 'api_error' } },
+            { status: 500, headers: getCorsHeaders() }
+          );
+        }
+      } catch (e) {
+        return NextResponse.json(
+          { error: { message: 'Failed to connect to GitHub Models API', type: 'api_error' } },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
     } else {
       // Pollinations
       const params = new URLSearchParams();
@@ -510,7 +602,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (apiKeyInfo) {
-      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'image');
+      const usageWeight = model.usageWeight || 5;
+      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'image', undefined, usageWeight);
     }
 
     const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'image');

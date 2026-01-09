@@ -225,13 +225,78 @@ export async function POST(request: NextRequest) {
     if (body.seed) params.set('seed', String(body.seed));
     params.set('prompt', body.prompt);
     
-    // We point to our own /api/video endpoint because it handles authentication,
-    // usage tracking, and proxies the binary response from Pollinations.
-    const videoUrl = `${process.env.NEXT_PUBLIC_APP_URL || ''}/api/video?${params.toString()}`;
+    let videoUrl = '';
+
+    if (model.provider === 'github') {
+      const providerApiKey = process.env.GITHUB_TOKEN;
+      
+      if (!providerApiKey) {
+        return NextResponse.json(
+          {
+            error: {
+              message: 'GitHub Models token is not configured. Please add GITHUB_TOKEN to your .env.local file.',
+              type: 'config_error',
+              param: null,
+              code: 'missing_api_key'
+            }
+          },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
+
+      try {
+        // GitHub Models doesn't have a standard video generation endpoint yet,
+        // but we'll follow the OpenAI-compatible pattern for future-proofing.
+        const response = await fetch(`${PROVIDER_URLS.github}/video/generations`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${providerApiKey}`,
+          },
+          body: JSON.stringify({
+            model: model.id,
+            prompt: body.prompt,
+            duration: body.duration || 5,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          return NextResponse.json(
+            { 
+              error: { 
+                message: errorData.error?.message || `GitHub Models API error: ${response.status}`, 
+                type: 'api_error' 
+              } 
+            },
+            { status: response.status, headers: getCorsHeaders() }
+          );
+        }
+
+        const data = await response.json();
+        videoUrl = data.data?.[0]?.url;
+      } catch (e) {
+        return NextResponse.json(
+          { error: { message: 'Failed to connect to GitHub Models API', type: 'api_error' } },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
+    } else {
+      // Default to our internal proxy which handles Pollinations
+      videoUrl = `${process.env.NEXT_PUBLIC_APP_URL || ''}/api/video?${params.toString()}`;
+    }
+    
+    if (!videoUrl) {
+      return NextResponse.json(
+        { error: { message: 'Failed to generate video URL', type: 'api_error' } },
+        { status: 500, headers: getCorsHeaders() }
+      );
+    }
     
     // Track usage
     if (apiKeyInfo) {
-      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'video');
+      const usageWeight = model.usageWeight || 50;
+      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'video', undefined, usageWeight);
     }
 
     // Final response

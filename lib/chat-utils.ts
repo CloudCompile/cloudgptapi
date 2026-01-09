@@ -120,6 +120,7 @@ export const PROVIDER_URLS = {
   liz: 'https://lizley.zeabur.app',
   stablehorde: 'https://stablehorde.net/api/v2',
   meridian: 'https://meridianlabsapp.website/api',
+  github: 'https://models.inference.ai.azure.com',
 };
 
 export function createChatTransformStream(

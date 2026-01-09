@@ -23,31 +23,37 @@ async function sendAnnouncement() {
       return;
     }
   }
+
   const embed = {
-    title: '⚠️ Service Update: Pollinations Models',
-    description: "We are currently performing maintenance on all **Pollinations** powered models. They are temporarily unavailable.",
-    color: 0xffa500, // Orange
+    title: '🚀 New Models & Lightning Speed Upgrades',
+    description: "We've just integrated several cutting-edge models and optimized our infrastructure for unprecedented response times across the board.",
+    color: 0x7289da, // Discord Blurple
     fields: [
       {
-        name: '🕒 Expected Return',
-        value: "Models are expected to be back online by **2:00 PM EST**.",
+        name: '🧠 New Reasoning & Text',
+        value: '• **Phi-4-reasoning**: Advanced logic & coding\n• **AI21-Jamba-1.5-Large**: Massive context & high accuracy',
         inline: false
       },
       {
-        name: '⚡ Alternative Models',
-        value: 'While Pollinations is down, you can still use our other high-performance models from Anthropic, Google, and OpenAI.',
+        name: '🎨 New Image Generation',
+        value: '• **Stable-Diffusion-3.5-Large**: Next-gen photorealism\n• **HunyuanImage-3.0**: Superior prompt adherence\n• **Qwen-Image**: High-speed multimodal generation',
+        inline: false
+      },
+      {
+        name: '⚡ Lightning Speed',
+        value: 'Our new optimized routing engine now delivers **sub-500ms** response times for high-speed models. Experience the fastest AI responses on the market.',
         inline: false
       }
     ],
     footer: {
-      text: 'CloudGPT Service Status',
-      icon_url: 'https://raw.githubusercontent.com/lucide-software/lucide/main/icons/cloud.png'
+      text: 'CloudGPT Performance Update',
+      icon_url: 'https://raw.githubusercontent.com/lucide-software/lucide/main/icons/zap.png'
     },
     timestamp: new Date().toISOString()
   };
 
   const payload = { 
-    content: "@everyone ⚠️ **Pollinations models are temporarily down until 2PM EST.**",
+    content: "@everyone 🚀 **Major updates have arrived!** Check out our new models and speed improvements.",
     embeds: [embed] 
   };
 

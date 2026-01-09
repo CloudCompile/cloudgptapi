@@ -86,16 +86,16 @@ CREATE POLICY "Admins can manage all profiles"
     USING (true); -- Authenticated via Clerk in API
 
 -- Function to increment usage count and daily usage
-CREATE OR REPLACE FUNCTION public.increment_usage_count(key_id UUID)
+CREATE OR REPLACE FUNCTION public.increment_usage_count(key_id UUID, p_weight INTEGER DEFAULT 1)
 RETURNS void AS $$
 DECLARE
     v_now TIMESTAMP WITH TIME ZONE := timezone('utc'::text, now());
 BEGIN
     UPDATE public.api_keys
-    SET usage_count = usage_count + 1,
+    SET usage_count = usage_count + p_weight,
         daily_usage_count = CASE 
-            WHEN date_trunc('day', last_reset_at) < date_trunc('day', v_now) THEN 1
-            ELSE daily_usage_count + 1
+            WHEN date_trunc('day', last_reset_at) < date_trunc('day', v_now) THEN p_weight
+            ELSE daily_usage_count + p_weight
         END,
         last_reset_at = CASE
             WHEN date_trunc('day', last_reset_at) < date_trunc('day', v_now) THEN v_now

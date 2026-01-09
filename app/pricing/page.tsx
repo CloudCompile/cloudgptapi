@@ -57,7 +57,7 @@ const plans = [
   },
   {
     name: 'Pro',
-    price: '$1',
+    price: '$3',
     period: '/month',
     description: 'For professional developers and growing applications.',
     features: [
@@ -72,7 +72,7 @@ const plans = [
     buttonHref: '#',
     highlight: true,
     stripeProductId: 'prod_TkaB1ApHkafWT1',
-    stripePriceId: 'price_1Sn50iRG5zp0rTvzA3lI8SE2', // Pro price ID
+    stripePriceId: 'price_1SnmRzRG5zp0rTvzlRi9k0EO', // Pro price ID
   },
   {
     name: 'Enterprise',

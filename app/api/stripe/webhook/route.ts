@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       
       // Map price ID to plan name using env vars if available, fallback to hardcoded IDs from pricing page
       let planName = 'free';
-      const PRO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || 'price_1Sn50iRG5zp0rTvzA3lI8SE2';
+      const PRO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || 'price_1SnmRzRG5zp0rTvzlRi9k0EO';
       const DEV_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_DEV_PRICE_ID || 'price_1Sn51wRG5zp0rTvz8SeF3WXh';
       const VIDEO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_VIDEO_PRICE_ID || 'price_1SnLTHRG5zp0rTvzT7KuRE8v';
 
@@ -201,7 +201,7 @@ export async function POST(req: Request) {
       // Sync new price/plan to database
       const priceId = subscription.items.data[0].price.id;
       let planName = 'free';
-      const PRO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || 'price_1Sn50iRG5zp0rTvzA3lI8SE2';
+      const PRO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || 'price_1SnmRzRG5zp0rTvzlRi9k0EO';
       const DEV_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_DEV_PRICE_ID || 'price_1Sn51wRG5zp0rTvz8SeF3WXh';
       const VIDEO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_VIDEO_PRICE_ID || 'price_1SnLTHRG5zp0rTvzT7KuRE8v';
 

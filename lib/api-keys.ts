@@ -90,10 +90,27 @@ export async function trackUsage(
   userId: string, 
   modelId: string, 
   type: 'chat' | 'image' | 'video' | 'mem',
-  tokensOrData?: any
+  tokensOrData?: any,
+  weight: number = 1
 ) {
   // Increment usage count on the API key
-  await supabaseAdmin.rpc('increment_usage_count', { key_id: apiKeyId });
+  // We pass the weight to the RPC (requires updated RPC in Supabase)
+  try {
+    const { error } = await supabaseAdmin.rpc('increment_usage_count', { 
+      key_id: apiKeyId,
+      p_weight: weight 
+    });
+
+    if (error) {
+      // Fallback if RPC doesn't support weight yet
+      console.warn('increment_usage_count with weight failed, falling back to single increment', error);
+      await supabaseAdmin.rpc('increment_usage_count', { key_id: apiKeyId });
+    }
+  } catch (err: any) {
+    console.error('Error in trackUsage RPC:', err);
+    // Try fallback anyway
+    await supabaseAdmin.rpc('increment_usage_count', { key_id: apiKeyId });
+  }
 
   // Estimate tokens if not provided
   let estimatedTokens = 0;
