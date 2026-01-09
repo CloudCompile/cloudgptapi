@@ -116,10 +116,10 @@ export function sanitizeErrorText(text: string): string {
 
 export const PROVIDER_URLS = {
   pollinations: 'https://gen.pollinations.ai',
-  openrouter: 'https://openrouter.ai/api',
-  liz: 'https://liz.it',
+  openrouter: 'https://openrouter.ai',
+  liz: 'https://lizley.zeabur.app',
   stablehorde: 'https://stablehorde.net/api/v2',
-  meridian: 'https://meridian-azure.cloudgpt.com',
+  meridian: 'https://meridianlabsapp.website/api',
 };
 
 export function createChatTransformStream(

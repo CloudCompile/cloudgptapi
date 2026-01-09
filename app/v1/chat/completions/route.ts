@@ -1085,7 +1085,7 @@ export async function POST(request: NextRequest) {
     
     // Remember interaction in background
      if (userId && lastMessage) {
-       const assistantMessage = responseData.choices?.[0]?.message?.content || '';
+       const assistantMessage = responseData?.choices?.[0]?.message?.content || '';
        if (assistantMessage) {
          rememberInteraction(lastMessage, assistantMessage, userId).catch(err => 
            console.error('Failed to remember interaction:', err)
