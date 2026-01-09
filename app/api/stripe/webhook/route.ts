@@ -160,7 +160,7 @@ export async function POST(req: Request) {
     if (session.subscription) {
       const subscription = await stripe.subscriptions.retrieve(
         session.subscription as string
-      );
+      ) as any;
       console.log(`[${requestId}] Subscription ${subscription.id} payment succeeded`);
       
       // Update subscription status in database
