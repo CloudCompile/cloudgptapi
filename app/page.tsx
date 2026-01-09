@@ -1,12 +1,31 @@
-import { ArrowRight, Bot, Code, Cpu, Image as ImageIcon, MessageSquare, Video, Zap, Terminal, Sparkles, Globe, Shield, Cloud, Layers, Database, Activity, Lock, Cpu as CpuIcon } from 'lucide-react';
+import { ArrowRight, Bot, Code, Cpu, Image as ImageIcon, MessageSquare, Video, Zap, Terminal, Sparkles, Globe, Shield, Cloud, Layers, Database, Activity, Lock, Cpu as CpuIcon, Play } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { Logo } from '@/components/Logo';
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full z-50 glass border-b border-border/50">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <Logo />
+          <div className="hidden md:flex items-center gap-8">
+            <Link href="/models" className="text-sm font-bold hover:text-primary transition-colors">Models</Link>
+            <Link href="/pricing" className="text-sm font-bold hover:text-primary transition-colors">Pricing</Link>
+            <Link href="/docs" className="text-sm font-bold hover:text-primary transition-colors">Docs</Link>
+            <Link 
+              href="/dashboard" 
+              className="px-5 py-2 rounded-xl bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all"
+            >
+              Get Started
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden dot-grid">
+      <section className="relative pt-48 pb-20 overflow-hidden dot-grid">
         <div className="absolute inset-0 mesh-gradient opacity-60" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
@@ -14,8 +33,8 @@ export default function Home() {
               <Sparkles className="h-3.5 w-3.5 fill-current" />
               <span>Next Generation AI Infrastructure</span>
             </div>
-            <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 leading-[0.9]">
-              The <span className="text-primary">Studio</span> for <br />Professional AI
+            <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 leading-[0.85]">
+              The <span className="premium-text">Studio</span> for <br />Professional AI
             </h1>
             <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-5 duration-700 delay-200">
               A unified API gateway for the world's most powerful AI models. 
@@ -35,6 +54,52 @@ export default function Home() {
               >
                 Open Playground
               </Link>
+            </div>
+          </div>
+
+          {/* Product "Screenshot" Component */}
+          <div className="mt-24 relative max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-500">
+            <div className="absolute -inset-1 premium-gradient rounded-[2rem] blur-2xl opacity-20 animate-pulse-slow" />
+            <div className="relative bg-slate-950 rounded-[2rem] border border-white/10 shadow-2xl overflow-hidden aspect-[16/9] md:aspect-[21/9]">
+              {/* Fake UI Header */}
+              <div className="h-12 bg-white/5 border-b border-white/5 flex items-center px-6 gap-2">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-500/50" />
+                  <div className="w-3 h-3 rounded-full bg-amber-500/50" />
+                  <div className="w-3 h-3 rounded-full bg-emerald-500/50" />
+                </div>
+                <div className="ml-4 px-3 py-1 rounded-md bg-white/5 text-[10px] text-white/40 font-mono">cloudgpt.com/playground</div>
+              </div>
+              
+              {/* Fake UI Content */}
+              <div className="p-8 flex gap-8 h-full">
+                <div className="w-64 flex flex-col gap-4">
+                  <div className="h-8 w-32 bg-white/10 rounded-lg animate-pulse" />
+                  <div className="space-y-2">
+                    <div className="h-10 bg-primary/20 border border-primary/30 rounded-xl" />
+                    <div className="h-10 bg-white/5 rounded-xl" />
+                    <div className="h-10 bg-white/5 rounded-xl" />
+                  </div>
+                </div>
+                <div className="flex-1 flex flex-col gap-4">
+                  <div className="h-full bg-white/5 rounded-2xl border border-white/5 p-6 flex flex-col gap-4">
+                    <div className="flex gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/40 shrink-0" />
+                      <div className="h-16 w-3/4 bg-white/10 rounded-2xl rounded-tl-none" />
+                    </div>
+                    <div className="flex gap-3 justify-end">
+                      <div className="h-24 w-2/3 bg-white/5 rounded-2xl rounded-tr-none" />
+                      <div className="w-8 h-8 rounded-full bg-white/20 shrink-0" />
+                    </div>
+                    <div className="mt-auto h-12 bg-white/5 rounded-xl border border-white/10 flex items-center px-4 justify-between">
+                      <div className="text-white/20 text-sm">Ask anything...</div>
+                      <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                        <Play className="w-4 h-4 text-white fill-current" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

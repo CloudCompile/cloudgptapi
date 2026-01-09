@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserButton, useUser } from '@clerk/nextjs';
+import { Logo } from './Logo';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -45,13 +46,8 @@ export function Sidebar() {
   return (
     <div className="hidden lg:flex lg:flex-col lg:w-72 lg:fixed lg:inset-y-0 z-50 bg-white/50 dark:bg-slate-950/50 backdrop-blur-xl border-r border-border/50">
       <div className="flex flex-col flex-grow pt-8 pb-6 overflow-y-auto">
-        <div className="flex items-center flex-shrink-0 px-8 gap-3 mb-10">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20">
-            <Cloud className="h-6 w-6 text-white" />
-          </div>
-          <Link href="/" className="text-2xl font-black tracking-tighter">
-            CloudGPT
-          </Link>
+        <div className="px-8 mb-10">
+          <Logo />
         </div>
         
         <nav className="flex-1 px-4 space-y-10">
