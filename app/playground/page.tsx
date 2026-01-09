@@ -15,7 +15,8 @@ import {
   User,
   Zap,
   History,
-  Info
+  Info,
+  Clock
 } from 'lucide-react';
 import { CHAT_MODELS, IMAGE_MODELS, VIDEO_MODELS, PREMIUM_MODELS } from '@/lib/providers';
 import { cn } from '@/lib/utils';
