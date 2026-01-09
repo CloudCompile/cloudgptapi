@@ -61,9 +61,9 @@ async function runTests() {
   console.log('--- Provider Latency Test (Optimized) ---');
   
   const modelsToTest = [
-    { name: 'OpenAI GPT-4o', id: 'openai' },
-    { name: 'DeepSeek V3', id: 'deepseek' },
-    { name: 'Gemini 2.0 Flash', id: 'gemini' }
+    { name: 'OpenAI GPT-5 Mini', id: 'openai' },
+    { name: 'DeepSeek V3.2', id: 'deepseek' },
+    { name: 'Gemini 3 Flash', id: 'gemini' }
   ];
 
   for (const model of modelsToTest) {

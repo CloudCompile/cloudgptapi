@@ -324,10 +324,10 @@ CloudGPT aggregates multiple top-tier AI providers:
 
 | Model ID | Name | Provider |
 |----------|------|----------|
-| `openai` | OpenAI GPT-4o | Pollinations |
-| `claude` | Claude 3.5 Sonnet | Pollinations |
-| `gemini` | Gemini 2.0 Flash | Pollinations |
-| `deepseek` | DeepSeek V3 | Pollinations |
+| `openai` | OpenAI GPT-5 Mini | Pollinations |
+| `claude` | Anthropic Claude Sonnet 4.5 | Pollinations |
+| `gemini` | Gemini 3 Flash | Pollinations |
+| `deepseek` | DeepSeek V3.2 | Pollinations |
 | `meridian` | Meridian (Memory) | Meridian |
 | `llama-3.3-70b-instruct:free` | Llama 3.3 70B | Routeway |
 
