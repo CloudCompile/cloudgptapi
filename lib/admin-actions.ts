@@ -95,7 +95,7 @@ export async function syncUser(userId: string, email: string) {
   // Check if user already exists
   const { data: existingProfile } = await supabaseAdmin
     .from('profiles')
-    .select('id')
+    .select('id, created_at')
     .eq('id', userId)
     .single();
 
@@ -112,7 +112,8 @@ export async function syncUser(userId: string, email: string) {
     return;
   }
 
-  // If this is a new user (didn't exist before upsert), notify Discord
+  // Only notify Discord if this is a truly new user (didn't exist before)
+  // This prevents duplicate notifications if syncUser is called multiple times
   if (!existingProfile) {
     const discordWebhookUrl = process.env.DISCORD_PRO_WEBHOOK;
     if (discordWebhookUrl) {

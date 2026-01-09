@@ -2,7 +2,6 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateApiKey } from '@/lib/api-keys';
 import { supabaseAdmin } from '@/lib/supabase';
-import { syncUser } from '@/lib/admin-actions';
 
 export async function GET() {
   try {
@@ -12,16 +11,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Sync user profile on every dashboard visit/key fetch
-    const user = await currentUser();
-    if (user) {
-      try {
-        await syncUser(userId, user.emailAddresses[0].emailAddress);
-      } catch (syncError) {
-        console.error('Error in syncUser:', syncError);
-        // Continue even if sync fails, as the table might already have the user
-      }
-    }
+    // Note: User sync is handled by the SyncUser component in the root layout
+    // No need to sync here to avoid duplicate webhook notifications
 
     const { data: keys, error } = await supabaseAdmin
       .from('api_keys')
