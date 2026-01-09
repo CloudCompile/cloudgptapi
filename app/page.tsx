@@ -102,7 +102,7 @@ export default function Home() {
                         <div className="h-20 bg-white/5 rounded-2xl p-4 font-mono text-xs text-white/40 leading-relaxed">
                           $ curl https://api.cloudgpt.com/v1/chat \<br />
                           &nbsp;&nbsp;-H "Authorization: Bearer $KEY" \<br />
-                          &nbsp;&nbsp;-d '{"model": "gpt-5-mini"}'
+                          &nbsp;&nbsp;-d '{"{"}"model": "gpt-5-mini"{"}"}'
                         </div>
                       </div>
                     </div>
