@@ -45,15 +45,15 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center">
             <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">GPT-4o</span>
+              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">GPT-5 Mini</span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">OpenAI</span>
             </div>
             <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">Claude 3.5 Sonnet</span>
+              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">Claude Sonnet 4.5</span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">Anthropic</span>
             </div>
             <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">Gemini 2.0 Flash</span>
+              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">Gemini 3 Flash</span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">Google</span>
             </div>
             <div className="flex flex-col items-center gap-1 group cursor-default">
@@ -65,7 +65,7 @@ export default function Home() {
               <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">Black Forest</span>
             </div>
             <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">DeepSeek-V3</span>
+              <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">DeepSeek V3.2</span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">DeepSeek</span>
             </div>
           </div>

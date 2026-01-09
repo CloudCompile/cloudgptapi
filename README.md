@@ -158,17 +158,17 @@ curl -X POST https://your-app.vercel.app/v1/chat/completions \
 
 | Model ID | Name | Description |
 |----------|------|-------------|
-| `openai` | OpenAI GPT-4o | OpenAI's flagship model |
-| `openai-fast` | GPT-4o Mini | Faster, more economical |
-| `openai-large` | GPT-4.5 | Largest OpenAI model |
-| `claude` | Claude 3.5 Sonnet | Anthropic's balanced model |
-| `claude-fast` | Claude 3 Haiku | Fast Claude responses |
-| `gemini` | Gemini 2.0 Flash | Google's fast model |
-| `gemini-large` | Gemini 2.5 Pro | Google's advanced model |
-| `deepseek` | DeepSeek V3 | DeepSeek's latest |
-| `grok` | Grok 3 | xAI's model |
-| `mistral` | Mistral Large | Mistral AI's large model |
-| `qwen-coder` | Qwen 2.5 Coder | Coding-focused model |
+| `openai` | OpenAI GPT-5 Mini | OpenAI's flagship fast model |
+| `openai-fast` | OpenAI GPT-5 Nano | Faster, more economical |
+| `openai-large` | OpenAI GPT-5.2 | Latest OpenAI flagship |
+| `claude` | Anthropic Claude Sonnet 4.5 | Anthropic's balanced model |
+| `claude-fast` | Anthropic Claude Haiku 4.5 | Fast Claude responses |
+| `gemini` | Google Gemini 3 Flash | Google's fast model |
+| `gemini-large` | Google Gemini 3 Pro | Google's advanced model |
+| `deepseek` | DeepSeek V3.2 | DeepSeek's latest |
+| `grok` | Grok 4 Fast | xAI's model |
+| `mistral` | Mistral Small 3.2 24B | Mistral AI's fast model |
+| `qwen-coder` | Qwen3 Coder 30B | Coding-focused model |
 | `chickytutor` | ChickyTutor | Educational AI tutor |
 | `midijourney` | Midijourney | Creative AI assistant |
 

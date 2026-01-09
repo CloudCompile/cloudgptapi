@@ -22,11 +22,11 @@ export interface ModelDetails {
 export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
   'openai': {
     id: 'openai',
-    name: 'OpenAI GPT-4o',
+    name: 'OpenAI GPT-5 Mini',
     provider: 'Pollinations',
-    family: 'GPT-4',
-    description: 'OpenAI GPT-4o model',
-    longDescription: 'GPT-4o is OpenAI\'s flagship multimodal model that can process both text and images. It offers improved reasoning, coding, and creative capabilities compared to previous versions.',
+    family: 'GPT-5',
+    description: 'OpenAI GPT-5 Mini model',
+    longDescription: 'GPT-5 Mini is OpenAI\'s latest multimodal model that can process both text and images, offering improved reasoning, coding, and creative capabilities compared to previous versions.',
     strengths: [
       'Excellent reasoning and problem-solving',
       'Strong coding capabilities',
@@ -48,11 +48,11 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
   },
   'openai-fast': {
     id: 'openai-fast',
-    name: 'OpenAI GPT-4o Mini',
+    name: 'OpenAI GPT-5 Nano',
     provider: 'Pollinations',
-    family: 'GPT-4',
-    description: 'Faster OpenAI model',
-    longDescription: 'GPT-4o Mini is a faster, more efficient version of GPT-4o, optimized for speed while maintaining strong performance on most tasks.',
+    family: 'GPT-5',
+    description: 'Fast OpenAI GPT-5 Nano model',
+    longDescription: 'GPT-5 Nano is a faster, more efficient version of GPT-5 Mini, optimized for speed while maintaining strong performance on most tasks.',
     strengths: [
       'Fast response times',
       'Cost-effective',
@@ -60,7 +60,7 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
       'Efficient for simple tasks'
     ],
     weaknesses: [
-      'Less capable than full GPT-4o on complex tasks',
+      'Less capable than full GPT-5 Mini on complex tasks',
       'May struggle with very nuanced queries',
       'Smaller context window'
     ],
@@ -73,11 +73,11 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
   },
   'claude': {
     id: 'claude',
-    name: 'Claude 3.5 Sonnet',
+    name: 'Anthropic Claude Sonnet 4.5',
     provider: 'Pollinations',
-    family: 'Claude 3',
-    description: 'Anthropic Claude 3.5 Sonnet',
-    longDescription: 'Claude 3.5 Sonnet is Anthropic\'s balanced model offering excellent performance across a wide range of tasks, with strong focus on safety and helpfulness.',
+    family: 'Claude 4.5',
+    description: 'Anthropic Claude Sonnet 4.5',
+    longDescription: 'Claude Sonnet 4.5 is Anthropic\'s balanced model offering excellent performance across a wide range of tasks, with strong focus on safety and helpfulness.',
     strengths: [
       'Excellent at analysis and reasoning',
       'Strong code generation',
@@ -99,11 +99,11 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
   },
   'gemini': {
     id: 'gemini',
-    name: 'Gemini 2.0 Flash',
+    name: 'Gemini 3 Flash',
     provider: 'Pollinations',
-    family: 'Gemini 2',
-    description: 'Google Gemini 2.0 Flash',
-    longDescription: 'Gemini 2.0 Flash is Google\'s fast, efficient multimodal AI model with excellent reasoning and real-time capabilities.',
+    family: 'Gemini 3',
+    description: 'Google Gemini 3 Flash',
+    longDescription: 'Gemini 3 Flash is Google\'s fast, efficient multimodal AI model with excellent reasoning and real-time capabilities.',
     strengths: [
       'Fast response times',
       'Strong multimodal capabilities',
@@ -125,11 +125,11 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
   },
   'deepseek': {
     id: 'deepseek',
-    name: 'DeepSeek V3',
+    name: 'DeepSeek V3.2',
     provider: 'Pollinations',
     family: 'DeepSeek',
-    description: 'DeepSeek V3 model',
-    longDescription: 'DeepSeek V3 is a powerful open-source language model with strong performance on coding and reasoning tasks.',
+    description: 'DeepSeek V3.2 model',
+    longDescription: 'DeepSeek V3.2 is a powerful open-source language model with strong performance on coding and reasoning tasks.',
     strengths: [
       'Excellent coding capabilities',
       'Strong mathematical reasoning',
@@ -151,11 +151,11 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
   },
   'mistral': {
     id: 'mistral',
-    name: 'Mistral Large',
+    name: 'Mistral Small 3.2 24B',
     provider: 'Pollinations',
     family: 'Mistral',
-    description: 'Mistral AI Large',
-    longDescription: 'Mistral Large is a high-performance European AI model offering strong multilingual capabilities and reasoning.',
+    description: 'Mistral Small 3.2 24B',
+    longDescription: 'Mistral Small 3.2 24B is a high-performance European AI model offering strong multilingual capabilities and reasoning.',
     strengths: [
       'Excellent multilingual support',
       'Strong reasoning capabilities',
@@ -177,11 +177,11 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
   },
   'qwen-coder': {
     id: 'qwen-coder',
-    name: 'Qwen 2.5 Coder',
+    name: 'Qwen3 Coder 30B',
     provider: 'Pollinations',
     family: 'Qwen',
-    description: 'Qwen 2.5 Coder 32B',
-    longDescription: 'Qwen 2.5 Coder is a specialized coding model from Alibaba Cloud, optimized for software development tasks.',
+    description: 'Qwen3 Coder 30B',
+    longDescription: 'Qwen3 Coder is a specialized coding model from Alibaba Cloud, optimized for software development tasks.',
     strengths: [
       'Specialized for coding tasks',
       'Supports many programming languages',
