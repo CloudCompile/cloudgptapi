@@ -2361,7 +2361,7 @@
                 "perplexity-reasoning",
                 "kimi-k2-thinking",
                 "gemini-large",
-                "nova-micro"
+                "nova-fast"
               ]
             },
             "description": "Text model to use for generation"
