@@ -19,6 +19,8 @@
   --animate-float: float 6s ease-in-out infinite;
   --animate-pulse-slow: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-glow: glow 2s ease-in-out infinite alternate;
+  --animate-spin-slow: spin-slow 8s linear infinite;
+  --animate-shimmer: shimmer 2s infinite;
 }
 
 @keyframes float {
@@ -34,6 +36,16 @@
 @keyframes glow {
   from { box-shadow: 0 0 10px -5px var(--color-primary); }
   to { box-shadow: 0 0 20px 2px var(--color-primary); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 :root {
@@ -116,19 +128,20 @@ body {
     radial-gradient(at 0% 100%, rgba(99, 102, 241, 0.15) 0px, transparent 50%);
 }
 
-.premium-gradient {
+@utility premium-gradient {
   background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
 }
 
 .premium-text {
-  @apply bg-clip-text text-transparent premium-gradient;
+  @apply bg-clip-text text-transparent;
+  background-image: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
 }
 
 .card-hover {
   @apply transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 border border-border hover:border-primary/30 bg-white/50 dark:bg-slate-900/50;
 }
 
-.shimmer {
+@utility shimmer {
   background: linear-gradient(
     90deg,
     transparent 0%,
@@ -136,36 +149,8 @@ body {
     transparent 100%
   );
   background-size: 200% 100%;
-  animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
 }
 
 .ai-studio-input {
   @apply w-full bg-muted/50 border border-border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all;
-}
-
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 8s linear infinite;
 }
