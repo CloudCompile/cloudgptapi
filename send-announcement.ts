@@ -1,20 +1,28 @@
+import axios from 'axios';
 import * as dotenv from 'dotenv';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 
-// Load environment variables from .env.local
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+dotenv.config({ path: '.env.local' });
 
 const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+const WEBHOOK_URL = process.env.DISCORD_PRO_WEBHOOK;
 const CHANNEL_ID = '1458666010197495962';
+const LOCK_FILE = path.join(process.cwd(), '.maintenance-sent');
 
 async function sendAnnouncement() {
-  if (!BOT_TOKEN) {
-    console.error('DISCORD_BOT_TOKEN not found in environment variables');
-    return;
+  // Check if already sent
+  if (fs.existsSync(LOCK_FILE)) {
+    const lastSent = fs.readFileSync(LOCK_FILE, 'utf8');
+    const sentTime = new Date(lastSent).getTime();
+    const now = Date.now();
+    
+    // Only allow one message every 4 hours to prevent spamming
+    if (now - sentTime < 4 * 60 * 60 * 1000) {
+      console.log('Announcement already sent recently. Skipping to prevent spam.');
+      return;
+    }
   }
-
-  const url = `https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`;
-  
   const embed = {
     title: '⚠️ Service Update: Pollinations Models',
     description: "We are currently performing maintenance on all **Pollinations** powered models. They are temporarily unavailable.",
@@ -38,29 +46,60 @@ async function sendAnnouncement() {
     timestamp: new Date().toISOString()
   };
 
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bot ${BOT_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        content: "@everyone ⚠️ **Pollinations models are temporarily down until 2PM EST.**",
-        embeds: [embed] 
-      }),
-    });
+  const payload = { 
+    content: "@everyone ⚠️ **Pollinations models are temporarily down until 2PM EST.**",
+    embeds: [embed] 
+  };
 
-    if (response.ok) {
-      const data = await response.json();
-      console.log('Announcement pushed successfully to channel:', CHANNEL_ID);
-      console.log('Message ID:', data.id);
-    } else {
-      const errorData = await response.json();
-      console.error('Failed to push announcement:', errorData);
+  // Try Bot Token first if available
+  if (BOT_TOKEN) {
+    console.log('Attempting to send via Bot Token...');
+    const url = `https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`;
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bot ${BOT_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        console.log('Announcement pushed successfully via Bot Token');
+        fs.writeFileSync(LOCK_FILE, new Date().toISOString());
+        return;
+      } else {
+        const errorData = await response.json();
+        console.error('Bot Token failed:', errorData);
+      }
+    } catch (error: any) {
+      console.error('Bot Token error:', error.message);
     }
-  } catch (error: any) {
-    console.error('Error sending announcement:', error.message);
+  }
+
+  // Fallback to Webhook if Bot Token fails
+  if (WEBHOOK_URL) {
+    console.log('Attempting to send via Webhook fallback...');
+    try {
+      const response = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        console.log('Announcement pushed successfully via Webhook');
+        fs.writeFileSync(LOCK_FILE, new Date().toISOString());
+      } else {
+        const errorData = await response.json();
+        console.error('Webhook failed:', errorData);
+      }
+    } catch (error: any) {
+      console.error('Webhook error:', error.message);
+    }
+  } else {
+    console.error('No Bot Token or Webhook URL available');
   }
 }
 

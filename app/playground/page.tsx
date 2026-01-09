@@ -24,6 +24,40 @@ import Link from 'next/link';
 
 type Mode = 'chat' | 'image' | 'video';
 
+// Countdown hook for downtime
+function useCountdown(targetDate?: string) {
+  const [timeLeft, setTimeLeft] = useState<{hours: number, minutes: number, seconds: number} | null>(null);
+
+  useEffect(() => {
+    if (!targetDate) {
+      setTimeLeft(null);
+      return;
+    }
+
+    const calculateTimeLeft = () => {
+      const difference = new Date(targetDate).getTime() - Date.now();
+      
+      if (difference <= 0) {
+        setTimeLeft(null);
+        return;
+      }
+
+      const hours = Math.floor(difference / (1000 * 60 * 60));
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+      setTimeLeft({ hours, minutes, seconds });
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  return timeLeft;
+}
+
 export default function PlaygroundPage() {
   const { user, isLoaded } = useUser();
   const [profile, setProfile] = useState<{ plan: string } | null>(null);
@@ -35,6 +69,10 @@ export default function PlaygroundPage() {
   const [imageUrl, setImageUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
   const [error, setError] = useState('');
+  
+  const currentModels = mode === 'chat' ? CHAT_MODELS : mode === 'image' ? IMAGE_MODELS : VIDEO_MODELS;
+  const selectedModelData = currentModels.find(m => m.id === selectedModel);
+  const countdown = useCountdown(selectedModelData?.downtimeUntil);
   
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -77,6 +115,11 @@ export default function PlaygroundPage() {
     
     if (isPremium && !isPro) {
       setError('This model is only available for Pro members. Please upgrade your plan to use it.');
+      return;
+    }
+
+    if (countdown) {
+      setError('This model is currently undergoing maintenance. Please try again later.');
       return;
     }
 
@@ -173,8 +216,6 @@ export default function PlaygroundPage() {
       setLoading(false);
     }
   };
-
-  const currentModels = mode === 'chat' ? CHAT_MODELS : mode === 'image' ? IMAGE_MODELS : VIDEO_MODELS;
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] bg-white dark:bg-slate-950 overflow-hidden relative">
@@ -368,6 +409,23 @@ export default function PlaygroundPage() {
           {/* Input Area */}
           <div className="p-6 md:p-10 bg-gradient-to-t from-white dark:from-slate-950 via-white/80 dark:via-slate-950/80 to-transparent">
             <div className="max-w-4xl mx-auto relative group">
+              {countdown && (
+                <div className="mb-4 p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-center justify-between animate-in slide-in-from-bottom-2">
+                  <div className="flex items-center gap-3">
+                    <Clock className="h-5 w-5 text-amber-500 animate-pulse" />
+                    <div>
+                      <p className="text-sm font-bold text-amber-900 dark:text-amber-100">Model Maintenance</p>
+                      <p className="text-xs text-amber-700 dark:text-amber-400">This model is temporarily unavailable for scheduled maintenance.</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-black text-amber-500 uppercase tracking-widest">Back In</p>
+                    <p className="text-sm font-mono font-black text-amber-600 dark:text-amber-400">
+                      {countdown.hours}h {countdown.minutes}m {countdown.seconds}s
+                    </p>
+                  </div>
+                </div>
+              )}
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-blue-500/20 to-emerald-500/20 rounded-[2.5rem] blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
               <div className="relative">
                 <textarea

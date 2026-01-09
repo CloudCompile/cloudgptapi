@@ -26,8 +26,8 @@ export interface VideoModel {
   downtimeUntil?: string; // ISO timestamp for maintenance countdown
 }
 
-// Calculate downtime timestamp (5 hours from now)
-const POLLINATIONS_DOWNTIME = new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString();
+// Calculate downtime timestamp (until 2PM EST)
+const POLLINATIONS_DOWNTIME = '2026-01-09T19:00:00Z';
 
 // Available chat models
 export const CHAT_MODELS: ChatModel[] = [

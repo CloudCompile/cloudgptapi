@@ -135,6 +135,10 @@ export default function ModelsPage() {
     return { online, total: ALL_MODELS.length, avgLatency };
   }, [statuses]);
 
+  // Global downtime check
+  const pollinationsDowntime = ALL_MODELS.find(m => m.provider === 'pollinations')?.downtimeUntil;
+  const globalCountdown = useCountdown(pollinationsDowntime);
+
   const handleModelClick = (model: ModelType) => {
     setSelectedModel(model);
     setIsModalOpen(true);
@@ -184,6 +188,31 @@ export default function ModelsPage() {
             />
           </div>
         </div>
+
+        {/* Global Maintenance Banner */}
+        {globalCountdown && (
+          <div className="mb-12 p-8 rounded-[2.5rem] bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 backdrop-blur-xl animate-in fade-in slide-in-from-top-4 duration-700">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-start gap-6">
+                <div className="p-4 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                  <Clock className="h-8 w-8 animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black text-amber-900 dark:text-amber-100 mb-2">Provider Maintenance</h3>
+                  <p className="text-amber-800/80 dark:text-amber-400/80 font-medium max-w-xl">
+                    Pollinations models are currently undergoing scheduled maintenance. Service is expected to return shortly.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col items-center md:items-end gap-2 px-8 py-4 rounded-3xl bg-amber-500/20 border border-amber-500/30">
+                <span className="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-[0.2em]">Estimated Return</span>
+                <span className="text-4xl font-mono font-black text-amber-700 dark:text-amber-300">
+                  {String(globalCountdown.hours).padStart(2, '0')}:{String(globalCountdown.minutes).padStart(2, '0')}:{String(globalCountdown.seconds).padStart(2, '0')}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Filters & Search */}
         <div className="sticky top-24 z-30 mb-12 p-3 rounded-[2.5rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 shadow-2xl shadow-slate-200/50 dark:shadow-none flex flex-col md:flex-row items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-700 delay-200">
@@ -311,11 +340,11 @@ function ModelCard({ model, status, onClick, index }: { model: ModelType, status
         </div>
         
         <div className="flex items-center gap-2">
-          {status.status === 'maintenance' && countdown ? (
+          {status.status === 'maintenance' ? (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 backdrop-blur-md">
               <Clock className="w-3 h-3 text-amber-500 animate-pulse" />
               <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">
-                {countdown.hours}h {countdown.minutes}m {countdown.seconds}s
+                Maintenance
               </span>
             </div>
           ) : status.status === 'online' ? (

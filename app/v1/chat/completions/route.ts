@@ -482,6 +482,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Maintenance Check
+    if (model.downtimeUntil && new Date(model.downtimeUntil).getTime() > Date.now()) {
+      const remainingTime = Math.ceil((new Date(model.downtimeUntil).getTime() - Date.now()) / (1000 * 60));
+      return NextResponse.json(
+        {
+          error: {
+            message: `Model ${modelId} is currently undergoing maintenance. Expected back in ${remainingTime} minutes.`,
+            type: 'maintenance_error',
+            param: 'model',
+            code: 'model_maintenance',
+            request_id: requestId
+          }
+        },
+        { 
+          status: 503, 
+          headers: {
+            ...getCorsHeaders(),
+            'Retry-After': String(remainingTime * 60)
+          } 
+        }
+      );
+    }
+
     // Determine provider URL and API key based on model provider
     let providerUrl: string;
     let providerApiKey: string | undefined;
