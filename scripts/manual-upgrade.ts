@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv';
 import path from 'path';
 
 // Load environment variables from .env.local
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -105,5 +105,5 @@ async function upgradeUserByEmail(email: string) {
   }
 }
 
-const targetEmail = process.argv[2] || 'vietnamesefarmer101@gmail.com';
+const targetEmail = process.argv[2] || 'kyhas@hotmail.co.uk';
 upgradeUserByEmail(targetEmail);
