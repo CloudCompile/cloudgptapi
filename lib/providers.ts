@@ -125,10 +125,10 @@ export const CHAT_MODELS: ChatModel[] = [
 // Premium models that require a subscription
 export const PREMIUM_MODELS = new Set([
   // Flagship & Next-Gen Chat
-  'openai-large', // GPT-4.5
-  'openai',       // GPT-4o
-  'claude',       // Claude 3.5 Sonnet
-  'claude-large', // Claude Large
+  'openai-large', // GPT-5.2
+  'openai',       // GPT-5 Mini
+  'claude',       // Claude Sonnet 4.5
+  'claude-large', // Claude Opus 4.5
   'gemini-large', // Google Gemini 3 Pro
   'gemini-2.5-pro',
   'gemini-3-pro-preview',

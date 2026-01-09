@@ -60,7 +60,7 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
       'Efficient for simple tasks'
     ],
     weaknesses: [
-      'Less capable than full GPT-4o on complex tasks',
+      'Less capable than full GPT-5 Mini on complex tasks',
       'May struggle with very nuanced queries',
       'Smaller context window'
     ],
