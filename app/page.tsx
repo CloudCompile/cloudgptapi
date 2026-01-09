@@ -34,67 +34,89 @@ export default function Home() {
               <span>Next Generation AI Infrastructure</span>
             </div>
             <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 leading-[0.85]">
-              The <span className="premium-text">Studio</span> for <br />Professional AI
+              Unified <span className="premium-text">Intelligence</span> <br />at Scale
             </h1>
-            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-5 duration-700 delay-200">
-              A unified API gateway for the world's most powerful AI models. 
-              Build, scale, and innovate with enterprise-grade reliability and lightning speed.
+            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-5 duration-700 delay-200 font-medium">
+              The professional API gateway for global AI infrastructure. 
+              Switch between 100+ models with zero latency and enterprise-grade reliability.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
               <Link 
                 href="/dashboard" 
-                className="w-full sm:w-auto px-10 py-4 rounded-2xl bg-primary text-white font-black text-lg shadow-2xl shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-10 py-4 rounded-xl bg-primary text-white font-bold text-lg shadow-xl shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
-                Start Building
+                Get API Key
                 <ArrowRight className="h-5 w-5" />
               </Link>
               <Link 
-                href="/playground" 
-                className="w-full sm:w-auto px-10 py-4 rounded-2xl bg-white dark:bg-slate-950 border border-border font-black text-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-all flex items-center justify-center gap-2"
+                href="/docs" 
+                className="w-full sm:w-auto px-10 py-4 rounded-xl bg-white dark:bg-slate-950 border border-border font-bold text-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-all flex items-center justify-center gap-2"
               >
-                Open Playground
+                Read Documentation
               </Link>
             </div>
           </div>
 
           {/* Product "Screenshot" Component */}
-          <div className="mt-24 relative max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-500">
-            <div className="absolute -inset-1 premium-gradient rounded-[2rem] blur-2xl opacity-20 animate-pulse-slow" />
-            <div className="relative bg-slate-950 rounded-[2rem] border border-white/10 shadow-2xl overflow-hidden aspect-[16/9] md:aspect-[21/9]">
+          <div className="mt-32 relative max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-500">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-[2.5rem] blur opacity-10 animate-pulse-slow" />
+            <div className="relative bg-slate-950 rounded-[2.5rem] border border-white/5 shadow-3xl overflow-hidden aspect-[16/9] md:aspect-[21/9]">
               {/* Fake UI Header */}
-              <div className="h-12 bg-white/5 border-b border-white/5 flex items-center px-6 gap-2">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/50" />
-                  <div className="w-3 h-3 rounded-full bg-amber-500/50" />
-                  <div className="w-3 h-3 rounded-full bg-emerald-500/50" />
+              <div className="h-14 bg-white/[0.02] border-b border-white/5 flex items-center px-8 gap-4">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-white/10" />
+                  <div className="w-3 h-3 rounded-full bg-white/10" />
+                  <div className="w-3 h-3 rounded-full bg-white/10" />
                 </div>
-                <div className="ml-4 px-3 py-1 rounded-md bg-white/5 text-[10px] text-white/40 font-mono">cloudgpt.com/playground</div>
+                <div className="h-6 w-px bg-white/10 mx-2" />
+                <div className="px-4 py-1.5 rounded-lg bg-white/5 text-[11px] text-white/40 font-mono tracking-wider uppercase">Project: Production-v1</div>
               </div>
               
               {/* Fake UI Content */}
-              <div className="p-8 flex gap-8 h-full">
-                <div className="w-64 flex flex-col gap-4">
-                  <div className="h-8 w-32 bg-white/10 rounded-lg animate-pulse" />
-                  <div className="space-y-2">
-                    <div className="h-10 bg-primary/20 border border-primary/30 rounded-xl" />
-                    <div className="h-10 bg-white/5 rounded-xl" />
-                    <div className="h-10 bg-white/5 rounded-xl" />
+              <div className="p-10 flex gap-10 h-full">
+                <div className="w-72 flex flex-col gap-6">
+                  <div className="space-y-3">
+                    <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-4">Endpoints</div>
+                    <div className="h-11 bg-primary/10 border border-primary/20 rounded-xl flex items-center px-4 gap-3">
+                      <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                      <div className="text-xs font-bold text-primary">Chat Completions</div>
+                    </div>
+                    <div className="h-11 bg-white/[0.02] border border-white/5 rounded-xl flex items-center px-4 gap-3 opacity-40">
+                      <div className="w-2 h-2 rounded-full bg-white/20" />
+                      <div className="text-xs font-bold text-white/60">Image Generation</div>
+                    </div>
+                    <div className="h-11 bg-white/[0.02] border border-white/5 rounded-xl flex items-center px-4 gap-3 opacity-40">
+                      <div className="w-2 h-2 rounded-full bg-white/20" />
+                      <div className="text-xs font-bold text-white/60">Audio Processing</div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex-1 flex flex-col gap-4">
-                  <div className="h-full bg-white/5 rounded-2xl border border-white/5 p-6 flex flex-col gap-4">
-                    <div className="flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-primary/40 shrink-0" />
-                      <div className="h-16 w-3/4 bg-white/10 rounded-2xl rounded-tl-none" />
+                <div className="flex-1 flex flex-col gap-6">
+                  <div className="h-full bg-white/[0.01] rounded-3xl border border-white/5 p-8 flex flex-col gap-6">
+                    <div className="flex gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/20 flex items-center justify-center shrink-0">
+                        <Terminal className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="space-y-2 flex-1">
+                        <div className="h-4 w-32 bg-white/10 rounded-full" />
+                        <div className="h-20 bg-white/5 rounded-2xl p-4 font-mono text-xs text-white/40 leading-relaxed">
+                          $ curl https://api.cloudgpt.com/v1/chat \<br />
+                          &nbsp;&nbsp;-H "Authorization: Bearer $KEY" \<br />
+                          &nbsp;&nbsp;-d '{"model": "gpt-5-mini"}'
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex gap-3 justify-end">
-                      <div className="h-24 w-2/3 bg-white/5 rounded-2xl rounded-tr-none" />
-                      <div className="w-8 h-8 rounded-full bg-white/20 shrink-0" />
-                    </div>
-                    <div className="mt-auto h-12 bg-white/5 rounded-xl border border-white/10 flex items-center px-4 justify-between">
-                      <div className="text-white/20 text-sm">Ask anything...</div>
-                      <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                        <Play className="w-4 h-4 text-white fill-current" />
+                    <div className="flex gap-4 justify-end">
+                      <div className="space-y-2 flex-1 items-end flex flex-col">
+                        <div className="h-4 w-24 bg-white/5 rounded-full" />
+                        <div className="h-24 w-full bg-primary/5 border border-primary/10 rounded-2xl p-5 text-xs text-white/70 leading-relaxed font-medium">
+                          "Deployment successful. Latency: 42ms. <br />
+                          Model: GPT-5 Mini (v1.2)<br />
+                          Tokens: 1,024 cached"
+                        </div>
+                      </div>
+                      <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center shrink-0">
+                        <Bot className="w-5 h-5 text-white/20" />
                       </div>
                     </div>
                   </div>
