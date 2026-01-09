@@ -35,6 +35,7 @@ export async function POST(req: Request) {
       customer_email: user.emailAddresses[0].emailAddress,
       metadata: {
         userId,
+        userEmail: user.emailAddresses[0].emailAddress,
       },
     });
 

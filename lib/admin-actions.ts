@@ -92,6 +92,13 @@ export async function assignPlan(userId: string, plan: 'free' | 'developer' | 'p
 }
 
 export async function syncUser(userId: string, email: string) {
+  // Check if user already exists
+  const { data: existingProfile } = await supabaseAdmin
+    .from('profiles')
+    .select('id')
+    .eq('id', userId)
+    .single();
+
   // This can be called when a user logs in to ensure they have a profile
   const { data, error } = await supabaseAdmin
     .from('profiles')
@@ -102,5 +109,47 @@ export async function syncUser(userId: string, email: string) {
 
   if (error) {
     console.error('Error syncing user profile:', error);
+    return;
+  }
+
+  // If this is a new user (didn't exist before upsert), notify Discord
+  if (!existingProfile) {
+    const discordWebhookUrl = process.env.DISCORD_PRO_WEBHOOK;
+    if (discordWebhookUrl) {
+      try {
+        const embed = {
+          title: 'New User Joined! 🚀',
+          description: `A new user has just signed up for CloudGPT.`,
+          color: 0x3498db, // Blue
+          fields: [
+            {
+              name: 'User ID',
+              value: userId,
+              inline: true
+            },
+            {
+              name: 'Email',
+              value: email,
+              inline: true
+            }
+          ],
+          timestamp: new Date().toISOString(),
+          footer: {
+            text: 'CloudGPT User System'
+          }
+        };
+
+        await fetch(discordWebhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: `🆕 **New User Signup: ${email}**`,
+            embeds: [embed]
+          })
+        });
+      } catch (discordError) {
+        console.error('Failed to send Discord notification for new user:', discordError);
+      }
+    }
   }
 }

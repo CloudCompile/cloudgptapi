@@ -19,10 +19,10 @@ export function getCorsHeaders() {
  */
 export function getPollinationsApiKeys(): string[] {
   const keys = [
+    process.env.POLLINATIONS_API_KEY_2, // Prioritize key 2 as requested
     'sk_ErW9QCrg33NJapix0eaTQAKIOTBYxk9d', // New main key
     process.env.POLLINATIONS_API_KEY,
     process.env.POLLINATIONS_API_KEY_1,
-    process.env.POLLINATIONS_API_KEY_2,
     process.env.POLLINATIONS_API_KEY_3,
     process.env.POLLINATIONS_API_KEY_4,
     process.env.POLLINATIONS_API_KEY_5,
@@ -45,7 +45,13 @@ export function getPollinationsApiKey(): string | undefined {
     return undefined;
   }
   
-  // Use random selection to distribute load across keys
+  // Start with key 2 if it exists, otherwise use random selection
+  const key2 = process.env.POLLINATIONS_API_KEY_2;
+  if (key2 && keys.includes(key2)) {
+    return key2;
+  }
+  
+  // Use random selection to distribute load across remaining keys
   const randomIndex = Math.floor(Math.random() * keys.length);
   return keys[randomIndex];
 }
