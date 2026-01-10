@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit } from '@/lib/api-keys';
 import { VIDEO_MODELS, PROVIDER_URLS, PREMIUM_MODELS } from '@/lib/providers';
 import { getCorsHeaders } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -86,6 +86,10 @@ export async function POST(request: NextRequest) {
       limit = 2; // 2 RPM for video
       dailyLimit = 1000; // 1000 RPD for free
     }
+
+    // Apply peak hours reduction (5 PM - 5 AM UTC): 50% reduction for all users
+    limit = applyPeakHoursLimit(limit);
+    dailyLimit = applyPeakHoursLimit(dailyLimit);
 
     // Check daily limit first
     if (!await checkDailyLimit(effectiveKey, dailyLimit, apiKeyInfo?.id)) {

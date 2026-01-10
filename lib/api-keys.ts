@@ -34,6 +34,29 @@ export function extractApiKey(headers: Headers): string | null {
   return null;
 }
 
+/**
+ * Check if the current time is during peak hours (5:00 PM to 5:00 AM UTC)
+ * Peak hours are when usage is high and we want to apply lower rate limits
+ */
+export function isPeakHours(): boolean {
+  const now = new Date();
+  const hour = now.getUTCHours();
+  // Peak hours: 17:00 (5 PM) to 05:00 (5 AM) UTC
+  // This means hours 17, 18, 19, 20, 21, 22, 23, 0, 1, 2, 3, 4
+  return hour >= 17 || hour < 5;
+}
+
+/**
+ * Apply peak hours reduction to rate limits
+ * During peak hours (5 PM - 5 AM), reduce rate limits by 50% for all users
+ */
+export function applyPeakHoursLimit(baseLimit: number): number {
+  if (isPeakHours()) {
+    return Math.max(1, Math.floor(baseLimit * 0.5)); // 50% reduction, minimum 1
+  }
+  return baseLimit;
+}
+
   // Validate API key and return user info
   export async function validateApiKey(key: string): Promise<ApiKey | null> {
     // First get the API key

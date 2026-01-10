@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit } from '@/lib/api-keys';
 import { IMAGE_MODELS, PROVIDER_URLS, ImageModel, PREMIUM_MODELS } from '@/lib/providers';
 import { getPollinationsApiKey, safeResponseJson, safeJsonParse } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -383,6 +383,10 @@ export async function POST(request: NextRequest) {
     if (apiKeyInfo && apiKeyInfo.rateLimit > limit) {
       limit = apiKeyInfo.rateLimit;
     }
+    
+    // Apply peak hours reduction (5 PM - 5 AM UTC): 50% reduction for all users
+    limit = applyPeakHoursLimit(limit);
+    dailyLimit = applyPeakHoursLimit(dailyLimit);
     
     // Check Daily Limit First
     if (!await checkDailyLimit(effectiveKey, dailyLimit, apiKeyInfo?.id)) {
