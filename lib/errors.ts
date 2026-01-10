@@ -39,7 +39,7 @@ export type ErrorType =
   | 'server_error';
 
 // Provider names for display
-export type ProviderName = 'pollinations' | 'openrouter' | 'liz' | 'stablehorde' | 'meridian';
+export type ProviderName = 'pollinations' | 'openrouter' | 'liz' | 'stablehorde' | 'meridian' | 'github' | 'claude';
 
 // Structured error response interface
 export interface ApiError {
@@ -62,6 +62,8 @@ const PROVIDER_DISPLAY_NAMES: Record<ProviderName, string> = {
   liz: 'Liz proxy',
   stablehorde: 'Stable Horde',
   meridian: 'Meridian',
+  github: 'GitHub Models',
+  claude: 'Anthropic Claude (Liz)',
 };
 
 // Alternative models to suggest when a provider fails
@@ -71,6 +73,8 @@ const FALLBACK_SUGGESTIONS: Record<ProviderName, string[]> = {
   liz: ['Try a Pollinations model like "openai" or "claude"', 'Try an OpenRouter model'],
   stablehorde: ['Try a Pollinations model like "openai" or "mistral"', 'Stable Horde may have high queue times'],
   meridian: ['Try a Pollinations model like "openai"', 'Meridian is an experimental provider'],
+  github: ['Try a Pollinations model like "openai"', 'Try a Liz model like "deepseek-v3"'],
+  claude: ['Try a Pollinations model like "openai"', 'Try a Liz model like "gemini-2.5-pro"'],
 };
 
 // Get retry suggestion based on error code and provider

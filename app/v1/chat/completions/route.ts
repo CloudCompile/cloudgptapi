@@ -518,7 +518,7 @@ export async function POST(request: NextRequest) {
     if (model.provider === 'openrouter') {
       providerUrl = `${PROVIDER_URLS.openrouter}/api/v1/chat/completions`;
       providerApiKey = getOpenRouterApiKey();
-    } else if (model.provider === 'liz') {
+    } else if (model.provider === 'liz' || model.provider === 'claude') {
       providerUrl = `${PROVIDER_URLS.liz}/v1/chat/completions`;
       providerApiKey = process.env.LIZ_API_KEY || 'sk-d38705df52b386e905f257a4019f8f2a';
     } else if (model.provider === 'meridian') {

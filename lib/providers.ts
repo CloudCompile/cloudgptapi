@@ -3,7 +3,7 @@
 export interface ChatModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'liz' | 'github';
+  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'liz' | 'github' | 'claude';
   description?: string;
   contextWindow?: number;
   downtimeUntil?: string; // ISO timestamp for maintenance countdown
@@ -32,8 +32,8 @@ export interface VideoModel {
 // Calculate downtime timestamp (until 2PM EST)
 const POLLINATIONS_DOWNTIME = '2026-01-09T19:00:00Z';
 
-// Available chat models
-export const CHAT_MODELS: ChatModel[] = [
+// Available chat models by provider
+const POLLINATIONS_CHAT_MODELS: ChatModel[] = [
   { id: 'nova-fast', name: 'Amazon Nova Micro', provider: 'pollinations', description: 'Amazon Nova Micro', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'qwen-coder', name: 'Qwen3 Coder 30B', provider: 'pollinations', description: 'Qwen3 Coder 30B', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'mistral', name: 'Mistral Small 3.2 24B', provider: 'pollinations', description: 'Mistral Small 3.2 24B', downtimeUntil: POLLINATIONS_DOWNTIME },
@@ -46,17 +46,23 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'gemini-search', name: 'Google Gemini 3 Flash', provider: 'pollinations', description: 'Google Gemini 3 Flash', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'chickytutor', name: 'ChickyTutor AI Language Tutor', provider: 'pollinations', description: 'ChickyTutor AI Language Tutor', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'minimax', name: 'MiniMax M2.1', provider: 'pollinations', description: 'MiniMax M2.1', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'claude-fast', name: 'Anthropic Claude Haiku 4.5', provider: 'pollinations', description: 'Anthropic Claude Haiku 4.5', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'deepseek', name: 'DeepSeek V3.2', provider: 'pollinations', description: 'DeepSeek V3.2', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'glm', name: 'Z.ai GLM-4.7', provider: 'pollinations', description: 'Z.ai GLM-4.7', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'kimi-k2-thinking', name: 'Moonshot Kimi K2 Thinking', provider: 'pollinations', description: 'Moonshot Kimi K2 Thinking', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'midijourney', name: 'MIDIjourney', provider: 'pollinations', description: 'MIDIjourney', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'claude', name: 'Anthropic Claude Sonnet 4.5', provider: 'pollinations', description: 'Anthropic Claude Sonnet 4.5', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'claude-large', name: 'Anthropic Claude Opus 4.5', provider: 'pollinations', description: 'Anthropic Claude Opus 4.5', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'perplexity-reasoning', name: 'Perplexity Sonar Reasoning', provider: 'pollinations', description: 'Perplexity Sonar Reasoning', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'gemini-large', name: 'Google Gemini 3 Pro', provider: 'pollinations', description: 'Google Gemini 3 Pro', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'openai-large', name: 'OpenAI GPT-5.2', provider: 'pollinations', description: 'OpenAI GPT-5.2', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'openai-audio', name: 'OpenAI GPT-4o Mini Audio', provider: 'pollinations', description: 'OpenAI GPT-4o Mini Audio', downtimeUntil: POLLINATIONS_DOWNTIME },
+];
+
+const CLAUDE_CHAT_MODELS: ChatModel[] = [
+  { id: 'claude-fast', name: 'Anthropic Claude Haiku 4.5', provider: 'claude', description: 'Anthropic Claude Haiku 4.5', downtimeUntil: POLLINATIONS_DOWNTIME },
+  { id: 'claude', name: 'Anthropic Claude Sonnet 4.5', provider: 'claude', description: 'Anthropic Claude Sonnet 4.5', downtimeUntil: POLLINATIONS_DOWNTIME },
+  { id: 'claude-large', name: 'Anthropic Claude Opus 4.5', provider: 'claude', description: 'Anthropic Claude Opus 4.5', downtimeUntil: POLLINATIONS_DOWNTIME },
+];
+
+const OPENROUTER_CHAT_MODELS: ChatModel[] = [
   // OpenRouter free models
   { id: 'xiaomi/mimo-v2-flash:free', name: 'Xiaomi Mimo V2 Flash', provider: 'openrouter', description: 'Xiaomi Mimo V2 Flash model' },
   { id: 'mistralai/devstral-2512:free', name: 'Mistral Devstral 2512', provider: 'openrouter', description: 'Mistral AI Devstral 2512' },
@@ -90,14 +96,23 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'google/gemma-3-12b-it:free', name: 'Google Gemma 3 12B IT', provider: 'openrouter', description: 'Google Gemma 3 12B Instruct' },
   { id: 'google/gemma-3n-e4b-it:free', name: 'Google Gemma 3N E4B IT', provider: 'openrouter', description: 'Google Gemma 3N E4B Instruct' },
   { id: 'moonshotai/kimi-k2:free', name: 'Moonshot AI Kimi K2', provider: 'openrouter', description: 'Moonshot AI Kimi K2' },
+];
+
+const STABLEHORDE_CHAT_MODELS: ChatModel[] = [
   // Stable Horde text models (selection of popular models)
   { id: 'stable-horde-nemotron-nano-9b', name: 'Nemotron Nano 9B V2', provider: 'stablehorde', description: 'NVIDIA Nemotron Nano 9B V2' },
   { id: 'stable-horde-llama-3.2-3b', name: 'Llama 3.2 3B Instruct', provider: 'stablehorde', description: 'Meta Llama 3.2 3B Instruct' },
   { id: 'stable-horde-mistral-7b', name: 'Mistral 7B Instruct', provider: 'stablehorde', description: 'Mistral AI 7B Instruct model' },
   { id: 'stable-horde-qwen3-4b', name: 'Qwen 3 4B', provider: 'stablehorde', description: 'Qwen 3 4B model' },
   { id: 'stable-horde-neonmaid-12b', name: 'NeonMaid-12B', provider: 'stablehorde', description: 'NeonMaid-12B v2 creative model' },
+];
+
+const MERIDIAN_CHAT_MODELS: ChatModel[] = [
   // Meridian model
   { id: 'meridian', name: 'Meridian', provider: 'meridian', description: 'Meridian cognitive substrate with persistent memory' },
+];
+
+const LIZ_CHAT_MODELS: ChatModel[] = [
   // Liz Proxy models (Non-Claude only as requested)
   { id: 'gemini-2.0-flash-001', name: 'Gemini 2.0 Flash 001', provider: 'liz', description: 'Google Gemini 2.0 Flash 001' },
   { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', provider: 'liz', description: 'Google Gemini 3 Flash Preview' },
@@ -123,6 +138,9 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'glm-4.5v', name: 'GLM 4.5V', provider: 'liz', description: 'GLM 4.5 Vision' },
   { id: 'glm-4.6', name: 'GLM 4.6', provider: 'liz', description: 'GLM 4.6' },
   { id: 'glm-4.7', name: 'GLM 4.7', provider: 'liz', description: 'GLM 4.7' },
+];
+
+const GITHUB_CHAT_MODELS: ChatModel[] = [
   // GitHub Models
   { id: 'AI21-Jamba-1.5-Large', name: 'AI21 Jamba 1.5 Large', provider: 'github', usageWeight: 10 },
   { id: 'Phi-4-reasoning', name: 'Phi-4 Reasoning', provider: 'github', usageWeight: 25 },
@@ -163,6 +181,16 @@ export const CHAT_MODELS: ChatModel[] = [
   { id: 'Mistral-medium-3-25.05', name: 'Mistral Medium 3 (25.05)', provider: 'github', usageWeight: 10 },
   { id: 'Ministral-3B', name: 'Ministral 3B', provider: 'github', usageWeight: 1 },
   { id: 'DeepSeek-V3-0324', name: 'DeepSeek-V3-0324', provider: 'github', usageWeight: 10 },
+];
+
+export const CHAT_MODELS: ChatModel[] = [
+  ...POLLINATIONS_CHAT_MODELS,
+  ...CLAUDE_CHAT_MODELS,
+  ...OPENROUTER_CHAT_MODELS,
+  ...STABLEHORDE_CHAT_MODELS,
+  ...MERIDIAN_CHAT_MODELS,
+  ...LIZ_CHAT_MODELS,
+  ...GITHUB_CHAT_MODELS,
 ];
 
 // Premium models that require a subscription
