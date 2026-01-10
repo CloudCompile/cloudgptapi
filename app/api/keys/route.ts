@@ -87,20 +87,29 @@ export async function POST(request: NextRequest) {
       rate_limit: rateLimit,
     };
 
+    console.log(`[POST /api/keys] Creating new key for user: ${userId}, plan: ${plan}, rateLimit: ${rateLimit}`);
+
     const { data, error } = await supabaseAdmin
       .from('api_keys')
       .insert(newKey)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
-      console.error('Supabase error creating API key:', error);
+      console.error('[POST /api/keys] Supabase error creating API key:', error);
       return NextResponse.json({ 
         error: 'Failed to create API key',
         details: error.message,
         code: error.code
       }, { status: 500 });
     }
+
+    if (!data) {
+      console.error('[POST /api/keys] No data returned after insertion');
+      return NextResponse.json({ error: 'Failed to create API key: No data returned' }, { status: 500 });
+    }
+
+    console.log(`[POST /api/keys] Key created successfully: ${data.id}`);
 
     // Return the full key only on creation
     return NextResponse.json({

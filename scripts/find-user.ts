@@ -18,18 +18,24 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-async function findUser(email: string) {
-  const { data, error } = await supabase
+async function findUser(query: string) {
+  const { data: profile, error } = await supabase
     .from('profiles')
     .select('*')
-    .eq('email', email)
-    .single();
-    
+    .or(`email.eq.${query},id.eq.${query}`)
+    .maybeSingle();
+
   if (error) {
-    console.error('Error:', error.message);
-  } else {
-    console.log('User found:', data);
+    console.error('Error searching for user:', error.message);
+    return;
   }
+
+  if (!profile) {
+    console.log(`No user found matching: ${query}`);
+    return;
+  }
+
+  console.log('User found:', profile);
 }
 
 findUser('kyhas@hotmail.co.uk');

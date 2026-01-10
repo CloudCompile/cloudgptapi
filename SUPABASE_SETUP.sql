@@ -26,6 +26,9 @@ CREATE TABLE IF NOT EXISTS public.usage_logs (
 -- Index for usage logs performance
 CREATE INDEX IF NOT EXISTS idx_usage_logs_api_key_id ON public.usage_logs(api_key_id);
 CREATE INDEX IF NOT EXISTS idx_usage_logs_user_id ON public.usage_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_api_keys_user_id ON public.api_keys(user_id);
+CREATE INDEX IF NOT EXISTS idx_api_keys_key ON public.api_keys(key);
+CREATE INDEX IF NOT EXISTS idx_rate_limits_reset_at ON public.rate_limits(reset_at);
 
 -- Create Profiles table to track user plans and roles
 CREATE TABLE IF NOT EXISTS public.profiles (
@@ -55,6 +58,7 @@ CREATE TABLE IF NOT EXISTS public.user_subscriptions (
 ALTER TABLE public.user_subscriptions ENABLE ROW LEVEL SECURITY;
 
 -- Policy for user_subscriptions
+DROP POLICY IF EXISTS "Users can view their own subscriptions" ON public.user_subscriptions;
 CREATE POLICY "Users can view their own subscriptions"
     ON public.user_subscriptions FOR SELECT
     USING (true); -- Authenticated via Clerk in API
@@ -68,6 +72,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON public.profiles;
 CREATE TRIGGER update_profiles_updated_at
     BEFORE UPDATE ON public.profiles
     FOR EACH ROW
@@ -77,10 +82,12 @@ CREATE TRIGGER update_profiles_updated_at
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Policies for profiles
+DROP POLICY IF EXISTS "Users can view their own profile" ON public.profiles;
 CREATE POLICY "Users can view their own profile"
     ON public.profiles FOR SELECT
     USING (true); -- Authenticated via Clerk in API
 
+DROP POLICY IF EXISTS "Admins can manage all profiles" ON public.profiles;
 CREATE POLICY "Admins can manage all profiles"
     ON public.profiles FOR ALL
     USING (true); -- Authenticated via Clerk in API
@@ -179,14 +186,18 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Policies for api_keys
+DROP POLICY IF EXISTS "Public access to API keys" ON public.api_keys;
 CREATE POLICY "Public access to API keys"
     ON public.api_keys FOR ALL
-    USING (true); -- Authenticated via Clerk in API
+    USING (true)
+    WITH CHECK (true); -- Authenticated via Clerk in API
 
 -- Policies for usage_logs
+DROP POLICY IF EXISTS "Public access to usage logs" ON public.usage_logs;
 CREATE POLICY "Public access to usage logs"
     ON public.usage_logs FOR ALL
-    USING (true); -- Authenticated via Clerk in API
+    USING (true)
+    WITH CHECK (true); -- Authenticated via Clerk in API
 
 -- Function to check daily limit
 CREATE OR REPLACE FUNCTION public.check_daily_limit(
@@ -217,5 +228,14 @@ BEGIN
         'allowed', v_daily_usage < p_daily_limit,
         'usage', v_daily_usage
     );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Cleanup function for expired rate limits
+CREATE OR REPLACE FUNCTION public.cleanup_expired_rate_limits()
+RETURNS void AS $$
+BEGIN
+    DELETE FROM public.rate_limits
+    WHERE reset_at < timezone('utc'::text, now());
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

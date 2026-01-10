@@ -26,12 +26,15 @@ async function upgradeUserByEmail(email: string) {
       .from('profiles')
       .select('id, email, plan')
       .eq('email', email)
-      .single();
+      .maybeSingle();
 
-    if (profileError || !profile) {
-      console.error(`Error finding profile for ${email}:`, profileError?.message || 'Profile not found');
+    if (profileError) {
+      console.error(`Error finding profile for ${email}:`, profileError.message);
+      return;
+    }
+
+    if (!profile) {
       console.log('User might not have logged into the dashboard yet. Creating profile...');
-      
       // If user doesn't exist, we might need to wait for them to log in, 
       // OR we can create a placeholder if we have a userId. 
       // Since we don't have the Clerk userId, we can't create the profile correctly.

@@ -32,10 +32,15 @@ async function createKeyForUser(email: string) {
       .from('profiles')
       .select('id, email, plan')
       .eq('email', email)
-      .single();
+      .maybeSingle();
 
-    if (profileError || !profile) {
-      console.error(`Error finding profile for ${email}:`, profileError?.message || 'Profile not found');
+    if (profileError) {
+      console.error(`Error finding profile for ${email}:`, profileError.message);
+      return;
+    }
+
+    if (!profile) {
+      console.error(`Profile not found for email: ${email}`);
       return;
     }
 
@@ -55,10 +60,15 @@ async function createKeyForUser(email: string) {
         rate_limit: 5000, // Pro level limit
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (insertError) {
       console.error('Error inserting API key:', insertError.message);
+      return;
+    }
+
+    if (!apiKey) {
+      console.error('No data returned after inserting API key');
       return;
     }
 

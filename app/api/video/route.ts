@@ -81,7 +81,7 @@ async function handleVideoGeneration(request: NextRequest, body: any) {
         .from('profiles')
         .select('plan, email')
         .eq('id', sessionUserId)
-        .single();
+        .maybeSingle();
       
       if (profile) {
         userPlan = profile.plan || 'free';

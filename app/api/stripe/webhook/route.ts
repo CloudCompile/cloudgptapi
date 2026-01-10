@@ -218,7 +218,7 @@ export async function POST(req: Request) {
         .from('user_subscriptions')
         .select('user_id')
         .eq('stripe_subscription_id', subscription.id)
-        .single();
+        .maybeSingle();
 
       if (subData) {
         console.log(`[${requestId}] Updating user ${subData.user_id} plan to ${planName} due to subscription update`);
@@ -260,7 +260,7 @@ export async function POST(req: Request) {
         .from('user_subscriptions')
         .select('user_id')
         .eq('stripe_subscription_id', subscription.id)
-        .single();
+        .maybeSingle();
 
       if (subQueryError || !subData) {
         console.error(`[${requestId}] Error finding user for deleted subscription ${subscription.id}:`, subQueryError);

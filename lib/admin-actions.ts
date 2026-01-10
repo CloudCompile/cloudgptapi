@@ -15,7 +15,7 @@ async function verifyAdmin() {
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   if (error || !profile || profile.role !== 'admin') {
     throw new Error('Unauthorized: Admin access required');
@@ -97,7 +97,7 @@ export async function syncUser(userId: string, email: string) {
     .from('profiles')
     .select('id, created_at')
     .eq('id', userId)
-    .single();
+    .maybeSingle();
 
   // This can be called when a user logs in to ensure they have a profile
   const { data, error } = await supabaseAdmin
