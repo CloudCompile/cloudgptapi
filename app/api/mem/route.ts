@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, applyPeakHoursLimit } from '@/lib/api-keys';
 
 export const runtime = 'edge';
 
@@ -51,6 +51,10 @@ export async function POST(request: NextRequest) {
       limit = 20;
       dailyLimit = 1000; // 1000 RPD for free
     }
+
+    // Apply peak hours reduction (5 PM - 5 AM UTC): 50% reduction for all users
+    limit = applyPeakHoursLimit(limit);
+    dailyLimit = applyPeakHoursLimit(dailyLimit);
 
     // Check daily limit first
     const { checkDailyLimit, getDailyLimitInfo } = await import('@/lib/api-keys');
