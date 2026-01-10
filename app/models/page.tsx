@@ -325,101 +325,112 @@ function ModelCard({ model, status, onClick, index }: { model: ModelType, status
   const countdown = useCountdown(model.downtimeUntil);
   const isFree = model.id.endsWith(':free') || !PREMIUM_MODELS.has(model.id);
   
+  const typeColors = {
+    chat: "from-blue-500/20 to-indigo-500/20 text-blue-600 dark:text-blue-400 border-blue-200/50 dark:border-blue-800/50 shadow-blue-500/10",
+    image: "from-purple-500/20 to-pink-500/20 text-purple-600 dark:text-purple-400 border-purple-200/50 dark:border-purple-800/50 shadow-purple-500/10",
+    video: "from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 border-amber-200/50 dark:border-amber-800/50 shadow-amber-500/10"
+  };
+
+  const typeIcons = {
+    chat: <MessageSquare className="h-6 w-6" />,
+    image: <ImageIcon className="h-6 w-6" />,
+    video: <Video className="h-6 w-6" />
+  };
+
   return (
     <div 
       onClick={onClick}
       className={cn(
-        "group relative flex flex-col p-8 rounded-[2.5rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/20 dark:border-slate-800/50 hover:border-primary/30 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 overflow-hidden cursor-pointer animate-in fade-in zoom-in-95",
+        "group relative flex flex-col p-0 rounded-[2.5rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(16,185,129,0.15)] hover:-translate-y-2 overflow-hidden cursor-pointer animate-in fade-in zoom-in-95",
         index % 2 === 0 ? "delay-75" : "delay-150"
       )}>
-      {/* Background decoration */}
-      <div className="absolute inset-0 dot-grid opacity-0 group-hover:opacity-10 transition-opacity" />
-      <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-primary/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
       
-      <div className="flex items-start justify-between mb-8 relative z-10">
-        <div className="flex items-center gap-3">
-          <div className={cn(
-            "p-4 rounded-[1.5rem] shadow-lg",
-            model.type === 'chat' ? "bg-blue-500 text-white shadow-blue-500/20" :
-            model.type === 'image' ? "bg-purple-500 text-white shadow-purple-500/20" :
-            "bg-amber-500 text-white shadow-amber-500/20"
-          )}>
-            {model.type === 'chat' ? <MessageSquare className="h-6 w-6" /> :
-             model.type === 'image' ? <ImageIcon className="h-6 w-6" /> :
-             <Video className="h-6 w-6" />}
-          </div>
-          {isFree ? (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 backdrop-blur-md">
-              <Zap className="w-3 h-3 text-emerald-500" />
-              <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Free</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 backdrop-blur-md">
-              <Target className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-              <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">Premium</span>
-            </div>
-          )}
-        </div>
+      {/* Top Gradient Header */}
+      <div className={cn(
+        "h-32 w-full bg-gradient-to-br relative overflow-hidden transition-all duration-500 group-hover:h-36",
+        typeColors[model.type]
+      )}>
+        <div className="absolute inset-0 dot-grid opacity-20" />
+        <div className="absolute -right-4 -top-4 w-32 h-32 bg-white/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
         
-        <div className="flex items-center gap-2">
+        <div className="absolute bottom-4 left-6 flex items-center gap-3">
+          <div className="p-3 rounded-2xl bg-white/90 dark:bg-slate-950/90 shadow-xl backdrop-blur-md border border-white/50 dark:border-slate-800/50 group-hover:scale-110 transition-transform duration-500">
+            {typeIcons[model.type]}
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">Model Tier</span>
+            {isFree ? (
+              <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-black text-sm">
+                <Zap className="w-3 h-3" />
+                <span>FREE</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-black text-sm">
+                <Target className="w-3 h-3" />
+                <span>PREMIUM</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Status Badge Over Image */}
+        <div className="absolute top-4 right-6">
           {status.status === 'maintenance' ? (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 backdrop-blur-md">
-              <Clock className="w-3 h-3 text-amber-500 animate-pulse" />
-              <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">
-                Maintenance
-              </span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/90 text-white shadow-lg backdrop-blur-md">
+              <Clock className="w-3 h-3 animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Maintenance</span>
             </div>
           ) : status.status === 'online' ? (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 backdrop-blur-md">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Online</span>
-            </div>
-          ) : status.status === 'offline' ? (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/20 backdrop-blur-md">
-              <span className="w-2 h-2 rounded-full bg-rose-500" />
-              <span className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest">Offline</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/90 text-white shadow-lg backdrop-blur-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Online</span>
             </div>
           ) : (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-500/10 dark:bg-slate-500/20 border border-slate-500/20 backdrop-blur-md">
-              <span className="w-2 h-2 rounded-full bg-slate-400 animate-pulse" />
-              <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Checking</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-500/90 text-white shadow-lg backdrop-blur-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-white" />
+              <span className="text-[10px] font-black uppercase tracking-widest">{status.status}</span>
             </div>
           )}
         </div>
       </div>
 
-      <div className="mb-8 relative z-10">
-        <h3 className="text-2xl font-black text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors flex items-center gap-2 tracking-tight">
-          {model.name}
-          <ArrowUpRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-all -translate-y-1" />
-        </h3>
-        <div className="flex items-center gap-2 mt-2">
-          <code className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800/50 px-2 py-1 rounded-lg text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 font-bold">
-            {model.id}
-          </code>
-        </div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 h-10 mt-4 leading-relaxed font-medium">
-          {model.description || `High-performance ${model.type} model powered by ${model.provider}.`}
-        </p>
-      </div>
-
-      <div className="mt-auto pt-6 border-t border-slate-100 dark:border-slate-800/50 flex items-center justify-between relative z-10">
-        <div className="flex items-center gap-3">
-          <div className="flex flex-col">
-            <span className="text-[9px] uppercase text-slate-400 dark:text-slate-500 font-black tracking-[0.2em]">Provider</span>
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 capitalize">{model.provider}</span>
+      <div className="p-8 pt-6 flex flex-col flex-1 relative z-10">
+        <div className="mb-6">
+          <h3 className="text-2xl font-black text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors flex items-center gap-2 tracking-tight">
+            {model.name}
+            <ArrowUpRight className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1 group-hover:-translate-y-1" />
+          </h3>
+          <div className="flex items-center gap-2 mt-2">
+            <code className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800/50 px-2 py-1 rounded-lg text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 font-bold group-hover:border-primary/30 transition-colors">
+              {model.id}
+            </code>
           </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 h-10 mt-4 leading-relaxed font-medium group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
+            {model.description || `High-performance ${model.type} model powered by ${model.provider}.`}
+          </p>
         </div>
-        
-        {status.latency && (
-          <div className="flex flex-col items-end">
-            <span className="text-[9px] uppercase text-slate-400 dark:text-slate-500 font-black tracking-[0.2em]">Latency</span>
-            <div className="flex items-center gap-1.5 text-xs font-mono font-black text-slate-900 dark:text-white">
-              <Clock className="h-3 w-3 text-primary" />
-              {status.latency}ms
+
+        <div className="mt-auto pt-6 border-t border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700 group-hover:border-primary/30 transition-colors">
+              <Globe className="h-4 w-4 text-slate-400 group-hover:text-primary transition-colors" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[9px] uppercase text-slate-400 dark:text-slate-500 font-black tracking-[0.2em]">Provider</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 capitalize">{model.provider}</span>
             </div>
           </div>
-        )}
+          
+          {status.latency && (
+            <div className="flex flex-col items-end">
+              <span className="text-[9px] uppercase text-slate-400 dark:text-slate-500 font-black tracking-[0.2em]">Latency</span>
+              <div className="flex items-center gap-1.5 text-xs font-mono font-black text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 group-hover:border-primary/30 transition-colors">
+                <Zap className="h-3 w-3 text-primary" />
+                {status.latency}ms
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
