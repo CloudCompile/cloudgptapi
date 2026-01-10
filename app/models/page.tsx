@@ -7,7 +7,8 @@ import {
   VIDEO_MODELS,
   ChatModel,
   ImageModel,
-  VideoModel 
+  VideoModel,
+  PREMIUM_MODELS
 } from '@/lib/providers';
 import { getModelDetails, ModelDetails } from '@/lib/model-details';
 import { 
@@ -81,7 +82,7 @@ const ALL_MODELS: ModelType[] = [
 export default function ModelsPage() {
   const [statuses, setStatuses] = useState<Record<string, ModelStatus>>({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | 'chat' | 'image' | 'video'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'chat' | 'image' | 'video' | 'free'>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedModel, setSelectedModel] = useState<ModelType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -116,10 +117,16 @@ export default function ModelsPage() {
 
   const filteredModels = useMemo(() => {
     return ALL_MODELS.filter(model => {
+      const isFree = model.id.endsWith(':free') || !PREMIUM_MODELS.has(model.id);
       const matchesSearch = model.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            model.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            model.provider.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesTab = activeTab === 'all' || model.type === activeTab;
+      
+      let matchesTab = activeTab === 'all' || model.type === activeTab;
+      if (activeTab === 'free') {
+        matchesTab = isFree;
+      }
+      
       return matchesSearch && matchesTab;
     });
   }, [searchQuery, activeTab]);
@@ -232,6 +239,7 @@ export default function ModelsPage() {
             <TabButton active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} icon={<MessageSquare className="h-4 w-4" />} label="Chat" />
             <TabButton active={activeTab === 'image'} onClick={() => setActiveTab('image')} icon={<ImageIcon className="h-4 w-4" />} label="Image" />
             <TabButton active={activeTab === 'video'} onClick={() => setActiveTab('video')} icon={<Video className="h-4 w-4" />} label="Video" />
+            <TabButton active={activeTab === 'free'} onClick={() => setActiveTab('free')} icon={<Zap className="h-4 w-4" />} label="Free" />
           </div>
         </div>
 
@@ -315,6 +323,7 @@ function TabButton({ active, onClick, icon, label }: { active: boolean, onClick:
 
 function ModelCard({ model, status, onClick, index }: { model: ModelType, status: ModelStatus, onClick: () => void, index: number }) {
   const countdown = useCountdown(model.downtimeUntil);
+  const isFree = model.id.endsWith(':free') || !PREMIUM_MODELS.has(model.id);
   
   return (
     <div 
@@ -328,15 +337,28 @@ function ModelCard({ model, status, onClick, index }: { model: ModelType, status
       <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-primary/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
       
       <div className="flex items-start justify-between mb-8 relative z-10">
-        <div className={cn(
-          "p-4 rounded-[1.5rem] shadow-lg",
-          model.type === 'chat' ? "bg-blue-500 text-white shadow-blue-500/20" :
-          model.type === 'image' ? "bg-purple-500 text-white shadow-purple-500/20" :
-          "bg-amber-500 text-white shadow-amber-500/20"
-        )}>
-          {model.type === 'chat' ? <MessageSquare className="h-6 w-6" /> :
-           model.type === 'image' ? <ImageIcon className="h-6 w-6" /> :
-           <Video className="h-6 w-6" />}
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "p-4 rounded-[1.5rem] shadow-lg",
+            model.type === 'chat' ? "bg-blue-500 text-white shadow-blue-500/20" :
+            model.type === 'image' ? "bg-purple-500 text-white shadow-purple-500/20" :
+            "bg-amber-500 text-white shadow-amber-500/20"
+          )}>
+            {model.type === 'chat' ? <MessageSquare className="h-6 w-6" /> :
+             model.type === 'image' ? <ImageIcon className="h-6 w-6" /> :
+             <Video className="h-6 w-6" />}
+          </div>
+          {isFree ? (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 backdrop-blur-md">
+              <Zap className="w-3 h-3 text-emerald-500" />
+              <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Free</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 backdrop-blur-md">
+              <Target className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+              <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">Premium</span>
+            </div>
+          )}
         </div>
         
         <div className="flex items-center gap-2">
@@ -407,6 +429,7 @@ function ModelCard({ model, status, onClick, index }: { model: ModelType, status
 function ModelDetailsModal({ model, status, onClose }: { model: ModelType, status: ModelStatus, onClose: () => void }) {
   const details = getModelDetails(model.id, model.type);
   const countdown = useCountdown(model.downtimeUntil);
+  const isFree = model.id.endsWith(':free') || !PREMIUM_MODELS.has(model.id);
   
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -464,6 +487,19 @@ function ModelDetailsModal({ model, status, onClose }: { model: ModelType, statu
                 <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">
                   {model.name}
                 </h2>
+                <div className="flex items-center gap-2">
+                  {isFree ? (
+                    <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 backdrop-blur-md">
+                      <Zap className="w-3.5 h-3.5 text-emerald-500" />
+                      <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Free Model</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 backdrop-blur-md">
+                      <Target className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                      <span className="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">Premium Model</span>
+                    </div>
+                  )}
+                </div>
                 {status.status === 'maintenance' && countdown ? (
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 backdrop-blur-md">

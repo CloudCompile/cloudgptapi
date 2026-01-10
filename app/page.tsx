@@ -1,4 +1,4 @@
-import { ArrowRight, Bot, Code, Cpu, Image as ImageIcon, MessageSquare, Video, Zap, Terminal, Sparkles, Globe, Shield, Cloud, Layers, Database, Activity, Lock, Cpu as CpuIcon, Play } from 'lucide-react';
+import { ArrowRight, Bot, Code, Cpu, Image as ImageIcon, MessageSquare, Video, Zap, Terminal, Sparkles, Globe, Shield, Cloud, Layers, Database, Activity, Lock, Cpu as CpuIcon, Play, Users, Mail, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/Logo';
@@ -6,25 +6,6 @@ import { Logo } from '@/components/Logo';
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 glass border-b border-border/50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Logo />
-          <div className="hidden md:flex items-center gap-8">
-            <Link href="/models" className="text-sm font-bold hover:text-primary transition-colors">Models</Link>
-            <Link href="/pricing" className="text-sm font-bold hover:text-primary transition-colors">Pricing</Link>
-            <Link href="/about" className="text-sm font-bold hover:text-primary transition-colors">About</Link>
-            <Link href="/docs" className="text-sm font-bold hover:text-primary transition-colors">Docs</Link>
-            <Link 
-              href="/dashboard" 
-              className="px-5 py-2 rounded-xl bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero Section */}
       <section className="relative pt-48 pb-20 overflow-hidden dot-grid">
         <div className="absolute inset-0 mesh-gradient opacity-60" />
@@ -35,10 +16,10 @@ export default function Home() {
               <span>Next Generation AI Infrastructure</span>
             </div>
             <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 leading-[0.85]">
-              Unified <span className="premium-text">Intelligence</span> <br />at Scale
+              Intelligence <br /><span className="premium-text">Unbound</span>
             </h1>
             <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-5 duration-700 delay-200 font-medium">
-              The professional API gateway for global AI infrastructure. 
+              A Meridian Labs production. The professional API gateway for global AI infrastructure. 
               Switch between 100+ models with zero latency and enterprise-grade reliability.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
@@ -285,6 +266,60 @@ console.log(response.content);`}</code>
         </div>
       </section>
 
+      {/* Team Section */}
+      <section className="py-32 relative overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mb-24">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-black tracking-widest uppercase mb-6 border border-emerald-500/20">
+              <Users className="h-3.5 w-3.5" />
+              <span>The Minds Behind CloudGPT</span>
+            </div>
+            <h2 className="text-5xl font-black tracking-tighter mb-6 leading-none">Built by Developers, for Developers.</h2>
+            <p className="text-slate-600 dark:text-slate-400 text-xl leading-relaxed font-medium">
+              A Meridian Labs project, engineered by the core team at Pollinations API to unify the world's intelligence.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl">
+            <div className="group p-8 rounded-[2.5rem] bg-slate-50 dark:bg-slate-900/50 border border-border hover:border-primary/50 transition-all duration-500">
+              <div className="flex items-start justify-between mb-8">
+                <div className="h-16 w-16 rounded-2xl bg-primary/20 flex items-center justify-center text-primary">
+                  <span className="text-2xl font-black">CH</span>
+                </div>
+                <div className="flex gap-2">
+                  <a href="#" className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-border hover:text-primary transition-colors">
+                    <Mail className="h-4 w-4" />
+                  </a>
+                </div>
+              </div>
+              <h3 className="text-2xl font-black mb-1 tracking-tighter">CJ Hauser</h3>
+              <p className="text-primary font-bold text-sm mb-4 uppercase tracking-widest">Lead Architect</p>
+              <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                Pioneering the integration of multi-modal AI systems and cognitive memory architectures.
+              </p>
+            </div>
+
+            <div className="group p-8 rounded-[2.5rem] bg-slate-50 dark:bg-slate-900/50 border border-border hover:border-primary/50 transition-all duration-500">
+              <div className="flex items-start justify-between mb-8">
+                <div className="h-16 w-16 rounded-2xl bg-primary/20 flex items-center justify-center text-primary">
+                  <span className="text-2xl font-black">AM</span>
+                </div>
+                <div className="flex gap-2">
+                  <a href="#" className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-border hover:text-primary transition-colors">
+                    <Mail className="h-4 w-4" />
+                  </a>
+                </div>
+              </div>
+              <h3 className="text-2xl font-black mb-1 tracking-tighter">Aaron Miller</h3>
+              <p className="text-primary font-bold text-sm mb-4 uppercase tracking-widest">Systems Engineer</p>
+              <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                Optimizing global infrastructure and low-latency API gateways for enterprise scale.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-40 relative overflow-hidden">
         <div className="absolute inset-0 dot-grid opacity-40" />
@@ -312,24 +347,55 @@ console.log(response.content);`}</code>
       </section>
 
       {/* Footer */}
-      <footer className="py-20 border-t border-border bg-slate-50/50 dark:bg-slate-950/50">
+      <footer className="py-20 border-t border-border bg-slate-50/50 dark:bg-slate-950/50 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-10">
-            <div className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20">
-                <Cloud className="h-6 w-6 text-white" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+            <div className="col-span-1 md:col-span-2">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20">
+                  <Cloud className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-2xl font-black tracking-tighter">CloudGPT</span>
               </div>
-              <span className="text-2xl font-black tracking-tighter">CloudGPT</span>
+              <p className="text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-sm mb-6">
+                The next generation of AI infrastructure. Built by developers at Pollinations API to empower the future of cognitive intelligence.
+              </p>
+              <div className="flex items-center gap-4">
+                <a href="https://meridianlabsapp.website/" target="_blank" className="text-xs font-black uppercase tracking-widest text-primary hover:opacity-80 transition-all flex items-center gap-1.5">
+                  Meridian Labs <ExternalLink className="h-3 w-3" />
+                </a>
+                <span className="text-slate-300">|</span>
+                <a href="https://pollinations.ai" target="_blank" className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-all flex items-center gap-1.5">
+                  Pollinations API <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
             </div>
-            <div className="flex flex-wrap justify-center gap-10 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-              <Link href="/models" className="hover:text-primary transition-colors">Models</Link>
-              <Link href="/pricing" className="hover:text-primary transition-colors">Pricing</Link>
-              <Link href="/docs" className="hover:text-primary transition-colors">Documentation</Link>
-              <Link href="/terms-of-service" className="hover:text-primary transition-colors">Terms</Link>
-              <Link href="/privacy-policy" className="hover:text-primary transition-colors">Privacy</Link>
+            <div>
+              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white mb-6">Platform</h4>
+              <ul className="space-y-4">
+                <li><Link href="/models" className="text-sm font-bold text-slate-500 hover:text-primary transition-colors">Models</Link></li>
+                <li><Link href="/pricing" className="text-sm font-bold text-slate-500 hover:text-primary transition-colors">Pricing</Link></li>
+                <li><Link href="/docs" className="text-sm font-bold text-slate-500 hover:text-primary transition-colors">Documentation</Link></li>
+                <li><Link href="/playground" className="text-sm font-bold text-slate-500 hover:text-primary transition-colors">Playground</Link></li>
+              </ul>
             </div>
+            <div>
+              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white mb-6">Legal</h4>
+              <ul className="space-y-4">
+                <li><Link href="/terms-of-service" className="text-sm font-bold text-slate-500 hover:text-primary transition-colors">Terms of Service</Link></li>
+                <li><Link href="/privacy-policy" className="text-sm font-bold text-slate-500 hover:text-primary transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/security" className="text-sm font-bold text-slate-500 hover:text-primary transition-colors">Security</Link></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="pt-12 border-t border-border flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="text-sm text-slate-400 font-bold">
-              © {new Date().getFullYear()} CloudGPT Studio.
+              © {new Date().getFullYear()} CloudGPT Studio. A Meridian Labs Venture.
+            </div>
+            <div className="flex items-center gap-6">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">Crafted by CJ Hauser & Aaron Miller</span>
             </div>
           </div>
         </div>
