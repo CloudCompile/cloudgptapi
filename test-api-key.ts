@@ -1,18 +1,11 @@
 
-async function testApiKey(key: string) {
+async function testApiKey(key: string, model: string = 'gemini-2.5-pro', baseUrl: string = 'http://localhost:3001') {
   console.log(`--- Testing API Key: ${key.substring(0, 10)}... ---`);
+  console.log(`--- Using Base URL: ${baseUrl} ---`);
+  console.log(`--- Using Model: ${model} ---`);
   
-  const baseUrl = 'http://localhost:3000'; // Assuming local dev server
   const endpoint = `${baseUrl}/v1/chat/completions`;
   
-  const payload = {
-    model: 'gemini-2.5-pro',
-    messages: [
-      { role: 'user', content: 'Say "API Key is working!"' }
-    ],
-    stream: false
-  };
-
   try {
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -20,7 +13,12 @@ async function testApiKey(key: string) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${key}`
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          { role: 'user', content: 'Hello! Are you working?' }
+        ]
+      })
     });
 
     console.log(`Status: ${response.status} ${response.statusText}`);
@@ -42,4 +40,7 @@ async function testApiKey(key: string) {
 }
 
 const keyToTest = process.argv[2] || 'cgpt_2c33963f422948d381bfab94581db93f';
-testApiKey(keyToTest);
+const modelToTest = process.argv[3] || 'gemini-2.5-pro';
+const baseUrlToTest = process.argv[4] || 'http://localhost:3001';
+
+testApiKey(keyToTest, modelToTest, baseUrlToTest);

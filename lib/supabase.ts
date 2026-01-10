@@ -32,6 +32,7 @@ export const supabaseAdmin = new Proxy({} as SupabaseClient, {
       if (!url || !key) {
         throw new Error('Supabase environment variables are not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.');
       }
+      console.log(`[Supabase Admin] Initializing client for URL: ${url.substring(0, 20)}...`);
       _supabaseAdmin = createClient(url, key, {
         auth: {
           autoRefreshToken: false,

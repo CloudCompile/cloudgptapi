@@ -38,4 +38,5 @@ async function findUser(query: string) {
   console.log('User found:', profile);
 }
 
-findUser('kyhas@hotmail.co.uk');
+const query = process.argv[2] || 'kyhas@hotmail.co.uk';
+findUser(query);

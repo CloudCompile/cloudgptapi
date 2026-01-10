@@ -20,6 +20,8 @@ export async function GET() {
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
+    console.log(`[GET /api/keys] Found ${keys?.length || 0} keys for user: ${userId}`);
+
     if (error) {
       console.error('Supabase error fetching API keys:', error);
       return NextResponse.json({ 
@@ -87,26 +89,42 @@ export async function POST(request: NextRequest) {
       rate_limit: rateLimit,
     };
 
-    console.log(`[POST /api/keys] Creating new key for user: ${userId}, plan: ${plan}, rateLimit: ${rateLimit}`);
+    console.log(`[POST /api/keys] User ID: ${userId}, Plan: ${plan}`);
+    console.log(`[POST /api/keys] Data to insert:`, JSON.stringify(newKey, null, 2));
+    console.log(`[POST /api/keys] Attempting to insert key into public.api_keys table...`);
 
-    const { data, error } = await supabaseAdmin
+    const { data, error, status, statusText } = await supabaseAdmin
       .from('api_keys')
       .insert(newKey)
       .select()
       .maybeSingle();
 
     if (error) {
-      console.error('[POST /api/keys] Supabase error creating API key:', error);
+      console.error(`[POST /api/keys] Supabase error (Status: ${status} ${statusText}):`, error);
       return NextResponse.json({ 
         error: 'Failed to create API key',
         details: error.message,
-        code: error.code
+        code: error.code,
+        status
       }, { status: 500 });
     }
 
     if (!data) {
-      console.error('[POST /api/keys] No data returned after insertion');
+      console.error(`[POST /api/keys] No data returned after insertion (Status: ${status} ${statusText})`);
       return NextResponse.json({ error: 'Failed to create API key: No data returned' }, { status: 500 });
+    }
+
+    // Verify persistence by reading it back
+    const { data: verifiedData, error: verifyError } = await supabaseAdmin
+      .from('api_keys')
+      .select('*')
+      .eq('id', data.id)
+      .maybeSingle();
+
+    if (verifyError || !verifiedData) {
+      console.error(`[POST /api/keys] CRITICAL: Key was "created" but could not be read back! Verification error:`, verifyError);
+    } else {
+      console.log(`[POST /api/keys] Verification SUCCESS: Key ${data.id} is persistent in database.`);
     }
 
     const keyPreview = data.key ? `${data.key.substring(0, 12)}...${data.key.substring(data.key.length - 4)}` : 'N/A';

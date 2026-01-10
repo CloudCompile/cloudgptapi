@@ -23,15 +23,15 @@ function generateApiKey(): string {
   return `${prefix}${key}`;
 }
 
-async function createKeyForUser(email: string) {
-  console.log(`--- Generating API key for ${email} ---`);
+async function createKeyForUser(query: string) {
+  console.log(`--- Generating API key for ${query} ---`);
   
   try {
-    // 1. Get user profile
+    // 1. Get user profile (by email or ID)
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('id, email, plan')
-      .eq('email', email)
+      .or(`email.eq.${query},id.eq.${query}`)
       .maybeSingle();
 
     if (profileError) {
@@ -73,7 +73,8 @@ async function createKeyForUser(email: string) {
     }
 
     console.log('\n--- API Key Generated Successfully ---');
-    console.log(`Email: ${email}`);
+    console.log(`User ID: ${profile.id}`);
+    console.log(`Email: ${profile.email}`);
     console.log(`Key: ${newKey}`);
     console.log(`Name: ${keyName}`);
     console.log(`Rate Limit: ${apiKey.rate_limit}`);
