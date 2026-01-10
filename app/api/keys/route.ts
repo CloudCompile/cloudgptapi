@@ -109,7 +109,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create API key: No data returned' }, { status: 500 });
     }
 
-    console.log(`[POST /api/keys] Key created successfully: ${data.id}`);
+    const keyPreview = data.key ? `${data.key.substring(0, 12)}...${data.key.substring(data.key.length - 4)}` : 'N/A';
+    console.log(`[POST /api/keys] Key created successfully. DB ID: ${data.id}, Key: ${keyPreview}`);
 
     // Return the full key only on creation
     return NextResponse.json({
