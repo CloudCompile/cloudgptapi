@@ -34,6 +34,7 @@ const navigation = [
 ];
 
 const secondaryNavigation = [
+  { name: 'About', href: '/about', icon: User },
   { name: 'Pricing', href: '/pricing', icon: Activity },
   { name: 'Terms', href: '/terms-of-service', icon: FileText },
   { name: 'Privacy', href: '/privacy-policy', icon: Shield },

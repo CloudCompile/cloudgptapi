@@ -7,7 +7,7 @@ dotenv.config({ path: '.env.local' });
 
 const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const WEBHOOK_URL = process.env.DISCORD_PRO_WEBHOOK;
-const CHANNEL_ID = '1458666010197495962';
+const CHANNEL_ID = '1459360039809843310';
 const LOCK_FILE = path.join(process.cwd(), '.maintenance-sent');
 
 async function sendAnnouncement() {

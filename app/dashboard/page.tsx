@@ -132,6 +132,40 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10 animate-in fade-in duration-700">
+      {/* New Key Success Modal */}
+      {createdKey && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-border rounded-[2.5rem] p-8 max-w-lg w-full shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="h-16 w-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-6">
+              <Shield className="h-8 w-8" />
+            </div>
+            <h2 className="text-2xl font-black tracking-tight mb-2">API Key Created!</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-6">
+              {createdKey.message}
+            </p>
+            
+            <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl p-4 mb-6 flex items-center justify-between gap-4 border border-border group">
+              <code className="text-sm font-mono font-bold break-all text-primary">
+                {createdKey.key}
+              </code>
+              <button 
+                onClick={() => copyToClipboard(createdKey.key, 'created')}
+                className="shrink-0 p-2.5 rounded-xl bg-white dark:bg-slate-700 border border-border hover:bg-muted transition-all shadow-sm"
+              >
+                {copiedId === 'created' ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+              </button>
+            </div>
+
+            <button 
+              onClick={() => setCreatedKey(null)}
+              className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg"
+            >
+              I've saved it securely
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Welcome Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
@@ -194,12 +228,22 @@ export default function Dashboard() {
                             <code className="text-xs font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded uppercase tracking-wider">
                               {key.keyPreview}
                             </code>
-                            <button 
-                              onClick={() => copyToClipboard(key.keyPreview, key.id)}
-                              className="text-slate-400 hover:text-primary transition-colors"
-                            >
-                              {copiedId === key.id ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                            </button>
+                            {key.keyPreview.includes('...') ? (
+                              <div className="group/hint relative">
+                                <Lock className="h-3 w-3 text-slate-300" />
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-[10px] font-bold rounded opacity-0 group-hover/hint:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                  Full key hidden for security
+                                </div>
+                              </div>
+                            ) : (
+                              <button 
+                                onClick={() => copyToClipboard(key.keyPreview, key.id)}
+                                className="text-slate-400 hover:text-primary transition-colors"
+                                title="Copy API key"
+                              >
+                                {copiedId === key.id ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>

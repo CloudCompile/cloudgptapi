@@ -5,7 +5,7 @@ import path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const CONTEST_WEBHOOK = 'https://discord.com/api/webhooks/1458950950625607701/RVRvEvPPbZJnPpndZEVaFfsvvQy1GZ3mHcd0Pj2OOyY-asCdihCio0pYV35kzC-tqC5c';
-const FORUM_CHANNEL_ID = '1458951237461610528';
+const FORUM_CHANNEL_ID = '1459360039809843310';
 
 async function sendForumLink() {
   // Constructing a special link that Discord often renders with a "Open Link" style or clear navigation

@@ -62,6 +62,7 @@ function Header({ isAppPage }: { isAppPage: boolean }) {
           <nav className="hidden md:flex items-center gap-8">
             <Link href="/models" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Models</Link>
             <Link href="/pricing" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Pricing</Link>
+            <Link href="/about" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">About</Link>
             <Link href="/docs" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Docs</Link>
           </nav>
         )}
