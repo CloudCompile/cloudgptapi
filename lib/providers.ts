@@ -3,7 +3,7 @@
 export interface ChatModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'liz' | 'github' | 'claude';
+  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'liz' | 'github' | 'claude' | 'gemini';
   description?: string;
   contextWindow?: number;
   downtimeUntil?: string; // ISO timestamp for maintenance countdown
@@ -37,13 +37,10 @@ const POLLINATIONS_CHAT_MODELS: ChatModel[] = [
   { id: 'nova-fast', name: 'Amazon Nova Micro', provider: 'pollinations', description: 'Amazon Nova Micro', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'qwen-coder', name: 'Qwen3 Coder 30B', provider: 'pollinations', description: 'Qwen3 Coder 30B', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'mistral', name: 'Mistral Small 3.2 24B', provider: 'pollinations', description: 'Mistral Small 3.2 24B', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'gemini-fast', name: 'Google Gemini 2.5 Flash Lite', provider: 'pollinations', description: 'Google Gemini 2.5 Flash Lite', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'openai-fast', name: 'OpenAI GPT-5 Nano', provider: 'pollinations', description: 'OpenAI GPT-5 Nano', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'grok', name: 'xAI Grok 4 Fast', provider: 'pollinations', description: 'xAI Grok 4 Fast', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'openai', name: 'OpenAI GPT-5 Mini', provider: 'pollinations', description: 'OpenAI GPT-5 Mini', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'perplexity-fast', name: 'Perplexity Sonar', provider: 'pollinations', description: 'Perplexity Sonar', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'gemini', name: 'Google Gemini 3 Flash', provider: 'pollinations', description: 'Google Gemini 3 Flash', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'gemini-search', name: 'Google Gemini 3 Flash', provider: 'pollinations', description: 'Google Gemini 3 Flash', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'chickytutor', name: 'ChickyTutor AI Language Tutor', provider: 'pollinations', description: 'ChickyTutor AI Language Tutor', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'minimax', name: 'MiniMax M2.1', provider: 'pollinations', description: 'MiniMax M2.1', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'deepseek', name: 'DeepSeek V3.2', provider: 'pollinations', description: 'DeepSeek V3.2', downtimeUntil: POLLINATIONS_DOWNTIME },
@@ -51,15 +48,21 @@ const POLLINATIONS_CHAT_MODELS: ChatModel[] = [
   { id: 'kimi-k2-thinking', name: 'Moonshot Kimi K2 Thinking', provider: 'pollinations', description: 'Moonshot Kimi K2 Thinking', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'midijourney', name: 'MIDIjourney', provider: 'pollinations', description: 'MIDIjourney', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'perplexity-reasoning', name: 'Perplexity Sonar Reasoning', provider: 'pollinations', description: 'Perplexity Sonar Reasoning', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'gemini-large', name: 'Google Gemini 3 Pro', provider: 'pollinations', description: 'Google Gemini 3 Pro', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'openai-large', name: 'OpenAI GPT-5.2', provider: 'pollinations', description: 'OpenAI GPT-5.2', downtimeUntil: POLLINATIONS_DOWNTIME },
   { id: 'openai-audio', name: 'OpenAI GPT-4o Mini Audio', provider: 'pollinations', description: 'OpenAI GPT-4o Mini Audio', downtimeUntil: POLLINATIONS_DOWNTIME },
 ];
 
+const GEMINI_CHAT_MODELS: ChatModel[] = [
+  { id: 'gemini-fast', name: 'Google Gemini 2.5 Flash Lite', provider: 'gemini', description: 'Google Gemini 2.5 Flash Lite', downtimeUntil: POLLINATIONS_DOWNTIME },
+  { id: 'gemini', name: 'Google Gemini 3 Flash', provider: 'gemini', description: 'Google Gemini 3 Flash', downtimeUntil: POLLINATIONS_DOWNTIME },
+  { id: 'gemini-search', name: 'Google Gemini 3 Flash', provider: 'gemini', description: 'Google Gemini 3 Flash', downtimeUntil: POLLINATIONS_DOWNTIME },
+  { id: 'gemini-large', name: 'Google Gemini 3 Pro', provider: 'gemini', description: 'Google Gemini 3 Pro', downtimeUntil: POLLINATIONS_DOWNTIME },
+];
+
 const CLAUDE_CHAT_MODELS: ChatModel[] = [
-  { id: 'claude-fast', name: 'Anthropic Claude Haiku 4.5', provider: 'claude', description: 'Anthropic Claude Haiku 4.5', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'claude', name: 'Anthropic Claude Sonnet 4.5', provider: 'claude', description: 'Anthropic Claude Sonnet 4.5', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'claude-large', name: 'Anthropic Claude Opus 4.5', provider: 'claude', description: 'Anthropic Claude Opus 4.5', downtimeUntil: POLLINATIONS_DOWNTIME },
+  { id: 'claude-fast', name: 'Anthropic Claude Haiku 4.5', provider: 'claude', description: 'Anthropic Claude Haiku 4.5', downtimeUntil: '2099-01-01T00:00:00Z' },
+  { id: 'claude', name: 'Anthropic Claude Sonnet 4.5', provider: 'claude', description: 'Anthropic Claude Sonnet 4.5', downtimeUntil: '2099-01-01T00:00:00Z' },
+  { id: 'claude-large', name: 'Anthropic Claude Opus 4.5', provider: 'claude', description: 'Anthropic Claude Opus 4.5', downtimeUntil: '2099-01-01T00:00:00Z' },
 ];
 
 const OPENROUTER_CHAT_MODELS: ChatModel[] = [
@@ -114,15 +117,15 @@ const MERIDIAN_CHAT_MODELS: ChatModel[] = [
 
 const LIZ_CHAT_MODELS: ChatModel[] = [
   // Liz Proxy models (Non-Claude only as requested)
-  { id: 'gemini-2.0-flash-001', name: 'Gemini 2.0 Flash 001', provider: 'liz', description: 'Google Gemini 2.0 Flash 001' },
-  { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', provider: 'liz', description: 'Google Gemini 3 Flash Preview' },
-  { id: 'gemini-2.0-flash-lite-001', name: 'Gemini 2.0 Flash Lite 001', provider: 'liz', description: 'Google Gemini 2.0 Flash Lite 001' },
-  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'liz', description: 'Google Gemini 2.5 Flash' },
-  { id: 'gemini-2.5-flash-image', name: 'Gemini 2.5 Flash Image', provider: 'liz', description: 'Google Gemini 2.5 Flash Image' },
-  { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite', provider: 'liz', description: 'Google Gemini 2.5 Flash Lite' },
-  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'liz', description: 'Google Gemini 2.5 Pro' },
-  { id: 'gemini-3-pro-image-preview', name: 'Gemini 3 Pro Image Preview', provider: 'liz', description: 'Google Gemini 3 Pro Image Preview' },
-  { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', provider: 'liz', description: 'Google Gemini 3 Pro Preview' },
+  { id: 'gemini-2.0-flash-001', name: 'Gemini 2.0 Flash 001', provider: 'liz', description: 'Google Gemini 2.0 Flash 001', downtimeUntil: '2099-01-01T00:00:00Z' },
+  { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', provider: 'liz', description: 'Google Gemini 3 Flash Preview', downtimeUntil: '2099-01-01T00:00:00Z' },
+  { id: 'gemini-2.0-flash-lite-001', name: 'Gemini 2.0 Flash Lite 001', provider: 'liz', description: 'Google Gemini 2.0 Flash Lite 001', downtimeUntil: '2099-01-01T00:00:00Z' },
+  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'liz', description: 'Google Gemini 2.5 Flash', downtimeUntil: '2099-01-01T00:00:00Z' },
+  { id: 'gemini-2.5-flash-image', name: 'Gemini 2.5 Flash Image', provider: 'liz', description: 'Google Gemini 2.5 Flash Image', downtimeUntil: '2099-01-01T00:00:00Z' },
+  { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite', provider: 'liz', description: 'Google Gemini 2.5 Flash Lite', downtimeUntil: '2099-01-01T00:00:00Z' },
+  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'liz', description: 'Google Gemini 2.5 Pro', downtimeUntil: '2099-01-01T00:00:00Z' },
+  { id: 'gemini-3-pro-image-preview', name: 'Gemini 3 Pro Image Preview', provider: 'liz', description: 'Google Gemini 3 Pro Image Preview', downtimeUntil: '2099-01-01T00:00:00Z' },
+  { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', provider: 'liz', description: 'Google Gemini 3 Pro Preview', downtimeUntil: '2099-01-01T00:00:00Z' },
   { id: 'deepseek-prover-v2', name: 'DeepSeek Prover V2', provider: 'liz', description: 'DeepSeek Prover V2' },
   { id: 'deepseek-r1', name: 'DeepSeek R1', provider: 'liz', description: 'DeepSeek R1' },
   { id: 'deepseek-v3', name: 'DeepSeek V3', provider: 'liz', description: 'DeepSeek V3' },
@@ -185,6 +188,7 @@ const GITHUB_CHAT_MODELS: ChatModel[] = [
 
 export const CHAT_MODELS: ChatModel[] = [
   ...POLLINATIONS_CHAT_MODELS,
+  ...GEMINI_CHAT_MODELS,
   ...CLAUDE_CHAT_MODELS,
   ...OPENROUTER_CHAT_MODELS,
   ...STABLEHORDE_CHAT_MODELS,

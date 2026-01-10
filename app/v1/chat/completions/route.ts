@@ -521,6 +521,9 @@ export async function POST(request: NextRequest) {
     } else if (model.provider === 'liz' || model.provider === 'claude') {
       providerUrl = `${PROVIDER_URLS.liz}/v1/chat/completions`;
       providerApiKey = process.env.LIZ_API_KEY || 'sk-d38705df52b386e905f257a4019f8f2a';
+    } else if (model.provider === 'gemini') {
+      providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
+      providerApiKey = getPollinationsApiKey();
     } else if (model.provider === 'meridian') {
       providerUrl = `${PROVIDER_URLS.meridian}/chat`;
       providerApiKey = process.env.MERIDIAN_API_KEY;
@@ -849,6 +852,27 @@ export async function POST(request: NextRequest) {
         }
       }
       
+      // Fallback for Claude models from Liz to Pollinations
+      if ((model.provider === 'liz' || model.provider === 'claude') && !providerResponse.ok && (modelId.includes('claude') || modelId.includes('sonnet') || modelId.includes('opus'))) {
+        console.warn(`[${requestId}] Liz failed for Claude model. Trying Pollinations fallback...`);
+        try {
+          const pollKey = getPollinationsApiKey();
+          const pollResponse = await fetch(`${PROVIDER_URLS.pollinations}/v1/chat/completions`, {
+            method: 'POST',
+            headers: { ...headers, 'Authorization': `Bearer ${pollKey}` },
+            body: JSON.stringify({ ...requestBody, model: modelId }),
+            signal: controller.signal,
+          });
+          
+          if (pollResponse.ok) {
+            console.log(`[${requestId}] Claude fallback to Pollinations successful!`);
+            providerResponse = pollResponse;
+          }
+        } catch (err) {
+          console.error(`[${requestId}] Pollinations fallback from Liz failed:`, err);
+        }
+      }
+
       // If we still have a 429 from OpenRouter after trying all keys, try another provider
       if (model.provider === 'openrouter' && providerResponse.status === 429) {
         // Fallback for Gemini models to Pollinations
