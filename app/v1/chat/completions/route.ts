@@ -243,13 +243,22 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
+  console.log(`[${requestId}] POST /v1/chat/completions started`);
   
   try {
     // Get user from session (for website users)
-    const { userId: sessionUserId } = await auth();
+    let sessionUserId = null;
+    try {
+      const authData = await auth();
+      sessionUserId = authData.userId;
+      console.log(`[${requestId}] Session User ID: ${sessionUserId}`);
+    } catch (authError) {
+      console.log(`[${requestId}] Clerk auth() skipped or failed (expected for API keys)`);
+    }
 
     // Extract and validate API key (for API users)
     const rawApiKey = extractApiKey(request.headers);
+    console.log(`[${requestId}] Raw API Key: ${rawApiKey ? rawApiKey.substring(0, 10) + '...' : 'none'}`);
     
     // Check rate limit (allow anonymous with lower limits)
     const clientIp = (request as any).ip || 
@@ -755,6 +764,11 @@ export async function POST(request: NextRequest) {
     const timeoutId = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS);
     
     try {
+      console.log(`[${requestId}] Forwarding to provider: ${model.provider}, URL: ${providerUrl}`);
+      // Don't log the full API key, just the prefix
+      const keyPrefix = headers['Authorization']?.substring(0, 15) || 'none';
+      console.log(`[${requestId}] Auth Header Prefix: ${keyPrefix}`);
+
       providerResponse = await fetch(providerUrl, {
         method: 'POST',
         headers,

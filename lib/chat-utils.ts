@@ -75,6 +75,7 @@ export const modelAliases: Record<string, string> = {
   'gemini-2.0-flash': 'gemini',
   'gemini-1.5-flash': 'gemini-fast',
   'gemini-1.5-pro': 'gemini-large',
+  'gemini-2.5-pro': 'gemini-large',
 };
 
 export function resolveModelId(modelId: string): string {

@@ -30,7 +30,7 @@ export interface VideoModel {
 }
 
 // Calculate downtime timestamp (until 2PM EST)
-const POLLINATIONS_DOWNTIME = '2026-01-09T19:00:00Z';
+const POLLINATIONS_DOWNTIME = '2026-01-09T00:00:00Z';
 
 // Available chat models by provider
 const POLLINATIONS_CHAT_MODELS: ChatModel[] = [
@@ -53,10 +53,10 @@ const POLLINATIONS_CHAT_MODELS: ChatModel[] = [
 ];
 
 const GEMINI_CHAT_MODELS: ChatModel[] = [
-  { id: 'gemini-fast', name: 'Google Gemini 2.5 Flash Lite', provider: 'gemini', description: 'Google Gemini 2.5 Flash Lite', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'gemini', name: 'Google Gemini 3 Flash', provider: 'gemini', description: 'Google Gemini 3 Flash', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'gemini-search', name: 'Google Gemini 3 Flash', provider: 'gemini', description: 'Google Gemini 3 Flash', downtimeUntil: POLLINATIONS_DOWNTIME },
-  { id: 'gemini-large', name: 'Google Gemini 3 Pro', provider: 'gemini', description: 'Google Gemini 3 Pro', downtimeUntil: POLLINATIONS_DOWNTIME },
+  { id: 'gemini-fast', name: 'Google Gemini 2.5 Flash Lite', provider: 'gemini', description: 'Google Gemini 2.5 Flash Lite' },
+  { id: 'gemini', name: 'Google Gemini 3 Flash', provider: 'gemini', description: 'Google Gemini 3 Flash' },
+  { id: 'gemini-search', name: 'Google Gemini 3 Flash', provider: 'gemini', description: 'Google Gemini 3 Flash' },
+  { id: 'gemini-large', name: 'Google Gemini 3 Pro', provider: 'gemini', description: 'Google Gemini 3 Pro' },
 ];
 
 const CLAUDE_CHAT_MODELS: ChatModel[] = [
@@ -123,7 +123,7 @@ const LIZ_CHAT_MODELS: ChatModel[] = [
   { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'liz', description: 'Google Gemini 2.5 Flash', downtimeUntil: '2099-01-01T00:00:00Z' },
   { id: 'gemini-2.5-flash-image', name: 'Gemini 2.5 Flash Image', provider: 'liz', description: 'Google Gemini 2.5 Flash Image', downtimeUntil: '2099-01-01T00:00:00Z' },
   { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite', provider: 'liz', description: 'Google Gemini 2.5 Flash Lite', downtimeUntil: '2099-01-01T00:00:00Z' },
-  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'liz', description: 'Google Gemini 2.5 Pro', downtimeUntil: '2099-01-01T00:00:00Z' },
+  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'liz', description: 'Google Gemini 2.5 Pro' },
   { id: 'gemini-3-pro-image-preview', name: 'Gemini 3 Pro Image Preview', provider: 'liz', description: 'Google Gemini 3 Pro Image Preview', downtimeUntil: '2099-01-01T00:00:00Z' },
   { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', provider: 'liz', description: 'Google Gemini 3 Pro Preview', downtimeUntil: '2099-01-01T00:00:00Z' },
   { id: 'deepseek-prover-v2', name: 'DeepSeek Prover V2', provider: 'liz', description: 'DeepSeek Prover V2' },
@@ -132,7 +132,7 @@ const LIZ_CHAT_MODELS: ChatModel[] = [
   { id: 'deepseek-r1-0528', name: 'DeepSeek R1 0528', provider: 'liz', description: 'DeepSeek R1 0528' },
   { id: 'deepseek-v3.1', name: 'DeepSeek V3.1', provider: 'liz', description: 'DeepSeek V3.1' },
   { id: 'deepseek-v3.2-exp', name: 'DeepSeek V3.2 Exp', provider: 'liz', description: 'DeepSeek V3.2 Experimental' },
-  { id: 'deepseek-v3.2-speciale', name: 'DeepSeek V3.2 Speciale', provider: 'liz', description: 'DeepSeek V3.2 Speciale' },
+  { id: 'deepseek-v3.2', name: 'DeepSeek V3.2', provider: 'liz', description: 'DeepSeek V3.2' },
   { id: 'deepseek-v3.1-nex-n1:free', name: 'DeepSeek V3.1 Nex N1', provider: 'liz', description: 'DeepSeek V3.1 Nex N1 Free' },
   { id: 'glm-4.5-air:free', name: 'GLM 4.5 Air Free', provider: 'liz', description: 'GLM 4.5 Air Free' },
   { id: 'glm-4-32b', name: 'GLM 4 32B', provider: 'liz', description: 'GLM 4 32B' },
