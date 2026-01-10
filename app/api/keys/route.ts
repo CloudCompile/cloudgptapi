@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
         .from('profiles')
         .select('plan')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
       
       if (profileError) {
         console.warn('Profile fetch error (might not exist yet):', profileError.message);

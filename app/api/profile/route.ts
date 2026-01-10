@@ -16,7 +16,7 @@ export async function GET() {
       .from('profiles')
       .select('role, plan')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('Error fetching profile:', error);

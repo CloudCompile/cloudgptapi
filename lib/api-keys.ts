@@ -64,10 +64,15 @@ export function applyPeakHoursLimit(baseLimit: number): number {
       .from('api_keys')
       .select('*')
       .eq('key', key)
-      .single();
+      .maybeSingle();
   
-    if (error || !data) {
-      console.error('[validateApiKey] Key not found or error:', error?.message);
+    if (error) {
+      console.error('[validateApiKey] Database error:', error.message);
+      return null;
+    }
+
+    if (!data) {
+      console.error('[validateApiKey] Key not found');
       return null;
     }
   
@@ -76,7 +81,7 @@ export function applyPeakHoursLimit(baseLimit: number): number {
       .from('profiles')
       .select('plan, email')
       .eq('id', data.user_id)
-      .single();
+      .maybeSingle();
   
     // Update last used at
     await supabaseAdmin
@@ -274,7 +279,7 @@ export async function getRateLimitInfo(key: string, limit: number = 60, type: st
       .from('rate_limits')
       .select('count, reset_at')
       .eq('key', rateLimitKey)
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       return { remaining: limit, resetAt: Date.now() + 60000, limit };
@@ -300,7 +305,7 @@ export async function getDailyLimitInfo(key: string, limit: number = 1000, apiKe
         .from('api_keys')
         .select('daily_usage_count, last_reset_at')
         .eq('id', apiKeyId)
-        .single();
+        .maybeSingle();
 
       const nextMidnight = new Date();
       nextMidnight.setUTCHours(24, 0, 0, 0);
@@ -336,7 +341,7 @@ export async function getDailyLimitInfo(key: string, limit: number = 1000, apiKe
       .from('rate_limits')
       .select('count, reset_at')
       .eq('key', dailyKey)
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       const nextMidnight = new Date();
