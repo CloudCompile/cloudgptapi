@@ -1,4 +1,4 @@
-import { ArrowRight, Bot, Clock, Code, Cpu, Download, ExternalLink, Hash, Image as ImageIcon, Info, MessageSquare, Shield, Terminal, Video, Zap } from 'lucide-react';
+import { Bot, Clock, Code, Crown, ExternalLink, Hash, Image as ImageIcon, Info, MessageSquare, Shield, Terminal, Video, Zap } from 'lucide-react';
 import Link from 'next/link';
 
 export default function DocsPage() {
@@ -251,13 +251,19 @@ const response = await fetch('https://cloudgptapi.vercel.app/v1/chat/completions
 
               {/* Chat API */}
               <section id="chat" className="scroll-mt-24">
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                  <MessageSquare className="h-6 w-6 text-blue-500" />
-                  Chat Completions
-                </h2>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold flex items-center gap-2">
+                    <MessageSquare className="h-6 w-6 text-blue-500" />
+                    Chat Completions
+                  </h2>
+                  <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400">
+                    <Crown className="h-3 w-3" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Includes Liz Premium</span>
+                  </div>
+                </div>
                 <div className="space-y-6">
                   <p className="text-slate-600 dark:text-slate-400">
-                    Generate text completions using various LLMs like GPT-4o, Claude 3.5, and Llama 3.3.
+                    Generate text completions using various LLMs like GPT-4o, Claude 3.5, and Llama 3.3. Premium flagship models are available via the <strong>Liz Proxy</strong> bridge.
                   </p>
                   
                   <div className="bg-slate-50 dark:bg-slate-900 rounded-xl border p-1 mb-6 flex items-center h-12 w-fit">

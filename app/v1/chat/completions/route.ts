@@ -10,6 +10,7 @@ import {
   generateRequestId,
   PROVIDER_URLS,
   resolveModelId,
+  PROVIDER_MODEL_MAPPING,
   createChatTransformStream,
   PROVIDER_TIMEOUT_MS,
   sanitizeErrorText,
@@ -883,6 +884,12 @@ export async function POST(request: NextRequest) {
 
     // Prepare request body based on provider
     let requestBody = { ...standardBody };
+    
+    // Apply provider-specific model mapping (e.g., liz-claude-3-opus -> claude-3-opus)
+    if (PROVIDER_MODEL_MAPPING[modelId]) {
+      console.log(`[${requestId}] Mapping model ID for provider: ${modelId} -> ${PROVIDER_MODEL_MAPPING[modelId]}`);
+      requestBody.model = PROVIDER_MODEL_MAPPING[modelId];
+    }
     
     if (model.provider === 'meridian') {
       // Meridian expects a simple "prompt" field, not "messages"

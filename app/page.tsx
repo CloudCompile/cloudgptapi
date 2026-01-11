@@ -155,16 +155,20 @@ export default function Home() {
                 Access NSFW-optimized roleplay, deep reasoning, and flagship models via our premium Liz Proxy bridge.
               </p>
             </div>
-            <div className="flex gap-12 items-center">
-              <div className="flex flex-col items-center gap-1 group cursor-default">
+            <div className="flex gap-12 items-center overflow-x-auto pb-4 md:pb-0 scrollbar-hide">
+              <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
                 <span className="font-black text-xl tracking-tighter group-hover:text-primary transition-colors">Claude 3 Opus</span>
                 <span className="text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">NSFW Optimized</span>
               </div>
-              <div className="flex flex-col items-center gap-1 group cursor-default">
-                <span className="font-black text-xl tracking-tighter group-hover:text-primary transition-colors">GPT-4o</span>
-                <span className="text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">OpenAI</span>
+              <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
+                <span className="font-black text-xl tracking-tighter group-hover:text-primary transition-colors">DeepSeek R1</span>
+                <span className="text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Reasoning</span>
               </div>
-              <div className="flex flex-col items-center gap-1 group cursor-default">
+              <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
+                <span className="font-black text-xl tracking-tighter group-hover:text-primary transition-colors">Qwen 235B</span>
+                <span className="text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Elite Performance</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
                 <span className="font-black text-xl tracking-tighter group-hover:text-primary transition-colors">o1-Reasoning</span>
                 <span className="text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Deep Logic</span>
               </div>

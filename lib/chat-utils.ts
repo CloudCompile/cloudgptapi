@@ -183,6 +183,25 @@ export const modelAliases: Record<string, string> = {
   'llama-3.3-70b-liz': 'liz-llama-3.3-70b',
 };
 
+// Provider-specific model mapping (CloudGPT ID -> Provider ID)
+export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
+  // Liz Proxy Mapping
+  'liz-claude-3-5-sonnet': 'claude-3-5-sonnet',
+  'liz-claude-3-opus': 'claude-3-opus',
+  'liz-gpt-4o': 'gpt-4o',
+  'liz-gemini-1.5-pro': 'gemini-1.5-pro',
+  'liz-deepseek-v3': 'deepseek-v3',
+  'liz-deepseek-r1': 'deepseek-r1',
+  'liz-o1': 'o1',
+  'liz-o3-mini': 'o3-mini',
+  'liz-qwen3-235b': 'qwen-235b',
+  'liz-llama-3.3-70b': 'llama-3.3-70b',
+  
+  // OpenRouter specific mappings if needed
+  'openai/gpt-4o': 'gpt-4o',
+  'anthropic/claude-3.5-sonnet': 'claude-3-5-sonnet',
+};
+
 export function resolveModelId(modelId: string): string {
   return modelAliases[modelId] || modelId;
 }

@@ -319,6 +319,7 @@ CloudGPT aggregates multiple top-tier AI providers:
 | **OpenRouter** | Gateway to a massive selection of models. |
 | **Stable Horde** | Community-driven distributed model network. |
 | **Meridian** | Specialized cognitive substrate with persistent memory. |
+| **Liz Proxy** | Premium bridge for flagship and NSFW-optimized models. |
 
 ### Popular Chat Models
 
@@ -329,6 +330,10 @@ CloudGPT aggregates multiple top-tier AI providers:
 | `gemini` | Gemini 3 Flash | Pollinations |
 | `deepseek` | DeepSeek V3.2 | Pollinations |
 | `meridian` | Meridian (Memory) | Meridian |
+| `liz-claude-3-5-sonnet` | Claude 3.5 Sonnet | Liz Proxy |
+| `liz-deepseek-r1` | DeepSeek R1 | Liz Proxy |
+| `liz-gpt-4o` | GPT-4o | Liz Proxy |
+| `liz-o1` | o1-Reasoning | Liz Proxy |
 | `llama-3.3-70b-instruct:free` | Llama 3.3 70B | Routeway |
 
 ### Popular Image Models
