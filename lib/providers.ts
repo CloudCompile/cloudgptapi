@@ -31,35 +31,35 @@ export interface VideoModel {
 
 // Available chat models by provider
 const POLLINATIONS_CHAT_MODELS: ChatModel[] = [
-  { id: 'nova-fast', name: 'Amazon Nova Micro', provider: 'pollinations', description: 'Amazon Nova Micro' },
-  { id: 'qwen-coder', name: 'Qwen3 Coder 30B', provider: 'pollinations', description: 'Qwen3 Coder 30B' },
-  { id: 'mistral', name: 'Mistral Small 3.2 24B', provider: 'pollinations', description: 'Mistral Small 3.2 24B' },
-  { id: 'openai-fast', name: 'OpenAI GPT-5 Nano', provider: 'pollinations', description: 'OpenAI GPT-5 Nano' },
-  { id: 'grok', name: 'xAI Grok 4 Fast', provider: 'pollinations', description: 'xAI Grok 4 Fast' },
-  { id: 'openai', name: 'OpenAI GPT-5 Mini', provider: 'pollinations', description: 'OpenAI GPT-5 Mini' },
-  { id: 'perplexity-fast', name: 'Perplexity Sonar', provider: 'pollinations', description: 'Perplexity Sonar' },
-  { id: 'chickytutor', name: 'ChickyTutor AI Language Tutor', provider: 'pollinations', description: 'ChickyTutor AI Language Tutor' },
-  { id: 'minimax', name: 'MiniMax M2.1', provider: 'pollinations', description: 'MiniMax M2.1' },
-  { id: 'deepseek', name: 'DeepSeek V3.2', provider: 'pollinations', description: 'DeepSeek V3.2' },
-  { id: 'glm', name: 'Z.ai GLM-4.7', provider: 'pollinations', description: 'Z.ai GLM-4.7' },
-  { id: 'kimi-k2-thinking', name: 'Moonshot Kimi K2 Thinking', provider: 'pollinations', description: 'Moonshot Kimi K2 Thinking' },
-  { id: 'midijourney', name: 'MIDIjourney', provider: 'pollinations', description: 'MIDIjourney' },
-  { id: 'perplexity-reasoning', name: 'Perplexity Sonar Reasoning', provider: 'pollinations', description: 'Perplexity Sonar Reasoning' },
-  { id: 'openai-large', name: 'OpenAI GPT-5.2', provider: 'pollinations', description: 'OpenAI GPT-5.2' },
-  { id: 'openai-audio', name: 'OpenAI GPT-4o Mini Audio', provider: 'pollinations', description: 'OpenAI GPT-4o Mini Audio' },
+  { id: 'deepseek', name: 'DeepSeek V3.2', provider: 'pollinations', description: 'DeepSeek V3.2', contextWindow: 400, usageWeight: 10 },
+  { id: 'chickytutor', name: 'ChickyTutor AI Language Tutor', provider: 'pollinations', description: 'ChickyTutor AI Language Tutor', contextWindow: 200, usageWeight: 5 },
+  { id: 'kimi-k2-thinking', name: 'Moonshot Kimi K2 Thinking', provider: 'pollinations', description: 'Moonshot Kimi K2 Thinking', contextWindow: 200, usageWeight: 15 },
+  { id: 'openai-audio', name: 'OpenAI GPT-4o Mini Audio', provider: 'pollinations', description: 'OpenAI GPT-4o Mini Audio', contextWindow: 150, usageWeight: 5 },
+  { id: 'midijourney', name: 'MIDIjourney', provider: 'pollinations', description: 'MIDIjourney', contextWindow: 150, usageWeight: 20 },
+  { id: 'glm', name: 'Z.ai GLM-4.7', provider: 'pollinations', description: 'Z.ai GLM-4.7', contextWindow: 150, usageWeight: 10 },
+  { id: 'minimax', name: 'MiniMax M2.1', provider: 'pollinations', description: 'MiniMax M2.1', contextWindow: 150, usageWeight: 8 },
+  { id: 'openai-large', name: 'OpenAI GPT-5.2', provider: 'pollinations', description: 'OpenAI GPT-5.2', contextWindow: 100, usageWeight: 40 },
+  { id: 'perplexity-reasoning', name: 'Perplexity Sonar Reasoning', provider: 'pollinations', description: 'Perplexity Sonar Reasoning', contextWindow: 100, usageWeight: 25 },
+  { id: 'nova-fast', name: 'Amazon Nova Micro', provider: 'pollinations', description: 'Amazon Nova Micro', contextWindow: 24400, usageWeight: 1 },
+  { id: 'mistral', name: 'Mistral Small 3.2 24B', provider: 'pollinations', description: 'Mistral Small 3.2 24B', contextWindow: 2000, usageWeight: 1 },
+  { id: 'qwen-coder', name: 'Qwen3 Coder 30B', provider: 'pollinations', description: 'Qwen3 Coder 30B', contextWindow: 1600, usageWeight: 1 },
+  { id: 'grok', name: 'xAI Grok 4 Fast', provider: 'pollinations', description: 'xAI Grok 4 Fast', contextWindow: 900, usageWeight: 1 },
+  { id: 'openai', name: 'OpenAI GPT-5 Mini', provider: 'pollinations', description: 'OpenAI GPT-5 Mini', contextWindow: 750, usageWeight: 1 },
+  { id: 'perplexity-fast', name: 'Perplexity Sonar', provider: 'pollinations', description: 'Perplexity Sonar', contextWindow: 750, usageWeight: 1 },
+  { id: 'openai-fast', name: 'OpenAI GPT-5 Nano', provider: 'pollinations', description: 'OpenAI GPT-5 Nano', contextWindow: 700, usageWeight: 1 },
 ];
 
 const GEMINI_CHAT_MODELS: ChatModel[] = [
-  { id: 'gemini-fast', name: 'Google Gemini 2.5 Flash Lite', provider: 'gemini', description: 'Google Gemini 2.5 Flash Lite' },
-  { id: 'gemini', name: 'Google Gemini 3 Flash', provider: 'gemini', description: 'Google Gemini 3 Flash' },
-  { id: 'gemini-search', name: 'Google Gemini 3 Flash', provider: 'gemini', description: 'Google Gemini 3 Flash' },
-  { id: 'gemini-large', name: 'Google Gemini 3 Pro', provider: 'gemini', description: 'Google Gemini 3 Pro' },
+  { id: 'gemini-search', name: 'Google Gemini 3 Flash', provider: 'gemini', description: 'Google Gemini 3 Flash (Search)', contextWindow: 200, usageWeight: 10 },
+  { id: 'gemini', name: 'Google Gemini 3 Flash', provider: 'gemini', description: 'Google Gemini 3 Flash', contextWindow: 150, usageWeight: 8 },
+  { id: 'gemini-large', name: 'Google Gemini 3 Pro', provider: 'gemini', description: 'Google Gemini 3 Pro', contextWindow: 30, usageWeight: 25 },
+  { id: 'gemini-fast', name: 'Google Gemini 2.5 Flash Lite', provider: 'gemini', description: 'Google Gemini 2.5 Flash Lite', contextWindow: 2000, usageWeight: 1 },
 ];
 
 const CLAUDE_CHAT_MODELS: ChatModel[] = [
-  { id: 'claude-fast', name: 'Anthropic Claude Haiku 4.5', provider: 'claude', description: 'Anthropic Claude Haiku 4.5' },
-  { id: 'claude', name: 'Anthropic Claude Sonnet 4.5', provider: 'claude', description: 'Anthropic Claude Sonnet 4.5' },
-  { id: 'claude-large', name: 'Anthropic Claude Opus 4.5', provider: 'claude', description: 'Anthropic Claude Opus 4.5' },
+  { id: 'claude-fast', name: 'Anthropic Claude Haiku 4.5', provider: 'claude', description: 'Anthropic Claude Haiku 4.5', contextWindow: 55, usageWeight: 5 },
+  { id: 'claude', name: 'Anthropic Claude Sonnet 4.5', provider: 'claude', description: 'Anthropic Claude Sonnet 4.5', contextWindow: 30, usageWeight: 15 },
+  { id: 'claude-large', name: 'Anthropic Claude Opus 4.5', provider: 'claude', description: 'Anthropic Claude Opus 4.5', contextWindow: 20, usageWeight: 40 },
 ];
 
 const OPENROUTER_CHAT_MODELS: ChatModel[] = [
@@ -192,25 +192,25 @@ const POE_CHAT_MODELS: ChatModel[] = [
 
 const LIZ_CHAT_MODELS: ChatModel[] = [
   // Liz's flagship models (proxied)
-  { id: 'liz-claude-3-7-sonnet', name: 'Claude 3.7 Sonnet (Liz)', provider: 'liz', description: 'Anthropic Claude 3.7 Sonnet via Liz Proxy', usageWeight: 15 },
-  { id: 'liz-claude-3-5-sonnet', name: 'Claude 3.5 Sonnet (Liz)', provider: 'liz', description: 'Anthropic Claude 3.5 Sonnet via Liz Proxy', usageWeight: 15 },
-  { id: 'liz-claude-3-opus', name: 'Claude 3 Opus (Liz)', provider: 'liz', description: 'Anthropic Claude 3 Opus via Liz Proxy (NSFW/Smut Optimized)', usageWeight: 30 },
-  { id: 'liz-claude-sonnet-4', name: 'Claude Sonnet 4 (Liz)', provider: 'liz', description: 'Anthropic Claude Sonnet 4 via Liz Proxy', usageWeight: 15 },
-  { id: 'liz-claude-opus-4', name: 'Claude Opus 4 (Liz)', provider: 'liz', description: 'Anthropic Claude Opus 4 via Liz Proxy (Creative/NSFW)', usageWeight: 30 },
-  { id: 'liz-claude-opus-4.5', name: 'Claude Opus 4.5 (Liz)', provider: 'liz', description: 'Anthropic Claude Opus 4.5 via Liz Proxy (Ultimate Reasoning)', usageWeight: 40 },
-  { id: 'liz-gpt-4o', name: 'GPT-4o (Liz)', provider: 'liz', description: 'OpenAI GPT-4o via Liz Proxy', usageWeight: 15 },
-  { id: 'liz-gemini-3-pro', name: 'Gemini 3 Pro (Liz)', provider: 'liz', description: 'Google Gemini 3 Pro via Liz Proxy (Preview)', usageWeight: 25 },
-  { id: 'liz-gemini-3-flash', name: 'Gemini 3 Flash (Liz)', provider: 'liz', description: 'Google Gemini 3 Flash via Liz Proxy (Preview)', usageWeight: 10 },
-  { id: 'liz-gemini-2.5-pro', name: 'Gemini 2.5 Pro (Liz)', provider: 'liz', description: 'Google Gemini 2.5 Pro via Liz Proxy', usageWeight: 20 },
-  { id: 'liz-gemini-2.5-flash', name: 'Gemini 2.5 Flash (Liz)', provider: 'liz', description: 'Google Gemini 2.5 Flash via Liz Proxy', usageWeight: 5 },
-  { id: 'liz-gemini-2.0-flash', name: 'Gemini 2.0 Flash (Liz)', provider: 'liz', description: 'Google Gemini 2.0 Flash via Liz Proxy', usageWeight: 5 },
-  { id: 'liz-gemini-1.5-pro', name: 'Gemini 1.5 Pro (Liz)', provider: 'liz', description: 'Google Gemini 1.5 Pro via Liz Proxy', usageWeight: 20 },
-  { id: 'liz-deepseek-v3', name: 'DeepSeek V3 (Liz)', provider: 'liz', description: 'DeepSeek V3 via Liz Proxy', usageWeight: 10 },
-  { id: 'liz-deepseek-r1', name: 'DeepSeek R1 (Liz)', provider: 'liz', description: 'DeepSeek R1 Reasoning via Liz Proxy', usageWeight: 25 },
-  { id: 'liz-o1', name: 'OpenAI o1 (Liz)', provider: 'liz', description: 'OpenAI o1 Reasoning via Liz Proxy', usageWeight: 40 },
-  { id: 'liz-o3-mini', name: 'OpenAI o3-mini (Liz)', provider: 'liz', description: 'OpenAI o3-mini Reasoning via Liz Proxy', usageWeight: 20 },
-  { id: 'liz-qwen3-235b', name: 'Qwen3 235B (Liz)', provider: 'liz', description: 'Qwen3 235B a22b via Liz Proxy', usageWeight: 15 },
-  { id: 'liz-llama-3.3-70b', name: 'Llama 3.3 70B (Liz)', provider: 'liz', description: 'Meta Llama 3.3 70B via Liz Proxy', usageWeight: 12 },
+  { id: 'liz-claude-3-7-sonnet', name: 'Claude 3.7 Sonnet (Liz)', provider: 'liz', description: 'Anthropic Claude 3.7 Sonnet via Liz Proxy', contextWindow: 200, usageWeight: 15 },
+  { id: 'liz-claude-3-5-sonnet', name: 'Claude 3.5 Sonnet (Liz)', provider: 'liz', description: 'Anthropic Claude 3.5 Sonnet via Liz Proxy', contextWindow: 200, usageWeight: 15 },
+  { id: 'liz-claude-3-opus', name: 'Claude 3 Opus (Liz)', provider: 'liz', description: 'Anthropic Claude 3 Opus via Liz Proxy (NSFW/Smut Optimized)', contextWindow: 200, usageWeight: 30 },
+  { id: 'liz-claude-sonnet-4', name: 'Claude Sonnet 4 (Liz)', provider: 'liz', description: 'Anthropic Claude Sonnet 4 via Liz Proxy', contextWindow: 30, usageWeight: 15 },
+  { id: 'liz-claude-opus-4', name: 'Claude Opus 4 (Liz)', provider: 'liz', description: 'Anthropic Claude Opus 4 via Liz Proxy (Creative/NSFW)', contextWindow: 20, usageWeight: 30 },
+  { id: 'liz-claude-opus-4.5', name: 'Claude Opus 4.5 (Liz)', provider: 'liz', description: 'Anthropic Claude Opus 4.5 via Liz Proxy (Ultimate Reasoning)', contextWindow: 20, usageWeight: 40 },
+  { id: 'liz-gpt-4o', name: 'GPT-4o (Liz)', provider: 'liz', description: 'OpenAI GPT-4o via Liz Proxy', contextWindow: 128, usageWeight: 15 },
+  { id: 'liz-gemini-3-pro', name: 'Gemini 3 Pro (Liz)', provider: 'liz', description: 'Google Gemini 3 Pro via Liz Proxy (Preview)', contextWindow: 30, usageWeight: 25 },
+  { id: 'liz-gemini-3-flash', name: 'Gemini 3 Flash (Liz)', provider: 'liz', description: 'Google Gemini 3 Flash via Liz Proxy (Preview)', contextWindow: 150, usageWeight: 10 },
+  { id: 'liz-gemini-2.5-pro', name: 'Gemini 2.5 Pro (Liz)', provider: 'liz', description: 'Google Gemini 2.5 Pro via Liz Proxy', contextWindow: 128, usageWeight: 20 },
+  { id: 'liz-gemini-2.5-flash', name: 'Gemini 2.5 Flash (Liz)', provider: 'liz', description: 'Google Gemini 2.5 Flash via Liz Proxy', contextWindow: 128, usageWeight: 5 },
+  { id: 'liz-gemini-2.0-flash', name: 'Gemini 2.0 Flash (Liz)', provider: 'liz', description: 'Google Gemini 2.0 Flash via Liz Proxy', contextWindow: 128, usageWeight: 5 },
+  { id: 'liz-gemini-1.5-pro', name: 'Gemini 1.5 Pro (Liz)', provider: 'liz', description: 'Google Gemini 1.5 Pro via Liz Proxy', contextWindow: 128, usageWeight: 20 },
+  { id: 'liz-deepseek-v3', name: 'DeepSeek V3 (Liz)', provider: 'liz', description: 'DeepSeek V3 via Liz Proxy', contextWindow: 400, usageWeight: 10 },
+  { id: 'liz-deepseek-r1', name: 'DeepSeek R1 (Liz)', provider: 'liz', description: 'DeepSeek R1 Reasoning via Liz Proxy', contextWindow: 128, usageWeight: 25 },
+  { id: 'liz-o1', name: 'OpenAI o1 (Liz)', provider: 'liz', description: 'OpenAI o1 Reasoning via Liz Proxy', contextWindow: 128, usageWeight: 40 },
+  { id: 'liz-o3-mini', name: 'OpenAI o3-mini (Liz)', provider: 'liz', description: 'OpenAI o3-mini Reasoning via Liz Proxy', contextWindow: 128, usageWeight: 20 },
+  { id: 'liz-qwen3-235b', name: 'Qwen3 235B (Liz)', provider: 'liz', description: 'Qwen3 235B a22b via Liz Proxy', contextWindow: 128, usageWeight: 15 },
+  { id: 'liz-llama-3.3-70b', name: 'Llama 3.3 70B (Liz)', provider: 'liz', description: 'Meta Llama 3.3 70B via Liz Proxy', contextWindow: 128, usageWeight: 12 },
 ];
 
 export const CHAT_MODELS: ChatModel[] = [
@@ -227,26 +227,51 @@ export const CHAT_MODELS: ChatModel[] = [
 
 // Premium models that require a subscription
 export const PREMIUM_MODELS = new Set([
-  // Flagship & Next-Gen Chat
-  'openai-large', // GPT-5.2
-  'openai',       // GPT-5 Mini
-  'claude',       // Claude Sonnet 4.5
-  'claude-large', // Claude Opus 4.5
-  'gemini-large', // Google Gemini 3 Pro
+  // Flagship & Next-Gen Chat (User specified Premium)
+  'deepseek',
+  'gemini-search',
+  'chickytutor',
+  'kimi-k2-thinking',
+  'openai-audio',
+  'gemini',
+  'midijourney',
+  'glm',
+  'minimax',
+  'openai-large',
+  'perplexity-reasoning',
+  'claude-fast',
+  'claude',
+  'gemini-large',
+  'claude-large',
+
+  // Liz Premium Models
+  'liz-claude-3-7-sonnet',
+  'liz-claude-3-5-sonnet',
+  'liz-claude-3-opus',
+  'liz-claude-sonnet-4',
+  'liz-claude-opus-4',
+  'liz-claude-opus-4.5',
+  'liz-gpt-4o',
+  'liz-gemini-3-pro',
+  'liz-gemini-3-flash',
+  'liz-gemini-2.5-pro',
+  'liz-gemini-2.5-flash',
+  'liz-gemini-2.0-flash',
+  'liz-gemini-1.5-pro',
+  'liz-deepseek-v3',
+  'liz-deepseek-r1',
+  'liz-o1',
+  'liz-o3-mini',
+  'liz-qwen3-235b',
+  'liz-llama-3.3-70b',
+
+  // Other Existing Premium Models
   'gemini-2.5-pro',
   'gemini-3-pro-preview',
-  'grok',         // xAI Grok 4 Fast
   
   // Reasoning & Specialized
   'deepseek-r1',
-  'perplexity-reasoning',
-  'kimi-k2-thinking',
-  'gemini-search',
-  'openai-audio',
   'meridian',
-  'chickytutor',
-  'midijourney',
-  'minimax',
   
   // GitHub Premium Models
   'AI21-Jamba-1.5-Large',
@@ -257,11 +282,8 @@ export const PREMIUM_MODELS = new Set([
   'o1-preview',
   'o1-mini',
   'o1',
-  'gpt-5-nano',
-  'gpt-5-mini',
   'gpt-5-chat',
   'gpt-5',
-  'gpt-4.1-nano',
   'gpt-4.1-mini',
   'gpt-4.1',
   'Meta-Llama-3.1-405B-Instruct',
@@ -273,9 +295,6 @@ export const PREMIUM_MODELS = new Set([
   'Cohere-command-r-plus-08-2024',
   'Mistral-medium-3-25.05',
   'DeepSeek-V3-0324',
-  'Stable-Diffusion-3.5-Large',
-  'HunyuanImage-3.0',
-  'Qwen-Image',
   
   // Poe Premium Models
   'claude-sonnet-3.5',
@@ -293,19 +312,6 @@ export const PREMIUM_MODELS = new Set([
   'deepseek-r1',
   'mistral-large-2',
   'grok-4-fast-non-reasoning',
-  
-  // Liz Premium Models
-  'liz-claude-3-7-sonnet',
-  'liz-claude-3-5-sonnet',
-  'liz-claude-3-opus',
-  'liz-gpt-4o',
-  'liz-gemini-1.5-pro',
-  'liz-deepseek-v3',
-  'liz-deepseek-r1',
-  'liz-o1',
-  'liz-o3-mini',
-  'liz-qwen3-235b',
-  'liz-llama-3.3-70b',
   
   // Video (All)
   'veo',

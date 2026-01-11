@@ -88,6 +88,14 @@ export default function ModelsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedModel, setSelectedModel] = useState<ModelType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [usage, setUsage] = useState<{
+    plan: string;
+    limit: number;
+    remaining: number;
+    used: number;
+    resetAt: number;
+    isPeakHours: boolean;
+  } | null>(null);
 
   const PROVIDERS = useMemo(() => {
     const providers = new Set(ALL_MODELS.map(m => m.provider.toLowerCase()));
@@ -141,6 +149,18 @@ export default function ModelsPage() {
     }
   }, []);
 
+  const fetchUsage = useCallback(async () => {
+    try {
+      const response = await fetch('/api/usage');
+      if (response.ok) {
+        const data = await response.json();
+        setUsage(data);
+      }
+    } catch (err) {
+      console.error('Usage fetch error:', err);
+    }
+  }, []);
+
   useEffect(() => {
     // Initialize statuses
     const initialStatuses: Record<string, ModelStatus> = {};
@@ -150,10 +170,14 @@ export default function ModelsPage() {
     setStatuses(initialStatuses);
 
     fetchStatuses();
-    const interval = setInterval(fetchStatuses, 60000); // Refresh every minute
+    fetchUsage();
+    const interval = setInterval(() => {
+      fetchStatuses();
+      fetchUsage();
+    }, 60000); // Refresh every minute
 
     return () => clearInterval(interval);
-  }, [fetchStatuses]);
+  }, [fetchStatuses, fetchUsage]);
 
   const filteredModels = useMemo(() => {
     return ALL_MODELS.filter(model => {
@@ -172,6 +196,25 @@ export default function ModelsPage() {
       const matchesProvider = selectedProvider === 'all' || model.provider.toLowerCase() === selectedProvider;
       
       return matchesSearch && matchesTab && matchesProvider;
+    }).sort((a, b) => {
+      // First sort by Premium status (Premium first)
+      const isPremiumA = !((a.id.endsWith(':free') || !PREMIUM_MODELS.has(a.id)));
+      const isPremiumB = !((b.id.endsWith(':free') || !PREMIUM_MODELS.has(b.id)));
+      
+      if (isPremiumA !== isPremiumB) {
+        return isPremiumA ? -1 : 1;
+      }
+      
+      // Then sort by context window descending
+      const contextA = (a as any).contextWindow || 0;
+      const contextB = (b as any).contextWindow || 0;
+      
+      if (contextA !== contextB) {
+        return contextB - contextA;
+      }
+      
+      // Fallback to name
+      return a.name.localeCompare(b.name);
     });
   }, [searchQuery, activeTab, selectedProvider]);
 
@@ -237,6 +280,14 @@ export default function ModelsPage() {
               icon={<Zap className="h-5 w-5 text-amber-500" />}
               trend="-12ms"
             />
+            {usage && (
+              <StatCard 
+                label={`${usage.plan.toUpperCase()} Usage`} 
+                value={`${usage.used}/${usage.limit}`} 
+                icon={<TrendingUp className="h-5 w-5 text-blue-500" />}
+                trend={`${usage.remaining} left`}
+              />
+            )}
           </div>
         </div>
 

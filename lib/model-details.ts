@@ -41,7 +41,7 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['Complex problem solving', 'Code generation and debugging', 'Creative writing', 'Data analysis', 'General conversation'],
     technicalSpecs: {
-      contextWindow: '128K tokens',
+      contextWindow: '750',
       architecture: 'Transformer-based',
       releaseDate: '2024'
     }
@@ -66,7 +66,7 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['Quick queries', 'Simple coding tasks', 'General conversation', 'Content summarization'],
     technicalSpecs: {
-      contextWindow: '128K tokens',
+      contextWindow: '700',
       architecture: 'Transformer-based',
       releaseDate: '2024'
     }
@@ -92,7 +92,7 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['Code review and generation', 'Technical writing', 'Data analysis', 'Research assistance', 'Safe AI applications'],
     technicalSpecs: {
-      contextWindow: '200K tokens',
+      contextWindow: '30',
       architecture: 'Constitutional AI',
       releaseDate: '2024'
     }
@@ -118,8 +118,83 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['Real-time chat', 'Multimodal tasks', 'Quick information retrieval', 'Education', 'General assistance'],
     technicalSpecs: {
-      contextWindow: '1M tokens',
+      contextWindow: '150',
       architecture: 'Transformer-based',
+      releaseDate: '2024'
+    }
+  },
+  'gemini-large': {
+    id: 'gemini-large',
+    name: 'Google Gemini 3 Pro',
+    provider: 'Google',
+    family: 'Gemini 3',
+    description: 'Google Gemini 3 Pro flagship model',
+    longDescription: 'Gemini 3 Pro is Google\'s most capable model, offering state-of-the-art performance in complex reasoning, multimodal understanding, and creative tasks.',
+    strengths: [
+      'Top-tier reasoning and logic',
+      'Superior multimodal understanding',
+      'Excellent creative capabilities',
+      'Large context window',
+      'Strong coding performance'
+    ],
+    weaknesses: [
+      'Higher latency than Flash',
+      'Limited availability in some regions'
+    ],
+    useCases: ['Complex problem solving', 'Multimodal research', 'Advanced creative work', 'Deep reasoning'],
+    technicalSpecs: {
+      contextWindow: '30',
+      architecture: 'Gemini 3 Architecture',
+      releaseDate: '2025'
+    }
+  },
+  'chickytutor': {
+    id: 'chickytutor',
+    name: 'ChickyTutor AI Language Tutor',
+    provider: 'Pollinations',
+    family: 'Chicky',
+    description: 'AI Language Learning Assistant',
+    longDescription: 'ChickyTutor is a specialized AI model designed to help users learn new languages through interactive conversation, grammar correction, and cultural insights.',
+    strengths: [
+      'Patient and encouraging tone',
+      'Excellent grammar correction',
+      'Natural conversational style',
+      'Supports multiple languages',
+      'Cultural context awareness'
+    ],
+    weaknesses: [
+      'Less capable for general coding',
+      'May struggle with very technical scientific topics'
+    ],
+    useCases: ['Language learning', 'Conversation practice', 'Grammar check', 'Translation help'],
+    technicalSpecs: {
+      contextWindow: '200',
+      architecture: 'Transformer-based',
+      releaseDate: '2024'
+    }
+  },
+  'midijourney': {
+    id: 'midijourney',
+    name: 'MIDIjourney',
+    provider: 'Pollinations',
+    family: 'MIDI',
+    description: 'AI Music & MIDI Generation Model',
+    longDescription: 'MIDIjourney is a specialized model for generating musical compositions in MIDI format, capable of creating complex melodies, harmonies, and rhythms across various genres.',
+    strengths: [
+      'Excellent musical theory knowledge',
+      'Generates high-quality MIDI data',
+      'Supports multiple musical genres',
+      'Creative composition abilities',
+      'Good at following stylistic instructions'
+    ],
+    weaknesses: [
+      'Does not output raw audio (MIDI only)',
+      'Not for general text conversation'
+    ],
+    useCases: ['Music composition', 'Melody generation', 'Chord progression ideas', 'Songwriting assistance'],
+    technicalSpecs: {
+      contextWindow: '150',
+      architecture: 'Specialized MIDI Transformer',
       releaseDate: '2024'
     }
   },
@@ -128,25 +203,249 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     name: 'DeepSeek V3.2',
     provider: 'Pollinations',
     family: 'DeepSeek',
-    description: 'DeepSeek V3.2 model',
-    longDescription: 'DeepSeek V3.2 is a powerful open-source language model with strong performance on coding and reasoning tasks.',
+    description: 'DeepSeek V3.2 reasoning model',
+    longDescription: 'DeepSeek V3.2 is a state-of-the-art open-source language model optimized for deep reasoning, mathematical problem solving, and complex logic.',
     strengths: [
-      'Excellent coding capabilities',
-      'Strong mathematical reasoning',
-      'Open source',
-      'Cost-effective',
-      'Good multilingual support'
+      'Exceptional reasoning and logic',
+      'Strong mathematical capabilities',
+      'Excellent coding performance',
+      'Large context window',
+      'Highly cost-effective'
     ],
     weaknesses: [
-      'Less known than major providers',
-      'May lack some creative writing finesse',
-      'Smaller community support'
+      'Can be slower for simple tasks',
+      'Less creative than some alternatives'
     ],
-    useCases: ['Code generation', 'Mathematical problem solving', 'Technical documentation', 'Algorithm design'],
+    useCases: ['Complex problem solving', 'Math and logic', 'Scientific research', 'Advanced coding'],
     technicalSpecs: {
-      contextWindow: '64K tokens',
+      contextWindow: '400',
       architecture: 'Transformer-based',
       releaseDate: '2024'
+    }
+  },
+  'gemini-search': {
+    id: 'gemini-search',
+    name: 'Google Gemini 3 Flash (Search)',
+    provider: 'Google',
+    family: 'Gemini 3',
+    description: 'Google Gemini 3 Flash with Search & Vision',
+    longDescription: 'Gemini 3 Flash optimized for web search, real-time information retrieval, and vision tasks.',
+    strengths: [
+      'Real-time web search integration',
+      'Superior vision and image understanding',
+      'Excellent coding assistance',
+      'Fast response times',
+      'Large context window'
+    ],
+    weaknesses: [
+      'Less deep reasoning than Pro versions',
+      'Search results depend on availability'
+    ],
+    useCases: ['Information retrieval', 'Image analysis', 'Quick coding tasks', 'General assistance'],
+    technicalSpecs: {
+      contextWindow: '200',
+      architecture: 'Gemini 3 Architecture',
+      releaseDate: '2025'
+    }
+  },
+  'kimi-k2-thinking': {
+    id: 'kimi-k2-thinking',
+    name: 'Moonshot Kimi K2 Thinking',
+    provider: 'Moonshot AI',
+    family: 'Kimi',
+    description: 'Moonshot Kimi K2 with deep thinking capabilities',
+    longDescription: 'Kimi K2 Thinking is designed for long-context reasoning and deep analysis of complex information.',
+    strengths: [
+      'Deep thinking and analysis',
+      'Excellent long-context performance',
+      'Strong logical reasoning',
+      'Large context window',
+      'Highly accurate responses'
+    ],
+    weaknesses: [
+      'Higher latency due to thinking process',
+      'Limited multimodal support'
+    ],
+    useCases: ['Deep analysis', 'Long document processing', 'Logical deduction', 'Research'],
+    technicalSpecs: {
+      contextWindow: '200',
+      architecture: 'Transformer-based',
+      releaseDate: '2024'
+    }
+  },
+  'openai-audio': {
+    id: 'openai-audio',
+    name: 'OpenAI GPT-4o Mini Audio',
+    provider: 'OpenAI',
+    family: 'GPT-4o',
+    description: 'Multimodal GPT-4o Mini with Audio support',
+    longDescription: 'A specialized version of GPT-4o Mini that supports vision, audio input, and high-quality audio output.',
+    strengths: [
+      'Full audio input and output',
+      'Vision and image understanding',
+      'Fast and efficient',
+      'Large context window',
+      'Natural voice generation'
+    ],
+    weaknesses: [
+      'Less reasoning power than GPT-5',
+      'Audio processing adds slight latency'
+    ],
+    useCases: ['Voice assistants', 'Audio-to-text', 'Image analysis', 'Real-time conversation'],
+    technicalSpecs: {
+      contextWindow: '150',
+      architecture: 'Transformer-based',
+      releaseDate: '2024'
+    }
+  },
+  'glm': {
+    id: 'glm',
+    name: 'Z.ai GLM-4.7',
+    provider: 'Z-AI',
+    family: 'GLM',
+    description: 'GLM-4.7 reasoning model',
+    longDescription: 'The latest version of the General Language Model (GLM), optimized for reasoning and logic.',
+    strengths: [
+      'Strong logical reasoning',
+      'Good multilingual support',
+      'Fast response times',
+      'Large context window',
+      'Balanced performance'
+    ],
+    weaknesses: [
+      'Less vision capability than competitors',
+      'Knowledge cutoff concerns'
+    ],
+    useCases: ['General reasoning', 'Translation', 'Coding assistance', 'Content generation'],
+    technicalSpecs: {
+      contextWindow: '150',
+      architecture: 'Transformer-based',
+      releaseDate: '2024'
+    }
+  },
+  'minimax': {
+    id: 'minimax',
+    name: 'MiniMax M2.1',
+    provider: 'MiniMax',
+    family: 'MiniMax',
+    description: 'MiniMax M2.1 reasoning model',
+    longDescription: 'MiniMax M2.1 is a high-performance reasoning model with strong logic and creative capabilities.',
+    strengths: [
+      'Deep logical reasoning',
+      'Creative writing ability',
+      'Fast and reliable',
+      'Large context window',
+      'Strong performance in Chinese'
+    ],
+    weaknesses: [
+      'Smaller global community',
+      'Limited multimodal features'
+    ],
+    useCases: ['Reasoning tasks', 'Creative writing', 'General chat', 'Educational support'],
+    technicalSpecs: {
+      contextWindow: '150',
+      architecture: 'Transformer-based',
+      releaseDate: '2024'
+    }
+  },
+  'openai-large': {
+    id: 'openai-large',
+    name: 'OpenAI GPT-5.2',
+    provider: 'OpenAI',
+    family: 'GPT-5',
+    description: 'OpenAI GPT-5.2 flagship model',
+    longDescription: 'The next generation of OpenAI\'s flagship series, GPT-5.2 offers unparalleled reasoning and vision capabilities.',
+    strengths: [
+      'Ultimate reasoning performance',
+      'Superior vision and image understanding',
+      'Exceptional coding capabilities',
+      'Highly stable and reliable',
+      'Large context window'
+    ],
+    weaknesses: [
+      'Higher usage weight',
+      'Can be verbose'
+    ],
+    useCases: ['Deep analysis', 'Complex software engineering', 'Advanced scientific research', 'High-end creative projects'],
+    technicalSpecs: {
+      contextWindow: '100',
+      architecture: 'Next-gen Transformer',
+      releaseDate: '2025'
+    }
+  },
+  'perplexity-reasoning': {
+    id: 'perplexity-reasoning',
+    name: 'Perplexity Sonar Reasoning',
+    provider: 'Perplexity',
+    family: 'Sonar',
+    description: 'Perplexity Sonar with Search & Reasoning',
+    longDescription: 'Perplexity Sonar Reasoning combines deep logical thinking with real-time web search capabilities.',
+    strengths: [
+      'Real-time web search',
+      'Deep reasoning and logic',
+      'Excellent for research',
+      'Highly accurate information',
+      'Large context window'
+    ],
+    weaknesses: [
+      'Higher latency than standard Sonar',
+      'Search results depend on availability'
+    ],
+    useCases: ['In-depth research', 'Fact-checking', 'Complex information retrieval', 'Logical analysis'],
+    technicalSpecs: {
+      contextWindow: '100',
+      architecture: 'Transformer-based',
+      releaseDate: '2024'
+    }
+  },
+  'claude-fast': {
+    id: 'claude-fast',
+    name: 'Anthropic Claude Haiku 4.5',
+    provider: 'Anthropic',
+    family: 'Claude 4.5',
+    description: 'Fast Anthropic Claude Haiku 4.5 with Vision',
+    longDescription: 'Claude Haiku 4.5 is the fastest model in the Claude 4.5 family, now with built-in vision support.',
+    strengths: [
+      'Extremely fast response times',
+      'Vision and image understanding',
+      'Highly cost-effective',
+      'Excellent for simple tasks',
+      'Balanced context window'
+    ],
+    weaknesses: [
+      'Less reasoning power than Sonnet/Opus',
+      'Smaller context window'
+    ],
+    useCases: ['Quick queries', 'Image tagging', 'Simple coding', 'General chat'],
+    technicalSpecs: {
+      contextWindow: '55',
+      architecture: 'Constitutional AI',
+      releaseDate: '2025'
+    }
+  },
+  'claude-large': {
+    id: 'claude-large',
+    name: 'Anthropic Claude Opus 4.5',
+    provider: 'Anthropic',
+    family: 'Claude 4.5',
+    description: 'Anthropic Claude Opus 4.5 flagship model',
+    longDescription: 'Claude Opus 4.5 is Anthropic\'s most powerful model, offering deep reasoning and superior vision capabilities.',
+    strengths: [
+      'Deep philosophical reasoning',
+      'Superior vision and image analysis',
+      'Highly creative expression',
+      'Exceptional at nuanced roleplay',
+      '20 context window'
+    ],
+    weaknesses: [
+      'Higher usage weight',
+      'Slower than Sonnet'
+    ],
+    useCases: ['Premium roleplay', 'Philosophical exploration', 'Creative writing', 'Deep emotional support'],
+    technicalSpecs: {
+      contextWindow: '20',
+      architecture: 'Constitutional AI',
+      releaseDate: '2025'
     }
   },
   'mistral': {
@@ -170,7 +469,7 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['Multilingual applications', 'European business use', 'Code generation', 'General reasoning'],
     technicalSpecs: {
-      contextWindow: '32K tokens',
+      contextWindow: '2000',
       architecture: 'Transformer-based',
       releaseDate: '2024'
     }
@@ -196,7 +495,102 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['Code generation', 'Code review', 'Debugging', 'API development', 'Technical documentation'],
     technicalSpecs: {
-      contextWindow: '32K tokens',
+      contextWindow: '1600',
+      architecture: 'Transformer-based',
+      releaseDate: '2024'
+    }
+  },
+  'nova-fast': {
+    id: 'nova-fast',
+    name: 'Amazon Nova Micro',
+    provider: 'Pollinations',
+    family: 'Nova',
+    description: 'Amazon Nova Micro',
+    longDescription: 'Amazon Nova Micro is a fast and efficient model optimized for quick responses and simple tasks.',
+    strengths: [
+      'Fast response times',
+      'Cost-effective',
+      'Good for simple queries',
+      'Efficient'
+    ],
+    weaknesses: [
+      'Limited reasoning capabilities',
+      'Smaller context window'
+    ],
+    useCases: ['Quick queries', 'Simple tasks', 'Summarization'],
+    technicalSpecs: {
+      contextWindow: '24400',
+      architecture: 'Transformer-based',
+      releaseDate: '2024'
+    }
+  },
+  'gemini-fast': {
+    id: 'gemini-fast',
+    name: 'Google Gemini 2.5 Flash Lite',
+    provider: 'Google',
+    family: 'Gemini 2.5',
+    description: 'Fast Google Gemini 2.5 Flash Lite',
+    longDescription: 'Gemini 2.5 Flash Lite is a lightweight, high-speed model from Google, perfect for low-latency tasks.',
+    strengths: [
+      'Extremely low latency',
+      'Efficient multimodal support',
+      'Fast response times',
+      'Cost-effective'
+    ],
+    weaknesses: [
+      'Lower reasoning power',
+      'Small context window'
+    ],
+    useCases: ['Real-time chat', 'Simple multimodal tasks', 'Quick queries'],
+    technicalSpecs: {
+      contextWindow: '2000',
+      architecture: 'Gemini Architecture',
+      releaseDate: '2024'
+    }
+  },
+  'grok': {
+    id: 'grok',
+    name: 'xAI Grok 4 Fast',
+    provider: 'xAI',
+    family: 'Grok',
+    description: 'xAI Grok 4 Fast',
+    longDescription: 'Grok 4 Fast is xAI\'s efficient and real-time model, offering a unique personality and fast response times.',
+    strengths: [
+      'Real-time information',
+      'Fast response times',
+      'Unique personality',
+      'Good general knowledge'
+    ],
+    weaknesses: [
+      'Limited context window',
+      'May be less stable than established models'
+    ],
+    useCases: ['Real-time news', 'Quick queries', 'General conversation'],
+    technicalSpecs: {
+      contextWindow: '900',
+      architecture: 'Transformer-based',
+      releaseDate: '2025'
+    }
+  },
+  'perplexity-fast': {
+    id: 'perplexity-fast',
+    name: 'Perplexity Sonar',
+    provider: 'Perplexity',
+    family: 'Sonar',
+    description: 'Fast Perplexity Sonar Search',
+    longDescription: 'Perplexity Sonar is optimized for fast web search and information retrieval.',
+    strengths: [
+      'Fast search results',
+      'Accurate information retrieval',
+      'Good for quick fact-checking'
+    ],
+    weaknesses: [
+      'Limited reasoning',
+      'Small context window'
+    ],
+    useCases: ['Quick search', 'Fact checking', 'General queries'],
+    technicalSpecs: {
+      contextWindow: '750',
       architecture: 'Transformer-based',
       releaseDate: '2024'
     }
@@ -220,7 +614,7 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['Roleplay', 'Complex Coding', 'Creative Writing', 'Deep Reasoning'],
     technicalSpecs: {
-      contextWindow: '200K tokens',
+      contextWindow: '200',
       architecture: 'Transformer-based',
       releaseDate: '2025'
     }
@@ -231,21 +625,21 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     provider: 'Liz Proxy',
     family: 'Claude 3.5',
     description: 'Anthropic Claude 3.5 Sonnet via Liz Proxy',
-    longDescription: 'Claude 3.5 Sonnet is Anthropic\'s most advanced model, offering state-of-the-art performance in coding, reasoning, and creative writing. This version is proxied through Liz for high reliability.',
+    longDescription: 'Claude 3.5 Sonnet is Anthropic\'s balanced model, offering the best combination of speed and intelligence for complex tasks.',
     strengths: [
-      'Top-tier coding capabilities',
-      'Nuanced reasoning and analysis',
-      'Excellent creative writing',
-      'Great at following complex instructions',
-      'High speed and responsiveness'
+      'Industry-leading speed',
+      'Superior coding and reasoning',
+      'Excellent vision capabilities',
+      'Nuanced writing and roleplay',
+      'Large context window'
     ],
     weaknesses: [
-      'Can be cautious on certain topics',
-      'Proxied access might add slight latency'
+      'Less reasoning than Opus',
+      'Can be blunt'
     ],
-    useCases: ['Advanced coding', 'Creative writing', 'Complex analysis', 'Instruction following', 'General assistance'],
+    useCases: ['Coding assistance', 'Vision tasks', 'Complex reasoning', 'Roleplay'],
     technicalSpecs: {
-      contextWindow: '200K tokens',
+      contextWindow: '200',
       architecture: 'Transformer-based',
       releaseDate: '2024'
     }
@@ -256,21 +650,21 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     provider: 'Liz Proxy',
     family: 'Claude 3',
     description: 'Anthropic Claude 3 Opus via Liz Proxy (NSFW/Smut Optimized)',
-    longDescription: 'Claude 3 Opus is Anthropic\'s most powerful model in the Claude 3 family, known for its deep reasoning and human-like expression. This Liz Proxy version is specifically optimized for creative freedom and NSFW content.',
+    longDescription: 'Claude 3 Opus is Anthropic\'s most powerful model, optimized by Liz for creative writing and unaligned responses.',
     strengths: [
-      'Deep, philosophical reasoning',
-      'Highly creative and expressive language',
-      'Optimized for roleplay and NSFW content',
-      'Excellent at long-form storytelling',
-      'Strong empathy and emotional intelligence'
+      'Deep philosophical reasoning',
+      'Superior roleplay and creative writing',
+      'Unmatched nuance and intelligence',
+      'Excellent for complex instructions',
+      'Optimized for NSFW/Smut content'
     ],
     weaknesses: [
-      'Slower than Sonnet 3.5',
-      'Higher usage weight'
+      'Higher latency',
+      'High usage weight'
     ],
-    useCases: ['Roleplay', 'Creative storytelling', 'Complex philosophical discussions', 'NSFW/Smut content generation', 'Deep analysis'],
+    useCases: ['Creative writing', 'Advanced roleplay', 'Complex problem solving', 'Nuanced conversation'],
     technicalSpecs: {
-      contextWindow: '200K tokens',
+      contextWindow: '200',
       architecture: 'Transformer-based',
       releaseDate: '2024'
     }
@@ -281,22 +675,22 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     provider: 'Liz Proxy',
     family: 'Claude 4',
     description: 'Anthropic Claude Sonnet 4 via Liz Proxy',
-    longDescription: 'The next generation of Claude Sonnet, offering significantly improved reasoning and creative capabilities while maintaining high speed. Proxied via Liz for maximum flexibility.',
+    longDescription: 'The next generation of Anthropic\'s balanced model, offering improved performance and intelligence.',
     strengths: [
-      'State-of-the-art reasoning',
-      'Excellent creative writing',
-      'Faster than Opus 3',
-      'Strong instruction following',
-      'Great at complex multi-step tasks'
+      'Next-gen reasoning',
+      'Improved coding performance',
+      'Better vision capabilities',
+      'Higher efficiency',
+      'Enhanced instruction following'
     ],
     weaknesses: [
-      'Newer model, still being refined',
-      'Higher usage weight than 3.5'
+      'New and potentially unstable',
+      'Limited historical testing'
     ],
-    useCases: ['Advanced roleplay', 'Complex coding', 'Strategic planning', 'Content creation'],
+    useCases: ['Complex reasoning', 'Next-gen software development', 'Advanced vision tasks'],
     technicalSpecs: {
-      contextWindow: '200K tokens',
-      architecture: 'Next-gen Transformer',
+      contextWindow: '30',
+      architecture: 'Transformer-based',
       releaseDate: '2025'
     }
   },
@@ -306,23 +700,22 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     provider: 'Liz Proxy',
     family: 'Claude 4',
     description: 'Anthropic Claude Opus 4 via Liz Proxy (Creative/NSFW)',
-    longDescription: 'The pinnacle of the Claude 4 family, Opus 4 provides unparalleled creative freedom and deep reasoning. This version is specifically tuned for unrestricted creative expression.',
+    longDescription: 'Anthropic\'s future flagship model, optimized for the most demanding creative and reasoning tasks.',
     strengths: [
-      'Unmatched creative depth',
-      'Deep philosophical understanding',
-      'Maximum creative freedom (NSFW/Smut optimized)',
-      'Human-like empathy and tone',
-      'Exceptional at nuanced roleplay'
+      'State-of-the-art intelligence',
+      'Deepest reasoning capabilities',
+      'Superior creative expression',
+      'Ultimate instruction following',
+      'Optimized for creative and NSFW content'
     ],
     weaknesses: [
-      'Slower response times',
-      'High usage weight',
-      'Can occasionally hang on complex prompts'
+      'Highest usage weight',
+      'Higher latency'
     ],
-    useCases: ['Premium roleplay', 'Philosophical exploration', 'Creative writing', 'NSFW content', 'Deep emotional support'],
+    useCases: ['Ultimate creative projects', 'Deep reasoning research', 'Complex philosophical exploration'],
     technicalSpecs: {
-      contextWindow: '200K tokens',
-      architecture: 'Next-gen Transformer',
+      contextWindow: '20',
+      architecture: 'Transformer-based',
       releaseDate: '2025'
     }
   },
@@ -330,24 +723,24 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     id: 'liz-claude-opus-4.5',
     name: 'Claude Opus 4.5 (Liz)',
     provider: 'Liz Proxy',
-    family: 'Claude 4',
+    family: 'Claude 4.5',
     description: 'Anthropic Claude Opus 4.5 via Liz Proxy (Ultimate Reasoning)',
-    longDescription: 'The most advanced model available via Liz Proxy, Opus 4.5 pushes the boundaries of AI reasoning and creative expression beyond current limits.',
+    longDescription: 'The pinnacle of the Claude family, offering the highest level of intelligence and reasoning available.',
     strengths: [
-      'Ultimate reasoning capabilities',
-      'Superior world-building and lore consistency',
-      'Extremely high emotional intelligence',
-      'Perfect for the most complex creative tasks',
-      'Highly stable and reliable'
+      'Unparalleled intelligence',
+      'Ultimate reasoning and logic',
+      'Best-in-class vision and creativity',
+      'Superior performance across all benchmarks',
+      'Deeply nuanced understanding'
     ],
     weaknesses: [
       'Highest usage weight',
-      'Slowest response time'
+      'Longer response times'
     ],
-    useCases: ['Large-scale world building', 'Complex narrative design', 'Advanced scientific reasoning', 'Ultimate creative partner'],
+    useCases: ['Cutting-edge scientific research', 'Ultimate problem solving', 'High-end creative work'],
     technicalSpecs: {
-      contextWindow: '200K tokens',
-      architecture: 'Advanced Next-gen Transformer',
+      contextWindow: '20',
+      architecture: 'Transformer-based',
       releaseDate: '2025'
     }
   },
@@ -355,23 +748,23 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     id: 'liz-gpt-4o',
     name: 'GPT-4o (Liz)',
     provider: 'Liz Proxy',
-    family: 'GPT-4',
+    family: 'GPT-4o',
     description: 'OpenAI GPT-4o via Liz Proxy',
-    longDescription: 'GPT-4o ("omni") is OpenAI\'s latest flagship model, designed for multimodal interaction and high performance across all tasks. Proxied via Liz for stable access.',
+    longDescription: 'OpenAI\'s flagship multimodal model, offering high speed and intelligence across text and vision.',
     strengths: [
-      'Balanced reasoning and speed',
-      'Excellent general knowledge',
-      'Strong coding and math skills',
-      'Great at multimodal tasks',
-      'Reliable instruction following'
+      'Excellent multimodal performance',
+      'Very fast response times',
+      'Strong reasoning and coding',
+      'Highly stable and reliable',
+      'Large knowledge base'
     ],
     weaknesses: [
       'Can be verbose',
-      'Knowledge cutoff concerns'
+      'May follow instructions too literally'
     ],
-    useCases: ['General purpose assistant', 'Coding', 'Data analysis', 'Educational help', 'Creative writing'],
+    useCases: ['General assistance', 'Multimodal tasks', 'Coding help', 'Information retrieval'],
     technicalSpecs: {
-      contextWindow: '128K tokens',
+      contextWindow: '128',
       architecture: 'Transformer-based',
       releaseDate: '2024'
     }
@@ -396,8 +789,8 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['Long document analysis', 'Video/Audio understanding', 'Complex data retrieval', 'Large-scale coding projects'],
     technicalSpecs: {
-      contextWindow: '1M+ tokens',
-      architecture: 'MoE Transformer',
+      contextWindow: '128',
+      architecture: 'Gemini Architecture',
       releaseDate: '2024'
     }
   },
@@ -405,24 +798,24 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     id: 'liz-gemini-2.0-flash',
     name: 'Gemini 2.0 Flash (Liz)',
     provider: 'Liz Proxy',
-    family: 'Gemini 2',
+    family: 'Gemini 2.0',
     description: 'Google Gemini 2.0 Flash via Liz Proxy',
-    longDescription: 'Gemini 2.0 Flash is designed for speed and efficiency, offering high-speed performance across a wide range of tasks while maintaining strong reasoning capabilities.',
+    longDescription: 'A high-speed multimodal model from the Gemini 2.0 family, offering excellent performance for daily tasks.',
     strengths: [
-      'Extremely fast response times',
-      'High efficiency for common tasks',
-      'Strong multimodal capabilities',
-      'Good instruction following',
-      'Cost-effective performance'
+      'Fast and responsive',
+      'Good multimodal capabilities',
+      'Cost-effective',
+      'Stable performance',
+      'Versatile for common tasks'
     ],
     weaknesses: [
-      'Smaller knowledge base than Pro models',
-      'May struggle with very complex reasoning'
+      'Less depth than newer versions',
+      'Limited reasoning on complex topics'
     ],
-    useCases: ['Real-time applications', 'Quick summaries', 'Basic coding help', 'Multimodal interactions', 'High-volume tasks'],
+    useCases: ['Daily assistant tasks', 'Fast chat', 'Simple data extraction'],
     technicalSpecs: {
-      contextWindow: '1M tokens',
-      architecture: 'Next-gen Transformer',
+      contextWindow: '128',
+      architecture: 'Gemini Architecture',
       releaseDate: '2024'
     }
   },
@@ -432,23 +825,23 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     provider: 'Liz Proxy',
     family: 'Gemini 2.5',
     description: 'Google Gemini 2.5 Flash via Liz Proxy',
-    longDescription: 'Gemini 2.5 Flash represents the latest in Google\'s efficient model series, providing even better reasoning and multimodal performance than 2.0.',
+    longDescription: 'Gemini 2.5 Flash is a high-speed, efficient multimodal model optimized for low-latency tasks.',
     strengths: [
-      'Improved reasoning over 2.0 Flash',
-      'Superior multimodal understanding',
-      'Large context window',
-      'Excellent speed-to-performance ratio',
-      'Reliable output consistency'
+      'Extremely fast response times',
+      'Strong multimodal performance',
+      'Great for quick tasks',
+      'Reliable for real-time chat',
+      'Efficient instruction following'
     ],
     weaknesses: [
-      'Still less powerful than Pro versions',
-      'Proxied access overhead'
+      'Lower reasoning than Pro models',
+      'Smaller knowledge base'
     ],
-    useCases: ['Advanced multimodal tasks', 'Fast complex reasoning', 'Long context retrieval', 'Efficient agentic workflows'],
+    useCases: ['Real-time assistance', 'Fast summarization', 'Quick queries', 'Vision-based chat'],
     technicalSpecs: {
-      contextWindow: '1M tokens',
-      architecture: 'Advanced Transformer',
-      releaseDate: '2025'
+      contextWindow: '128',
+      architecture: 'Gemini Architecture',
+      releaseDate: '2024'
     }
   },
   'liz-gemini-2.5-pro': {
@@ -457,23 +850,23 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     provider: 'Liz Proxy',
     family: 'Gemini 2.5',
     description: 'Google Gemini 2.5 Pro via Liz Proxy',
-    longDescription: 'Gemini 2.5 Pro is the advanced flagship from Google, offering state-of-the-art reasoning, multimodal capabilities, and an enormous context window.',
+    longDescription: 'Gemini 2.5 Pro is a highly capable multimodal model designed for complex reasoning and creative tasks.',
     strengths: [
-      'State-of-the-art reasoning',
-      'Massive context window',
-      'Exceptional multimodal understanding',
-      'Top-tier creative writing',
-      'Highly stable and reliable'
+      'Strong logical reasoning',
+      'Superior multimodal understanding',
+      'Excellent for research and analysis',
+      'High creative potential',
+      'Reliable performance'
     ],
     weaknesses: [
-      'Slower than Flash versions',
+      'Higher latency than Flash',
       'Higher usage weight'
     ],
-    useCases: ['Deep analysis', 'Complex software engineering', 'Large-scale document processing', 'Creative content generation', 'Advanced scientific research'],
+    useCases: ['Deep research', 'Complex multimodal analysis', 'Creative projects', 'Strategic planning'],
     technicalSpecs: {
-      contextWindow: '2M tokens',
-      architecture: 'Advanced MoE Transformer',
-      releaseDate: '2025'
+      contextWindow: '128',
+      architecture: 'Gemini Architecture',
+      releaseDate: '2024'
     }
   },
   'liz-gemini-3-flash': {
@@ -497,7 +890,7 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['Cutting-edge application development', 'Experimental AI workflows', 'Testing next-gen capabilities', 'High-speed future-proofing'],
     technicalSpecs: {
-      contextWindow: '1M+ tokens',
+      contextWindow: '150',
       architecture: 'Gemini 3 Architecture',
       releaseDate: '2025 (Preview)'
     }
@@ -523,7 +916,7 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['Future-tech research', 'Ultimate conceptual design', 'Next-gen software architecture', 'Experimental deep reasoning'],
     technicalSpecs: {
-      contextWindow: '2M+ tokens',
+      contextWindow: '30',
       architecture: 'Gemini 3 Architecture',
       releaseDate: '2025 (Preview)'
     }
@@ -548,7 +941,7 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['Software development', 'Math problem solving', 'Technical analysis', 'Translation'],
     technicalSpecs: {
-      contextWindow: '64K tokens',
+      contextWindow: '400',
       architecture: 'Transformer-based',
       releaseDate: '2024'
     }
@@ -573,7 +966,7 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['Complex math', 'Logic puzzles', 'Advanced debugging', 'Scientific research', 'Fact checking'],
     technicalSpecs: {
-      contextWindow: '64K tokens',
+      contextWindow: '128',
       architecture: 'Reasoning-optimized Transformer',
       releaseDate: '2025'
     }
@@ -599,7 +992,7 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['Scientific research', 'Advanced mathematics', 'Complex software architecture', 'Strategic planning'],
     technicalSpecs: {
-      contextWindow: '128K tokens',
+      contextWindow: '128',
       architecture: 'RL-based Reasoning',
       releaseDate: '2024'
     }
@@ -624,7 +1017,7 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['Coding assistance', 'Intermediate math', 'Logical analysis', 'Quick problem solving'],
     technicalSpecs: {
-      contextWindow: '128K tokens',
+      contextWindow: '128',
       architecture: 'Efficient Reasoning',
       releaseDate: '2025'
     }
@@ -649,7 +1042,7 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['Multilingual applications', 'Complex coding tasks', 'Mathematical proofing', 'Deep research', 'Enterprise-grade reasoning'],
     technicalSpecs: {
-      contextWindow: '128K tokens',
+      contextWindow: '128',
       architecture: 'Transformer-based (MoE)',
       releaseDate: '2025'
     }
@@ -674,7 +1067,7 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
     ],
     useCases: ['General purpose chat', 'Instruction following', 'Summarization', 'Structured data extraction', 'Customer support'],
     technicalSpecs: {
-      contextWindow: '128K tokens',
+      contextWindow: '128',
       architecture: 'Transformer-based',
       releaseDate: '2024'
     }
