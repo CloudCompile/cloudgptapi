@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit } from '@/lib/api-keys';
 import { CHAT_MODELS, PREMIUM_MODELS } from '@/lib/providers';
-import { getCorsHeaders, getPollinationsApiKey, getPollinationsApiKeys, getOpenRouterApiKey, getOpenRouterApiKeys, getPoeApiKey, getPoeApiKeys, safeResponseJson, hasProAccess } from '@/lib/utils';
+import { getCorsHeaders, getPollinationsApiKey, getPollinationsApiKeys, getClaudeApiKey, getClaudeApiKeys, getOpenRouterApiKey, getOpenRouterApiKeys, getPoeApiKey, getPoeApiKeys, getLizApiKey, getLizApiKeys, safeResponseJson, hasProAccess } from '@/lib/utils';
 import { retrieveMemory, rememberInteraction } from '@/lib/memory';
 import { supabaseAdmin } from '@/lib/supabase';
 import {
@@ -585,6 +585,9 @@ export async function POST(request: NextRequest) {
     } else if (model.provider === 'gemini') {
       providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
       providerApiKey = getPollinationsApiKey();
+    } else if (model.provider === 'claude') {
+      providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
+      providerApiKey = getClaudeApiKey();
     } else if (model.provider === 'meridian') {
       providerUrl = `${PROVIDER_URLS.meridian}/chat`;
       providerApiKey = process.env.MERIDIAN_API_KEY;
@@ -617,6 +620,25 @@ export async function POST(request: NextRequest) {
           {
             error: {
               message: 'Poe API key is not configured. Please add POE_API_KEY to your .env.local file.',
+              type: 'config_error',
+              param: null,
+              code: 'missing_api_key',
+              request_id: requestId
+            }
+          },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
+    } else if (model.provider === 'liz') {
+      providerUrl = `${PROVIDER_URLS.liz}/v1/chat/completions`;
+      providerApiKey = getLizApiKey();
+      
+      if (!providerApiKey) {
+        console.warn(`[${requestId}] Missing Liz API key for model: ${modelId}`);
+        return NextResponse.json(
+          {
+            error: {
+              message: 'Liz API key is not configured. Please add LIZ_API_KEY to your .env.local file.',
               type: 'config_error',
               param: null,
               code: 'missing_api_key',
@@ -695,23 +717,21 @@ export async function POST(request: NextRequest) {
     let processedMessages = [...body.messages]; // Clone to avoid modifying the original body.messages prematurely
     
     if (Array.isArray(processedMessages) && processedMessages.length > 0) {
-      const isGeminiLarge = modelId === 'gemini-large';
+      const isGeminiModel = modelId.includes('gemini');
       
-      // Strict Sanitization for Gemini Large:
-      // Gemini Large will return a "silent empty stream" (HTTP 200, but 0 tokens) 
+      // Strict Sanitization for Gemini Models:
+      // Gemini will return a "silent empty stream" or error
       // if the last message is an assistant message.
-      if (isGeminiLarge) {
+      if (isGeminiModel) {
         let poppedCount = 0;
         while (processedMessages.length > 0 && processedMessages[processedMessages.length - 1].role === 'assistant') {
           const lastMsg = processedMessages[processedMessages.length - 1];
-          console.log(`[${requestId}] SANITIZER: Popping trailing assistant message to prevent Gemini silent failure (Content length: ${lastMsg.content?.length || 0})`);
+          console.log(`[${requestId}] SANITIZER: Popping trailing assistant message to prevent Gemini failure (Model: ${modelId}, Content length: ${lastMsg.content?.length || 0})`);
           processedMessages.pop();
           poppedCount++;
         }
         
         if (poppedCount > 0) {
-          // If we popped assistant messages, we should ensure the new last message is a user message
-          // If the list is now empty or ends with a system message, we might need a fallback
           if (processedMessages.length === 0 || processedMessages[processedMessages.length - 1].role !== 'user') {
             console.log(`[${requestId}] SANITIZER: After popping, last message is not 'user'. Adding placeholder to ensure generation.`);
             processedMessages.push({ role: 'user', content: 'Continue the conversation.' });
@@ -922,13 +942,17 @@ export async function POST(request: NextRequest) {
 
       console.log(`[${requestId}] Provider response status: ${providerResponse.status} ${providerResponse.statusText}`);
       
-      // Fallback for Pollinations/OpenRouter/Poe auth errors (401)
-      if ((model.provider === 'pollinations' || model.provider === 'gemini' || model.provider === 'claude' || model.provider === 'openrouter' || model.provider === 'poe') && providerResponse.status === 401) {
+      // Fallback for Pollinations/OpenRouter/Poe/Liz auth errors (401)
+      if ((model.provider === 'pollinations' || model.provider === 'gemini' || model.provider === 'claude' || model.provider === 'openrouter' || model.provider === 'poe' || model.provider === 'liz') && providerResponse.status === 401) {
         let availableKeys: string[] = [];
         if (model.provider === 'openrouter') {
           availableKeys = getOpenRouterApiKeys();
         } else if (model.provider === 'poe') {
           availableKeys = getPoeApiKeys();
+        } else if (model.provider === 'liz') {
+          availableKeys = getLizApiKeys();
+        } else if (model.provider === 'claude') {
+          availableKeys = getClaudeApiKeys();
         } else {
           availableKeys = getPollinationsApiKeys();
         }

@@ -1,4 +1,4 @@
-import { ArrowRight, Bot, Code, Cpu, Image as ImageIcon, MessageSquare, Video, Zap, Terminal, Sparkles, Globe, Shield, Cloud, Layers, Database, Activity, Lock, Cpu as CpuIcon, Play, Users, Mail, ExternalLink } from 'lucide-react';
+import { ArrowRight, Bot, Code, Cpu, Image as ImageIcon, MessageSquare, Video, Zap, Terminal, Sparkles, Globe, Shield, Cloud, Layers, Database, Activity, Lock, Cpu as CpuIcon, Play, Users, Mail, ExternalLink, Crown } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/Logo';
@@ -136,6 +136,38 @@ export default function Home() {
             <div className="flex flex-col items-center gap-1 group cursor-default">
               <span className="font-black text-2xl tracking-tighter group-hover:text-primary transition-colors">DeepSeek V3.2</span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black">DeepSeek</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Liz Proxy Section */}
+      <section className="py-12 bg-slate-50 dark:bg-slate-900/50 border-b border-border">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary w-fit">
+                <Crown className="h-3.5 w-3.5" />
+                <span className="text-[10px] font-bold uppercase tracking-wider">Premium Models</span>
+              </div>
+              <h3 className="text-3xl font-black tracking-tighter">Liz Proxy Integration</h3>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">
+                Access NSFW-optimized roleplay, deep reasoning, and flagship models via our premium Liz Proxy bridge.
+              </p>
+            </div>
+            <div className="flex gap-12 items-center">
+              <div className="flex flex-col items-center gap-1 group cursor-default">
+                <span className="font-black text-xl tracking-tighter group-hover:text-primary transition-colors">Claude 3 Opus</span>
+                <span className="text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">NSFW Optimized</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 group cursor-default">
+                <span className="font-black text-xl tracking-tighter group-hover:text-primary transition-colors">GPT-4o</span>
+                <span className="text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">OpenAI</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 group cursor-default">
+                <span className="font-black text-xl tracking-tighter group-hover:text-primary transition-colors">o1-Reasoning</span>
+                <span className="text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Deep Logic</span>
+              </div>
             </div>
           </div>
         </div>

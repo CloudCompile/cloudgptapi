@@ -30,7 +30,8 @@ import {
   TrendingUp,
   TrendingDown,
   Target,
-  Settings
+  Settings,
+  Crown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -82,7 +83,7 @@ const ALL_MODELS: ModelType[] = [
 export default function ModelsPage() {
   const [statuses, setStatuses] = useState<Record<string, ModelStatus>>({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | 'chat' | 'image' | 'video' | 'free'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'chat' | 'image' | 'video' | 'free' | 'premium'>('all');
   const [selectedProvider, setSelectedProvider] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedModel, setSelectedModel] = useState<ModelType | null>(null);
@@ -164,6 +165,8 @@ export default function ModelsPage() {
       let matchesTab = activeTab === 'all' || model.type === activeTab;
       if (activeTab === 'free') {
         matchesTab = isFree;
+      } else if (activeTab === 'premium') {
+        matchesTab = !isFree;
       }
 
       const matchesProvider = selectedProvider === 'all' || model.provider.toLowerCase() === selectedProvider;
@@ -282,6 +285,7 @@ export default function ModelsPage() {
               <TabButton active={activeTab === 'image'} onClick={() => setActiveTab('image')} icon={<ImageIcon className="h-4 w-4" />} label="Image" />
               <TabButton active={activeTab === 'video'} onClick={() => setActiveTab('video')} icon={<Video className="h-4 w-4" />} label="Video" />
               <TabButton active={activeTab === 'free'} onClick={() => setActiveTab('free')} icon={<Zap className="h-4 w-4" />} label="Free" />
+              <TabButton active={activeTab === 'premium'} onClick={() => setActiveTab('premium')} icon={<Crown className="h-4 w-4" />} label="Premium" />
             </div>
           </div>
 

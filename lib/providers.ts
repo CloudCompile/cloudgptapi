@@ -3,7 +3,7 @@
 export interface ChatModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'poe';
+  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'poe' | 'liz';
   description?: string;
   contextWindow?: number;
   downtimeUntil?: string; // ISO timestamp for maintenance countdown
@@ -190,6 +190,20 @@ const POE_CHAT_MODELS: ChatModel[] = [
   { id: 'Web-Search', name: 'Web Search', provider: 'poe', usageWeight: 5 },
 ];
 
+const LIZ_CHAT_MODELS: ChatModel[] = [
+  // Liz's flagship models (proxied)
+  { id: 'liz-claude-3-5-sonnet', name: 'Claude 3.5 Sonnet (Liz)', provider: 'liz', description: 'Anthropic Claude 3.5 Sonnet via Liz Proxy', usageWeight: 15 },
+  { id: 'liz-claude-3-opus', name: 'Claude 3 Opus (Liz)', provider: 'liz', description: 'Anthropic Claude 3 Opus via Liz Proxy (NSFW/Smut Optimized)', usageWeight: 30 },
+  { id: 'liz-gpt-4o', name: 'GPT-4o (Liz)', provider: 'liz', description: 'OpenAI GPT-4o via Liz Proxy', usageWeight: 15 },
+  { id: 'liz-gemini-1.5-pro', name: 'Gemini 1.5 Pro (Liz)', provider: 'liz', description: 'Google Gemini 1.5 Pro via Liz Proxy', usageWeight: 20 },
+  { id: 'liz-deepseek-v3', name: 'DeepSeek V3 (Liz)', provider: 'liz', description: 'DeepSeek V3 via Liz Proxy', usageWeight: 10 },
+  { id: 'liz-deepseek-r1', name: 'DeepSeek R1 (Liz)', provider: 'liz', description: 'DeepSeek R1 Reasoning via Liz Proxy', usageWeight: 25 },
+  { id: 'liz-o1', name: 'OpenAI o1 (Liz)', provider: 'liz', description: 'OpenAI o1 Reasoning via Liz Proxy', usageWeight: 40 },
+  { id: 'liz-o3-mini', name: 'OpenAI o3-mini (Liz)', provider: 'liz', description: 'OpenAI o3-mini Reasoning via Liz Proxy', usageWeight: 20 },
+  { id: 'liz-qwen3-235b', name: 'Qwen3 235B (Liz)', provider: 'liz', description: 'Qwen3 235B a22b via Liz Proxy', usageWeight: 15 },
+  { id: 'liz-llama-3.3-70b', name: 'Llama 3.3 70B (Liz)', provider: 'liz', description: 'Meta Llama 3.3 70B via Liz Proxy', usageWeight: 12 },
+];
+
 export const CHAT_MODELS: ChatModel[] = [
   ...POLLINATIONS_CHAT_MODELS,
   ...GEMINI_CHAT_MODELS,
@@ -199,6 +213,7 @@ export const CHAT_MODELS: ChatModel[] = [
   ...MERIDIAN_CHAT_MODELS,
   ...GITHUB_CHAT_MODELS,
   ...POE_CHAT_MODELS,
+  ...LIZ_CHAT_MODELS,
 ];
 
 // Premium models that require a subscription
@@ -269,6 +284,18 @@ export const PREMIUM_MODELS = new Set([
   'deepseek-r1',
   'mistral-large-2',
   'grok-4-fast-non-reasoning',
+  
+  // Liz Premium Models
+  'liz-claude-3-5-sonnet',
+  'liz-claude-3-opus',
+  'liz-gpt-4o',
+  'liz-gemini-1.5-pro',
+  'liz-deepseek-v3',
+  'liz-deepseek-r1',
+  'liz-o1',
+  'liz-o3-mini',
+  'liz-qwen3-235b',
+  'liz-llama-3.3-70b',
   
   // Video (All)
   'veo',

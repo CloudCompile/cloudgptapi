@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PROVIDER_URLS } from '@/lib/chat-utils';
-import { getPollinationsApiKey, getOpenRouterApiKey, getPoeApiKey } from '@/lib/utils';
+import { getPollinationsApiKey, getOpenRouterApiKey, getPoeApiKey, getLizApiKey } from '@/lib/utils';
 
 // Cache status for 1 minute to avoid hammering providers
 let statusCache: {
@@ -52,6 +52,7 @@ export async function GET() {
     { name: 'openrouter', url: `https://openrouter.ai/api/v1/models` }, // OpenRouter doesn't need key for models list
     { name: 'poe', url: `${PROVIDER_URLS.poe}/models`, apiKey: getPoeApiKey() },
     { name: 'github', url: `https://models.inference.ai.azure.com/models` },
+    { name: 'liz', url: `${PROVIDER_URLS.liz}/v1/models`, apiKey: getLizApiKey() },
   ];
 
   const results = await Promise.all(

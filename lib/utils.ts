@@ -35,19 +35,34 @@ export function getPollinationsApiKeys(): string[] {
 }
 
 /**
+ * Get all available Claude-specific API keys
+ */
+export function getClaudeApiKeys(): string[] {
+  const keys = [
+    process.env.CLAUDE_API_KEY,
+    process.env.ANTHROPIC_API_KEY,
+    'sk_v36iYt2n9Xm4PqW7zR5bL8kH1jD0vS9u', // Also use the priority keys as fallback
+  ].filter(Boolean) as string[];
+  
+  return Array.from(new Set(keys));
+}
+
+/**
  * Get a Pollinations API key using random selection for load balancing
- * Supports multiple API keys via POLLINATIONS_API_KEY (primary) and numbered versions
- * Returns undefined if no keys are configured
- * Uses random selection to avoid race conditions in edge runtime environments
  */
 export function getPollinationsApiKey(): string | undefined {
   const keys = getPollinationsApiKeys();
-  
-  if (keys.length === 0) {
-    return undefined;
-  }
-  
-  // Use random selection for load balancing
+  if (keys.length === 0) return undefined;
+  const randomIndex = Math.floor(Math.random() * keys.length);
+  return keys[randomIndex];
+}
+
+/**
+ * Get a Claude API key using random selection
+ */
+export function getClaudeApiKey(): string | undefined {
+  const keys = getClaudeApiKeys();
+  if (keys.length === 0) return getPollinationsApiKey(); // Fallback to general keys
   const randomIndex = Math.floor(Math.random() * keys.length);
   return keys[randomIndex];
 }
@@ -151,6 +166,29 @@ export function getPoeApiKeys(): string[] {
  */
 export function getPoeApiKey(): string | undefined {
   const keys = getPoeApiKeys();
+  if (keys.length === 0) return undefined;
+  
+  const randomIndex = Math.floor(Math.random() * keys.length);
+  return keys[randomIndex];
+}
+
+/**
+ * Get all available Liz API keys
+ */
+export function getLizApiKeys(): string[] {
+  const keys = [
+    process.env.LIZ_API_KEY,
+    'sk-946715b46e8fcd676f8cc5d4e9c80a51', // User provided key
+  ].filter(Boolean) as string[];
+  
+  return Array.from(new Set(keys));
+}
+
+/**
+ * Get a Liz API key using random selection
+ */
+export function getLizApiKey(): string | undefined {
+  const keys = getLizApiKeys();
   if (keys.length === 0) return undefined;
   
   const randomIndex = Math.floor(Math.random() * keys.length);

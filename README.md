@@ -172,6 +172,21 @@ curl -X POST https://your-app.vercel.app/v1/chat/completions \
 | `chickytutor` | ChickyTutor | Educational AI tutor |
 | `midijourney` | Midijourney | Creative AI assistant |
 
+### Liz Proxy Models (Premium)
+
+| Model ID | Name | Description |
+|----------|------|-------------|
+| `liz-claude-3-5-sonnet` | Claude 3.5 Sonnet (Liz) | Optimized Anthropic flagship |
+| `liz-claude-3-opus` | Claude 3 Opus (Liz) | NSFW/Smut Optimized roleplay model |
+| `liz-gpt-4o` | GPT-4o (Liz) | Reliable OpenAI flagship |
+| `liz-o1` | OpenAI o1 (Liz) | Deep reasoning & strategy |
+| `liz-o3-mini` | OpenAI o3-mini (Liz) | Fast reasoning & coding |
+| `liz-deepseek-v3` | DeepSeek V3 (Liz) | Top-tier open source model |
+| `liz-deepseek-r1` | DeepSeek R1 (Liz) | Reasoning-focused open source |
+| `liz-gemini-1.5-pro` | Gemini 1.5 Pro (Liz) | Massive context analysis |
+| `liz-qwen3-235b` | Qwen3 235B (Liz) | Large-scale multilingual model |
+| `liz-llama-3.3-70b` | Llama 3.3 70B (Liz) | Efficient flagship-class model |
+
 ### Image Models
 
 | Model ID | Name | Description |

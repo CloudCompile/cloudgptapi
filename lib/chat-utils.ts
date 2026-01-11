@@ -170,6 +170,17 @@ export const modelAliases: Record<string, string> = {
   'gemini-1.5-flash': 'gemini-fast',
   'gemini-1.5-pro': 'gemini-large',
   'gemini-2.5-pro': 'gemini-large',
+  // Liz Proxy Aliases
+  'claude-3-5-sonnet-liz': 'liz-claude-3-5-sonnet',
+  'claude-3-opus-liz': 'liz-claude-3-opus',
+  'gpt-4o-liz': 'liz-gpt-4o',
+  'gemini-1.5-pro-liz': 'liz-gemini-1.5-pro',
+  'deepseek-v3-liz': 'liz-deepseek-v3',
+  'deepseek-r1-liz': 'liz-deepseek-r1',
+  'o1-liz': 'liz-o1',
+  'o3-mini-liz': 'liz-o3-mini',
+  'qwen3-235b-liz': 'liz-qwen3-235b',
+  'llama-3.3-70b-liz': 'liz-llama-3.3-70b',
 };
 
 export function resolveModelId(modelId: string): string {
@@ -216,6 +227,7 @@ export const PROVIDER_URLS = {
   meridian: 'https://meridianlabsapp.website/api',
   github: 'https://models.inference.ai.azure.com',
   poe: 'https://api.poe.com/v1',
+  liz: 'https://lizley.zeabur.app',
 };
 
 export function createChatTransformStream(
@@ -365,6 +377,17 @@ export function createChatTransformStream(
     const delta = choice.delta || choice.message || {};
     
     // 3. Extract content and ensure it's in delta.content for client compatibility
+    // Fix for Claude/Gemini repetition: some providers send snapshots instead of deltas
+    if (delta.content) {
+      const originalContent = delta.content;
+      const extractedDelta = getDelta(originalContent, 'lastContent');
+      
+      if (extractedDelta !== originalContent) {
+        delta.content = extractedDelta;
+        modified = true;
+      }
+    }
+
     let contentFromBlocks = '';
     const blocks = delta.content_blocks || choice.message?.content_blocks;
     if (Array.isArray(blocks)) {
