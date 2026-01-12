@@ -205,7 +205,8 @@ export function getLizApiKey(): string | undefined {
 export function getOpenAIApiKeys(): string[] {
   const keys = [
     process.env.OPENAI_API_KEY,
-    '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', // User provided key from problem statement
+    // User-provided key from issue - replace with your own key in production
+    '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',
   ].filter(Boolean) as string[];
   
   return Array.from(new Set(keys));
