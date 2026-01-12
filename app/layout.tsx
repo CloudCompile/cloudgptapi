@@ -3,6 +3,7 @@ import './globals.css';
 import { SyncUser } from '@/components/sync-user';
 import { MainLayout } from '@/components/MainLayout';
 import { LogtoClientProvider } from '@/components/logto-provider';
+import { ClerkProvider } from '@clerk/nextjs';
 
 import { Suspense } from 'react';
 
@@ -26,15 +27,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
-      <body className="min-h-screen bg-background antialiased selection:bg-primary/10 selection:text-primary">
-        <LogtoClientProvider>
-          <Suspense fallback={null}>
-            <SyncUser />
-          </Suspense>
-          <MainLayout>{children}</MainLayout>
-        </LogtoClientProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+        <body className="min-h-screen bg-background antialiased selection:bg-primary/10 selection:text-primary">
+          <LogtoClientProvider>
+            <Suspense fallback={null}>
+              <SyncUser />
+            </Suspense>
+            <MainLayout>{children}</MainLayout>
+          </LogtoClientProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

@@ -19,11 +19,11 @@ const nextConfig = {
     return [
       {
         source: '/oidc/:path*',
-        destination: 'https://ethical-incident-barbara-proceedings.trycloudflare.com/oidc/:path*',
+        destination: 'http://157.151.169.121:3101/oidc/:path*',
       },
       {
         source: '/.well-known/:path*',
-        destination: 'https://ethical-incident-barbara-proceedings.trycloudflare.com/oidc/.well-known/:path*',
+        destination: 'http://157.151.169.121:3101/oidc/.well-known/:path*',
       },
     ];
   },

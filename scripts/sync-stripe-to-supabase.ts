@@ -105,13 +105,14 @@ async function syncStripeToSupabase() {
       // Ensure we have a valid date for current_period_end
       let periodEndIso: string;
       try {
-        if (sub.current_period_end && !isNaN(sub.current_period_end)) {
-          periodEndIso = new Date(sub.current_period_end * 1000).toISOString();
+        const currentPeriodEnd = (sub as any).current_period_end;
+        if (currentPeriodEnd && !isNaN(currentPeriodEnd)) {
+          periodEndIso = new Date(currentPeriodEnd * 1000).toISOString();
         } else {
           periodEndIso = new Date().toISOString();
         }
       } catch (e) {
-        console.error(`Invalid date for subscription ${sub.id}:`, sub.current_period_end);
+        console.error(`Invalid date for subscription ${sub.id}:`, (sub as any).current_period_end);
         periodEndIso = new Date().toISOString();
       }
 

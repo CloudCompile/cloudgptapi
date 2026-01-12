@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 // API routes that use API key authentication instead of session
 const isApiKeyRoute = (path: string) => {
@@ -8,23 +9,30 @@ const isApiKeyRoute = (path: string) => {
          path.startsWith("/api/image");
 };
 
-const isProtectedRoute = (path: string) => {
-  return path.startsWith("/dashboard");
+// Logto specific routes that Clerk should ignore
+const isLogtoRoute = (path: string) => {
+  return path.startsWith("/api/logto") || 
+         path.startsWith("/oidc") || 
+         path.startsWith("/.well-known");
 };
 
-export default async function middleware(req: NextRequest) {
+const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
+
+export default clerkMiddleware(async (auth, req) => {
   const { pathname } = req.nextUrl;
 
-  // Skip auth for API routes - they use API key authentication
-  if (isApiKeyRoute(pathname)) {
+  // Skip Clerk for API routes and Logto routes
+  if (isApiKeyRoute(pathname) || isLogtoRoute(pathname)) {
     return NextResponse.next();
   }
 
-  // For protected routes, we'll handle authentication in the server components
-  // using getLogtoContext for now, as it's more reliable in Next.js App Router
-  
+  // Protect dashboard routes with Clerk
+  if (isProtectedRoute(req)) {
+    await auth.protect();
+  }
+
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [

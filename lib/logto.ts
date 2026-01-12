@@ -19,4 +19,6 @@ export const logtoConfig: LogtoNextConfig = {
   // If testing locally via http://localhost:3000, cookieSecure will be false.
   cookieSecure: process.env.NODE_ENV === 'production' && !getBaseUrl().includes('localhost'),
   scopes: ['email', 'profile', 'openid', 'offline_access'],
+  signInRedirectUri: `${getBaseUrl()}/api/logto/sign-in-callback`,
+  signOutRedirectUri: getBaseUrl(),
 };
