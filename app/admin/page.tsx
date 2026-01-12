@@ -5,6 +5,9 @@ import { getAllUsers, promoteUser, assignPlan } from '@/lib/admin-actions';
 import { supabaseAdmin } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
+// Force dynamic rendering to prevent prerendering errors with Logto authentication
+export const dynamic = 'force-dynamic';
+
 export default async function AdminPage() {
   const { isAuthenticated, claims } = await getLogtoContext(logtoConfig);
 
