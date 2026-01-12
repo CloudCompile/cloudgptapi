@@ -198,3 +198,27 @@ export function getLizApiKey(): string | undefined {
   const randomIndex = Math.floor(Math.random() * keys.length);
   return keys[randomIndex];
 }
+
+/**
+ * Get OpenAI API keys from environment and user-provided keys
+ */
+export function getOpenAIApiKeys(): string[] {
+  const keys = [
+    process.env.OPENAI_API_KEY,
+    // User-provided key from issue - replace with your own key in production
+    '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',
+  ].filter(Boolean) as string[];
+  
+  return Array.from(new Set(keys));
+}
+
+/**
+ * Get an OpenAI API key using random selection
+ */
+export function getOpenAIApiKey(): string | undefined {
+  const keys = getOpenAIApiKeys();
+  if (keys.length === 0) return undefined;
+  
+  const randomIndex = Math.floor(Math.random() * keys.length);
+  return keys[randomIndex];
+}

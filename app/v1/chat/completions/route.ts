@@ -4,7 +4,7 @@ import { logtoConfig } from '@/lib/logto';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit } from '@/lib/api-keys';
 import { runFandomPlugin } from '@/lib/plugins';
 import { CHAT_MODELS, PREMIUM_MODELS } from '@/lib/providers';
-import { getCorsHeaders, getPollinationsApiKey, getPollinationsApiKeys, getClaudeApiKey, getClaudeApiKeys, getOpenRouterApiKey, getOpenRouterApiKeys, getPoeApiKey, getPoeApiKeys, getLizApiKey, getLizApiKeys, safeResponseJson, hasProAccess } from '@/lib/utils';
+import { getCorsHeaders, getPollinationsApiKey, getPollinationsApiKeys, getClaudeApiKey, getClaudeApiKeys, getOpenRouterApiKey, getOpenRouterApiKeys, getPoeApiKey, getPoeApiKeys, getLizApiKey, getLizApiKeys, getOpenAIApiKey, getOpenAIApiKeys, safeResponseJson, hasProAccess } from '@/lib/utils';
 import { retrieveMemory, rememberInteraction } from '@/lib/memory';
 import { supabaseAdmin } from '@/lib/supabase';
 import {
@@ -726,6 +726,25 @@ export async function POST(request: NextRequest) {
           { status: 500, headers: getCorsHeaders() }
         );
       }
+    } else if (model.provider === 'openai') {
+      providerUrl = `${PROVIDER_URLS.openai}/chat/completions`;
+      providerApiKey = getOpenAIApiKey();
+      
+      if (!providerApiKey) {
+        console.warn(`[${requestId}] Missing OpenAI API key for model: ${modelId}`);
+        return NextResponse.json(
+          {
+            error: {
+              message: 'OpenAI API key is not configured. Please add OPENAI_API_KEY to your .env.local file or use the provided key.',
+              type: 'config_error',
+              param: null,
+              code: 'missing_api_key',
+              request_id: requestId
+            }
+          },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
     } else if (model.provider === 'stablehorde') {
       // Handle Stable Horde text generation
       return await handleStableHordeChat(body, modelId, apiKeyInfo, userId, effectiveKey, requestId, limit, dailyLimit, isSystemRequest, characterId);
@@ -1047,8 +1066,8 @@ export async function POST(request: NextRequest) {
 
       console.log(`[${requestId}] Provider response status: ${providerResponse.status} ${providerResponse.statusText}`);
       
-      // Fallback for Pollinations/OpenRouter/Poe/Liz auth errors (401)
-      if ((model.provider === 'pollinations' || model.provider === 'gemini' || model.provider === 'claude' || model.provider === 'openrouter' || model.provider === 'poe' || model.provider === 'liz') && providerResponse.status === 401) {
+      // Fallback for Pollinations/OpenRouter/Poe/Liz/OpenAI auth errors (401)
+      if ((model.provider === 'pollinations' || model.provider === 'gemini' || model.provider === 'claude' || model.provider === 'openrouter' || model.provider === 'poe' || model.provider === 'liz' || model.provider === 'openai') && providerResponse.status === 401) {
         let availableKeys: string[] = [];
         if (model.provider === 'openrouter') {
           availableKeys = getOpenRouterApiKeys();
@@ -1056,6 +1075,8 @@ export async function POST(request: NextRequest) {
           availableKeys = getPoeApiKeys();
         } else if (model.provider === 'liz') {
           availableKeys = getLizApiKeys();
+        } else if (model.provider === 'openai') {
+          availableKeys = getOpenAIApiKeys();
         } else if (model.provider === 'claude') {
           availableKeys = getClaudeApiKeys();
         } else {

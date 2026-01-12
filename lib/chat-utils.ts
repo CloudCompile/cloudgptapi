@@ -257,6 +257,7 @@ export const PROVIDER_URLS = {
   github: 'https://models.inference.ai.azure.com',
   poe: 'https://api.poe.com/v1',
   liz: 'https://lizley.zeabur.app',
+  openai: 'https://api.openai.com/v1',
 };
 
 export function createChatTransformStream(
