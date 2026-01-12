@@ -1,5 +1,8 @@
 'use client';
 
+// Note: This is a client component, so it doesn't need the dynamic export.
+// The dynamic rendering is controlled by the parent layout or by the API routes it calls.
+
 import { useState, useEffect } from 'react';
 import { 
   Key, 

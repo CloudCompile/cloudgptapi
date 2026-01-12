@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider dynamic>
       <html lang="en" className="scroll-smooth" suppressHydrationWarning>
         <body className="min-h-screen bg-background antialiased selection:bg-primary/10 selection:text-primary">
           <LogtoClientProvider>
