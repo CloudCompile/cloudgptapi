@@ -1,466 +1,250 @@
-import { ArrowRight, Bot, Code, Cpu, Image as ImageIcon, MessageSquare, Video, Zap, Terminal, Sparkles, Globe, Shield, Cloud, Layers, Database, Activity, Lock, Cpu as CpuIcon, Play, Users, Mail, ExternalLink, Crown } from 'lucide-react';
+import { ArrowRight, CodeXml, Shield, Zap, Box, Globe, Cpu, Command, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
-import { Logo } from '@/components/Logo';
+import { SignInButton } from '@clerk/nextjs';
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <main className="min-h-screen bg-black dark-theme selection:bg-zinc-800 selection:text-white">
+      {/* Navigation */}
+      <nav className="border-b border-zinc-800 bg-black/80 backdrop-blur-xl px-6 py-4 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 transition-all">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.5 19C18.8807 19 20 17.8807 20 16.5C20 15.1193 18.8807 14 17.5 14C17.3881 14 17.2785 14.0073 17.1713 14.0215C16.8532 12.284 15.3344 11 13.5 11C12.4414 11 11.4933 11.4232 10.8041 12.1064C10.0881 11.4173 9.11718 11 8.05 11C6.08939 11 4.5 12.5894 4.5 14.55C4.5 14.6547 4.50456 14.7583 4.51341 14.8605C3.62647 15.421 3 16.3906 3 17.5C3 19.1569 4.34315 20.5 6 20.5H17.5C18.8807 20.5 20 19.3807 20 18C20 16.6193 18.8807 15.5 17.5 15.5V19Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 3V7M12 3L15 6M12 3L9 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <span className="text-xl font-black text-white tracking-tight font-serif italic">CloudGPT</span>
+          </div>
+          <div className="hidden md:flex items-center gap-8">
+            <a className="text-sm font-bold text-zinc-400 hover:text-white transition-colors" href="#features">Features</a>
+            <a className="text-sm font-bold text-zinc-400 hover:text-white transition-colors" href="#providers">Providers</a>
+            <Link className="text-sm font-bold text-zinc-400 hover:text-white transition-colors" href="/pricing">Pricing</Link>
+          </div>
+          <div className="flex items-center gap-4">
+            <SignInButton mode="modal">
+              <button className="hidden md:inline-flex text-sm font-bold text-zinc-400 hover:text-white transition-colors mr-4">Sign In</button>
+            </SignInButton>
+            <SignInButton mode="modal">
+              <button className="rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-black hover:bg-zinc-200 transition-all active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)]">Get Started</button>
+            </SignInButton>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
-      <section className="relative pt-32 sm:pt-48 pb-12 sm:pb-20 overflow-hidden dot-grid">
-        <div className="absolute inset-0 mesh-gradient opacity-60" />
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] sm:text-xs font-bold tracking-wider uppercase mb-6 sm:mb-8 animate-in fade-in slide-in-from-bottom-3 duration-700 shadow-sm border border-primary/20">
-              <Sparkles className="h-3.5 w-3.5 fill-current" />
-              <span>Next Generation AI Infrastructure</span>
-            </div>
-            <h1 className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tighter mb-6 sm:mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 leading-[0.85]">
-              Intelligence <br /><span className="premium-text">Unbound</span>
-            </h1>
-            <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-5 duration-700 delay-200 font-medium">
-              A Meridian Labs production. The professional API gateway for global AI infrastructure. 
-              Switch between 100+ models with zero latency and enterprise-grade reliability.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
-              <Link 
-                href="/dashboard" 
-                className="w-full sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4 rounded-xl bg-primary text-white font-bold text-base sm:text-lg shadow-xl shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              >
-                Get API Key
-                <ArrowRight className="h-5 w-5" />
-              </Link>
-              <Link 
-                href="/docs" 
-                className="w-full sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4 rounded-xl bg-white dark:bg-slate-950 border border-border font-bold text-base sm:text-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-all flex items-center justify-center gap-2"
-              >
-                Read Documentation
-              </Link>
-            </div>
+      <div className="relative overflow-hidden pt-24 pb-32">
+        {/* Animated background blobs */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-zinc-900/20 rounded-full filter blur-3xl opacity-50 animate-pulse"></div>
+          <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-zinc-800/20 rounded-full filter blur-3xl opacity-50 animate-pulse delay-700"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/50 border border-zinc-800 text-zinc-400 text-xs font-bold mb-8 animate-in fade-in slide-in-from-top-4 duration-1000">
+            <Sparkles className="h-3.5 w-3.5 text-zinc-500" />
+            <span className="tracking-widest uppercase text-[10px] sm:text-xs">The Next Generation AI Infrastructure</span>
           </div>
 
-          {/* Product "Screenshot" Component */}
-          <div className="mt-16 sm:mt-32 relative max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-500">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-3xl sm:rounded-[2.5rem] blur opacity-10 animate-pulse-slow" />
-            <div className="relative bg-slate-950 rounded-3xl sm:rounded-[2.5rem] border border-white/5 shadow-3xl overflow-hidden aspect-[4/3] sm:aspect-[16/9] md:aspect-[21/9]">
-              {/* Fake UI Header */}
-              <div className="h-10 sm:h-14 bg-white/[0.02] border-b border-white/5 flex items-center px-4 sm:px-8 gap-3 sm:gap-4">
-                <div className="flex gap-1.5 sm:gap-2">
-                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-white/10" />
-                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-white/10" />
-                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-white/10" />
-                </div>
-                <div className="h-4 sm:h-6 w-px bg-white/10 mx-1 sm:mx-2" />
-                <div className="px-2 sm:px-4 py-1 rounded-lg bg-white/5 text-[9px] sm:text-[11px] text-white/40 font-mono tracking-wider uppercase">Project: Production-v1</div>
-              </div>
-              
-              {/* Fake UI Content */}
-              <div className="p-3 sm:p-4 md:p-10 flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-10 h-full overflow-hidden">
-                <div className="hidden md:flex w-72 flex-col gap-6">
-                  <div className="space-y-3">
-                    <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-4">Endpoints</div>
-                    <div className="h-11 bg-primary/10 border border-primary/20 rounded-xl flex items-center px-4 gap-3">
-                      <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                      <div className="text-xs font-bold text-primary">Chat Completions</div>
-                    </div>
-                    <div className="h-11 bg-white/[0.02] border border-white/5 rounded-xl flex items-center px-4 gap-3 opacity-40">
-                      <div className="w-2 h-2 rounded-full bg-white/20" />
-                      <div className="text-xs font-bold text-white/60">Image Generation</div>
-                    </div>
-                    <div className="h-11 bg-white/[0.02] border border-white/5 rounded-xl flex items-center px-4 gap-3 opacity-40">
-                      <div className="w-2 h-2 rounded-full bg-white/20" />
-                      <div className="text-xs font-bold text-white/60">Audio Processing</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex-1 flex flex-col gap-4 sm:gap-6 min-w-0">
-                  <div className="h-full bg-white/[0.01] rounded-2xl sm:rounded-3xl border border-white/5 p-4 md:p-8 flex flex-col gap-4 sm:gap-6 overflow-hidden">
-                    <div className="flex gap-3 sm:gap-4">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary/20 border border-primary/20 flex items-center justify-center shrink-0">
-                        <Terminal className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                      </div>
-                      <div className="space-y-2 flex-1 min-w-0">
-                        <div className="h-3 sm:h-4 w-24 sm:w-32 bg-white/10 rounded-full" />
-                        <div className="h-auto md:h-20 bg-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-4 font-mono text-[9px] sm:text-[10px] md:text-xs text-white/40 leading-relaxed break-all md:break-normal">
-                          $ curl https://api.cloudgpt.com/v1/chat/completions \<br />
-                          &nbsp;&nbsp;-H "Authorization: Bearer $KEY" \<br />
-                          &nbsp;&nbsp;-d '{"{"}"model": "gpt-5-mini"{"}"}'
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-3 sm:gap-4 justify-end">
-                      <div className="space-y-2 flex-1 items-end flex flex-col min-w-0">
-                        <div className="h-3 sm:h-4 w-16 sm:w-24 bg-white/5 rounded-full" />
-                        <div className="h-auto w-full bg-primary/5 border border-primary/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 text-[9px] sm:text-[10px] md:text-xs text-white/70 leading-relaxed font-medium text-right">
-                          "Deployment successful. Latency: 42ms. <br />
-                          Model: GPT-5 Mini (v1.2)<br />
-                          Tokens: 1,024 cached"
-                        </div>
-                      </div>
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white/5 border border-white/5 flex items-center justify-center shrink-0">
-                        <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white/20" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Hero Title */}
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white mb-8 leading-[1.05] text-metallic-gunmetal">
+            The Ultimate <br className="hidden md:block"/> AI Frontier.
+          </h1>
+
+          {/* Hero Description */}
+          <p className="mt-8 text-xl text-zinc-500 max-w-2xl mx-auto leading-relaxed font-medium">
+            Access 50+ enterprise-grade models from every major provider through a single, pitch-black, metallic-shiny interface. Built for those who demand the best.
+          </p>
+
+          {/* Hero CTAs */}
+          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+            <Link className="w-full sm:w-auto rounded-2xl bg-white px-8 py-4 text-base font-bold text-black shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:bg-zinc-200 hover:-translate-y-1 transition-all flex items-center justify-center gap-2" href="/dashboard">
+              Start Building <ArrowRight className="h-5 w-5" />
+            </Link>
+            <Link className="w-full sm:w-auto rounded-2xl bg-zinc-900 border border-zinc-800 px-8 py-4 text-base font-bold text-white hover:bg-zinc-800 hover:border-zinc-700 transition-all flex items-center justify-center gap-2" href="/playground">
+              Try Playground <Command className="h-5 w-5" />
+            </Link>
+          </div>
+
+          {/* Provider Logos */}
+          <div className="mt-24 flex items-center justify-center gap-6 md:gap-12 grayscale opacity-30 overflow-x-auto py-4 border-y border-zinc-900/50 scrollbar-hide">
+            <span className="text-xs font-black tracking-[0.3em] uppercase text-zinc-500 whitespace-nowrap">OpenAI</span>
+            <span className="text-xs font-black tracking-[0.3em] uppercase text-zinc-500 whitespace-nowrap">Anthropic</span>
+            <span className="text-xs font-black tracking-[0.3em] uppercase text-zinc-500 whitespace-nowrap">Google</span>
+            <span className="text-xs font-black tracking-[0.3em] uppercase text-zinc-500 whitespace-nowrap">Meta</span>
+            <span className="text-xs font-black tracking-[0.3em] uppercase text-zinc-500 whitespace-nowrap">Mistral</span>
+            <span className="text-xs font-black tracking-[0.3em] uppercase text-zinc-500 whitespace-nowrap">GitHub</span>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Stats/Showcase Section */}
-      <section className="py-8 sm:py-12 border-y border-border bg-white dark:bg-slate-950 relative overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 sm:gap-8 items-center">
-            <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">GPT-5 Mini</span>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">OpenAI</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">Claude Sonnet 4.5</span>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Anthropic</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">Gemini 3 Flash</span>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Google</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">Llama 3.3 70B</span>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Meta</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">Flux.1 Pro</span>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Black Forest</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">DeepSeek V3.2</span>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">DeepSeek</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Liz Proxy Section */}
-      <section className="py-8 sm:py-12 bg-slate-50 dark:bg-slate-900/50 border-b border-border">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
-            <div className="flex flex-col gap-2 text-center md:text-left items-center md:items-start">
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary w-fit">
-                <Crown className="h-3.5 w-3.5" />
-                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">Premium Models</span>
-              </div>
-              <h3 className="text-2xl sm:text-3xl font-black tracking-tighter">Liz Proxy Integration</h3>
-              <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium max-w-lg">
-                Access NSFW-optimized roleplay, deep reasoning, and flagship models via our premium Liz Proxy bridge.
-              </p>
-            </div>
-            <div className="flex gap-8 sm:gap-12 items-center overflow-x-auto pb-4 md:pb-0 scrollbar-hide w-full md:w-auto justify-start sm:justify-center md:justify-end">
-              <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
-                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">Claude 3 Opus</span>
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">NSFW Optimized</span>
-              </div>
-              <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
-                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">DeepSeek R1</span>
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Reasoning</span>
-              </div>
-              <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
-                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">Qwen 235B</span>
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Elite Performance</span>
-              </div>
-              <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
-                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">o1-Reasoning</span>
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Deep Logic</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Core Features */}
-      <section className="py-16 sm:py-32 relative">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mb-12 sm:mb-24 text-center sm:text-left">
-            <h2 className="text-3xl sm:text-5xl font-black tracking-tighter mb-4 sm:mb-6 leading-none">Engineered for Developers.</h2>
-            <p className="text-slate-600 dark:text-slate-400 text-base sm:text-xl leading-relaxed font-medium">
-              We've abstracted the complexity of multiple AI providers into a single, elegant interface. 
-              Focus on your product, not your infrastructure.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <FeatureCard 
-              icon={<MessageSquare className="h-6 w-6" />}
-              title="Chat & Reasoning"
-              description="Access the most advanced LLMs with unified parameters and streaming support."
-              href="/docs#chat"
-              color="blue"
-            />
-            <FeatureCard 
-              icon={<ImageIcon className="h-6 w-6" />}
-              title="Image Generation"
-              description="State-of-the-art text-to-image models with high-resolution output."
-              href="/docs#image"
-              color="purple"
-            />
-            <FeatureCard 
-              icon={<Video className="h-6 w-6" />}
-              title="Video & Motion"
-              description="Create cinematic AI videos and animations from simple descriptions."
-              href="/docs#video"
-              color="pink"
-            />
-            <FeatureCard 
-              icon={<Terminal className="h-6 w-6" />}
-              title="Unified API"
-              description="One schema to rule them all. Switch models by changing a single string."
-              href="/docs"
-              color="emerald"
-            />
-            <FeatureCard 
-              icon={<Activity className="h-6 w-6" />}
-              title="Real-time Analytics"
-              description="Monitor usage, latency, and costs across all models in a single dashboard."
-              href="/dashboard"
-              color="orange"
-            />
-            <FeatureCard 
-              icon={<Lock className="h-6 w-6" />}
-              title="Enterprise Security"
-              description="Granular API key permissions and comprehensive audit logging."
-              href="/pricing"
-              color="cyan"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Integration Section */}
-      <section className="py-16 sm:py-32 bg-slate-950 text-white overflow-hidden relative dot-grid">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-950/90 to-slate-950" />
+      {/* Features Section */}
+      <div id="features" className="py-32 bg-black relative">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(24,24,27,0.5),transparent)] pointer-events-none"></div>
         
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-12 sm:gap-20">
-            <div className="lg:w-1/2 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-[10px] sm:text-xs font-black tracking-widest uppercase mb-6 sm:mb-8 border border-blue-500/20">
-                <Code className="h-3.5 w-3.5" />
-                <span>Developer Experience</span>
-              </div>
-              <h2 className="text-4xl sm:text-6xl font-black tracking-tighter mb-6 sm:mb-8 leading-[0.9]">
-                One API.<br />Infinite Models.
-              </h2>
-              <p className="text-slate-400 text-base sm:text-xl mb-8 sm:mb-10 leading-relaxed font-medium">
-                Replace dozens of API keys and libraries with a single, elegant integration. 
-                Switch models on the fly without changing a single line of your core logic.
-              </p>
-              
-              <div className="grid grid-cols-2 gap-6 sm:gap-8 max-w-sm mx-auto lg:mx-0">
-                <div>
-                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">100+</div>
-                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Models</div>
-                </div>
-                <div>
-                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">&lt;100ms</div>
-                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Latency</div>
-                </div>
-                <div>
-                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">99.9%</div>
-                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Uptime</div>
-                </div>
-                <div>
-                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">SDK</div>
-                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Type-safe</div>
-                </div>
-              </div>
-            </div>
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="text-center mb-20">
+            <h2 className="text-sm font-black text-zinc-500 uppercase tracking-[0.4em] mb-4">Elite Capabilities</h2>
+            <h3 className="text-4xl md:text-5xl font-black text-white tracking-tight">Engineered for Excellence</h3>
+          </div>
 
-            <div className="lg:w-1/2 w-full">
-              <div className="rounded-2xl sm:rounded-3xl bg-black border border-slate-800 p-1 shadow-2xl shadow-blue-500/10">
-                <div className="bg-slate-900/50 rounded-xl sm:rounded-[1.4rem] p-4 sm:p-8">
-                  <div className="flex gap-1.5 mb-6 sm:mb-8">
-                    <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-red-500/20" />
-                    <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-yellow-500/20" />
-                    <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-green-500/20" />
-                  </div>
-                  <pre className="text-[10px] sm:text-sm font-mono text-blue-400 leading-relaxed overflow-x-auto">
-                    <code>{`// Switch models with one parameter
-const response = await cloudgpt.chat.create({
-  model: 'claude-3-5-sonnet',
-  messages: [
-    { role: 'user', content: 'Design a space station' }
-  ],
-  temperature: 0.7,
-  max_tokens: 1024
-});
-
-console.log(response.content);`}</code>
-                  </pre>
-                </div>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <FeatureCard 
+              icon={<CodeXml className="h-7 w-7" />}
+              title="Unified AI Core"
+              description="A single, powerful integration point for all your AI needs. Minimal latency, maximum impact."
+            />
+            <FeatureCard 
+              icon={<Shield className="h-7 w-7" />}
+              title="Fort Knox Security"
+              description="Enterprise-grade authentication and key management. Your data, protected by the best."
+            />
+            <FeatureCard 
+              icon={<Zap className="h-7 w-7" />}
+              title="Instant Scaling"
+              description="From prototype to production in seconds. Our infrastructure scales as fast as you do."
+            />
+            <FeatureCard 
+              icon={<Box className="h-7 w-7" />}
+              title="Advanced Analytics"
+              description="Complete visibility into every token. Optimize your spend with granular usage tracking."
+            />
+            <FeatureCard 
+              icon={<Globe className="h-7 w-7" />}
+              title="Global Edge"
+              description="Deployed on the edge for worldwide performance. Speed is not an option, it is a requirement."
+            />
+            <FeatureCard 
+              icon={<Cpu className="h-7 w-7" />}
+              title="Model Intelligence"
+              description="Access the latest reasoning and vision models the moment they are released."
+            />
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Team Section */}
-      <section className="py-16 sm:py-32 relative overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mb-12 sm:mb-24 text-center sm:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] sm:text-xs font-black tracking-widest uppercase mb-4 sm:mb-6 border border-emerald-500/20">
-              <Users className="h-3.5 w-3.5" />
-              <span>The Minds Behind CloudGPT</span>
+      {/* Providers Section */}
+      <div id="providers" className="py-32 bg-black border-y border-zinc-900">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-6">
+            <div className="max-w-xl">
+              <h2 className="text-sm font-black text-zinc-500 uppercase tracking-[0.4em] mb-4">Integrations</h2>
+              <h3 className="text-4xl font-black text-white mb-6 tracking-tight">The Best of AI, Unified.</h3>
+              <p className="text-zinc-500 font-medium leading-relaxed">
+                Direct access to the most advanced models from around the globe. No middlemen, no compromise.
+              </p>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-black tracking-tighter mb-4 sm:mb-6 leading-none">Built by Developers, for Developers.</h2>
-            <p className="text-slate-600 dark:text-slate-400 text-base sm:text-xl leading-relaxed font-medium">
-              A Meridian Labs project, engineered by the core team at Pollinations API to unify the world's intelligence.
-            </p>
+            <Link href="/dashboard" className="text-sm font-bold text-white hover:text-zinc-400 flex items-center gap-2 transition-colors">
+              View All Models <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl">
-            <div className="group p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] bg-slate-50 dark:bg-slate-900/50 border border-border hover:border-primary/50 transition-all duration-500">
-              <div className="flex items-start justify-between mb-6 sm:mb-8">
-                <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-primary/20 flex items-center justify-center text-primary">
-                  <span className="text-xl sm:text-2xl font-black">CH</span>
-                </div>
-                <div className="flex gap-2">
-                  <a href="#" className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-border hover:text-primary transition-colors">
-                    <Mail className="h-4 w-4" />
-                  </a>
-                </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {['OpenAI', 'Anthropic', 'Google Gemini', 'Meta Llama', 'Mistral AI', 'GitHub Models', 'Liz AI', 'Meridian', 'StableHorde', 'Poe', 'Stripe', 'Clerk'].map((provider) => (
+              <div key={provider} className="flex items-center gap-3 px-6 py-6 rounded-2xl border border-zinc-900 bg-zinc-950/50 hover:border-zinc-700 hover:bg-zinc-900/50 transition-all group">
+                <div className="h-2 w-2 rounded-full bg-zinc-700 group-hover:bg-white transition-colors"></div>
+                <span className="font-bold text-zinc-400 group-hover:text-white transition-colors tracking-tight">{provider}</span>
               </div>
-              <h3 className="text-xl sm:text-2xl font-black mb-1 tracking-tighter">CJ Hauser</h3>
-              <p className="text-primary font-bold text-xs sm:text-sm mb-3 sm:mb-4 uppercase tracking-widest">Lead Architect</p>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                Pioneering the integration of multi-modal AI systems and cognitive memory architectures.
-              </p>
-            </div>
-
-            <div className="group p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] bg-slate-50 dark:bg-slate-900/50 border border-border hover:border-primary/50 transition-all duration-500">
-              <div className="flex items-start justify-between mb-6 sm:mb-8">
-                <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-primary/20 flex items-center justify-center text-primary">
-                  <span className="text-xl sm:text-2xl font-black">AM</span>
-                </div>
-                <div className="flex gap-2">
-                  <a href="#" className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-border hover:text-primary transition-colors">
-                    <Mail className="h-4 w-4" />
-                  </a>
-                </div>
-              </div>
-              <h3 className="text-xl sm:text-2xl font-black mb-1 tracking-tighter">Aaron Miller</h3>
-              <p className="text-primary font-bold text-xs sm:text-sm mb-3 sm:mb-4 uppercase tracking-widest">Systems Engineer</p>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                Optimizing global infrastructure and low-latency API gateways for enterprise scale.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
-      </section>
+      </div>
 
       {/* CTA Section */}
-      <section className="py-20 sm:py-40 relative overflow-hidden">
-        <div className="absolute inset-0 dot-grid opacity-40" />
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <h2 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tighter mb-6 sm:mb-8 leading-none">Ready to build?</h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-8 sm:mb-12 max-w-xl mx-auto text-lg sm:text-xl leading-relaxed font-medium">
-            Join thousands of developers building the next generation of AI applications on CloudGPT.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-            <Link 
-              href="/dashboard" 
-              className="w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 rounded-xl sm:rounded-2xl bg-primary text-white font-black text-lg sm:text-xl shadow-2xl shadow-primary/20 hover:bg-primary/90 hover:scale-105 transition-all flex items-center justify-center gap-3"
-            >
-              Get API Key
-              <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6" />
-            </Link>
-            <Link 
-              href="/docs" 
-              className="w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-950 border-2 border-border font-black text-lg sm:text-xl hover:bg-slate-50 dark:hover:bg-slate-900 transition-all flex items-center justify-center gap-3"
-            >
-              Read Docs
-            </Link>
+      <div className="py-32 bg-black">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="relative rounded-[3rem] bg-zinc-950 border border-zinc-900 p-12 md:p-24 overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] bg-white/5 rounded-full blur-3xl"></div>
+            
+            <div className="relative z-10 text-center max-w-2xl mx-auto">
+              <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tighter">Enter the Frontier.</h2>
+              <p className="text-zinc-500 text-lg mb-12 font-medium tracking-wide">
+                Join the elite group of developers building the future of AI.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link href="/dashboard" className="w-full sm:w-auto rounded-2xl bg-white px-10 py-5 text-base font-bold text-black hover:bg-zinc-200 hover:-translate-y-1 transition-all flex items-center justify-center gap-2 shadow-2xl">
+                  Get Started Now
+                </Link>
+                <Link href="/pricing" className="w-full sm:w-auto rounded-2xl bg-zinc-900 border border-zinc-800 px-10 py-5 text-base font-bold text-white hover:bg-zinc-800 transition-all">
+                  View Pricing
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Footer */}
-      <footer className="py-12 sm:py-20 border-t border-border bg-slate-50/50 dark:bg-slate-950/50 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 sm:gap-12 mb-12 sm:mb-16">
-            <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center gap-2 mb-4 sm:mb-6">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20">
-                  <Cloud className="h-6 w-6 text-white" />
+      <footer className="bg-black border-t border-zinc-900 py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-20">
+            <div className="max-w-xs">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.5 19C18.8807 19 20 17.8807 20 16.5C20 15.1193 18.8807 14 17.5 14C17.3881 14 17.2785 14.0073 17.1713 14.0215C16.8532 12.284 15.3344 11 13.5 11C12.4414 11 11.4933 11.4232 10.8041 12.1064C10.0881 11.4173 9.11718 11 8.05 11C6.08939 11 4.5 12.5894 4.5 14.55C4.5 14.6547 4.50456 14.7583 4.51341 14.8605C3.62647 15.421 3 16.3906 3 17.5C3 19.1569 4.34315 20.5 6 20.5H17.5C18.8807 20.5 20 19.3807 20 18C20 16.6193 18.8807 15.5 17.5 15.5V19Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 3V7M12 3L15 6M12 3L9 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </div>
-                <span className="text-xl sm:text-2xl font-black tracking-tighter">CloudGPT</span>
+                <span className="text-xl font-black text-white tracking-tight font-serif italic">CloudGPT</span>
               </div>
-              <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-sm mb-6">
-                The next generation of AI infrastructure. Built by developers at Pollinations API to empower the future of cognitive intelligence.
+              <p className="text-zinc-500 text-sm font-medium leading-relaxed">
+                The professional gateway for modern AI development. One API, every model, pitch black.
               </p>
-              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                <a href="https://meridianlabsapp.website/" target="_blank" className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-primary hover:opacity-80 transition-all flex items-center gap-1.5">
-                  Meridian Labs <ExternalLink className="h-3 w-3" />
-                </a>
-                <span className="hidden sm:inline text-slate-300">|</span>
-                <a href="https://pollinations.ai" target="_blank" className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-all flex items-center gap-1.5">
-                  Pollinations API <ExternalLink className="h-3 w-3" />
-                </a>
+            </div>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-12">
+              <div>
+                <h4 className="text-xs font-black text-zinc-600 uppercase tracking-[0.3em] mb-6">Product</h4>
+                <ul className="space-y-4">
+                  <li><Link href="/playground" className="text-sm font-bold text-zinc-500 hover:text-white transition-colors">Playground</Link></li>
+                  <li><Link href="/pricing" className="text-sm font-bold text-zinc-500 hover:text-white transition-colors">Pricing</Link></li>
+                  <li><Link href="/docs" className="text-sm font-bold text-zinc-500 hover:text-white transition-colors">Documentation</Link></li>
+                </ul>
               </div>
-            </div>
-            <div>
-              <h4 className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white mb-4 sm:mb-6">Platform</h4>
-              <ul className="space-y-3 sm:space-y-4">
-                <li><Link href="/models" className="text-xs sm:text-sm font-bold text-slate-500 hover:text-primary transition-colors">Models</Link></li>
-                <li><Link href="/pricing" className="text-xs sm:text-sm font-bold text-slate-500 hover:text-primary transition-colors">Pricing</Link></li>
-                <li><Link href="/docs" className="text-xs sm:text-sm font-bold text-slate-500 hover:text-primary transition-colors">Documentation</Link></li>
-                <li><Link href="/playground" className="text-xs sm:text-sm font-bold text-slate-500 hover:text-primary transition-colors">Playground</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white mb-4 sm:mb-6">Legal</h4>
-              <ul className="space-y-3 sm:space-y-4">
-                <li><Link href="/terms-of-service" className="text-xs sm:text-sm font-bold text-slate-500 hover:text-primary transition-colors">Terms of Service</Link></li>
-                <li><Link href="/privacy-policy" className="text-xs sm:text-sm font-bold text-slate-500 hover:text-primary transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/security" className="text-xs sm:text-sm font-bold text-slate-500 hover:text-primary transition-colors">Security</Link></li>
-              </ul>
+              <div>
+                <h4 className="text-xs font-black text-zinc-600 uppercase tracking-[0.3em] mb-6">Company</h4>
+                <ul className="space-y-4">
+                  <li><Link href="/about" className="text-sm font-bold text-zinc-500 hover:text-white transition-colors">About</Link></li>
+                  <li><a href="https://meridianlabsapp.website/" className="text-sm font-bold text-zinc-500 hover:text-white transition-colors">Blog</a></li>
+                  <li><Link href="/privacy-policy" className="text-sm font-bold text-zinc-500 hover:text-white transition-colors">Privacy</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-xs font-black text-zinc-600 uppercase tracking-[0.3em] mb-6">Legal</h4>
+                <ul className="space-y-4">
+                  <li><Link href="/terms-of-service" className="text-sm font-bold text-zinc-500 hover:text-white transition-colors">Terms</Link></li>
+                  <li><a href="#" className="text-sm font-bold text-zinc-500 hover:text-white transition-colors">Security</a></li>
+                </ul>
+              </div>
             </div>
           </div>
           
-          <div className="pt-8 sm:pt-12 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
-            <div className="text-[10px] sm:text-sm text-slate-400 font-bold text-center md:text-left">
-              © {new Date().getFullYear()} CloudGPT Studio. A Meridian Labs Venture.
-            </div>
+          <div className="pt-8 border-t border-zinc-900 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="text-xs font-bold text-zinc-600 tracking-widest">© 2026 CLOUD-GPT. ALL RIGHTS RESERVED.</p>
             <div className="flex items-center gap-6">
-              <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-slate-300">Crafted by CJ Hauser & Aaron Miller</span>
+              <a href="#" className="text-zinc-600 hover:text-white transition-colors font-bold text-xs tracking-widest">TWITTER</a>
+              <a href="#" className="text-zinc-600 hover:text-white transition-colors font-bold text-xs tracking-widest">GITHUB</a>
+              <a href="#" className="text-zinc-600 hover:text-white transition-colors font-bold text-xs tracking-widest">DISCORD</a>
             </div>
           </div>
         </div>
       </footer>
-    </div>
+    </main>
   );
 }
 
-function FeatureCard({ icon, title, description, href, color }: { icon: React.ReactNode, title: string, description: string, href: string, color: string }) {
-  const colorMap: Record<string, string> = {
-    blue: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-    purple: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-    pink: 'bg-pink-500/10 text-pink-500 border-pink-500/20',
-    emerald: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-    orange: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
-    cyan: 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20',
-  };
-
+function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
   return (
-    <Link href={href} className="group p-8 rounded-[2.5rem] bg-white dark:bg-slate-950 border border-border hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 relative overflow-hidden">
-      <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500 border", colorMap[color])}>
+    <div className="group p-8 rounded-[2rem] border border-zinc-900 bg-zinc-950/50 hover:bg-zinc-900/50 hover:border-zinc-700 transition-all duration-500">
+      <div className="h-14 w-14 rounded-2xl bg-zinc-900 border border-zinc-800 text-zinc-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:text-white group-hover:border-zinc-600 transition-all shadow-2xl">
         {icon}
       </div>
-      <h3 className="text-2xl font-black mb-4 tracking-tighter">{title}</h3>
-      <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-8 font-medium">{description}</p>
-      <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-[-10px] group-hover:translate-x-0">
-        Learn More
-        <ArrowRight className="h-4 w-4" />
-      </div>
-    </Link>
+      <h3 className="text-xl font-bold text-white mb-3 tracking-tight">{title}</h3>
+      <p className="text-zinc-500 leading-relaxed font-medium">{description}</p>
+    </div>
   );
 }

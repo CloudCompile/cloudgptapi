@@ -7,8 +7,8 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
-  title: 'CloudGPT - Unified AI API',
-  description: 'A unified API gateway for AI chat, image, and video generation',
+  title: 'CloudGPT | Unified AI Gateway',
+  description: 'Access 50+ models from 8+ providers through a single, secure authenticated endpoint.',
   icons: {
     icon: '/favicon.ico',
   },
@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <ClerkProvider dynamic>
       <html lang="en" className="scroll-smooth" suppressHydrationWarning>
-        <body className="min-h-screen bg-background antialiased selection:bg-primary/10 selection:text-primary">
+        <body className="min-h-screen antialiased">
           <Suspense fallback={null}>
             <SyncUser />
           </Suspense>

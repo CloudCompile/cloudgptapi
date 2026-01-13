@@ -107,11 +107,13 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const isLandingPage = pathname === '/';
 
   return (
-    <div className="min-h-screen bg-background dot-grid">
-      {isLandingPage && <LaunchBanner />}
-      <Header 
-        isAppPage={isAppPage} 
-      />
+    <div className={cn("min-h-screen", isLandingPage ? "bg-black" : "bg-background dot-grid")}>
+      {!isLandingPage && <LaunchBanner />}
+      {!isLandingPage && (
+        <Header 
+          isAppPage={isAppPage} 
+        />
+      )}
       
       <div className="flex">
         {isAppPage && (
