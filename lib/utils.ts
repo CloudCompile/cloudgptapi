@@ -177,6 +177,30 @@ export function getPoeApiKey(): string | undefined {
 }
 
 /**
+ * Get all available Kivest API keys
+ */
+export function getKivestApiKeys(): string[] {
+  const keys = [
+    process.env.KIVEST_API_KEY,
+    process.env.KIVEST_API_KEY_1,
+    process.env.KIVEST_API_KEY_2,
+  ].filter(Boolean) as string[];
+
+  return Array.from(new Set(keys));
+}
+
+/**
+ * Get a Kivest API key using random selection for rotation/load-balancing
+ */
+export function getKivestApiKey(): string | undefined {
+  const keys = getKivestApiKeys();
+  if (keys.length === 0) return undefined;
+
+  const randomIndex = Math.floor(Math.random() * keys.length);
+  return keys[randomIndex];
+}
+
+/**
  * Get all available Liz API keys
  */
 export function getLizApiKeys(): string[] {

@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { Check, Zap, Shield, Rocket, Loader2, Video } from 'lucide-react';
+import { Check, Zap, Shield, Rocket, Video, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -93,46 +92,13 @@ const plans = [
 ];
 
 export default function PricingPage() {
-  const [loading, setLoading] = useState<string | null>(null);
-
-  const handleUpgrade = async (plan: typeof plans[0]) => {
-    if (plan.name === 'Free') return;
-    if (plan.name === 'Enterprise') {
-      window.location.href = plan.buttonHref;
-      return;
-    }
-
-    try {
-      setLoading(plan.name);
-      const response = await fetch('/api/stripe/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          priceId: (plan as any).stripePriceId,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create checkout session');
-      }
-
-      const { url } = await response.json();
-      window.location.href = url;
-    } catch (error: any) {
-      console.error('Error upgrading:', error);
-      alert(error.message || 'Failed to start checkout. Please try again or contact support.');
-    } finally {
-      setLoading(null);
-    }
-  };
+  const inviteOnlyLabel = 'Invite Only';
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 relative overflow-hidden">
-      <div className="absolute inset-0 mesh-gradient opacity-30 pointer-events-none" />
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 relative overflow-hidden">
+      <div className="absolute inset-0 mesh-gradient opacity-40 pointer-events-none" />
       <div className="absolute inset-0 dot-grid opacity-[0.03] pointer-events-none" />
+      <div className="absolute -top-36 left-1/2 -translate-x-1/2 h-[28rem] w-[28rem] rounded-full bg-white/50 dark:bg-white/10 blur-3xl pointer-events-none" />
 
       {/* Hero Section */}
       <section className="pt-20 sm:pt-32 pb-12 sm:pb-20 px-4 relative z-10">
@@ -161,8 +127,8 @@ export default function PricingPage() {
                 className={cn(
                   "group relative flex flex-col p-6 sm:p-10 rounded-3xl sm:rounded-[2.5rem] border-2 transition-all duration-500 animate-in fade-in zoom-in-95",
                   plan.highlight 
-                    ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-2xl shadow-primary/20 lg:scale-105 z-20" 
-                    : "bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-border hover:border-primary/30 z-10",
+                    ? "bg-white/30 dark:bg-white/10 text-slate-900 dark:text-white border-white/40 shadow-2xl shadow-primary/20 lg:scale-105 z-20 backdrop-blur-2xl" 
+                    : "bg-white/45 dark:bg-slate-900/40 backdrop-blur-2xl border-white/50 dark:border-white/10 hover:border-primary/30 z-10",
                   i === 0 && "delay-300",
                   i === 1 && "delay-400",
                   i === 2 && "delay-500"
@@ -212,28 +178,18 @@ export default function PricingPage() {
                 </div>
 
                 <div className="relative z-10">
-                  {plan.name === 'Free' ? (
-                    <Link
-                      href={plan.buttonHref}
-                      className="flex items-center justify-center w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700"
-                    >
-                      {plan.buttonText}
-                    </Link>
-                  ) : (
-                    <button
-                      onClick={() => handleUpgrade(plan)}
-                      disabled={loading !== null}
-                      className={cn(
-                        "flex items-center justify-center w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl",
-                        plan.highlight
-                          ? "bg-primary text-white hover:scale-[1.02] active:scale-[0.98] shadow-primary/20"
-                          : "bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:scale-[1.02] active:scale-[0.98]",
-                        loading === plan.name && "opacity-70 cursor-not-allowed"
-                      )}
-                    >
-                      {loading === plan.name ? <Loader2 className="h-5 w-5 animate-spin" /> : plan.buttonText}
-                    </button>
-                  )}
+                  <button
+                    disabled
+                    className={cn(
+                      "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all cursor-not-allowed border",
+                      plan.highlight
+                        ? "bg-white/30 text-slate-900 dark:text-white border-white/60"
+                        : "bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 border-border"
+                    )}
+                  >
+                    <Lock className="h-4 w-4" />
+                    {inviteOnlyLabel}
+                  </button>
                 </div>
               </div>
             ))}
@@ -268,11 +224,12 @@ export default function PricingPage() {
                     </div>
                   </div>
                   <p className="text-xs sm:text-sm font-medium text-slate-500 mb-6 sm:mb-8">{plan.description}</p>
-                  <button 
-                    onClick={() => handleUpgrade(plan)}
-                    className="w-full py-3.5 sm:py-4 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all"
+                  <button
+                    disabled
+                    className="w-full py-3.5 sm:py-4 rounded-xl bg-white/70 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border border-border cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {plan.buttonText}
+                    <Lock className="h-3.5 w-3.5" />
+                    {inviteOnlyLabel}
                   </button>
                 </div>
               </div>

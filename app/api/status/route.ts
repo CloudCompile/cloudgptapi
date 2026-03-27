@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PROVIDER_URLS } from '@/lib/chat-utils';
-import { getPollinationsApiKey, getOpenRouterApiKey, getPoeApiKey, getLizApiKey } from '@/lib/utils';
+import { getPollinationsApiKey, getPoeApiKey, getLizApiKey, getKivestApiKey } from '@/lib/utils';
 
 // Cache status for 1 minute to avoid hammering providers
 let statusCache: {
@@ -53,6 +53,7 @@ export async function GET() {
     { name: 'poe', url: `${PROVIDER_URLS.poe}/models`, apiKey: getPoeApiKey() },
     { name: 'github', url: `https://models.inference.ai.azure.com/models` },
     { name: 'liz', url: `${PROVIDER_URLS.liz}/v1/models`, apiKey: getLizApiKey() },
+    { name: 'kivest', url: `${PROVIDER_URLS.kivest}/models`, apiKey: getKivestApiKey() },
   ];
 
   const results = await Promise.all(

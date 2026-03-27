@@ -15,6 +15,7 @@ import {
   getClaudeApiKey, getClaudeApiKeys,
   getPoeApiKey, getPoeApiKeys,
   getLizApiKey, getLizApiKeys,
+  getKivestApiKey,
   getOpenAIApiKey, getOpenAIApiKeys,
   safeResponseJson
 } from '@/lib/utils';
@@ -96,6 +97,16 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       console.warn(`[${requestId}] Missing OpenAI API key for model: ${modelId}`);
       return NextResponse.json(
         { error: { message: 'OpenAI API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { status: 500, headers: getCorsHeaders() }
+      );
+    }
+  } else if (model.provider === 'kivest') {
+    providerUrl = `${PROVIDER_URLS.kivest}/chat/completions`;
+    providerApiKey = getKivestApiKey();
+    if (!providerApiKey) {
+      console.warn(`[${requestId}] Missing Kivest API key for model: ${modelId}`);
+      return NextResponse.json(
+        { error: { message: 'Kivest API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
         { status: 500, headers: getCorsHeaders() }
       );
     }

@@ -3,7 +3,7 @@
 export interface ChatModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'poe' | 'liz' | 'openai';
+  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'poe' | 'liz' | 'openai' | 'kivest';
   description?: string;
   contextWindow?: number;
   downtimeUntil?: string; // ISO timestamp for maintenance countdown
@@ -31,22 +31,88 @@ export interface VideoModel {
 
 // Available chat models by provider
 const POLLINATIONS_CHAT_MODELS: ChatModel[] = [
-  { id: 'deepseek', name: 'DeepSeek V3.2', provider: 'pollinations', description: 'DeepSeek V3.2', contextWindow: 400, usageWeight: 10 },
-  { id: 'chickytutor', name: 'ChickyTutor AI Language Tutor', provider: 'pollinations', description: 'ChickyTutor AI Language Tutor', contextWindow: 200, usageWeight: 5 },
-  { id: 'kimi-k2-thinking', name: 'Moonshot Kimi K2 Thinking', provider: 'pollinations', description: 'Moonshot Kimi K2 Thinking', contextWindow: 200, usageWeight: 15 },
-  { id: 'openai-audio', name: 'OpenAI GPT-4o Mini Audio', provider: 'pollinations', description: 'OpenAI GPT-4o Mini Audio', contextWindow: 150, usageWeight: 5 },
-  { id: 'midijourney', name: 'MIDIjourney', provider: 'pollinations', description: 'MIDIjourney', contextWindow: 150, usageWeight: 20 },
-  { id: 'glm', name: 'Z.ai GLM-4.7', provider: 'pollinations', description: 'Z.ai GLM-4.7', contextWindow: 150, usageWeight: 10 },
-  { id: 'minimax', name: 'MiniMax M2.1', provider: 'pollinations', description: 'MiniMax M2.1', contextWindow: 150, usageWeight: 8 },
-  { id: 'openai-large', name: 'OpenAI GPT-5.2', provider: 'pollinations', description: 'OpenAI GPT-5.2', contextWindow: 100, usageWeight: 40 },
-  { id: 'perplexity-reasoning', name: 'Perplexity Sonar Reasoning', provider: 'pollinations', description: 'Perplexity Sonar Reasoning', contextWindow: 100, usageWeight: 25 },
-  { id: 'nova-fast', name: 'Amazon Nova Micro', provider: 'pollinations', description: 'Amazon Nova Micro', contextWindow: 24400, usageWeight: 1 },
-  { id: 'mistral', name: 'Mistral Small 3.2 24B', provider: 'pollinations', description: 'Mistral Small 3.2 24B', contextWindow: 2000, usageWeight: 1 },
-  { id: 'qwen-coder', name: 'Qwen3 Coder 30B', provider: 'pollinations', description: 'Qwen3 Coder 30B', contextWindow: 1600, usageWeight: 1 },
-  { id: 'grok', name: 'xAI Grok 4 Fast', provider: 'pollinations', description: 'xAI Grok 4 Fast', contextWindow: 900, usageWeight: 1 },
-  { id: 'openai', name: 'OpenAI GPT-5 Mini', provider: 'pollinations', description: 'OpenAI GPT-5 Mini', contextWindow: 750, usageWeight: 1 },
-  { id: 'perplexity-fast', name: 'Perplexity Sonar', provider: 'pollinations', description: 'Perplexity Sonar', contextWindow: 750, usageWeight: 1 },
-  { id: 'openai-fast', name: 'OpenAI GPT-5 Nano', provider: 'pollinations', description: 'OpenAI GPT-5 Nano', contextWindow: 700, usageWeight: 1 },
+  { id: 'openai', name: 'OpenAI GPT-5 Mini', provider: 'pollinations', description: 'OpenAI GPT-5 Mini', contextWindow: 400, usageWeight: 1 },
+  { id: 'openai-fast', name: 'OpenAI GPT-5 Nano', provider: 'pollinations', description: 'OpenAI GPT-5 Nano', contextWindow: 400, usageWeight: 1 },
+  { id: 'openai-large', name: 'OpenAI GPT-5.4', provider: 'pollinations', description: 'OpenAI GPT-5.4', contextWindow: 400, usageWeight: 3 },
+  { id: 'gpt-5.1', name: 'OpenAI GPT-5.1', provider: 'pollinations', description: 'OpenAI GPT-5.1', contextWindow: 400, usageWeight: 2 },
+  { id: 'gpt-oss-120b', name: 'OpenAI GPT-OSS 120B', provider: 'pollinations', description: 'OpenAI GPT-OSS 120B', contextWindow: 200, usageWeight: 2 },
+  { id: 'gpt-oss-20b', name: 'OpenAI GPT-OSS 20B', provider: 'pollinations', description: 'OpenAI GPT-OSS 20B', contextWindow: 200, usageWeight: 1 },
+  { id: 'claude-fast', name: 'Claude Sonnet 4.6', provider: 'pollinations', description: 'Anthropic Claude Sonnet 4.6', contextWindow: 200, usageWeight: 4 },
+  { id: 'gemini', name: 'Gemini 3 Flash Preview', provider: 'pollinations', description: 'Google Gemini 3 Flash Preview', contextWindow: 1000, usageWeight: 3 },
+  { id: 'gemini-search', name: 'Gemini 3 Flash Preview (Search)', provider: 'pollinations', description: 'Google Gemini 3 Flash Preview with Search', contextWindow: 1000, usageWeight: 4 },
+  { id: 'gemini-large', name: 'Gemini 3 Pro Preview', provider: 'pollinations', description: 'Google Gemini 3 Pro Preview', contextWindow: 1000, usageWeight: 6 },
+  { id: 'gemini-large-search', name: 'Gemini 3 Pro Preview (Search)', provider: 'pollinations', description: 'Google Gemini 3 Pro Preview with Search', contextWindow: 1000, usageWeight: 7 },
+  { id: 'gemini-fast', name: 'Gemini 2.5 Flash', provider: 'pollinations', description: 'Google Gemini 2.5 Flash', contextWindow: 1000, usageWeight: 2 },
+  { id: 'deepseek', name: 'DeepSeek V3.2', provider: 'pollinations', description: 'DeepSeek V3.2', contextWindow: 160, usageWeight: 2 },
+  { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'pollinations', description: 'DeepSeek Chat', contextWindow: 160, usageWeight: 1 },
+  { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner', provider: 'pollinations', description: 'DeepSeek Reasoner', contextWindow: 160, usageWeight: 3 },
+  { id: 'deepseek-r1-0528', name: 'DeepSeek R1 0528', provider: 'pollinations', description: 'DeepSeek R1 0528', contextWindow: 160, usageWeight: 4 },
+  { id: 'qwen-large', name: 'Qwen 3.5 397B A17B', provider: 'pollinations', description: 'Qwen 3.5 397B A17B', contextWindow: 512, usageWeight: 2 },
+  { id: 'qwen3-235b-a22b', name: 'Qwen3 235B A22B', provider: 'pollinations', description: 'Qwen3 235B A22B', contextWindow: 512, usageWeight: 2 },
+  { id: 'qwen3-32b', name: 'Qwen3 32B', provider: 'pollinations', description: 'Qwen3 32B', contextWindow: 256, usageWeight: 1 },
+  { id: 'qwen-coder', name: 'Qwen3 Coder 480B', provider: 'pollinations', description: 'Qwen3 Coder 480B A35B Instruct', contextWindow: 256, usageWeight: 2 },
+  { id: 'qwen-next-80b', name: 'Qwen3 Next 80B Instruct', provider: 'pollinations', description: 'Qwen3 Next 80B A3B Instruct', contextWindow: 256, usageWeight: 2 },
+  { id: 'qwen-next-80b-thinking', name: 'Qwen3 Next 80B Thinking', provider: 'pollinations', description: 'Qwen3 Next 80B A3B Thinking', contextWindow: 256, usageWeight: 3 },
+  { id: 'qwen3.5-plus', name: 'Qwen 3.5 Plus', provider: 'pollinations', description: 'Qwen 3.5 Plus', contextWindow: 256, usageWeight: 1 },
+  { id: 'qwen3.5-flash', name: 'Qwen 3.5 Flash', provider: 'pollinations', description: 'Qwen 3.5 Flash', contextWindow: 256, usageWeight: 1 },
+  { id: 'qwen-deep-research', name: 'Qwen Deep Research', provider: 'pollinations', description: 'Qwen Deep Research', contextWindow: 256, usageWeight: 4 },
+  { id: 'kimi', name: 'Kimi K2.5', provider: 'pollinations', description: 'Moonshot Kimi K2.5', contextWindow: 256, usageWeight: 3 },
+  { id: 'kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'pollinations', description: 'Moonshot Kimi K2 Thinking', contextWindow: 256, usageWeight: 2 },
+  { id: 'mistral', name: 'Mistral Large 3 675B', provider: 'pollinations', description: 'Mistral Large 3 675B Instruct', contextWindow: 128, usageWeight: 2 },
+  { id: 'glm', name: 'GLM 5', provider: 'pollinations', description: 'Zhipu GLM 5', contextWindow: 198, usageWeight: 2 },
+  { id: 'minimax', name: 'MiniMax M2.5', provider: 'pollinations', description: 'MiniMax M2.5', contextWindow: 200, usageWeight: 3 },
+  { id: 'grok', name: 'Grok', provider: 'pollinations', description: 'xAI Grok', contextWindow: 2000, usageWeight: 2 },
+];
+
+const KIVEST_CHAT_MODELS: ChatModel[] = [
+  { id: 'kivest-tungtung-brainrot', name: 'Kivest Tungtung Brainrot', provider: 'kivest', description: 'KivestAI house model', usageWeight: 1 },
+  { id: 'claude-sonnet-4.6', name: 'Claude Sonnet 4.6', provider: 'kivest', description: 'Anthropic Claude Sonnet 4.6', usageWeight: 10 },
+  { id: 'gpt-5.4', name: 'GPT-5.4', provider: 'kivest', description: 'OpenAI GPT-5.4', usageWeight: 6 },
+  { id: 'gpt-5.3-codex', name: 'GPT-5.3 Codex', provider: 'kivest', description: 'OpenAI GPT-5.3 Codex', usageWeight: 6 },
+  { id: 'gpt-5.1', name: 'GPT-5.1', provider: 'kivest', description: 'OpenAI GPT-5.1', usageWeight: 4 },
+  { id: 'gpt-5-nano', name: 'GPT-5 Nano', provider: 'kivest', description: 'OpenAI GPT-5 Nano', usageWeight: 2 },
+  { id: 'llama3.1-8B', name: 'Llama 3.1 8B', provider: 'kivest', description: 'Meta Llama 3.1 8B', usageWeight: 1 },
+  { id: 'llama-4-maverick-17b-128e-instruct', name: 'Llama 4 Maverick 17B 128E', provider: 'kivest', description: 'Meta Llama 4 Maverick 17B 128E Instruct', usageWeight: 4 },
+  { id: 'llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17B 16E', provider: 'kivest', description: 'Meta Llama 4 Scout 17B 16E Instruct', usageWeight: 4 },
+  { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', provider: 'kivest', description: 'Google Gemini 3 Pro Preview', usageWeight: 8 },
+  { id: 'gemini-3-pro-preview:search', name: 'Gemini 3 Pro Preview (Search)', provider: 'kivest', description: 'Google Gemini 3 Pro Preview with Search', usageWeight: 9 },
+  { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', provider: 'kivest', description: 'Google Gemini 3 Flash Preview', usageWeight: 8 },
+  { id: 'gemini-3-flash-preview:search', name: 'Gemini 3 Flash Preview (Search)', provider: 'kivest', description: 'Google Gemini 3 Flash Preview with Search', usageWeight: 9 },
+  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'kivest', description: 'Google Gemini 2.5 Flash', usageWeight: 8 },
+  { id: 'gpt-oss-120b', name: 'GPT-OSS 120B', provider: 'kivest', description: 'OpenAI GPT-OSS 120B', usageWeight: 4 },
+  { id: 'gpt-oss-20b', name: 'GPT-OSS 20B', provider: 'kivest', description: 'OpenAI GPT-OSS 20B', usageWeight: 2 },
+  { id: 'qwen3.5-plus', name: 'Qwen 3.5 Plus', provider: 'kivest', description: 'Qwen 3.5 Plus', usageWeight: 2 },
+  { id: 'qwen3.5-flash', name: 'Qwen 3.5 Flash', provider: 'kivest', description: 'Qwen 3.5 Flash', usageWeight: 1 },
+  { id: 'qwen-slides', name: 'Qwen Slides', provider: 'kivest', description: 'Qwen Slides', usageWeight: 4 },
+  { id: 'qwen-deep-research', name: 'Qwen Deep Research', provider: 'kivest', description: 'Qwen Deep Research', usageWeight: 6 },
+  { id: 'qwen3.5-397b-a17b', name: 'Qwen 3.5 397B A17B', provider: 'kivest', description: 'Qwen 3.5 397B A17B', usageWeight: 2 },
+  { id: 'qwen3-235b-a22b', name: 'Qwen3 235B A22B', provider: 'kivest', description: 'Qwen3 235B A22B', usageWeight: 2 },
+  { id: 'qwen3-32b', name: 'Qwen3 32B', provider: 'kivest', description: 'Qwen3 32B', usageWeight: 2 },
+  { id: 'qwen3-coder-480b-a35b-instruct', name: 'Qwen3 Coder 480B A35B', provider: 'kivest', description: 'Qwen3 Coder 480B A35B Instruct', usageWeight: 2 },
+  { id: 'qwen3-next-80b-a3b-instruct', name: 'Qwen3 Next 80B A3B Instruct', provider: 'kivest', description: 'Qwen3 Next 80B A3B Instruct', usageWeight: 2 },
+  { id: 'qwen3-next-80b-a3b-thinking', name: 'Qwen3 Next 80B A3B Thinking', provider: 'kivest', description: 'Qwen3 Next 80B A3B Thinking', usageWeight: 2 },
+  { id: 'deepseek-r1-0528', name: 'DeepSeek R1 0528', provider: 'kivest', description: 'DeepSeek R1 0528', usageWeight: 6 },
+  { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'kivest', description: 'DeepSeek Chat', usageWeight: 2 },
+  { id: 'deepseek-v3.2', name: 'DeepSeek V3.2', provider: 'kivest', description: 'DeepSeek V3.2', usageWeight: 3 },
+  { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner', provider: 'kivest', description: 'DeepSeek Reasoner', usageWeight: 3 },
+  { id: 'phi-4-mini-flash-reasoning', name: 'Phi-4 Mini Flash Reasoning', provider: 'kivest', description: 'Microsoft Phi-4 Mini Flash Reasoning', usageWeight: 3 },
+  { id: 'phi-4-multimodal-instruct', name: 'Phi-4 Multimodal Instruct', provider: 'kivest', description: 'Microsoft Phi-4 Multimodal Instruct', usageWeight: 6 },
+  { id: 'minimax-2.7', name: 'MiniMax 2.7', provider: 'kivest', description: 'MiniMax 2.7', usageWeight: 3 },
+  { id: 'minimax-m2.1', name: 'MiniMax M2.1', provider: 'kivest', description: 'MiniMax M2.1', usageWeight: 4 },
+  { id: 'minimax-m2.5', name: 'MiniMax M2.5', provider: 'kivest', description: 'MiniMax M2.5', usageWeight: 6 },
+  { id: 'minimax-m2', name: 'MiniMax M2', provider: 'kivest', description: 'MiniMax M2', usageWeight: 3 },
+  { id: 'mimo-v2-pro', name: 'Mimo V2 Pro', provider: 'kivest', description: 'Mimo V2 Pro', usageWeight: 3 },
+  { id: 'mimo-v2-omni', name: 'Mimo V2 Omni', provider: 'kivest', description: 'Mimo V2 Omni', usageWeight: 3 },
+  { id: 'devstral-2-123b', name: 'Devstral 2 123B', provider: 'kivest', description: 'Mistral Devstral 2 123B', usageWeight: 6 },
+  { id: 'mistral-large-3-675b-instruct', name: 'Mistral Large 3 675B', provider: 'kivest', description: 'Mistral Large 3 675B Instruct', usageWeight: 2 },
+  { id: 'kimi-k2-instruct-0905', name: 'Kimi K2 Instruct 0905', provider: 'kivest', description: 'Moonshot Kimi K2 Instruct 0905', usageWeight: 4 },
+  { id: 'kimi-k2.5', name: 'Kimi K2.5', provider: 'kivest', description: 'Moonshot Kimi K2.5', usageWeight: 6 },
+  { id: 'kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'kivest', description: 'Moonshot Kimi K2 Thinking', usageWeight: 4 },
+  { id: 'glm-4.7', name: 'GLM 4.7', provider: 'kivest', description: 'Zhipu GLM 4.7', usageWeight: 2 },
+  { id: 'glm-5', name: 'GLM 5', provider: 'kivest', description: 'Zhipu GLM 5', usageWeight: 3 },
+  { id: 'seed-oss-36b-instruct', name: 'Seed OSS 36B Instruct', provider: 'kivest', description: 'ByteDance Seed OSS 36B Instruct', usageWeight: 2 },
+  { id: 'nemotron-3-nano-30b-a3b', name: 'Nemotron 3 Nano 30B A3B', provider: 'kivest', description: 'NVIDIA Nemotron 3 Nano 30B A3B', usageWeight: 2 },
+  { id: 'step-3.5-flash', name: 'Step 3.5 Flash', provider: 'kivest', description: 'StepFun Step 3.5 Flash', usageWeight: 2 },
 ];
 
 const GEMINI_CHAT_MODELS: ChatModel[] = [
@@ -279,6 +345,7 @@ const LIZ_CHAT_MODELS: ChatModel[] = [
 
 export const CHAT_MODELS: ChatModel[] = [
   ...POLLINATIONS_CHAT_MODELS,
+  ...KIVEST_CHAT_MODELS,
 ];
 
 // All models require PRO subscription
@@ -301,20 +368,28 @@ export const PREMIUM_MODELS = new Set([
   'openai-large', // OpenAI GPT-5.2
   'perplexity-reasoning', // Perplexity Sonar Reasoning
   'perplexity-fast', // Perplexity Sonar
+  // Kivest models
+  ...KIVEST_CHAT_MODELS.map(model => model.id),
 ]);
 
 // Available image models
 export const IMAGE_MODELS: ImageModel[] = [
   { id: 'flux', name: 'Flux', provider: 'pollinations', description: 'Flux Schnell - Fast high-quality image generation', usageWeight: 5 },
   { id: 'zimage', name: 'Z-Image', provider: 'pollinations', description: 'Z-Image Turbo - Fast 6B Flux with 2x upscaling', usageWeight: 5 },
-  { id: 'turbo', name: 'Turbo', provider: 'pollinations', description: 'SDXL Turbo - Single-step real-time generation', usageWeight: 5 },
+  { id: 'qwen-image', name: 'Qwen Image', provider: 'pollinations', description: 'Qwen Image Plus - text/image generation and editing', usageWeight: 8 },
+  { id: 'grok-imagine', name: 'Grok Imagine', provider: 'pollinations', description: 'xAI official image generation model', usageWeight: 8 },
+  { id: 'grok-imagine-pro', name: 'Grok Imagine Pro', provider: 'pollinations', description: 'xAI Aurora image generation', usageWeight: 20 },
+  { id: 'klein', name: 'Flux Klein', provider: 'pollinations', description: 'FLUX.2 Klein 4B fast image generation/editing', usageWeight: 6 },
   { id: 'gptimage', name: 'GPT Image', provider: 'pollinations', description: "GPT Image 1 Mini - OpenAI's image generation model", usageWeight: 5 },
   { id: 'gptimage-large', name: 'GPT Image Large', provider: 'pollinations', description: "GPT Image 1.5 - OpenAI's advanced image generation model", usageWeight: 15 },
-  { id: 'seedream', name: 'Seedream', provider: 'pollinations', description: 'Seedream 4.0 - ByteDance ARK (better quality)', usageWeight: 5 },
-  { id: 'kontext', name: 'Kontext', provider: 'pollinations', description: 'FLUX.1 Kontext - In-context editing & generation', usageWeight: 5 },
+  { id: 'seedream5', name: 'Seedream 5', provider: 'pollinations', description: 'Seedream 5.0 Lite - ByteDance ARK', usageWeight: 12 },
+  { id: 'kontext', name: 'Kontext', provider: 'pollinations', description: 'FLUX.1 Kontext - In-context editing & generation', usageWeight: 10 },
   { id: 'nanobanana', name: 'Nanobanana', provider: 'pollinations', description: 'NanoBanana - Gemini 2.5 Flash Image', usageWeight: 5 },
-  { id: 'seedream-pro', name: 'Seedream Pro', provider: 'pollinations', description: 'Seedream 4.5 Pro - ByteDance ARK (4K, Multi-Image)', usageWeight: 15 },
+  { id: 'nanobanana-2', name: 'Nanobanana 2', provider: 'pollinations', description: 'NanoBanana 2 - Gemini 3.1 Flash Image', usageWeight: 8 },
   { id: 'nanobanana-pro', name: 'Nanobanana Pro', provider: 'pollinations', description: 'NanoBanana Pro - Gemini 3 Pro Image (4K, Thinking)', usageWeight: 15 },
+  { id: 'p-image', name: 'Pruna p-image', provider: 'pollinations', description: 'Pruna fast text-to-image', usageWeight: 6 },
+  { id: 'p-image-edit', name: 'Pruna p-image-edit', provider: 'pollinations', description: 'Pruna image editing model', usageWeight: 10 },
+  { id: 'nova-canvas', name: 'Nova Canvas', provider: 'pollinations', description: 'Amazon Nova Canvas image generation', usageWeight: 15 },
 ];
 
 // Available video models - ALL require pro/video_pro plan
@@ -322,7 +397,12 @@ export const VIDEO_MODELS: VideoModel[] = [
   { id: 'seedance-pro', name: 'Seedance Pro', provider: 'pollinations', description: 'Seedance Pro-Fast - BytePlus video generation (better prompt adherence)', usageWeight: 50 },
   { id: 'seedance', name: 'Seedance', provider: 'pollinations', description: 'Seedance Lite - BytePlus video generation (better quality)', usageWeight: 50 },
   { id: 'veo', name: 'Veo', provider: 'pollinations', description: "Veo 3.1 Fast - Google's video generation model (preview)", usageWeight: 50 },
-  { id: 'openai-audio', name: 'OpenAI GPT-4o Mini Audio', provider: 'pollinations', description: 'OpenAI GPT-4o Mini Audio (Requires Pro)', usageWeight: 25 },
+  { id: 'wan', name: 'Wan 2.6', provider: 'pollinations', description: 'Alibaba text/image-to-video with audio', usageWeight: 20 },
+  { id: 'wan-fast', name: 'Wan 2.2 Fast', provider: 'pollinations', description: 'Alibaba fast/cheap video model', usageWeight: 8 },
+  { id: 'ltx-2', name: 'LTX-2', provider: 'pollinations', description: 'Fast text-to-video generation on Vast.ai', usageWeight: 8 },
+  { id: 'p-video', name: 'Pruna p-video', provider: 'pollinations', description: 'Pruna text/image-to-video generation', usageWeight: 24 },
+  { id: 'grok-video-pro', name: 'Grok Video Pro', provider: 'pollinations', description: 'xAI official video generation', usageWeight: 20 },
+  { id: 'nova-reel', name: 'Nova Reel', provider: 'pollinations', description: 'Amazon Nova Reel video generation', usageWeight: 30 },
 ];
 
 // Video models require pro/video_pro plan for access
@@ -343,4 +423,5 @@ export const PROVIDER_URLS = {
   poe: 'https://api.poe.com/v1',
   liz: 'https://api.lizai.xyz',
   openai: 'https://api.openai.com/v1',
+  kivest: 'https://ai.ezif.in/v1',
 };

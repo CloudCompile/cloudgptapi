@@ -206,6 +206,25 @@ export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
   'liz-o3-mini': 'o3-mini',
   'liz-qwen3-235b': 'qwen3-235b-a22b',
   'liz-llama-3.3-70b': 'llama-3.3-70b',
+  // Pollinations canonical IDs
+  'gemini': 'gemini-3-flash-preview',
+  'gemini-search': 'gemini-3-flash-preview:search',
+  'gemini-large': 'gemini-3-pro-preview',
+  'gemini-large-search': 'gemini-3-pro-preview:search',
+  'gemini-fast': 'gemini-2.5-flash',
+  'claude-fast': 'claude-sonnet-4.6',
+  'openai': 'gpt-5.1',
+  'openai-fast': 'gpt-5-nano',
+  'openai-large': 'gpt-5.4',
+  'qwen-large': 'qwen3.5-397b-a17b',
+  'qwen-coder': 'qwen3-coder-480b-a35b-instruct',
+  'qwen-next-80b': 'qwen3-next-80b-a3b-instruct',
+  'qwen-next-80b-thinking': 'qwen3-next-80b-a3b-thinking',
+  'mistral': 'mistral-large-3-675b-instruct',
+  'glm': 'glm-5',
+  'minimax': 'minimax-m2.5',
+  'deepseek': 'deepseek-v3.2',
+  'grok': 'grok',
   
   // OpenRouter specific mappings if needed
   'openai/gpt-4o': 'gpt-4o',
@@ -258,6 +277,7 @@ export const PROVIDER_URLS = {
   poe: 'https://api.poe.com/v1',
   liz: 'https://lizley.zeabur.app',
   openai: 'https://api.openai.com/v1',
+  kivest: 'https://ai.ezif.in/v1',
 };
 
 export function createChatTransformStream(
