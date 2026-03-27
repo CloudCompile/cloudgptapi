@@ -84,17 +84,37 @@ async function handleVideoGeneration(request: NextRequest, body: any) {
         userPlan = apiKeyInfo.plan;
       }
     } else if (sessionUserId) {
-      // Fetch plan for session users if no API key is provided
-      const { data: profile } = await supabaseAdmin
-        .from('profiles')
-        .select('plan, email')
-        .eq('id', sessionUserId)
-        .maybeSingle();
-      
-      if (profile) {
-        userPlan = profile.plan || 'free';
-        // Manual override for specific users requested by admin
-        userPlan = await applyPlanOverride(profile.email, userPlan, sessionUserId, 'id');
+      // First, try to get plan from Clerk public metadata
+      try {
+        const { clerkClient } = await import('@clerk/nextjs/server');
+        const user = await clerkClient.users.getUser(sessionUserId);
+        if (user?.publicMetadata?.plan) {
+          userPlan = user.publicMetadata.plan as string;
+        } else {
+          // Fallback to Supabase if not in Clerk metadata
+          const { data: profile } = await supabaseAdmin
+            .from('profiles')
+            .select('plan, email')
+            .eq('id', sessionUserId)
+            .maybeSingle();
+          
+          if (profile) {
+            userPlan = profile.plan || 'free';
+            // Manual override for specific users requested by admin
+            userPlan = await applyPlanOverride(profile.email, userPlan, sessionUserId, 'id');
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to fetch plan:', err);
+        const { data: profile } = await supabaseAdmin
+          .from('profiles')
+          .select('plan, email')
+          .eq('id', sessionUserId)
+          .maybeSingle();
+        
+        if (profile) {
+          userPlan = profile.plan || 'free';
+        }
       }
     }
 

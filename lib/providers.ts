@@ -281,9 +281,28 @@ export const CHAT_MODELS: ChatModel[] = [
   ...POLLINATIONS_CHAT_MODELS,
 ];
 
-// Premium models that require a subscription
+// Free models available to all users
+const FREE_MODELS = new Set([
+  'deepseek', // DeepSeek V3.2
+  'openai', // OpenAI GPT-5 Mini (free tier)
+  'openai-fast', // OpenAI GPT-5 Nano
+  'mistral', // Mistral Small
+  'qwen-coder', // Qwen3 Coder
+  'grok', // xAI Grok 4 Fast
+  'nova-fast', // Amazon Nova Micro
+]);
+
+// Premium models that require a PRO subscription
 export const PREMIUM_MODELS = new Set([
-  ...POLLINATIONS_CHAT_MODELS.map(model => model.id),
+  'chickytutor', // ChickyTutor
+  'kimi-k2-thinking', // Moonshot Kimi K2 Thinking
+  'openai-audio', // OpenAI GPT-4o Mini Audio
+  'midijourney', // MIDIjourney (music generation)
+  'glm', // Z.ai GLM-4.7
+  'minimax', // MiniMax M2.1
+  'openai-large', // OpenAI GPT-5.2
+  'perplexity-reasoning', // Perplexity Sonar Reasoning
+  'perplexity-fast', // Perplexity Sonar
 ]);
 
 // Available image models
@@ -300,13 +319,16 @@ export const IMAGE_MODELS: ImageModel[] = [
   { id: 'nanobanana-pro', name: 'Nanobanana Pro', provider: 'pollinations', description: 'NanoBanana Pro - Gemini 3 Pro Image (4K, Thinking)', usageWeight: 15 },
 ];
 
-// Available video models
+// Available video models - ALL require pro/video_pro plan
 export const VIDEO_MODELS: VideoModel[] = [
   { id: 'seedance-pro', name: 'Seedance Pro', provider: 'pollinations', description: 'Seedance Pro-Fast - BytePlus video generation (better prompt adherence)', usageWeight: 50 },
   { id: 'seedance', name: 'Seedance', provider: 'pollinations', description: 'Seedance Lite - BytePlus video generation (better quality)', usageWeight: 50 },
   { id: 'veo', name: 'Veo', provider: 'pollinations', description: "Veo 3.1 Fast - Google's video generation model (preview)", usageWeight: 50 },
-  { id: 'openai-audio', name: 'OpenAI GPT-4o Mini Audio', provider: 'pollinations', description: 'OpenAI GPT-4o Mini Audio', usageWeight: 25 },
+  { id: 'openai-audio', name: 'OpenAI GPT-4o Mini Audio', provider: 'pollinations', description: 'OpenAI GPT-4o Mini Audio (Requires Pro)', usageWeight: 25 },
 ];
+
+// Video models require pro/video_pro plan for access
+export const VIDEO_MODELS_SET = new Set(VIDEO_MODELS.map(m => m.id));
 
 // Provider base URLs
 export const PROVIDER_URLS = {

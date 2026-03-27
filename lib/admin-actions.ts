@@ -1,6 +1,7 @@
 'use server';
 
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { clerkClient } from '@clerk/nextjs/server';
 import { supabaseAdmin } from './supabase';
 import { revalidatePath } from 'next/cache';
 
@@ -69,6 +70,17 @@ export async function assignPlan(userId: string, plan: 'free' | 'developer' | 'p
 
   if (error) {
     throw new Error(`Failed to assign plan: ${error.message}`);
+  }
+
+  // Update Clerk metadata with plan
+  try {
+    await clerkClient.users.updateUser(userId, {
+      publicMetadata: {
+        plan: plan
+      }
+    });
+  } catch (clerkError) {
+    console.error(`Failed to update Clerk metadata for ${userId}:`, clerkError);
   }
 
   // Also update rate limits for their API keys if they upgrade
@@ -243,6 +255,17 @@ export async function syncUser(userId: string, email: string, username?: string,
   if (finalInsertError && finalInsertError.code !== '23505') {
     console.error('Error syncing user profile:', finalInsertError);
     return;
+  }
+
+  // Update Clerk metadata with plan (default to 'free' if not set from subscription)
+  try {
+    await clerkClient.users.updateUser(userId, {
+      publicMetadata: {
+        plan: initialPlan || 'free'
+      }
+    });
+  } catch (clerkError) {
+    console.error(`Failed to update Clerk metadata for new user ${userId}:`, clerkError);
   }
 
   // Only notify Discord if this is a truly new user (didn't exist before in any form)

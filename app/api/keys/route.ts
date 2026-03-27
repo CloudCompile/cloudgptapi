@@ -1,4 +1,5 @@
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { clerkClient } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateApiKey } from '@/lib/api-keys';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -23,7 +24,25 @@ export async function GET() {
     console.log(`[GET /api/keys] Found ${keys?.length || 0} keys for user: ${userId}`);
 
     if (error) {
-      console.error('Supabase error fetching API keys:', error);
+      console.error('Supabase error fetching API keys, trying Clerk fallback:', error);
+      // Fall back to Clerk private metadata
+      try {
+        const user = await currentUser();
+        const clerkKeys = (user?.privateMetadata?.apiKeys as any[]) || [];
+        const maskedKeys = clerkKeys.map(k => ({
+          id: k.id,
+          name: k.name,
+          keyPreview: k.key ? `${k.key.substring(0, 12)}...${k.key.substring(k.key.length - 4)}` : 'Invalid Key',
+          createdAt: k.createdAt,
+          source: 'clerk'
+        }));
+        if (maskedKeys.length > 0) {
+          console.log(`[GET /api/keys] Returned ${maskedKeys.length} keys from Clerk metadata`);
+          return NextResponse.json({ keys: maskedKeys });
+        }
+      } catch (clerkError) {
+        console.warn('Clerk metadata fallback failed:', clerkError);
+      }
       return NextResponse.json({ 
         error: 'Failed to fetch API keys',
         details: error.message,
@@ -114,6 +133,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create API key: No data returned' }, { status: 500 });
     }
 
+    // Also store in Clerk private metadata for redundancy/backup
+    try {
+      const user = await currentUser();
+      if (user) {
+        const apiKeys = (user.privateMetadata?.apiKeys as any[]) || [];
+        apiKeys.push({
+          id: data.id,
+          key: data.key,
+          name: data.name,
+          createdAt: data.created_at,
+          rateLimit: data.rate_limit,
+        });
+        await clerkClient.users.updateUser(userId, {
+          privateMetadata: {
+            apiKeys: apiKeys.slice(-10) // Keep last 10 keys to avoid metadata size limits
+          }
+        });
+        console.log(`[POST /api/keys] Key also stored in Clerk private metadata`);
+      }
+    } catch (clerkError) {
+      console.warn(`[POST /api/keys] Failed to store in Clerk metadata (non-critical):`, clerkError);
+    }
+
     // Verify persistence by reading it back
     const { data: verifiedData, error: verifyError } = await supabaseAdmin
       .from('api_keys')
@@ -148,29 +190,53 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const keyId = body.id;
+
+    if (!keyId) {
+      return NextResponse.json({ error: 'Key ID is required' }, { status: 400 });
+    }
+
+    // Delete from Supabase
+    const { error } = await supabaseAdmin
+      .from('api_keys')
+      .delete()
+      .eq('id', keyId)
+      .eq('user_id', userId);
+    
+    if (error) {
+      console.error('Error deleting API key:', error);
+      return NextResponse.json({ error: 'Failed to delete API key' }, { status: 500 });
+    }
+
+    // Also remove from Clerk private metadata
+    try {
+      const user = await currentUser();
+      if (user && user.privateMetadata?.apiKeys) {
+        const apiKeys = (user.privateMetadata.apiKeys as any[]).filter(k => k.id !== keyId);
+        await clerkClient.users.updateUser(userId, {
+          privateMetadata: {
+            apiKeys
+          }
+        });
+      }
+    } catch (clerkError) {
+      console.warn('Failed to remove from Clerk metadata:', clerkError);
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    console.error('Unexpected error in DELETE /api/keys:', err);
+    return NextResponse.json({ 
+      error: 'Internal Server Error',
+      details: err.message
+    }, { status: 500 });
   }
-
-  const body = await request.json();
-  const keyId = body.id;
-
-  if (!keyId) {
-    return NextResponse.json({ error: 'Key ID is required' }, { status: 400 });
-  }
-
-  const { error } = await supabaseAdmin
-    .from('api_keys')
-    .delete()
-    .eq('id', keyId)
-    .eq('user_id', userId);
-  
-  if (error) {
-    console.error('Error deleting API key:', error);
-    return NextResponse.json({ error: 'Failed to delete API key' }, { status: 500 });
-  }
-
-  return NextResponse.json({ success: true });
 }

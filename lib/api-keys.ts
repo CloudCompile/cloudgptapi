@@ -21,11 +21,11 @@ export interface ApiKey {
   };
 }
 
-// Generate a new API key with the cgpt_ prefix
+// Generate a new API key with the vtai prefix
 export function generateApiKey(): string {
-  const prefix = 'cgpt_';
+  const prefix = 'vtai';
   const key = uuidv4().replace(/-/g, '');
-  return `${prefix}${key}`;
+  return `${prefix}_${key}`;
 }
 
 // Extract API key from request headers (Bearer token)
@@ -34,7 +34,7 @@ export function extractApiKey(headers: Headers): string | null {
   if (authHeader?.startsWith('Bearer ')) {
     const key = authHeader.substring(7);
     // Validate key format before returning
-    if (key.startsWith('cgpt_') && key.length === 37) {
+    if (key.startsWith('vtai_') && key.length === 37) {
       return key;
     }
   }
