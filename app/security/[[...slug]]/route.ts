@@ -24,7 +24,7 @@ async function handleHoneypot(request: NextRequest) {
 
   // Clone headers and add metadata
   const headers = new Headers(requestHeaders);
-  headers.set('X-Honeypot-Source', 'CloudGPT');
+  headers.set('X-Honeypot-Source', 'Vetra');
   headers.set('X-Original-IP', clientIp);
   headers.set('X-Original-Path', path);
 

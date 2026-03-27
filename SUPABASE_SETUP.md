@@ -6,7 +6,7 @@ Follow these simple steps and you'll be done in 2 minutes! 🍬
 
 ## Step 1: Go to your Supabase Dashboard
 1. Open your browser and go to [Supabase.com](https://supabase.com).
-2. Log in and click on your project (the one you made for CloudGPT).
+2. Log in and click on your project (the one you made for Vetra).
 
 ## Step 2: Open the Magic Code Box (SQL Editor)
 1. On the left side, look for a little icon that looks like this: `SQL` (It's called the **SQL Editor**).

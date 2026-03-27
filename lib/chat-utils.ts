@@ -183,7 +183,7 @@ export const modelAliases: Record<string, string> = {
   'llama-3.3-70b-liz': 'liz-llama-3.3-70b',
 };
 
-// Provider-specific model mapping (CloudGPT ID -> Provider ID)
+// Provider-specific model mapping (Vetra ID -> Provider ID)
 export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
   // Liz Proxy Mapping
   'liz-claude-3-5-sonnet': 'claude-3.5-sonnet',

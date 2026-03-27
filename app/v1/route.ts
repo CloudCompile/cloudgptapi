@@ -6,7 +6,7 @@ export const runtime = 'edge';
 export async function GET() {
   return NextResponse.json({
     status: 'active',
-    message: 'CloudGPT API v1 is running',
+    message: 'Vetra API v1 is running',
     endpoints: [
       '/v1/chat/completions',
       '/v1/models',

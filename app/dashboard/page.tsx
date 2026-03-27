@@ -282,7 +282,7 @@ export default function Dashboard() {
                   </div>
                   <h3 className="text-lg sm:text-xl font-black tracking-tight mb-2">No API keys found</h3>
                   <p className="text-slate-400 max-w-xs mx-auto text-xs sm:text-sm font-medium">
-                    {searchQuery ? "No keys match your search criteria." : "Create your first API key to start using CloudGPT."}
+                    {searchQuery ? "No keys match your search criteria." : "Create your first API key to start using Vetra."}
                   </p>
                 </div>
               )}

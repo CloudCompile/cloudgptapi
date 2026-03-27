@@ -92,7 +92,7 @@ export default function DocsPage() {
                 Documentation
               </h1>
               <p className="text-base sm:text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
-                Everything you need to integrate <span className="text-primary font-black">CloudGPT</span>'s powerful multi-modal AI infrastructure into your production applications.
+                Everything you need to integrate <span className="text-primary font-black">Vetra</span>'s powerful multi-modal AI infrastructure into your production applications.
               </p>
             </header>
 
@@ -109,12 +109,12 @@ export default function DocsPage() {
                   </div>
                   <div className="prose prose-slate dark:prose-invert max-w-none">
                     <p className="text-sm sm:text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-4 sm:mb-6">
-                      CloudGPT provides a unified API for accessing the world's most advanced AI models. Whether you need text generation, image creation, or complex video synthesis, our infrastructure handles the heavy lifting.
+                      Vetra provides a unified API for accessing the world's most advanced AI models. Whether you need text generation, image creation, or complex video synthesis, our infrastructure handles the heavy lifting.
                     </p>
                     <div className="grid sm:grid-cols-2 gap-3 sm:gap-4 mt-6 sm:mt-8">
                       <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50">
                         <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white mb-1 sm:mb-2">Unified Access</h4>
-                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">One API key, dozens of models. Switch between providers with a single parameter.</p>
+                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">One API key for Pollinations chat, image, and video models.</p>
                       </div>
                       <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50">
                         <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white mb-1 sm:mb-2">Enterprise Scale</h4>
@@ -183,7 +183,7 @@ export default function DocsPage() {
                       </div>
                       <div className="p-5 sm:p-8">
                         <code className="text-xs sm:text-base text-blue-400 font-mono leading-relaxed block whitespace-pre-wrap">
-                          https://cloudgptapi.vercel.app/v1
+                          https://vetraai.vercel.app/v1
                         </code>
                       </div>
                     </div>
@@ -246,7 +246,7 @@ export default function DocsPage() {
                   <div className="rounded-xl bg-slate-950 p-6 shadow-2xl border border-slate-800 overflow-x-auto">
                     <pre className="text-sm font-mono text-slate-300">
                       <code>{`// Memory is AUTOMATIC when you provide a x-user-id
-const response = await fetch('https://cloudgptapi.vercel.app/v1/chat/completions', {
+const response = await fetch('https://vetraai.vercel.app/v1/chat/completions', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
@@ -269,7 +269,7 @@ const response = await fetch('https://cloudgptapi.vercel.app/v1/chat/completions
                       How it works
                     </h4>
                     <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                      When a request includes <code>x-user-id</code>, CloudGPT queries the <strong>PolliStack Agent Engine</strong> for relevant past interactions. This context is then seamlessly woven into the system prompt, giving the AI "memories" of previous conversations without any extra work from you!
+                      When a request includes <code>x-user-id</code>, Vetra can associate requests to the same end-user so context-aware features can work consistently across sessions.
                     </p>
                   </div>
                 </div>
@@ -284,12 +284,12 @@ const response = await fetch('https://cloudgptapi.vercel.app/v1/chat/completions
                   </h2>
                   <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400">
                     <Crown className="h-3 w-3" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Includes Liz Premium</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Pollinations Models</span>
                   </div>
                 </div>
                 <div className="space-y-6">
                   <p className="text-slate-600 dark:text-slate-400">
-                    Generate text completions using various LLMs like GPT-4o, Claude 3.5, and Llama 3.3. Premium flagship models are available via the <strong>Liz Proxy</strong> bridge.
+                    Generate text completions using Pollinations-hosted models like OpenAI, DeepSeek, Kimi, and more.
                   </p>
                   
                   <div className="bg-slate-50 dark:bg-slate-900 rounded-xl border p-1 mb-6 flex items-center h-12 w-fit">
@@ -313,7 +313,7 @@ const response = await fetch('https://cloudgptapi.vercel.app/v1/chat/completions
                           <td className="px-6 py-4 font-mono font-bold text-primary">model</td>
                           <td className="px-6 py-4">string</td>
                           <td className="px-6 py-4 text-red-500">Yes</td>
-                          <td className="px-6 py-4 text-slate-500">The model ID to use (e.g., "openai", "claude")</td>
+                          <td className="px-6 py-4 text-slate-500">The Pollinations model ID to use (e.g., "openai", "deepseek")</td>
                         </tr>
                         <tr>
                           <td className="px-6 py-4 font-mono font-bold text-primary">messages</td>
@@ -334,7 +334,7 @@ const response = await fetch('https://cloudgptapi.vercel.app/v1/chat/completions
                   <h3 className="text-lg font-bold">Example Usage</h3>
                   <div className="rounded-xl bg-slate-950 p-6 shadow-2xl border border-slate-800 overflow-x-auto">
                     <pre className="text-sm font-mono text-slate-300">
-                      <code>{`curl -X POST https://cloudgptapi.vercel.app/v1/chat/completions \\
+                      <code>{`curl -X POST https://vetraai.vercel.app/v1/chat/completions \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -433,7 +433,7 @@ const videoUrl = data[0].url;`}</code>
                 </h2>
                 <div className="space-y-6">
                   <p className="text-slate-600 dark:text-slate-400">
-                    Control how CloudGPT identifies your users and manages their data storage.
+                    Control how Vetra identifies your users and manages their data isolation.
                   </p>
                   <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
                     <table className="w-full text-sm text-left">
@@ -446,11 +446,11 @@ const videoUrl = data[0].url;`}</code>
                       <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                         <tr>
                           <td className="px-6 py-4 font-mono font-bold text-primary">x-user-id</td>
-                          <td className="px-6 py-4 text-slate-500">A unique identifier for your end-user. Used by PolliStack to isolate storage and memory.</td>
+                          <td className="px-6 py-4 text-slate-500">A unique identifier for your end-user. Used to isolate request context per user.</td>
                         </tr>
                         <tr>
                           <td className="px-6 py-4 font-mono font-bold text-primary">X-App-Source</td>
-                          <td className="px-6 py-4 text-slate-500">Automatically set to "CloudGPT-API" for API requests. Can be used for custom tracking.</td>
+                          <td className="px-6 py-4 text-slate-500">Automatically set to "Vetra-API" for API requests. Can be used for custom tracking.</td>
                         </tr>
                       </tbody>
                     </table>
@@ -466,7 +466,7 @@ const videoUrl = data[0].url;`}</code>
                 </h2>
                 <div className="space-y-6">
                   <p className="text-slate-600 dark:text-slate-400">
-                    To ensure fair usage and protect our upstream providers, CloudGPT implements per-minute rate limits based on your authentication status.
+                    To ensure fair usage and protect our upstream providers, Vetra implements per-minute rate limits based on your authentication status.
                   </p>
                   <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
                     <table className="w-full text-sm text-left">
@@ -517,17 +517,17 @@ const videoUrl = data[0].url;`}</code>
                 </h2>
                 <div className="space-y-6 prose prose-slate dark:prose-invert max-w-none">
                   <p>
-                    We believe in full transparency regarding how your data is handled. CloudGPT acts as a <strong>stateless router</strong>—we do not store your chat logs or generated content on our own servers. Instead, we propagate requests to specialized upstream providers.
+                    We believe in full transparency regarding how your data is handled. Vetra acts as a <strong>stateless router</strong>—we do not store your chat logs or generated content on our own servers. Instead, we propagate requests to specialized upstream providers.
                   </p>
                   
                   <h3 className="text-lg font-bold">How Routing Works</h3>
                   <p>
-                    When you make a request, CloudGPT performs the following steps:
+                    When you make a request, Vetra performs the following steps:
                   </p>
                   <ol>
                     <li><strong>Authentication:</strong> Verifies your API key or session.</li>
                     <li><strong>User Identification:</strong> Determines the user ID for storage isolation (see below).</li>
-                    <li><strong>Provider Selection:</strong> Routes the request to providers like Pollinations, Routeway, or Meridian.</li>
+                    <li><strong>Provider Selection:</strong> Routes the request to Pollinations.</li>
                     <li><strong>Header Propagation:</strong> Passes custom headers to upstream providers so they can manage data isolation on their end.</li>
                   </ol>
 
@@ -561,9 +561,9 @@ const videoUrl = data[0].url;`}</code>
                     Data is stored at the <strong>edge provider</strong> level:
                   </p>
                   <ul>
-                    <li><strong>Memory:</strong> Managed by Meridian Labs via Substrate. Your context is isolated by the user ID we provide.</li>
-                    <li><strong>Images/Video:</strong> Cached by Pollinations or PolliStack for temporary retrieval.</li>
-                    <li><strong>Logs:</strong> CloudGPT only logs metadata (request count, model used) for billing and rate-limiting purposes.</li>
+                    <li><strong>Memory:</strong> Context handling depends on your configured backend features and user ID strategy.</li>
+                    <li><strong>Images/Video:</strong> Generated media may be temporarily cached by Pollinations for retrieval.</li>
+                    <li><strong>Logs:</strong> Vetra only logs metadata (request count, model used) for billing and rate-limiting purposes.</li>
                   </ul>
                 </div>
               </section>

@@ -393,7 +393,7 @@ export default function PlaygroundPage() {
                     <div className="h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
                     <div className="h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full bg-primary animate-bounce" />
                   </div>
-                  <span className="text-slate-500 font-medium">CloudGPT is thinking...</span>
+                  <span className="text-slate-500 font-medium">Vetra is thinking...</span>
                 </div>
               </div>
             )}
@@ -489,7 +489,7 @@ export default function PlaygroundPage() {
               <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border-2 border-border shadow-sm hover:border-primary/30 transition-all group">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Provider</div>
                 <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                  CloudGPT Unified
+                  Vetra Unified
                   <Zap className="h-3 w-3 text-amber-500 fill-amber-500" />
                 </p>
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Model ID</div>

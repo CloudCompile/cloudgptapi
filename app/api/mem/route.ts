@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       // Ignore auth error for API keys
     }
 
-    // Extract and validate CloudGPT API key
+    // Extract and validate Vetra API key
     const rawApiKey = extractApiKey(request.headers);
     if (!rawApiKey) {
       return NextResponse.json(
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       'Content-Type': 'application/json',
       'x-api-key': substrateApiKey,
       'x-user-id': userId,
-      'X-App-Source': apiKeyInfo ? 'CloudGPT-API' : 'CloudGPT-Website',
+      'X-App-Source': apiKeyInfo ? 'Vetra-API' : 'Vetra-Website',
     };
 
     // Forward to Substrate API

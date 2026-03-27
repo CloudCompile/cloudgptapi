@@ -1,4 +1,4 @@
-// Error handling utilities for CloudGPT API
+// Error handling utilities for Vetra API
 // Provides structured error types, provider-specific error codes, and retry suggestions
 
 import { NextResponse } from 'next/server';

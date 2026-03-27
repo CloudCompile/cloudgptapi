@@ -117,7 +117,7 @@ export async function POST(req: Request) {
                 ],
                 timestamp: new Date().toISOString(),
                 footer: {
-                  text: 'CloudGPT Billing System'
+                  text: 'Vetra Billing System'
                 }
               };
 

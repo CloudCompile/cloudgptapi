@@ -250,7 +250,7 @@ async function handleVideoGeneration(request: NextRequest, body: any) {
     
     const userId = request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`;
     const headers: Record<string, string> = {
-      'X-App-Source': apiKeyInfo ? 'CloudGPT-API' : 'CloudGPT-Website',
+      'X-App-Source': apiKeyInfo ? 'Vetra-API' : 'Vetra-Website',
       'x-user-id': userId,
     };
     const pollinationsApiKey = getPollinationsApiKey();

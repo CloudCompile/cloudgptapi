@@ -286,7 +286,7 @@ export default function PricingPage() {
         <div className="container mx-auto max-w-4xl">
           <div className="text-center mb-12 sm:mb-20">
             <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-4 sm:mb-6 uppercase">Common Questions</h2>
-            <p className="text-slate-500 font-medium text-base sm:text-lg">Everything you need to know about CloudGPT plans.</p>
+            <p className="text-slate-500 font-medium text-base sm:text-lg">Everything you need to know about Vetra plans.</p>
           </div>
 
           <div className="grid gap-4 sm:gap-6">

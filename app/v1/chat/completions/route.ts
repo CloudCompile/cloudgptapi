@@ -82,7 +82,7 @@ async function handleStableHordeChat(
       headers: {
         'Content-Type': 'application/json',
         'apikey': hordeApiKey,
-        'Client-Agent': 'CloudGPT:1.0:cloudgptapi@github.com',
+        'Client-Agent': 'Vetra:1.0:cloudgptapi@github.com',
       },
       body: JSON.stringify(generateRequest),
     });
@@ -113,7 +113,7 @@ async function handleStableHordeChat(
     while (Date.now() - startTime < maxWaitTime) {
       const checkResponse = await fetch(`${hordeUrl}/generate/text/status/${requestId}`, {
         headers: {
-          'Client-Agent': 'CloudGPT:1.0:cloudgptapi@github.com',
+          'Client-Agent': 'Vetra:1.0:cloudgptapi@github.com',
         },
       });
       
@@ -771,7 +771,7 @@ export async function POST(request: NextRequest) {
     // Build headers based on provider
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'X-App-Source': apiKeyInfo ? 'CloudGPT-API' : 'CloudGPT-Website',
+      'X-App-Source': apiKeyInfo ? 'Vetra-API' : 'Vetra-Website',
       ...(providerApiKey && {
         'Authorization': `Bearer ${providerApiKey}`,
       }),
@@ -992,8 +992,8 @@ export async function POST(request: NextRequest) {
 
     // OpenRouter requires additional headers
     if (model.provider === 'openrouter') {
-      headers['HTTP-Referer'] = process.env.NEXT_PUBLIC_SITE_URL || 'https://cloudgptapi.vercel.app';
-      headers['X-Title'] = 'CloudGPT API';
+      headers['HTTP-Referer'] = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      headers['X-Title'] = 'Vetra API';
     }
 
     // Prepare request body based on provider
@@ -1568,7 +1568,7 @@ export async function POST(request: NextRequest) {
     // If the response is exceptionally long (> 12KB), we add a warning/truncation indicator
     if (modelId === 'gemini-large' && assistantContent.length > 12000) {
       console.warn(`[${requestId}] Extremely long response detected (${assistantContent.length} chars). Truncating for frontend compatibility.`);
-      assistantContent = assistantContent.substring(0, 12000) + '\n\n[Response truncated by CloudGPT for frontend compatibility. Use "Continue" to fetch more if supported.]';
+      assistantContent = assistantContent.substring(0, 12000) + '\n\n[Response truncated by Vetra for frontend compatibility. Use "Continue" to fetch more if supported.]';
       if (responseData.choices[0].message) {
         responseData.choices[0].message.content = assistantContent;
       }

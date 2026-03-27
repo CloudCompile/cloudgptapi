@@ -18,7 +18,7 @@ function LaunchBanner() {
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <p className="text-sm leading-6 text-white">
-          <strong className="font-semibold text-emerald-400">Meridian Labs x CloudGPT</strong>
+          <strong className="font-semibold text-emerald-400">Meridian Labs x Vetra</strong>
           <svg viewBox="0 0 2 2" className="mx-2 inline h-0.5 w-0.5 fill-current" aria-hidden="true"><circle cx="1" cy="1" r="1" /></svg>
           The future of Cognitive Memory is here.
         </p>
@@ -51,7 +51,7 @@ function Header({
               <Cloud className="h-5 w-5 text-white" />
             </div>
             <Link href="/" className="text-lg font-bold tracking-tight">
-              CloudGPT
+              Vetra
             </Link>
           </div>
         </div>

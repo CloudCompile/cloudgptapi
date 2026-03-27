@@ -369,7 +369,7 @@ export async function POST(request: NextRequest) {
         headers: {
           'Content-Type': 'application/json',
           'apikey': hordeApiKey,
-          'Client-Agent': 'CloudGPT:1.0:cloudgptapi@github.com',
+          'Client-Agent': 'Vetra:1.0:cloudgptapi@github.com',
         },
         body: JSON.stringify({
           prompt: body.prompt,
@@ -406,7 +406,7 @@ export async function POST(request: NextRequest) {
       while (attempts < maxAttempts) {
         await new Promise(r => setTimeout(r, 2000));
         const check = await fetch(`${hordeUrl}/generate/check/${requestId}`, {
-          headers: { 'Client-Agent': 'CloudGPT:1.0:cloudgptapi@github.com' }
+          headers: { 'Client-Agent': 'Vetra:1.0:cloudgptapi@github.com' }
         });
         
         if (!check.ok) {
@@ -418,7 +418,7 @@ export async function POST(request: NextRequest) {
         
         if (checkData.done) {
           const status = await fetch(`${hordeUrl}/generate/status/${requestId}`, {
-            headers: { 'Client-Agent': 'CloudGPT:1.0:cloudgptapi@github.com' }
+            headers: { 'Client-Agent': 'Vetra:1.0:cloudgptapi@github.com' }
           });
           const statusData = await status.json();
           if (statusData.generations?.[0]?.img) {

@@ -7,7 +7,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
-  title: 'CloudGPT - Unified AI API',
+  title: 'Vetra - Unified AI API',
   description: 'A unified API gateway for AI chat, image, and video generation',
   icons: {
     icon: '/favicon.ico',

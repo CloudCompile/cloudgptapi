@@ -81,7 +81,7 @@ async function generateAppyPieImage(body: any, model: ImageModel, userId?: strin
     'Content-Type': 'application/json',
     'Cache-Control': 'no-cache',
     'Ocp-Apim-Subscription-Key': apiKey,
-    'X-App-Source': userId?.startsWith('user_') ? 'CloudGPT-Website' : 'CloudGPT-API',
+    'X-App-Source': userId?.startsWith('user_') ? 'Vetra-Website' : 'Vetra-API',
     'x-user-id': userId || 'anonymous',
   };
 
@@ -197,7 +197,7 @@ async function generateStableHordeImage(
       headers: {
         'Content-Type': 'application/json',
         'apikey': hordeApiKey,
-        'Client-Agent': 'CloudGPT:1.0:cloudgptapi@github.com',
+        'Client-Agent': 'Vetra:1.0:cloudgptapi@github.com',
       },
       body: JSON.stringify(generateRequest),
     });
@@ -228,7 +228,7 @@ async function generateStableHordeImage(
     while (Date.now() - startTime < maxWaitTime) {
       const checkResponse = await fetch(`${hordeUrl}/generate/check/${requestId}`, {
         headers: {
-          'Client-Agent': 'CloudGPT:1.0:cloudgptapi@github.com',
+          'Client-Agent': 'Vetra:1.0:cloudgptapi@github.com',
         },
       });
       
@@ -243,7 +243,7 @@ async function generateStableHordeImage(
         // Get the result
         const statusResponse = await fetch(`${hordeUrl}/generate/status/${requestId}`, {
           headers: {
-            'Client-Agent': 'CloudGPT:1.0:cloudgptapi@github.com',
+            'Client-Agent': 'Vetra:1.0:cloudgptapi@github.com',
           },
         });
         
@@ -515,7 +515,7 @@ export async function POST(request: NextRequest) {
     
     const userId = request.headers.get('x-user-id') || apiKeyInfo?.userId || sessionUserId || `anonymous-${clientIp}`;
     const headers: Record<string, string> = {
-      'X-App-Source': apiKeyInfo ? 'CloudGPT-API' : 'CloudGPT-Website',
+      'X-App-Source': apiKeyInfo ? 'Vetra-API' : 'Vetra-Website',
       'x-user-id': userId,
     };
     const pollinationsApiKey = getPollinationsApiKey();

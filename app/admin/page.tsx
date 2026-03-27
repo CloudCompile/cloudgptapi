@@ -71,7 +71,7 @@ export default async function AdminPage() {
             Admin Dashboard
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">
-            Managing CloudGPT platform users and subscriptions.
+            Managing Vetra platform users and subscriptions.
           </p>
         </div>
       </div>

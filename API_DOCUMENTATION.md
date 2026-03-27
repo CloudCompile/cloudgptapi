@@ -1,6 +1,6 @@
-# CloudGPT API Documentation
+# Vetra API Documentation
 
-Complete API reference for CloudGPT - Unified AI API Gateway
+Complete API reference for Vetra - Unified AI API Gateway
      
 ## Table of Contents
 
@@ -32,7 +32,7 @@ Get your API key from the [Dashboard](/dashboard) after signing up.
 ## Base URL
 
 ```
-https://cloudgptapi.vercel.app
+https://vetraai.vercel.app
 ```
 
 ## Rate Limits
@@ -69,31 +69,31 @@ All errors follow this format:
 
 ## Custom Headers
 
-CloudGPT automatically adds or propagates headers to upstream providers (like PolliStack/Meridian) for user differentiation and storage isolation:
+Vetra automatically adds or propagates headers to upstream providers for user differentiation and storage isolation:
 
 | Header | Value / Source | Description |
 |--------|----------------|-------------|
-| `X-App-Source` | `CloudGPT-Website` or `CloudGPT-API` | Identifies if the request came from the official playground or a 3rd party API client. |
+| `X-App-Source` | `Vetra-Website` or `Vetra-API` | Identifies if the request came from the official playground or a 3rd party API client. |
 | `x-user-id` | Logto ID, API Key User ID, or IP-based ID | A unique identifier for the end-user, ensuring isolated storage/memory in backend routers. |
 
 *Note: API clients can pass their own `x-user-id` header to override the default identification for their end-users.*
 
 ## Transparency & Data Privacy
 
-CloudGPT is committed to being an honest and transparent AI gateway. Here is exactly how we handle your information and how our routing works.
+Vetra is committed to being an honest and transparent AI gateway. Here is exactly how we handle your information and how our routing works.
 
 ### Stateless Architecture
-CloudGPT acts as a **stateless router**. This means:
+Vetra acts as a **stateless router**. This means:
 - We **do not store** chat messages, generated images, or video files on our own infrastructure.
 - We **do not train** models on your data.
 - We only store metadata (timestamps, model IDs, token counts) necessary for billing and rate-limiting.
 
 ### Routing Logic
-When a request hits CloudGPT, it follows this flow:
+When a request hits Vetra, it follows this flow:
 1. **Auth Check:** The `Authorization` header is validated.
 2. **User ID Derivation:** A unique ID is assigned to the request based on the [User Identification Chain](#user-identification-chain).
-3. **Provider Selection:** The request is mapped to an upstream provider (e.g., Pollinations, Meridian, OpenRouter).
-4. **Header Injection:** CloudGPT injects `X-App-Source` and `x-user-id` headers before forwarding the request.
+3. **Provider Selection:** The request is mapped to Pollinations models.
+4. **Header Injection:** Vetra injects `X-App-Source` and `x-user-id` headers before forwarding the request.
 
 ### User Identification Chain
 To ensure data isolation (especially for the Memory API), we identify users in this order:
@@ -103,10 +103,9 @@ To ensure data isolation (especially for the Memory API), we identify users in t
 4. **Anonymous IP:** The public IP address of the requester (fallback).
 
 ### Data Storage & Third Parties
-While CloudGPT is stateless, our upstream providers may have different policies:
-- **Memory API (Meridian):** Conversation context is stored in a cognitive substrate managed by Meridian Labs. This data is isolated by the user ID provided by CloudGPT.
+While Vetra is stateless, our upstream providers may have different policies:
 - **Image/Video (Pollinations):** Generated media is temporarily cached on Pollinations' edge servers to allow for download and retrieval.
-- **Provider Keys:** CloudGPT uses its own master keys for upstream providers; your API keys are never shared with them.
+- **Provider Keys:** Vetra uses its own master keys for upstream providers; your API keys are never shared with them.
 
 ## Endpoints
 
@@ -177,7 +176,7 @@ Standard OpenAI-compatible response format.
 
 ### Advanced Memory Integrated Free AI Chat
 
-Generate text completions with long-term cognitive recall using the Meridian substrate. This endpoint provides persistent memory across sessions at no cost.
+Generate text completions with long-term memory behavior through the configured memory endpoint.
 
 **Endpoint:** `POST /api/mem`
 
@@ -188,7 +187,7 @@ Generate text completions with long-term cognitive recall using the Meridian sub
   "messages": [
     {
       "role": "user",
-      "content": "Remember that my favorite project is CloudGPT."
+      "content": "Remember that my favorite project is Vetra."
     }
   ]
 }
@@ -204,7 +203,7 @@ Generate text completions with long-term cognitive recall using the Meridian sub
 
 ```json
 {
-  "response": "I've noted that your favorite project is CloudGPT. I'll remember this for our future interactions!"
+  "response": "I've noted that your favorite project is Vetra. I'll remember this for our future interactions!"
 }
 ```
 
@@ -310,31 +309,21 @@ Get available models for all modalities (Chat, Image, Video) in a single OpenAI-
 
 ## Provider Support
 
-CloudGPT aggregates multiple top-tier AI providers:
+Vetra is Pollinations-only.
 
 | Provider | Description |
 |----------|-------------|
-| **Pollinations** | Main provider for fast text, image, and video models. |
-| **Routeway** | Provider for free high-performance models. |
-| **OpenRouter** | Gateway to a massive selection of models. |
-| **Stable Horde** | Community-driven distributed model network. |
-| **Meridian** | Specialized cognitive substrate with persistent memory. |
-| **Liz Proxy** | Premium bridge for flagship and NSFW-optimized models. |
+| **Pollinations** | Unified chat, image, and video generation provider used by Vetra. |
 
 ### Popular Chat Models
 
 | Model ID | Name | Provider |
 |----------|------|----------|
 | `openai` | OpenAI GPT-5 Mini | Pollinations |
-| `claude` | Anthropic Claude Sonnet 4.5 | Pollinations |
-| `gemini` | Gemini 3 Flash | Pollinations |
+| `openai-fast` | OpenAI GPT-5 Nano | Pollinations |
+| `openai-large` | OpenAI GPT-5.2 | Pollinations |
 | `deepseek` | DeepSeek V3.2 | Pollinations |
-| `meridian` | Meridian (Memory) | Meridian |
-| `liz-claude-3-5-sonnet` | Claude 3.5 Sonnet | Liz Proxy |
-| `liz-deepseek-r1` | DeepSeek R1 | Liz Proxy |
-| `liz-gpt-4o` | GPT-4o | Liz Proxy |
-| `liz-o1` | o1-Reasoning | Liz Proxy |
-| `llama-3.3-70b-instruct:free` | Llama 3.3 70B | Routeway |
+| `mistral` | Mistral Small 3.2 24B | Pollinations |
 
 ### Popular Image Models
 
@@ -343,14 +332,14 @@ CloudGPT aggregates multiple top-tier AI providers:
 | `flux` | Flux Schnell | Pollinations |
 | `turbo` | SDXL Turbo | Pollinations |
 | `kontext` | FLUX.1 Kontext | Pollinations |
-| `appypie-sdxl` | AppyPie SDXL | AppyPie |
+| `seedream` | Seedream | Pollinations |
 
 ## Code Examples
 
 ### JavaScript (fetch)
 
 ```javascript
-const response = await fetch('https://cloudgptapi.vercel.app/v1/chat/completions', {
+const response = await fetch('https://vetraai.vercel.app/v1/chat/completions', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',

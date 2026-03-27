@@ -1,6 +1,6 @@
-# ☁️ CloudGPT - Unified AI API Gateway
+# ☁️ Vetra - Unified AI API Gateway
 
-A unified API gateway for AI chat, image, and video generation. Access multiple AI providers through a single, consistent API interface.
+A unified API gateway for Pollinations-powered chat, image, and video generation through a single, consistent OpenAI-compatible interface.
 
 ## ✨ Features
 
@@ -8,7 +8,7 @@ A unified API gateway for AI chat, image, and video generation. Access multiple 
 - **⚡ Edge Runtime** - Fast responses with Vercel Edge Functions
 - **🔐 Authentication** - Secure user accounts with Clerk
 - **🔑 API Keys** - Generate and manage API keys from the dashboard
-- **🌐 Multi-Provider** - Access Pollinations AI and more
+- **🌐 Pollinations-Native** - Pollinations chat, image, and video in one API
 - **📱 Responsive** - Works on desktop and mobile devices
 - **🎨 Dark Mode** - Automatic dark mode support
 
@@ -18,8 +18,8 @@ A unified API gateway for AI chat, image, and video generation. Access multiple 
 
 ```bash
 # Clone the repository
-git clone https://github.com/CloudCompile/cloudgpt.git
-cd cloudgpt
+git clone https://github.com/CloudCompile/cloudgptapi.git
+cd cloudgptapi
 
 # Install dependencies
 npm install
@@ -37,6 +37,8 @@ Open [http://localhost:3000](http://localhost:3000) to see the application.
 ## 📡 API Endpoints
 
 For complete API documentation, see [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
+
+For full redeploy instructions from scratch, see [VETRA_VERCEL_SETUP.md](./VETRA_VERCEL_SETUP.md).
 
 ### Quick Reference
 
@@ -146,7 +148,7 @@ The dashboard and API key management require user authentication via Clerk. Sign
 Use your API key in the Authorization header:
 
 ```bash
-curl -X POST https://your-app.vercel.app/v1/chat/completions \
+curl -X POST https://vetraai.vercel.app/v1/chat/completions \
   -H "Authorization: Bearer cgpt_xxxxxxxxxxxxxxxxxxxx" \
   -H "Content-Type: application/json" \
   -d '{"model": "openai", "messages": [{"role": "user", "content": "Hello!"}]}'
@@ -158,43 +160,15 @@ curl -X POST https://your-app.vercel.app/v1/chat/completions \
 
 | Model ID | Name | Description |
 |----------|------|-------------|
-| `openai` | OpenAI GPT-5 Mini | OpenAI's flagship fast model |
-| `openai-fast` | OpenAI GPT-5 Nano | Faster, more economical |
-| `openai-large` | OpenAI GPT-5.2 | Latest OpenAI flagship |
-| `claude` | Anthropic Claude Sonnet 4.5 | Anthropic's balanced model |
-| `claude-fast` | Anthropic Claude Haiku 4.5 | Fast Claude responses |
-| `gemini` | Google Gemini 3 Flash | Google's fast model |
-| `gemini-large` | Google Gemini 3 Pro | Google's advanced model |
-| `deepseek` | DeepSeek V3.2 | DeepSeek's latest |
-| `grok` | Grok 4 Fast | xAI's model |
-| `mistral` | Mistral Small 3.2 24B | Mistral AI's fast model |
+| `openai` | OpenAI GPT-5 Mini | Fast general-purpose chat |
+| `openai-fast` | OpenAI GPT-5 Nano | Lowest-latency option |
+| `openai-large` | OpenAI GPT-5.2 | Highest capability |
+| `deepseek` | DeepSeek V3.2 | Strong reasoning and coding |
+| `kimi-k2-thinking` | Moonshot Kimi K2 Thinking | Chain-of-thought optimized |
+| `perplexity-fast` | Perplexity Sonar | Fast web-style responses |
+| `perplexity-reasoning` | Perplexity Sonar Reasoning | Deeper reasoning responses |
+| `mistral` | Mistral Small 3.2 24B | Efficient all-around model |
 | `qwen-coder` | Qwen3 Coder 30B | Coding-focused model |
-| `chickytutor` | ChickyTutor | Educational AI tutor |
-| `midijourney` | Midijourney | Creative AI assistant |
-
-### Liz Proxy Models (Premium)
-
-| Model ID | Name | Description |
-|----------|------|-------------|
-| `liz-claude-3-7-sonnet` | Claude 3.7 Sonnet (Liz) | Latest Anthropic flagship (v3.7) |
-| `liz-claude-3-5-sonnet` | Claude 3.5 Sonnet (Liz) | Optimized Anthropic flagship (v3.5) |
-| `liz-claude-3-opus` | Claude 3 Opus (Liz) | NSFW/Smut Optimized roleplay model |
-| `liz-claude-sonnet-4` | Claude Sonnet 4 (Liz) | Next-gen Anthropic model (v4) |
-| `liz-claude-opus-4` | Claude Opus 4 (Liz) | Creative/NSFW Optimized roleplay (v4) |
-| `liz-claude-opus-4.5` | Claude Opus 4.5 (Liz) | Ultimate reasoning & narrative (v4.5) |
-| `liz-gpt-4o` | GPT-4o (Liz) | Reliable OpenAI flagship |
-| `liz-gemini-3-pro` | Gemini 3 Pro (Liz) | Next-gen Google flagship (Preview) |
-| `liz-gemini-3-flash` | Gemini 3 Flash (Liz) | Next-gen Google fast model (Preview) |
-| `liz-gemini-2.5-pro` | Gemini 2.5 Pro (Liz) | Advanced Google flagship |
-| `liz-gemini-2.5-flash` | Gemini 2.5 Flash (Liz) | Latest Google fast model |
-| `liz-gemini-2.0-flash` | Gemini 2.0 Flash (Liz) | Reliable Google fast model |
-| `liz-gemini-1.5-pro` | Gemini 1.5 Pro (Liz) | Massive context analysis |
-| `liz-o1` | OpenAI o1 (Liz) | Deep reasoning & strategy |
-| `liz-o3-mini` | OpenAI o3-mini (Liz) | Fast reasoning & coding |
-| `liz-deepseek-v3` | DeepSeek V3 (Liz) | Top-tier open source model |
-| `liz-deepseek-r1` | DeepSeek R1 (Liz) | Reasoning-focused open source |
-| `liz-qwen3-235b` | Qwen3 235B (Liz) | Large-scale multilingual model |
-| `liz-llama-3.3-70b` | Llama 3.3 70B (Liz) | Efficient flagship-class model |
 
 ### Image Models
 
@@ -217,14 +191,14 @@ curl -X POST https://your-app.vercel.app/v1/chat/completions \
 ## 🛠️ Configuration
 
 See [KEYS_SETUP.md](./KEYS_SETUP.md) for detailed instructions on setting up:
-- Logto authentication
+- Clerk authentication
 - Pollinations API key
 - Other environment variables
 
 ## 📁 Project Structure
 
 ```
-cloudgpt/
+vetra/
 ├── app/
 │   ├── api/
 │   │   ├── image/route.ts     # Image generation endpoint
@@ -240,14 +214,14 @@ cloudgpt/
 │   │   └── models/route.ts    # List chat models
 │   ├── dashboard/
 │   │   └── page.tsx           # Dashboard page
-│   ├── layout.tsx             # Root layout with Logto
+│   ├── layout.tsx             # Root layout with Clerk
 │   ├── page.tsx               # Home page
 │   └── globals.css            # Global styles
 ├── lib/
 │   ├── api-keys.ts            # API key utilities
 │   └── providers.ts           # AI provider configs
 ├── docs/                      # Frontend for GitHub Pages
-├── middleware.ts              # Logto middleware
+├── middleware.ts              # Auth middleware
 ├── KEYS_SETUP.md              # Keys setup guide
 └── README.md                  # This file
 ```
@@ -293,6 +267,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [Pollinations AI](https://pollinations.ai) - AI generation API
-- [Logto](https://logto.io) - Authentication
+- [Clerk](https://clerk.com) - Authentication
 - [Vercel](https://vercel.com) - Hosting platform
 - [Next.js](https://nextjs.org) - React framework

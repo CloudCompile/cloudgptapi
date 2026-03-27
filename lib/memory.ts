@@ -4,7 +4,7 @@ export interface MemoryResult {
   context: string;
 }
 
-const APP_ID = 'CloudGPT';
+const APP_ID = 'Vetra';
 
 /**
  * Retrieves relevant long-term memory context for a given query and user.

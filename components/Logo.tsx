@@ -28,8 +28,7 @@ export function Logo({ className, iconOnly = false }: LogoProps) {
       </div>
       {!iconOnly && (
         <span className="text-2xl font-black tracking-tighter flex items-center">
-          <span className="text-foreground">Cloud</span>
-          <span className="premium-text ml-1">GPT</span>
+          <span className="text-foreground">Vetra</span>
         </span>
       )}
     </Link>

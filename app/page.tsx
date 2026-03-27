@@ -19,8 +19,8 @@ export default function Home() {
               Intelligence <br /><span className="premium-text">Unbound</span>
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-5 duration-700 delay-200 font-medium">
-              A Meridian Labs production. The professional API gateway for global AI infrastructure. 
-              Switch between 100+ models with zero latency and enterprise-grade reliability.
+              Vetra is a Pollinations-powered API gateway for global AI infrastructure. 
+              Access fast chat, image, and video generation with enterprise-grade reliability.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
               <Link 
@@ -82,7 +82,7 @@ export default function Home() {
                       <div className="space-y-2 flex-1 min-w-0">
                         <div className="h-3 sm:h-4 w-24 sm:w-32 bg-white/10 rounded-full" />
                         <div className="h-auto md:h-20 bg-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-4 font-mono text-[9px] sm:text-[10px] md:text-xs text-white/40 leading-relaxed break-all md:break-normal">
-                          $ curl https://api.cloudgpt.com/v1/chat/completions \<br />
+                          $ curl https://vetraai.vercel.app/v1/chat/completions \<br />
                           &nbsp;&nbsp;-H "Authorization: Bearer $KEY" \<br />
                           &nbsp;&nbsp;-d '{"{"}"model": "gpt-5-mini"{"}"}'
                         </div>
@@ -118,20 +118,20 @@ export default function Home() {
               <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">OpenAI</span>
             </div>
             <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">Claude Sonnet 4.5</span>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Anthropic</span>
+              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">OpenAI GPT-5 Mini</span>
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Pollinations</span>
             </div>
             <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">Gemini 3 Flash</span>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Google</span>
+              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">DeepSeek V3.2</span>
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Pollinations</span>
             </div>
             <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">Llama 3.3 70B</span>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Meta</span>
+              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">OpenAI GPT-5 Nano</span>
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Pollinations</span>
             </div>
             <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">Flux.1 Pro</span>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Black Forest</span>
+              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">Flux</span>
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Pollinations</span>
             </div>
             <div className="flex flex-col items-center gap-1 group cursor-default">
               <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">DeepSeek V3.2</span>
@@ -141,7 +141,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Liz Proxy Section */}
+      {/* Pollinations Section */}
       <section className="py-8 sm:py-12 bg-slate-50 dark:bg-slate-900/50 border-b border-border">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
@@ -150,27 +150,27 @@ export default function Home() {
                 <Crown className="h-3.5 w-3.5" />
                 <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">Premium Models</span>
               </div>
-              <h3 className="text-2xl sm:text-3xl font-black tracking-tighter">Liz Proxy Integration</h3>
+              <h3 className="text-2xl sm:text-3xl font-black tracking-tighter">Pollinations Integration</h3>
               <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium max-w-lg">
-                Access NSFW-optimized roleplay, deep reasoning, and flagship models via our premium Liz Proxy bridge.
+                Access Pollinations chat, image, and video models through one unified OpenAI-compatible API.
               </p>
             </div>
             <div className="flex gap-8 sm:gap-12 items-center overflow-x-auto pb-4 md:pb-0 scrollbar-hide w-full md:w-auto justify-start sm:justify-center md:justify-end">
               <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
-                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">Claude 3 Opus</span>
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">NSFW Optimized</span>
-              </div>
-              <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
-                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">DeepSeek R1</span>
+                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">Kimi K2 Thinking</span>
                 <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Reasoning</span>
               </div>
               <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
-                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">Qwen 235B</span>
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Elite Performance</span>
+                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">Perplexity Sonar</span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Reasoning</span>
               </div>
               <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
-                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">o1-Reasoning</span>
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Deep Logic</span>
+                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">Seedream Pro</span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Image</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
+                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">Veo</span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Video</span>
               </div>
             </div>
           </div>
@@ -183,7 +183,7 @@ export default function Home() {
           <div className="max-w-3xl mb-12 sm:mb-24 text-center sm:text-left">
             <h2 className="text-3xl sm:text-5xl font-black tracking-tighter mb-4 sm:mb-6 leading-none">Engineered for Developers.</h2>
             <p className="text-slate-600 dark:text-slate-400 text-base sm:text-xl leading-relaxed font-medium">
-              We've abstracted the complexity of multiple AI providers into a single, elegant interface. 
+              We've packaged Pollinations models into a single, elegant interface. 
               Focus on your product, not your infrastructure.
             </p>
           </div>
@@ -247,17 +247,17 @@ export default function Home() {
                 <span>Developer Experience</span>
               </div>
               <h2 className="text-4xl sm:text-6xl font-black tracking-tighter mb-6 sm:mb-8 leading-[0.9]">
-                One API.<br />Infinite Models.
+                One API.<br />Pollinations Models.
               </h2>
               <p className="text-slate-400 text-base sm:text-xl mb-8 sm:mb-10 leading-relaxed font-medium">
-                Replace dozens of API keys and libraries with a single, elegant integration. 
+                Replace fragmented integrations with a single, elegant Pollinations-powered API. 
                 Switch models on the fly without changing a single line of your core logic.
               </p>
               
               <div className="grid grid-cols-2 gap-6 sm:gap-8 max-w-sm mx-auto lg:mx-0">
                 <div>
-                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">100+</div>
-                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Models</div>
+                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">Text</div>
+                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Chat</div>
                 </div>
                 <div>
                   <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">&lt;100ms</div>
@@ -268,8 +268,8 @@ export default function Home() {
                   <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Uptime</div>
                 </div>
                 <div>
-                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">SDK</div>
-                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Type-safe</div>
+                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">Media</div>
+                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Image/Video</div>
                 </div>
               </div>
             </div>
@@ -284,8 +284,8 @@ export default function Home() {
                   </div>
                   <pre className="text-[10px] sm:text-sm font-mono text-blue-400 leading-relaxed overflow-x-auto">
                     <code>{`// Switch models with one parameter
-const response = await cloudgpt.chat.create({
-  model: 'claude-3-5-sonnet',
+const response = await vetra.chat.create({
+  model: 'openai',
   messages: [
     { role: 'user', content: 'Design a space station' }
   ],
@@ -308,11 +308,11 @@ console.log(response.content);`}</code>
           <div className="max-w-3xl mb-12 sm:mb-24 text-center sm:text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] sm:text-xs font-black tracking-widest uppercase mb-4 sm:mb-6 border border-emerald-500/20">
               <Users className="h-3.5 w-3.5" />
-              <span>The Minds Behind CloudGPT</span>
+              <span>The Minds Behind Vetra</span>
             </div>
             <h2 className="text-3xl sm:text-5xl font-black tracking-tighter mb-4 sm:mb-6 leading-none">Built by Developers, for Developers.</h2>
             <p className="text-slate-600 dark:text-slate-400 text-base sm:text-xl leading-relaxed font-medium">
-              A Meridian Labs project, engineered by the core team at Pollinations API to unify the world's intelligence.
+              Built by developers focused on making Pollinations integration reliable, fast, and simple.
             </p>
           </div>
 
@@ -362,7 +362,7 @@ console.log(response.content);`}</code>
         <div className="container mx-auto px-4 text-center relative z-10">
           <h2 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tighter mb-6 sm:mb-8 leading-none">Ready to build?</h2>
           <p className="text-slate-600 dark:text-slate-400 mb-8 sm:mb-12 max-w-xl mx-auto text-lg sm:text-xl leading-relaxed font-medium">
-            Join thousands of developers building the next generation of AI applications on CloudGPT.
+            Join thousands of developers building the next generation of AI applications on Vetra.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
             <Link 
@@ -392,14 +392,14 @@ console.log(response.content);`}</code>
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20">
                   <Cloud className="h-6 w-6 text-white" />
                 </div>
-                <span className="text-xl sm:text-2xl font-black tracking-tighter">CloudGPT</span>
+                <span className="text-xl sm:text-2xl font-black tracking-tighter">Vetra</span>
               </div>
               <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-sm mb-6">
-                The next generation of AI infrastructure. Built by developers at Pollinations API to empower the future of cognitive intelligence.
+                The next generation of AI infrastructure. Built for developers shipping with Pollinations.
               </p>
               <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                <a href="https://meridianlabsapp.website/" target="_blank" className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-primary hover:opacity-80 transition-all flex items-center gap-1.5">
-                  Meridian Labs <ExternalLink className="h-3 w-3" />
+                <a href="https://vetraai.vercel.app/" target="_blank" className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-primary hover:opacity-80 transition-all flex items-center gap-1.5">
+                  Vetra <ExternalLink className="h-3 w-3" />
                 </a>
                 <span className="hidden sm:inline text-slate-300">|</span>
                 <a href="https://pollinations.ai" target="_blank" className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-all flex items-center gap-1.5">
@@ -428,7 +428,7 @@ console.log(response.content);`}</code>
           
           <div className="pt-8 sm:pt-12 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
             <div className="text-[10px] sm:text-sm text-slate-400 font-bold text-center md:text-left">
-              © {new Date().getFullYear()} CloudGPT Studio. A Meridian Labs Venture.
+              © {new Date().getFullYear()} Vetra. All rights reserved.
             </div>
             <div className="flex items-center gap-6">
               <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-slate-300">Crafted by CJ Hauser & Aaron Miller</span>

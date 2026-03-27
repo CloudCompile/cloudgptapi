@@ -1,15 +1,15 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | CloudGPT',
-  description: 'Read the Terms of Service for CloudGPT and learn how you can use our unified AI API platform.',
+  title: 'Terms of Service | Vetra',
+  description: 'Read the Terms of Service for Vetra and learn how you can use our unified AI API platform.',
 };
 
 const sections = [
   {
     title: 'Acceptance of Terms',
     content:
-      'By accessing or using CloudGPT, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree, do not use the platform.',
+      'By accessing or using Vetra, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree, do not use the platform.',
   },
   {
     title: 'Use of the Service',
@@ -29,7 +29,7 @@ const sections = [
   {
     title: 'Limitation of Liability',
     content:
-      'CloudGPT is provided “as is” without warranties of any kind. To the maximum extent permitted by law, CloudCompile is not liable for any indirect, incidental, or consequential damages arising from your use of the service.',
+      'Vetra is provided “as is” without warranties of any kind. To the maximum extent permitted by law, Vetra is not liable for any indirect, incidental, or consequential damages arising from your use of the service.',
   },
   {
     title: 'Changes to These Terms',

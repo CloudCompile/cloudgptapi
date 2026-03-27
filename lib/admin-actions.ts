@@ -252,7 +252,7 @@ export async function syncUser(userId: string, email: string, username?: string,
       try {
         const embed = {
           title: 'New User Joined! 🚀',
-          description: `A new user has just signed up for CloudGPT.`,
+          description: `A new user has just signed up for Vetra.`,
           color: 0x3498db, // Blue
           fields: [
             {
@@ -268,7 +268,7 @@ export async function syncUser(userId: string, email: string, username?: string,
           ],
           timestamp: new Date().toISOString(),
           footer: {
-            text: 'CloudGPT User System'
+            text: 'Vetra User System'
           }
         };
 
