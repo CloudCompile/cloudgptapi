@@ -281,19 +281,17 @@ export const CHAT_MODELS: ChatModel[] = [
   ...POLLINATIONS_CHAT_MODELS,
 ];
 
-// Free models available to all users
-const FREE_MODELS = new Set([
+// All models require PRO subscription
+export const PREMIUM_MODELS = new Set([
+  // Originally free models now locked to pro
   'deepseek', // DeepSeek V3.2
-  'openai', // OpenAI GPT-5 Mini (free tier)
+  'openai', // OpenAI GPT-5 Mini
   'openai-fast', // OpenAI GPT-5 Nano
   'mistral', // Mistral Small
   'qwen-coder', // Qwen3 Coder
   'grok', // xAI Grok 4 Fast
   'nova-fast', // Amazon Nova Micro
-]);
-
-// Premium models that require a PRO subscription
-export const PREMIUM_MODELS = new Set([
+  // Originally premium models
   'chickytutor', // ChickyTutor
   'kimi-k2-thinking', // Moonshot Kimi K2 Thinking
   'openai-audio', // OpenAI GPT-4o Mini Audio

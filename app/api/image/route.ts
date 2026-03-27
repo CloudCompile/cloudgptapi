@@ -371,21 +371,21 @@ export async function POST(request: NextRequest) {
     userPlan = userPlan?.toLowerCase() || 'free';
 
     // Determine limit based on plan
-    let limit = 5; // Default anonymous/free limit (5 RPM for images)
-    let dailyLimit = 1000; // Default 1000 RPD
+    let limit = 4; // Default anonymous/free limit (4 RPM for images)
+    let dailyLimit = 10; // Default 10 RPD
     
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 100;
       dailyLimit = 100000;
     } else if (userPlan === 'pro') {
-      limit = 5; // 5 RPM for images as requested
-      dailyLimit = 2000; // 2000 RPD for pro
+      limit = 4; // 4 RPM for images
+      dailyLimit = 50; // 50 RPD for pro
     } else if (userPlan === 'developer') {
       limit = 20;
       dailyLimit = 5000;
     } else if (userPlan === 'free') {
-      limit = 5; // 5 RPM for images
-      dailyLimit = 1000; // 1000 RPD for free
+      limit = 4; // 4 RPM for images
+      dailyLimit = 10; // 10 RPD for free
     }
 
     // If API key has a specific custom limit that's higher, use that

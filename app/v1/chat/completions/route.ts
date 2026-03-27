@@ -304,21 +304,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Determine limit based on plan if not explicitly set high on the key
-    let limit = 100; // Default baseline limit (100 RPM)
-    let dailyLimit = 1000; // Default 1000 RPD
+    let limit = 4; // Default baseline limit (4 RPM)
+    let dailyLimit = 10; // Default 10 RPD
     
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 10000; 
       dailyLimit = 100000;
     } else if (userPlan === 'pro') {
-      limit = 200; // Higher RPM for Pro
-      dailyLimit = 2000; // 2000 RPD for pro
+      limit = 4; // 4 RPM for Pro
+      dailyLimit = 50; // 50 RPD for pro
     } else if (userPlan === 'developer') {
       limit = 1000;
       dailyLimit = 5000;
     } else if (userPlan === 'free') {
-      limit = 100; // 100 RPM for free
-      dailyLimit = 1000; // 1000 RPD for free
+      limit = 4; // 4 RPM for free
+      dailyLimit = 10; // 10 RPD for free
     }
 
     // If API key has a specific custom limit that's higher, use that
