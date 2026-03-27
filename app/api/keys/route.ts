@@ -4,6 +4,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateApiKey } from '@/lib/api-keys';
 import { supabaseAdmin } from '@/lib/supabase';
 
+function isMissingFandomColumnError(error: any): boolean {
+  if (!error || error.code !== 'PGRST204' || typeof error.message !== 'string') {
+    return false;
+  }
+  return error.message.includes('fandom_plugin_enabled');
+}
+
+type NewApiKeyInsert = {
+  key: string;
+  user_id: string;
+  name: string;
+  rate_limit: number;
+  fandom_plugin_enabled?: boolean;
+};
+
 export async function GET() {
   try {
     const { userId } = await auth();
@@ -58,7 +73,7 @@ export async function GET() {
       createdAt: k.created_at,
       usageCount: k.usage_count,
       lastUsedAt: k.last_used_at,
-      fandomEnabled: k.fandom_plugin_enabled || false,
+      fandomEnabled: Boolean(k.fandom_plugin_enabled),
     }));
 
     return NextResponse.json({ keys: maskedKeys });
@@ -107,7 +122,7 @@ export async function POST(request: NextRequest) {
           ? 500
           : 60;
 
-    const newKey = {
+    const newKey: NewApiKeyInsert = {
       key: generateApiKey(),
       user_id: userId,
       name,
@@ -119,11 +134,26 @@ export async function POST(request: NextRequest) {
     console.log(`[POST /api/keys] Data to insert:`, JSON.stringify(newKey, null, 2));
     console.log(`[POST /api/keys] Attempting to insert key into public.api_keys table...`);
 
-    const { data, error, status, statusText } = await supabaseAdmin
+    let { data, error, status, statusText } = await supabaseAdmin
       .from('api_keys')
       .insert(newKey)
       .select()
       .maybeSingle();
+
+    if (isMissingFandomColumnError(error)) {
+      console.warn(
+        `[POST /api/keys] Missing fandom_plugin_enabled column in db schema. Retrying insert without optional column...`
+      );
+
+      const fallbackKey = { ...newKey };
+      delete fallbackKey.fandom_plugin_enabled;
+
+      ({ data, error, status, statusText } = await supabaseAdmin
+        .from('api_keys')
+        .insert(fallbackKey)
+        .select()
+        .maybeSingle());
+    }
 
     if (error) {
       console.error(`[POST /api/keys] Supabase error (Status: ${status} ${statusText}):`, error);
@@ -144,6 +174,7 @@ export async function POST(request: NextRequest) {
     try {
       const user = await currentUser();
       if (user) {
+        const client = await clerkClient();
         const apiKeys = (user.privateMetadata?.apiKeys as any[]) || [];
         apiKeys.push({
           id: data.id,
@@ -152,7 +183,7 @@ export async function POST(request: NextRequest) {
           createdAt: data.created_at,
           rateLimit: data.rate_limit,
         });
-        await clerkClient.users.updateUser(userId, {
+        await client.users.updateUser(userId, {
           privateMetadata: {
             apiKeys: apiKeys.slice(-10) // Keep last 10 keys to avoid metadata size limits
           }
@@ -227,8 +258,9 @@ export async function DELETE(request: NextRequest) {
     try {
       const user = await currentUser();
       if (user && user.privateMetadata?.apiKeys) {
+        const client = await clerkClient();
         const apiKeys = (user.privateMetadata.apiKeys as any[]).filter(k => k.id !== keyId);
-        await clerkClient.users.updateUser(userId, {
+        await client.users.updateUser(userId, {
           privateMetadata: {
             apiKeys
           }

@@ -107,7 +107,8 @@ export function applyPeakHoursLimit(baseLimit: number): number {
     // Fallback to Clerk metadata if profile is missing or incomplete
     if (!profile?.plan || !profile?.email) {
       try {
-        const clerkUser = await clerkClient.users.getUser(data.user_id);
+        const client = await clerkClient();
+        const clerkUser = await client.users.getUser(data.user_id);
         if (!profile?.plan && clerkUser?.publicMetadata?.plan) {
           userPlan = String(clerkUser.publicMetadata.plan);
         }

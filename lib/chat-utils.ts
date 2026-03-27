@@ -220,6 +220,9 @@ export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
   'qwen-coder': 'qwen3-coder-480b-a35b-instruct',
   'qwen-next-80b': 'qwen3-next-80b-a3b-instruct',
   'qwen-next-80b-thinking': 'qwen3-next-80b-a3b-thinking',
+  // Kivest compatibility aliases for Qwen Next variants
+  'qwen3-next-80b-a3b-instruct': 'qwen-next-80b',
+  'qwen3-next-80b-a3b-thinking': 'qwen-next-80b-thinking',
   'mistral': 'mistral-large-3-675b-instruct',
   'glm': 'glm-5',
   'minimax': 'minimax-m2.5',
