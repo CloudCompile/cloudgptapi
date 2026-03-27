@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { isFandomPluginConfigured } from '@/lib/plugins';
 
-const REMOTE_PLUGIN_URL = 'https://king-dried-favors-latter.trycloudflare.com';
+const REMOTE_PLUGIN_URL = (process.env.FANDOM_PLUGIN_URL || process.env.NEXT_PUBLIC_FANDOM_PLUGIN_URL || '').trim();
 
 async function verifyOwnership(userId: string | null, keyId: string) {
   if (!userId) return false;
@@ -27,6 +28,10 @@ export async function GET(
     const { userId } = await auth();
     if (!await verifyOwnership(userId, keyId)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!isFandomPluginConfigured()) {
+      return NextResponse.json({ snippets: [] });
     }
 
     const response = await fetch(`${REMOTE_PLUGIN_URL}/lore/${keyId}`);
@@ -56,6 +61,10 @@ export async function POST(
     const { userId } = await auth();
     if (!await verifyOwnership(userId, keyId)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!isFandomPluginConfigured()) {
+      return NextResponse.json({ error: 'Lorebook/Wiki plugin is not configured' }, { status: 503 });
     }
 
     const body = await req.json();
@@ -94,6 +103,10 @@ export async function DELETE(
     const { userId } = await auth();
     if (!await verifyOwnership(userId, keyId)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!isFandomPluginConfigured()) {
+      return NextResponse.json({ error: 'Lorebook/Wiki plugin is not configured' }, { status: 503 });
     }
 
     const response = await fetch(`${REMOTE_PLUGIN_URL}/lore/${keyId}/${snippetId}`, {

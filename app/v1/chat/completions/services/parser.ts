@@ -1,6 +1,6 @@
 import { extractCharacterMetadata, generateCharacterId, extractUserId, estimateTokens } from '@/lib/chat-utils';
 import { retrieveMemory } from '@/lib/memory';
-import { runFandomPlugin } from '@/lib/plugins';
+import { isFandomPluginConfigured, runFandomPlugin } from '@/lib/plugins';
 import { ApiKey } from '@/lib/api-keys';
 
 export interface ParseResult {
@@ -91,38 +91,40 @@ export async function processContextAndMemory(
       }
     }
 
-    console.log(`[${requestId}] Running Remote Fandom Plugin for key: ${apiKeyInfo?.id || 'unknown'}`);
-    const originalMessages = [...processedMessages];
-    
-    processedMessages = await runFandomPlugin(processedMessages, apiKeyInfo?.fandomSettings as any, apiKeyInfo?.id, modelId);
-    
-    if (processedMessages.length > originalMessages.length) {
-      console.log(`[${requestId}] Fandom Knowledge Plugin injected lore from remote VPS.`);
+    if (isFandomEnabled && isFandomPluginConfigured()) {
+      console.log(`[${requestId}] Running Remote Fandom Plugin for key: ${apiKeyInfo?.id || 'unknown'}`);
+      const originalMessages = [...processedMessages];
       
-      const isGemini = modelId.includes('gemini');
-      if (isGemini) {
-        processedMessages = processedMessages.map((msg: any, idx: number) => {
-          const isNew = !originalMessages.some(orig => orig.role === msg.role && orig.content === msg.content);
-          if (isNew && msg.role === 'system') {
-            console.log(`[${requestId}] ADAPTIVE: Converting injected system message to user context for Gemini.`);
-            
-            let content = msg.content;
-            const loreTokens = estimateTokens(content);
-            const maxLoreTokens = 800; 
-            
-            if (loreTokens > maxLoreTokens) {
-              console.log(`[${requestId}] ADAPTIVE: Compressing long lore snippet (${loreTokens} tokens) for Gemini stability.`);
-              const targetCharCount = maxLoreTokens * 4;
-              content = content.substring(0, targetCharCount) + '... [Lore truncated for stability]';
-            }
+      processedMessages = await runFandomPlugin(processedMessages, apiKeyInfo?.fandomSettings as any, apiKeyInfo?.id, modelId);
+      
+      if (processedMessages.length > originalMessages.length) {
+        console.log(`[${requestId}] Fandom Knowledge Plugin injected lore from remote VPS.`);
+        
+        const isGemini = modelId.includes('gemini');
+        if (isGemini) {
+          processedMessages = processedMessages.map((msg: any) => {
+            const isNew = !originalMessages.some(orig => orig.role === msg.role && orig.content === msg.content);
+            if (isNew && msg.role === 'system') {
+              console.log(`[${requestId}] ADAPTIVE: Converting injected system message to user context for Gemini.`);
+              
+              let content = msg.content;
+              const loreTokens = estimateTokens(content);
+              const maxLoreTokens = 800; 
+              
+              if (loreTokens > maxLoreTokens) {
+                console.log(`[${requestId}] ADAPTIVE: Compressing long lore snippet (${loreTokens} tokens) for Gemini stability.`);
+                const targetCharCount = maxLoreTokens * 4;
+                content = content.substring(0, targetCharCount) + '... [Lore truncated for stability]';
+              }
 
-            return {
-              role: 'user',
-              content: `[Knowledge Context]: ${content}\n\nPlease use the above information to inform your response.`
-            };
-          }
-          return msg;
-        });
+              return {
+                role: 'user',
+                content: `[Knowledge Context]: ${content}\n\nPlease use the above information to inform your response.`
+              };
+            }
+            return msg;
+          });
+        }
       }
     }
 

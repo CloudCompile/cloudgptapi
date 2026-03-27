@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
@@ -23,7 +23,7 @@ import {
   ExternalLink,
   X
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, hasProAccess } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
 import { Logo } from './Logo';
 
@@ -45,6 +45,19 @@ const secondaryNavigation = [
 export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
   const { user, isSignedIn } = useUser();
+  const [plan, setPlan] = useState<string>('free');
+
+  useEffect(() => {
+    if (!isSignedIn) return;
+    fetch('/api/profile', { cache: 'no-store' })
+      .then(res => res.json())
+      .then(data => {
+        if (data?.profile?.plan) setPlan(String(data.profile.plan));
+      })
+      .catch(() => undefined);
+  }, [isSignedIn]);
+
+  const isPro = hasProAccess(plan);
 
   return (
     <>
@@ -145,17 +158,23 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
                 <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
               <div>
-                <div className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-500">Pro Plan</div>
-                <div className="text-xs sm:text-sm font-bold">Unlimited Access</div>
+                <div className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-500">{isPro ? 'Current Plan' : 'Pro Plan'}</div>
+                <div className="text-xs sm:text-sm font-bold">{isPro ? 'Active Subscription' : 'Unlimited Access'}</div>
               </div>
             </div>
-            <Link 
-              href="/pricing"
-              className="flex items-center justify-center gap-1.5 w-full py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-white dark:bg-slate-950 text-[10px] sm:text-xs font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all border border-border"
-            >
-              Upgrade
-              <ExternalLink className="h-3 w-3" />
-            </Link>
+            {isPro ? (
+              <div className="flex items-center justify-center gap-1.5 w-full py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                Active
+              </div>
+            ) : (
+              <Link 
+                href="/pricing"
+                className="flex items-center justify-center gap-1.5 w-full py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-white dark:bg-slate-950 text-[10px] sm:text-xs font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all border border-border"
+              >
+                Upgrade
+                <ExternalLink className="h-3 w-3" />
+              </Link>
+            )}
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 sm:py-4 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-950 border border-border shadow-sm">

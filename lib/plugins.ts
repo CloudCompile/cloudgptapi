@@ -13,16 +13,29 @@ export interface LoreSnippet {
   relevance: number;
 }
 
-const REMOTE_PLUGIN_URL = 'https://king-dried-favors-latter.trycloudflare.com';
+const ENV_REMOTE_PLUGIN_URL = process.env.FANDOM_PLUGIN_URL || process.env.NEXT_PUBLIC_FANDOM_PLUGIN_URL;
+
+function getRemotePluginBaseUrl(): string {
+  return (ENV_REMOTE_PLUGIN_URL || '').trim();
+}
+
+export function isFandomPluginConfigured(): boolean {
+  return Boolean((ENV_REMOTE_PLUGIN_URL || '').trim());
+}
 
 /**
  * Main entry point for the plugin pipeline - Now uses the remote VPS service
  */
 export async function runFandomPlugin(messages: any[], settings: FandomSettings, apiKeyId?: string, modelId?: string): Promise<any[]> {
+  if (!isFandomPluginConfigured()) {
+    return messages;
+  }
+
+  const baseUrl = getRemotePluginBaseUrl();
   try {
-    console.log(`[FandomPlugin] Calling remote service at ${REMOTE_PLUGIN_URL}/execute for key: ${apiKeyId}, model: ${modelId}`);
+    console.log(`[FandomPlugin] Calling remote service at ${baseUrl}/execute for key: ${apiKeyId}, model: ${modelId}`);
     
-    const response = await fetch(`${REMOTE_PLUGIN_URL}/execute`, {
+    const response = await fetch(`${baseUrl}/execute`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

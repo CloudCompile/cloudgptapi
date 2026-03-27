@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { applyPlanOverride } from '@/lib/api-keys';
 
 export async function GET() {
   try {
@@ -12,7 +13,7 @@ export async function GET() {
 
     const { data: profile, error } = await supabaseAdmin
       .from('profiles')
-      .select('role, plan')
+      .select('role, plan, email')
       .eq('id', userId)
       .maybeSingle();
 
@@ -21,7 +22,11 @@ export async function GET() {
       return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
     }
 
-    return NextResponse.json({ profile });
+    if (profile?.email) {
+      profile.plan = await applyPlanOverride(profile.email, profile.plan || 'free', userId, 'id');
+    }
+
+    return NextResponse.json({ profile: profile ? { role: profile.role, plan: profile.plan } : null });
   } catch (err) {
     console.error('Profile API error:', err);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

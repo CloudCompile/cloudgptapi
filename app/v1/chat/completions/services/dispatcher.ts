@@ -10,12 +10,13 @@ import {
 } from '@/lib/chat-utils';
 import { CHAT_MODELS } from '@/lib/providers';
 import {
-  getCorsHeaders, getOpenRouterApiKey, getOpenRouterApiKeys,
-  getPollinationsApiKey, getPollinationsApiKeys,
-  getClaudeApiKey, getClaudeApiKeys,
-  getPoeApiKey, getPoeApiKeys,
-  getLizApiKey, getLizApiKeys,
-  getOpenAIApiKey, getOpenAIApiKeys,
+  getCorsHeaders, getOpenRouterApiKey,
+  getPollinationsApiKey,
+  getClaudeApiKey,
+  getPoeApiKey,
+  getLizApiKey,
+  getKivestApiKey,
+  getOpenAIApiKey,
   safeResponseJson
 } from '@/lib/utils';
 import { rememberInteraction } from '@/lib/memory';
@@ -96,6 +97,16 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       console.warn(`[${requestId}] Missing OpenAI API key for model: ${modelId}`);
       return NextResponse.json(
         { error: { message: 'OpenAI API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { status: 500, headers: getCorsHeaders() }
+      );
+    }
+  } else if (model.provider === 'kivest') {
+    providerUrl = `${PROVIDER_URLS.kivest}/chat/completions`;
+    providerApiKey = getKivestApiKey();
+    if (!providerApiKey) {
+      console.warn(`[${requestId}] Missing Kivest API key for model: ${modelId}`);
+      return NextResponse.json(
+        { error: { message: 'Kivest API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
         { status: 500, headers: getCorsHeaders() }
       );
     }
@@ -273,166 +284,6 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
 
     console.log(`[${requestId}] Provider response status: ${providerResponse.status} ${providerResponse.statusText}`);
     
-    if ((model.provider === 'pollinations' || model.provider === 'gemini' || model.provider === 'claude' || model.provider === 'openrouter' || model.provider === 'poe' || model.provider === 'liz' || model.provider === 'openai') && providerResponse.status === 401) {
-      let availableKeys: string[] = [];
-      if (model.provider === 'openrouter') availableKeys = getOpenRouterApiKeys();
-      else if (model.provider === 'poe') availableKeys = getPoeApiKeys();
-      else if (model.provider === 'liz') availableKeys = getLizApiKeys();
-      else if (model.provider === 'openai') availableKeys = getOpenAIApiKeys();
-      else if (model.provider === 'claude') availableKeys = getClaudeApiKeys();
-      else availableKeys = getPollinationsApiKeys();
-
-      if (availableKeys.length > 1) {
-        console.warn(`[${requestId}] ${model.provider} unauthorized (401). Attempting fallback...`);
-        for (const fallbackKey of availableKeys) {
-          if (fallbackKey === providerApiKey) continue;
-          console.log(`[${requestId}] Trying ${model.provider} fallback key: ${fallbackKey.substring(0, 4)}...`);
-          try {
-            const fallbackResponse = await fetch(providerUrl, {
-              method: 'POST',
-              headers: { ...headers, 'Authorization': `Bearer ${fallbackKey}` },
-              body: JSON.stringify(requestBody),
-              signal: controller.signal,
-            });
-            if (fallbackResponse.ok) {
-              console.log(`[${requestId}] ${model.provider} auth fallback successful!`);
-              providerResponse = fallbackResponse;
-              providerApiKey = fallbackKey;
-              break;
-            }
-          } catch (err) { console.error(`[${requestId}] ${model.provider} auth fallback failed:`, err); }
-        }
-      }
-    }
-
-    if (model.provider === 'openrouter' && providerResponse.status === 429) {
-      const availableKeys = getOpenRouterApiKeys();
-      if (availableKeys.length > 1) {
-        console.warn(`[${requestId}] OpenRouter rate limited (429) with primary key. Attempting fallback...`);
-        for (const fallbackKey of availableKeys) {
-          if (fallbackKey === providerApiKey) continue;
-          console.log(`[${requestId}] Trying OpenRouter fallback key: ${fallbackKey.substring(0, 4)}...`);
-          try {
-            const fallbackResponse = await fetch(providerUrl, {
-              method: 'POST',
-              headers: { ...headers, 'Authorization': `Bearer ${fallbackKey}` },
-              body: JSON.stringify(requestBody),
-              signal: controller.signal,
-            });
-            if (fallbackResponse.ok) {
-              console.log(`[${requestId}] OpenRouter fallback successful!`);
-              providerResponse = fallbackResponse;
-              break;
-            } else if (fallbackResponse.status === 429) {
-              continue;
-            } else {
-              providerResponse = fallbackResponse;
-              break;
-            }
-          } catch (err) { console.error(`[${requestId}] OpenRouter fallback failed:`, err); }
-        }
-      }
-    }
-
-    if (model.provider === 'pollinations' && providerResponse.status === 429) {
-      const availableKeys = getPollinationsApiKeys();
-      if (availableKeys.length > 1) {
-        console.warn(`[${requestId}] Pollinations rate limited (429). Attempting fallback...`);
-        for (const fallbackKey of availableKeys) {
-          if (fallbackKey === providerApiKey) continue;
-          console.log(`[${requestId}] Trying Pollinations fallback key: ${fallbackKey.substring(0, 4)}...`);
-          try {
-            const fallbackResponse = await fetch(providerUrl, {
-              method: 'POST',
-              headers: { ...headers, 'Authorization': `Bearer ${fallbackKey}` },
-              body: JSON.stringify(requestBody),
-              signal: controller.signal,
-            });
-            if (fallbackResponse.ok) {
-              console.log(`[${requestId}] Pollinations fallback successful!`);
-              providerResponse = fallbackResponse;
-              break;
-            }
-          } catch (err) { console.error(`[${requestId}] Pollinations fallback failed:`, err); }
-        }
-      }
-    }
-
-    const FALLBACK_TO_POE_MAPPING: Record<string, string> = {
-      'deepseek': 'deepseek-v3',
-      'mistral': 'mistral-large-2',
-      'qwen-coder': 'qwen-2.5-72b-t',
-      'gemini': 'gemini-2.5-pro',
-      'gemini-large': 'gemini-2.5-pro',
-      'gemini-fast': 'gemini-2.5-flash',
-      'openai': 'gpt-4o',
-      'openai-large': 'gpt-4o',
-      'openai-fast': 'gpt-4o-mini',
-      'grok': 'grok-4-fast-non-reasoning',
-      'claude': 'claude-sonnet-3.5',
-      'claude-large': 'claude-opus-4',
-    };
-
-    if (!providerResponse.ok && (model.provider === 'pollinations' || model.provider === 'openrouter')) {
-      const poeModelId = FALLBACK_TO_POE_MAPPING[modelId] || 
-                        (modelId.includes('deepseek') ? 'deepseek-v3' : 
-                         modelId.includes('claude') ? 'claude-sonnet-3.5' : 
-                         modelId.includes('gpt-4') ? 'gpt-4o' : null);
-
-      if (poeModelId) {
-        console.warn(`[${requestId}] Primary provider failed for ${modelId}. Trying Poe fallback to ${poeModelId}...`);
-        try {
-          const poeKey = getPoeApiKey();
-          if (poeKey) {
-            const poeResponse = await fetch(`${PROVIDER_URLS.poe}/chat/completions`, {
-              method: 'POST',
-              headers: { ...headers, 'Authorization': `Bearer ${poeKey}`, 'x-user-id': userId },
-              body: JSON.stringify({ ...requestBody, model: poeModelId }),
-              signal: controller.signal,
-            });
-            if (poeResponse.ok) {
-              console.log(`[${requestId}] Poe fallback successful!`);
-              providerResponse = poeResponse;
-            }
-          }
-        } catch (err) { console.error(`[${requestId}] Poe fallback failed:`, err); }
-      }
-    }
-
-    if (modelId.includes('gemini') && model.provider === 'openrouter' && providerResponse.status === 429) {
-        console.warn(`[${requestId}] OpenRouter Gemini rate limited. Trying Pollinations fallback...`);
-        try {
-          const pollKey = getPollinationsApiKey();
-          const pollModelId = modelId.includes('large') || modelId.includes('pro') ? 'gemini-large' : (modelId.includes('lite') ? 'gemini-fast' : 'gemini');
-          const pollResponse = await fetch(`${PROVIDER_URLS.pollinations}/v1/chat/completions`, {
-            method: 'POST',
-            headers: { ...headers, 'Authorization': `Bearer ${pollKey}` },
-            body: JSON.stringify({ ...requestBody, model: pollModelId }),
-            signal: controller.signal,
-          });
-          if (pollResponse.ok) {
-            console.log(`[${requestId}] Cross-provider fallback to Pollinations successful!`);
-            providerResponse = pollResponse;
-          }
-        } catch (err) { console.error(`[${requestId}] Pollinations fallback failed:`, err); }
-      }
-      
-      if (modelId.includes('deepseek') && !providerResponse.ok) {
-        console.warn(`[${requestId}] OpenRouter DeepSeek rate limited. Trying Pollinations fallback...`);
-        try {
-          const pollKey = getPollinationsApiKey();
-          const pollResponse = await fetch(`${PROVIDER_URLS.pollinations}/v1/chat/completions`, {
-            method: 'POST',
-            headers: { ...headers, 'Authorization': `Bearer ${pollKey}` },
-            body: JSON.stringify({ ...requestBody, model: 'deepseek' }),
-            signal: controller.signal,
-          });
-          if (pollResponse.ok) {
-            console.log(`[${requestId}] Cross-provider fallback to Pollinations successful!`);
-            providerResponse = pollResponse;
-          }
-        } catch (err) { console.error(`[${requestId}] Pollinations fallback failed:`, err); }
-      }
   } catch (fetchError: any) {
     clearTimeout(timeoutId);
     if (fetchError.name === 'AbortError') {

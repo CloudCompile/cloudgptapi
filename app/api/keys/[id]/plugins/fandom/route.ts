@@ -1,8 +1,9 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { isFandomPluginConfigured } from '@/lib/plugins';
 
-const REMOTE_PLUGIN_URL = 'https://king-dried-favors-latter.trycloudflare.com';
+const REMOTE_PLUGIN_URL = (process.env.FANDOM_PLUGIN_URL || process.env.NEXT_PUBLIC_FANDOM_PLUGIN_URL || '').trim();
 
 /**
  * GET /api/keys/[id]/plugins/fandom
@@ -18,6 +19,10 @@ export async function GET(
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!isFandomPluginConfigured()) {
+      return NextResponse.json({ enabled: false, settings: null });
     }
 
     // Verify key ownership in Supabase first
@@ -66,6 +71,10 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    if (!isFandomPluginConfigured()) {
+      return NextResponse.json({ error: 'Lorebook/Wiki plugin is not configured' }, { status: 503 });
+    }
+
     // Verify key ownership in Supabase first
     const { data: keyData, error: keyError } = await supabaseAdmin
       .from('api_keys')
@@ -103,4 +112,3 @@ export async function PATCH(
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
-

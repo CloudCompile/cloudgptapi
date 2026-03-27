@@ -14,15 +14,17 @@ export function UserStatus() {
   const [profile, setProfile] = useState<{ role: string; plan: string } | null>(profileCache);
 
   useEffect(() => {
-    if (isSignedIn) {
+    if (!isSignedIn) return;
+
+    const refreshProfile = () => {
       const now = Date.now();
-      // Use cache if it's less than 5 minutes old
-      if (profileCache && now - profileCache.timestamp < 1000 * 60 * 5) {
+      // Use cache if it's less than 30 seconds old
+      if (profileCache && now - profileCache.timestamp < 1000 * 30) {
         setProfile(profileCache);
         return;
       }
 
-      fetch('/api/profile')
+      fetch('/api/profile', { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
           if (data.profile) {
@@ -32,7 +34,11 @@ export function UserStatus() {
           }
         })
         .catch(err => console.error('Failed to fetch user profile:', err));
-    }
+    };
+
+    refreshProfile();
+    window.addEventListener('focus', refreshProfile);
+    return () => window.removeEventListener('focus', refreshProfile);
   }, [isSignedIn]);
 
   if (!isSignedIn || !profile) return null;
