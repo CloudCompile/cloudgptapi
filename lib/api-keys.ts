@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { clerkClient } from '@clerk/nextjs/server';
 import { supabaseAdmin } from './supabase';
 import { estimateTokens } from './chat-utils';
 
@@ -18,6 +19,10 @@ export interface ApiKey {
     autoSummarize: boolean;
     cacheMode: string;
     preferredSources: string[];
+    plugins?: {
+      memory?: { enabled: boolean };
+      search?: { enabled: boolean };
+    };
   };
 }
 
@@ -97,7 +102,22 @@ export function applyPeakHoursLimit(baseLimit: number): number {
       .eq('id', data.id);
   
     let userPlan = profile?.plan || 'free';
-    const userEmail = profile?.email;
+    let userEmail = profile?.email;
+
+    // Fallback to Clerk metadata if profile is missing or incomplete
+    if (!profile?.plan || !profile?.email) {
+      try {
+        const clerkUser = await clerkClient.users.getUser(data.user_id);
+        if (!profile?.plan && clerkUser?.publicMetadata?.plan) {
+          userPlan = String(clerkUser.publicMetadata.plan);
+        }
+        if (!profile?.email && clerkUser?.emailAddresses?.[0]?.emailAddress) {
+          userEmail = clerkUser.emailAddresses[0].emailAddress;
+        }
+      } catch (clerkError) {
+        console.warn('[validateApiKey] Clerk fallback failed:', clerkError);
+      }
+    }
   
     console.log(`[validateApiKey] Key validated for user: ${data.user_id}, profile email: ${userEmail}, db plan: ${userPlan}`);
   
@@ -106,6 +126,18 @@ export function applyPeakHoursLimit(baseLimit: number): number {
       userPlan = await applyPlanOverride(userEmail, userPlan, userEmail, 'email');
     }
   
+    const rawSettings = data.fandom_settings || {};
+    const normalizedSettings = {
+      maxLoreTokens: rawSettings.maxLoreTokens ?? 800,
+      autoSummarize: rawSettings.autoSummarize ?? true,
+      cacheMode: rawSettings.cacheMode ?? 'aggressive',
+      preferredSources: rawSettings.preferredSources ?? ['fandom', 'wikipedia'],
+      plugins: {
+        memory: { enabled: Boolean(rawSettings?.plugins?.memory?.enabled) },
+        search: { enabled: Boolean(rawSettings?.plugins?.search?.enabled) }
+      }
+    };
+
     return {
       id: data.id,
       key: data.key,
@@ -115,14 +147,9 @@ export function applyPeakHoursLimit(baseLimit: number): number {
       lastUsedAt: data.last_used_at,
       rateLimit: data.rate_limit || 10,
       usageCount: data.usage_count || 0,
-      plan: userPlan,
+      plan: (userPlan || 'free').toLowerCase(),
       fandomPluginEnabled: data.fandom_plugin_enabled || false,
-      fandomSettings: data.fandom_settings || {
-        maxLoreTokens: 800,
-        autoSummarize: true,
-        cacheMode: 'aggressive',
-        preferredSources: ['fandom', 'wikipedia']
-      }
+      fandomSettings: normalizedSettings
     };
   }
 

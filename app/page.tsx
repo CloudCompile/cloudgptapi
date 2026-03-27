@@ -335,23 +335,6 @@ console.log(response.content);`}</code>
               </p>
             </div>
 
-            <div className="group p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] bg-slate-50 dark:bg-slate-900/50 border border-border hover:border-primary/50 transition-all duration-500">
-              <div className="flex items-start justify-between mb-6 sm:mb-8">
-                <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-primary/20 flex items-center justify-center text-primary">
-                  <span className="text-xl sm:text-2xl font-black">AM</span>
-                </div>
-                <div className="flex gap-2">
-                  <a href="#" className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-border hover:text-primary transition-colors">
-                    <Mail className="h-4 w-4" />
-                  </a>
-                </div>
-              </div>
-              <h3 className="text-xl sm:text-2xl font-black mb-1 tracking-tighter">Aaron Miller</h3>
-              <p className="text-primary font-bold text-xs sm:text-sm mb-3 sm:mb-4 uppercase tracking-widest">Systems Engineer</p>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                Optimizing global infrastructure and low-latency API gateways for enterprise scale.
-              </p>
-            </div>
           </div>
         </div>
       </section>
@@ -431,7 +414,7 @@ console.log(response.content);`}</code>
               © {new Date().getFullYear()} Vetra. All rights reserved.
             </div>
             <div className="flex items-center gap-6">
-              <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-slate-300">Crafted by CJ Hauser & Aaron Miller</span>
+              <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-slate-300">Crafted by CJ Hauser</span>
             </div>
           </div>
         </div>

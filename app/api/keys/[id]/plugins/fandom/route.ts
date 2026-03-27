@@ -25,10 +25,10 @@ export async function GET(
       return NextResponse.json({ enabled: false, settings: null });
     }
 
-    // Verify key ownership in Supabase first
+    // Verify key ownership and fetch persisted plugin config
     const { data: keyData, error: keyError } = await supabaseAdmin
       .from('api_keys')
-      .select('user_id')
+      .select('user_id, fandom_plugin_enabled, fandom_settings')
       .eq('id', keyId)
       .eq('user_id', userId)
       .maybeSingle();
@@ -40,14 +40,30 @@ export async function GET(
     // Fetch from remote VPS
     const response = await fetch(`${REMOTE_PLUGIN_URL}/settings/${keyId}`);
     if (!response.ok) {
-      // If not found on remote, it might be new. The remote service handles default settings.
-      return NextResponse.json({ enabled: false, settings: null });
+      // Fall back to persisted local settings so plugin state still works
+      return NextResponse.json({
+        enabled: keyData.fandom_plugin_enabled || false,
+        settings: keyData.fandom_settings || null
+      });
     }
 
     const data = await response.json();
+    const remoteEnabled = Boolean(data.enabled);
+    const remoteSettings = data.settings ?? null;
+
+    // Keep local key settings in sync with remote so runtime pipeline can read them from api_keys
+    await supabaseAdmin
+      .from('api_keys')
+      .update({
+        fandom_plugin_enabled: remoteEnabled,
+        fandom_settings: remoteSettings
+      })
+      .eq('id', keyId)
+      .eq('user_id', userId);
+
     return NextResponse.json({
-      enabled: data.enabled,
-      settings: data.settings
+      enabled: remoteEnabled,
+      settings: remoteSettings
     });
   } catch (err: any) {
     console.error('[GET Fandom Plugin] Error:', err);
@@ -102,10 +118,25 @@ export async function PATCH(
       return NextResponse.json({ error: 'Failed to update remote settings' }, { status: 500 });
     }
 
+    // Persist plugin state on API key for runtime pipeline reads (validateApiKey -> parser)
+    const { error: updateError } = await supabaseAdmin
+      .from('api_keys')
+      .update({
+        fandom_plugin_enabled: Boolean(enabled),
+        fandom_settings: settings ?? null
+      })
+      .eq('id', keyId)
+      .eq('user_id', userId);
+
+    if (updateError) {
+      console.error('[PATCH Fandom Plugin] Supabase update error:', updateError);
+      return NextResponse.json({ error: 'Failed to persist plugin settings' }, { status: 500 });
+    }
+
     return NextResponse.json({
       success: true,
-      enabled,
-      settings
+      enabled: Boolean(enabled),
+      settings: settings ?? null
     });
   } catch (err: any) {
     console.error('[PATCH Fandom Plugin] Error:', err);
