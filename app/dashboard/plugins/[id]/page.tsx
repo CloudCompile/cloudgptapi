@@ -37,6 +37,7 @@ interface FandomSettings {
   autoSummarize: boolean;
   cacheMode: string;
   preferredSources: string[];
+  wikiBaseUrl?: string;
 }
 
 export default function PluginSettingsPage() {
@@ -46,11 +47,14 @@ export default function PluginSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [enabled, setEnabled] = useState(false);
+  const [memoryEnabled, setMemoryEnabled] = useState(false);
+  const [searchPluginEnabled, setSearchPluginEnabled] = useState(false);
   const [settings, setSettings] = useState<FandomSettings>({
     maxLoreTokens: 800,
     autoSummarize: true,
     cacheMode: 'aggressive',
-    preferredSources: ['fandom', 'wikipedia']
+    preferredSources: ['fandom', 'wikipedia'],
+    wikiBaseUrl: 'https://community.fandom.com/wiki/'
   });
   
   const [testQuery, setTestQuery] = useState('');
@@ -124,14 +128,32 @@ export default function PluginSettingsPage() {
 
   async function fetchSettings() {
     try {
-      const response = await fetch(`/api/keys/${id}/plugins/fandom`);
-      const data = await response.json();
-      
-      if (response.ok) {
-        setEnabled(data.enabled);
-        if (data.settings) {
-          setSettings(data.settings);
+      const [fandomResp, memoryResp, searchResp] = await Promise.all([
+        fetch(`/api/keys/${id}/plugins/fandom`),
+        fetch(`/api/keys/${id}/plugins/memory`),
+        fetch(`/api/keys/${id}/plugins/search`)
+      ]);
+
+      const fandomData = await fandomResp.json();
+      const memoryData = await memoryResp.json();
+      const searchData = await searchResp.json();
+
+      if (fandomResp.ok) {
+        setEnabled(Boolean(fandomData.enabled));
+        if (fandomData.settings) {
+          setSettings({
+            ...fandomData.settings,
+            wikiBaseUrl: fandomData.settings.wikiBaseUrl || 'https://community.fandom.com/wiki/'
+          });
         }
+      }
+
+      if (memoryResp.ok) {
+        setMemoryEnabled(Boolean(memoryData.enabled));
+      }
+
+      if (searchResp.ok) {
+        setSearchPluginEnabled(Boolean(searchData.enabled));
       }
     } catch (err) {
       console.error('Failed to fetch plugin settings');
@@ -144,13 +166,25 @@ export default function PluginSettingsPage() {
     setSaving(true);
     setSaveStatus('idle');
     try {
-      const response = await fetch(`/api/keys/${id}/plugins/fandom`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled, settings }),
-      });
+      const [fandomRes, memoryRes, searchRes] = await Promise.all([
+        fetch(`/api/keys/${id}/plugins/fandom`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled, settings }),
+        }),
+        fetch(`/api/keys/${id}/plugins/memory`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled: memoryEnabled }),
+        }),
+        fetch(`/api/keys/${id}/plugins/search`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled: searchPluginEnabled }),
+        })
+      ]);
 
-      if (response.ok) {
+      if (fandomRes.ok && memoryRes.ok && searchRes.ok) {
         setSaveStatus('success');
         setTimeout(() => setSaveStatus('idle'), 3000);
       } else {
@@ -322,6 +356,53 @@ export default function PluginSettingsPage() {
                   <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   Configuration
                 </h3>
+
+                {/* Additional Plugins */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 border border-border rounded-2xl p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <History className="h-4 w-4 text-primary" />
+                        <span className="text-xs font-black uppercase tracking-wide">Long-term Memory</span>
+                      </div>
+                      <button
+                        onClick={() => setMemoryEnabled(!memoryEnabled)}
+                        className={cn(
+                          "relative inline-flex h-5 w-10 items-center rounded-full transition-colors",
+                          memoryEnabled ? "bg-primary" : "bg-slate-200 dark:bg-slate-700"
+                        )}
+                      >
+                        <span className={cn(
+                          "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                          memoryEnabled ? "translate-x-5" : "translate-x-1"
+                        )} />
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-slate-500">Persist conversation memory per API key.</p>
+                  </div>
+
+                  <div className="bg-slate-50 dark:bg-slate-800/50 border border-border rounded-2xl p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Search className="h-4 w-4 text-primary" />
+                        <span className="text-xs font-black uppercase tracking-wide">Web Search</span>
+                      </div>
+                      <button
+                        onClick={() => setSearchPluginEnabled(!searchPluginEnabled)}
+                        className={cn(
+                          "relative inline-flex h-5 w-10 items-center rounded-full transition-colors",
+                          searchPluginEnabled ? "bg-primary" : "bg-slate-200 dark:bg-slate-700"
+                        )}
+                      >
+                        <span className={cn(
+                          "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                          searchPluginEnabled ? "translate-x-5" : "translate-x-1"
+                        )} />
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-slate-500">Inject live web snippets into prompts for any model.</p>
+                  </div>
+                </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                   <div className="space-y-3">
@@ -407,6 +488,20 @@ export default function PluginSettingsPage() {
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  <div className="space-y-3 sm:space-y-4 sm:col-span-2">
+                    <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400 block">Fandom Wiki Base URL</label>
+                    <input
+                      type="url"
+                      placeholder="https://community.fandom.com/wiki/"
+                      value={settings.wikiBaseUrl || ''}
+                      onChange={(e) => setSettings({ ...settings, wikiBaseUrl: e.target.value })}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-border rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                    <p className="text-[10px] text-slate-400">
+                      Example: https://jujutsu-kaisen.fandom.com/wiki/ (used by lore retrieval services).
+                    </p>
                   </div>
                 </div>
               </div>
