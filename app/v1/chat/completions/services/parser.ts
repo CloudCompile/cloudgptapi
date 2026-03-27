@@ -1,6 +1,7 @@
 import { extractCharacterMetadata, generateCharacterId, extractUserId, estimateTokens } from '@/lib/chat-utils';
 import { retrieveMemory } from '@/lib/memory';
 import { isFandomPluginConfigured, runFandomPlugin } from '@/lib/plugins';
+import { runWebSearch } from '@/lib/web-search';
 import { ApiKey } from '@/lib/api-keys';
 
 export interface ParseResult {
@@ -40,8 +41,10 @@ export async function processContextAndMemory(
     const isGeminiLarge = modelId === 'gemini-large';
     const isClaude = modelId.startsWith('claude');
     const isFandomEnabled = apiKeyInfo?.fandomPluginEnabled || false;
+    const isMemoryPluginEnabled = Boolean((apiKeyInfo?.fandomSettings as any)?.plugins?.memory?.enabled);
+    const isSearchPluginEnabled = Boolean((apiKeyInfo?.fandomSettings as any)?.plugins?.search?.enabled);
     
-    if (isGeminiLarge || isClaude || body.use_memory || isFandomEnabled) {
+    if (isGeminiLarge || isClaude || body.use_memory || isFandomEnabled || isMemoryPluginEnabled) {
       memoryContext = await retrieveMemory(lastMessage, userId, characterId);
       
       let optimizationPrompt = '';
@@ -124,6 +127,28 @@ export async function processContextAndMemory(
             }
             return msg;
           });
+        }
+      }
+    }
+
+    if (isSearchPluginEnabled && lastMessage) {
+      const webContext = await runWebSearch(lastMessage, 3);
+      if (webContext) {
+        const isGemini = modelId.includes('gemini');
+        const searchContextMessage = `[Web Search Results]\n${webContext}\n\nUse these sources when relevant. If sources conflict, mention uncertainty.`;
+
+        if (isGemini) {
+          processedMessages.push({
+            role: 'user',
+            content: `${searchContextMessage}\n\nNow answer the original request.`
+          });
+        } else {
+          const systemIdx = processedMessages.findIndex((m: any) => m.role === 'system');
+          if (systemIdx !== -1) {
+            processedMessages[systemIdx].content += `\n\n${searchContextMessage}`;
+          } else {
+            processedMessages.unshift({ role: 'system', content: searchContextMessage });
+          }
         }
       }
     }

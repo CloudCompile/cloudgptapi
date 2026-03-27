@@ -11,6 +11,7 @@ import {
   generateRequestId,
   resolveModelId,
   PROVIDER_MODEL_MAPPING,
+  applySearchPluginModel,
 } from '@/lib/chat-utils';
 
 export const runtime = 'nodejs';
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
     message: 'Chat completions endpoint is active. Use POST to send messages.',
     endpoint: '/v1/chat/completions',
     example: {
-      model: 'openai',
+      model: 'deepseek-chat',
       messages: [{ role: 'user', content: 'Hello!' }]
     }
   }, {
@@ -176,7 +177,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Get model or use default, resolved through aliases via resolveModelId
-    const modelId = resolveModelId(body.model || 'openai');
+    const resolvedModelId = resolveModelId(body.model || 'deepseek-chat');
+    const isSearchPluginEnabled = Boolean((apiKeyInfo?.fandomSettings as any)?.plugins?.search?.enabled);
+    const modelId = applySearchPluginModel(resolvedModelId, isSearchPluginEnabled);
 
     // Check if model is premium and if user has access
     const isPremium = PREMIUM_MODELS.has(modelId);

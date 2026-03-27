@@ -58,6 +58,7 @@ export async function GET() {
       createdAt: k.created_at,
       usageCount: k.usage_count,
       lastUsedAt: k.last_used_at,
+      fandomEnabled: k.fandom_plugin_enabled || false,
     }));
 
     return NextResponse.json({ keys: maskedKeys });
@@ -98,14 +99,20 @@ export async function POST(request: NextRequest) {
       console.warn('Exception fetching profile:', err);
     }
 
-    const plan = profileData?.plan || 'free';
-    const rateLimit = plan === 'pro' ? 500 : plan === 'enterprise' ? 1000 : 60;
+    const plan = (profileData?.plan || 'free').toLowerCase();
+    const rateLimit =
+      plan === 'enterprise' || plan === 'admin'
+        ? 1000
+        : plan === 'pro' || plan === 'developer' || plan === 'video_pro'
+          ? 500
+          : 60;
 
     const newKey = {
       key: generateApiKey(),
       user_id: userId,
       name,
       rate_limit: rateLimit,
+      fandom_plugin_enabled: false,
     };
 
     console.log(`[POST /api/keys] User ID: ${userId}, Plan: ${plan}`);

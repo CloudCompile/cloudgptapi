@@ -467,7 +467,8 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   }
   
   const isFandomEnabled = apiKeyInfo?.fandomPluginEnabled || false;
-  if (userId && lastMessage && (modelId === 'gemini-large' || body.use_memory || isFandomEnabled)) {
+  const isMemoryPluginEnabled = Boolean((apiKeyInfo?.fandomSettings as any)?.plugins?.memory?.enabled);
+  if (userId && lastMessage && (modelId === 'gemini-large' || body.use_memory || isFandomEnabled || isMemoryPluginEnabled)) {
     const assistantMessage = assistantContent;
     if (assistantMessage) {
       rememberInteraction(lastMessage, assistantMessage, userId, characterId).catch(err => 

@@ -31,37 +31,21 @@ export interface VideoModel {
 
 // Available chat models by provider
 const POLLINATIONS_CHAT_MODELS: ChatModel[] = [
-  { id: 'openai', name: 'OpenAI GPT-5 Mini', provider: 'pollinations', description: 'OpenAI GPT-5 Mini', contextWindow: 400, usageWeight: 1 },
-  { id: 'openai-fast', name: 'OpenAI GPT-5 Nano', provider: 'pollinations', description: 'OpenAI GPT-5 Nano', contextWindow: 400, usageWeight: 1 },
-  { id: 'openai-large', name: 'OpenAI GPT-5.4', provider: 'pollinations', description: 'OpenAI GPT-5.4', contextWindow: 400, usageWeight: 3 },
   { id: 'gpt-5.1', name: 'OpenAI GPT-5.1', provider: 'pollinations', description: 'OpenAI GPT-5.1', contextWindow: 400, usageWeight: 2 },
   { id: 'gpt-oss-120b', name: 'OpenAI GPT-OSS 120B', provider: 'pollinations', description: 'OpenAI GPT-OSS 120B', contextWindow: 200, usageWeight: 2 },
   { id: 'gpt-oss-20b', name: 'OpenAI GPT-OSS 20B', provider: 'pollinations', description: 'OpenAI GPT-OSS 20B', contextWindow: 200, usageWeight: 1 },
-  { id: 'claude-fast', name: 'Claude Sonnet 4.6', provider: 'pollinations', description: 'Anthropic Claude Sonnet 4.6', contextWindow: 200, usageWeight: 4 },
-  { id: 'gemini', name: 'Gemini 3 Flash Preview', provider: 'pollinations', description: 'Google Gemini 3 Flash Preview', contextWindow: 1000, usageWeight: 3 },
-  { id: 'gemini-search', name: 'Gemini 3 Flash Preview (Search)', provider: 'pollinations', description: 'Google Gemini 3 Flash Preview with Search', contextWindow: 1000, usageWeight: 4 },
-  { id: 'gemini-large', name: 'Gemini 3 Pro Preview', provider: 'pollinations', description: 'Google Gemini 3 Pro Preview', contextWindow: 1000, usageWeight: 6 },
   { id: 'gemini-large-search', name: 'Gemini 3 Pro Preview (Search)', provider: 'pollinations', description: 'Google Gemini 3 Pro Preview with Search', contextWindow: 1000, usageWeight: 7 },
-  { id: 'gemini-fast', name: 'Gemini 2.5 Flash', provider: 'pollinations', description: 'Google Gemini 2.5 Flash', contextWindow: 1000, usageWeight: 2 },
-  { id: 'deepseek', name: 'DeepSeek V3.2', provider: 'pollinations', description: 'DeepSeek V3.2', contextWindow: 160, usageWeight: 2 },
   { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'pollinations', description: 'DeepSeek Chat', contextWindow: 160, usageWeight: 1 },
   { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner', provider: 'pollinations', description: 'DeepSeek Reasoner', contextWindow: 160, usageWeight: 3 },
   { id: 'deepseek-r1-0528', name: 'DeepSeek R1 0528', provider: 'pollinations', description: 'DeepSeek R1 0528', contextWindow: 160, usageWeight: 4 },
-  { id: 'qwen-large', name: 'Qwen 3.5 397B A17B', provider: 'pollinations', description: 'Qwen 3.5 397B A17B', contextWindow: 512, usageWeight: 2 },
   { id: 'qwen3-235b-a22b', name: 'Qwen3 235B A22B', provider: 'pollinations', description: 'Qwen3 235B A22B', contextWindow: 512, usageWeight: 2 },
   { id: 'qwen3-32b', name: 'Qwen3 32B', provider: 'pollinations', description: 'Qwen3 32B', contextWindow: 256, usageWeight: 1 },
-  { id: 'qwen-coder', name: 'Qwen3 Coder 480B', provider: 'pollinations', description: 'Qwen3 Coder 480B A35B Instruct', contextWindow: 256, usageWeight: 2 },
   { id: 'qwen-next-80b', name: 'Qwen3 Next 80B Instruct', provider: 'pollinations', description: 'Qwen3 Next 80B A3B Instruct', contextWindow: 256, usageWeight: 2 },
   { id: 'qwen-next-80b-thinking', name: 'Qwen3 Next 80B Thinking', provider: 'pollinations', description: 'Qwen3 Next 80B A3B Thinking', contextWindow: 256, usageWeight: 3 },
   { id: 'qwen3.5-plus', name: 'Qwen 3.5 Plus', provider: 'pollinations', description: 'Qwen 3.5 Plus', contextWindow: 256, usageWeight: 1 },
   { id: 'qwen3.5-flash', name: 'Qwen 3.5 Flash', provider: 'pollinations', description: 'Qwen 3.5 Flash', contextWindow: 256, usageWeight: 1 },
   { id: 'qwen-deep-research', name: 'Qwen Deep Research', provider: 'pollinations', description: 'Qwen Deep Research', contextWindow: 256, usageWeight: 4 },
-  { id: 'kimi', name: 'Kimi K2.5', provider: 'pollinations', description: 'Moonshot Kimi K2.5', contextWindow: 256, usageWeight: 3 },
   { id: 'kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'pollinations', description: 'Moonshot Kimi K2 Thinking', contextWindow: 256, usageWeight: 2 },
-  { id: 'mistral', name: 'Mistral Large 3 675B', provider: 'pollinations', description: 'Mistral Large 3 675B Instruct', contextWindow: 128, usageWeight: 2 },
-  { id: 'glm', name: 'GLM 5', provider: 'pollinations', description: 'Zhipu GLM 5', contextWindow: 198, usageWeight: 2 },
-  { id: 'minimax', name: 'MiniMax M2.5', provider: 'pollinations', description: 'MiniMax M2.5', contextWindow: 200, usageWeight: 3 },
-  { id: 'grok', name: 'Grok', provider: 'pollinations', description: 'xAI Grok', contextWindow: 2000, usageWeight: 2 },
 ];
 
 const KIVEST_CHAT_MODELS: ChatModel[] = [
@@ -116,16 +100,9 @@ const KIVEST_CHAT_MODELS: ChatModel[] = [
 ];
 
 const GEMINI_CHAT_MODELS: ChatModel[] = [
-  { id: 'gemini-search', name: 'Google Gemini 3 Flash', provider: 'gemini', description: 'Google Gemini 3 Flash (Search)', contextWindow: 200, usageWeight: 10 },
-  { id: 'gemini', name: 'Google Gemini 3 Flash', provider: 'gemini', description: 'Google Gemini 3 Flash', contextWindow: 150, usageWeight: 8 },
-  { id: 'gemini-large', name: 'Google Gemini 3 Pro', provider: 'gemini', description: 'Google Gemini 3 Pro', contextWindow: 30, usageWeight: 25 },
-  { id: 'gemini-fast', name: 'Google Gemini 2.5 Flash Lite', provider: 'gemini', description: 'Google Gemini 2.5 Flash Lite', contextWindow: 2000, usageWeight: 1 },
 ];
 
 const CLAUDE_CHAT_MODELS: ChatModel[] = [
-  { id: 'claude-fast', name: 'Anthropic Claude Haiku 4.5', provider: 'claude', description: 'Anthropic Claude Haiku 4.5', contextWindow: 55, usageWeight: 5 },
-  { id: 'claude', name: 'Anthropic Claude Sonnet 4.5', provider: 'claude', description: 'Anthropic Claude Sonnet 4.5', contextWindow: 30, usageWeight: 15 },
-  { id: 'claude-large', name: 'Anthropic Claude Opus 4.5', provider: 'claude', description: 'Anthropic Claude Opus 4.5', contextWindow: 20, usageWeight: 40 },
 ];
 
 const OPENROUTER_CHAT_MODELS: ChatModel[] = [
@@ -374,36 +351,10 @@ export const PREMIUM_MODELS = new Set([
 
 // Available image models
 export const IMAGE_MODELS: ImageModel[] = [
-  { id: 'flux', name: 'Flux', provider: 'pollinations', description: 'Flux Schnell - Fast high-quality image generation', usageWeight: 5 },
-  { id: 'zimage', name: 'Z-Image', provider: 'pollinations', description: 'Z-Image Turbo - Fast 6B Flux with 2x upscaling', usageWeight: 5 },
-  { id: 'qwen-image', name: 'Qwen Image', provider: 'pollinations', description: 'Qwen Image Plus - text/image generation and editing', usageWeight: 8 },
-  { id: 'grok-imagine', name: 'Grok Imagine', provider: 'pollinations', description: 'xAI official image generation model', usageWeight: 8 },
-  { id: 'grok-imagine-pro', name: 'Grok Imagine Pro', provider: 'pollinations', description: 'xAI Aurora image generation', usageWeight: 20 },
-  { id: 'klein', name: 'Flux Klein', provider: 'pollinations', description: 'FLUX.2 Klein 4B fast image generation/editing', usageWeight: 6 },
-  { id: 'gptimage', name: 'GPT Image', provider: 'pollinations', description: "GPT Image 1 Mini - OpenAI's image generation model", usageWeight: 5 },
-  { id: 'gptimage-large', name: 'GPT Image Large', provider: 'pollinations', description: "GPT Image 1.5 - OpenAI's advanced image generation model", usageWeight: 15 },
-  { id: 'seedream5', name: 'Seedream 5', provider: 'pollinations', description: 'Seedream 5.0 Lite - ByteDance ARK', usageWeight: 12 },
-  { id: 'kontext', name: 'Kontext', provider: 'pollinations', description: 'FLUX.1 Kontext - In-context editing & generation', usageWeight: 10 },
-  { id: 'nanobanana', name: 'Nanobanana', provider: 'pollinations', description: 'NanoBanana - Gemini 2.5 Flash Image', usageWeight: 5 },
-  { id: 'nanobanana-2', name: 'Nanobanana 2', provider: 'pollinations', description: 'NanoBanana 2 - Gemini 3.1 Flash Image', usageWeight: 8 },
-  { id: 'nanobanana-pro', name: 'Nanobanana Pro', provider: 'pollinations', description: 'NanoBanana Pro - Gemini 3 Pro Image (4K, Thinking)', usageWeight: 15 },
-  { id: 'p-image', name: 'Pruna p-image', provider: 'pollinations', description: 'Pruna fast text-to-image', usageWeight: 6 },
-  { id: 'p-image-edit', name: 'Pruna p-image-edit', provider: 'pollinations', description: 'Pruna image editing model', usageWeight: 10 },
-  { id: 'nova-canvas', name: 'Nova Canvas', provider: 'pollinations', description: 'Amazon Nova Canvas image generation', usageWeight: 15 },
 ];
 
 // Available video models - ALL require pro/video_pro plan
-export const VIDEO_MODELS: VideoModel[] = [
-  { id: 'seedance-pro', name: 'Seedance Pro', provider: 'pollinations', description: 'Seedance Pro-Fast - BytePlus video generation (better prompt adherence)', usageWeight: 50 },
-  { id: 'seedance', name: 'Seedance', provider: 'pollinations', description: 'Seedance Lite - BytePlus video generation (better quality)', usageWeight: 50 },
-  { id: 'veo', name: 'Veo', provider: 'pollinations', description: "Veo 3.1 Fast - Google's video generation model (preview)", usageWeight: 50 },
-  { id: 'wan', name: 'Wan 2.6', provider: 'pollinations', description: 'Alibaba text/image-to-video with audio', usageWeight: 20 },
-  { id: 'wan-fast', name: 'Wan 2.2 Fast', provider: 'pollinations', description: 'Alibaba fast/cheap video model', usageWeight: 8 },
-  { id: 'ltx-2', name: 'LTX-2', provider: 'pollinations', description: 'Fast text-to-video generation on Vast.ai', usageWeight: 8 },
-  { id: 'p-video', name: 'Pruna p-video', provider: 'pollinations', description: 'Pruna text/image-to-video generation', usageWeight: 24 },
-  { id: 'grok-video-pro', name: 'Grok Video Pro', provider: 'pollinations', description: 'xAI official video generation', usageWeight: 20 },
-  { id: 'nova-reel', name: 'Nova Reel', provider: 'pollinations', description: 'Amazon Nova Reel video generation', usageWeight: 30 },
-];
+export const VIDEO_MODELS: VideoModel[] = [];
 
 // Video models require pro/video_pro plan for access
 export const VIDEO_MODELS_SET = new Set(VIDEO_MODELS.map(m => m.id));

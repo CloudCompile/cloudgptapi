@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { extractApiKey, validateApiKey, applyPlanOverride, applyPeakHoursLimit, ApiKey } from '@/lib/api-keys';
 import { supabaseAdmin } from '@/lib/supabase';
 
@@ -52,8 +52,20 @@ export async function processAuth(
     if (profile) {
       userPlan = profile.plan || 'free';
       userPlan = await applyPlanOverride(profile.email, userPlan, sessionUserId, 'id');
+    } else {
+      try {
+        const user = await currentUser();
+        const clerkPlan = user?.publicMetadata?.plan;
+        if (clerkPlan) {
+          userPlan = String(clerkPlan);
+        }
+      } catch (clerkError) {
+        console.warn(`[${requestId}] Clerk plan fallback failed`, clerkError);
+      }
     }
   }
+
+  userPlan = (userPlan || 'free').toLowerCase();
 
   let limit = 4;
   let dailyLimit = 10;
@@ -67,6 +79,9 @@ export async function processAuth(
   } else if (userPlan === 'developer') {
     limit = 1000;
     dailyLimit = 5000;
+  } else if (userPlan === 'video_pro') {
+    limit = 500;
+    dailyLimit = 50;
   }
 
   if (apiKeyInfo && apiKeyInfo.rateLimit > limit) {

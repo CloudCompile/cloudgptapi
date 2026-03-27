@@ -232,7 +232,20 @@ export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
 };
 
 export function resolveModelId(modelId: string): string {
-  return modelAliases[modelId] || modelId;
+  const normalizedModelId = modelId.trim().replace(/^['"]+|['"]+$/g, '');
+  return modelAliases[normalizedModelId] || normalizedModelId;
+}
+
+export const SEARCH_MODEL_ALIASES: Record<string, string> = {
+  'gemini': 'gemini-search',
+  'gemini-large': 'gemini-large-search',
+  'gemini-3-flash-preview': 'gemini-3-flash-preview:search',
+  'gemini-3-pro-preview': 'gemini-3-pro-preview:search',
+};
+
+export function applySearchPluginModel(modelId: string, searchEnabled: boolean): string {
+  if (!searchEnabled) return modelId;
+  return SEARCH_MODEL_ALIASES[modelId] || modelId;
 }
 
 export function generateRequestId(): string {
