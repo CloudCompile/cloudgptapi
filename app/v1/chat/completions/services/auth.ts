@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { auth, currentUser } from '@clerk/nextjs/server';
-import { extractApiKey, validateApiKey, applyPlanOverride, applyPeakHoursLimit, ApiKey } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, applyPlanOverride, applyPeakHoursLimit, ApiKey, getDailyLimitForPlan } from '@/lib/api-keys';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export interface AuthResult {
@@ -68,20 +68,16 @@ export async function processAuth(
   userPlan = (userPlan || 'free').toLowerCase();
 
   let limit = 4;
-  let dailyLimit = 10;
+  let dailyLimit = getDailyLimitForPlan(userPlan);
   
   if (userPlan === 'admin' || userPlan === 'enterprise') {
     limit = 10000; 
-    dailyLimit = 100000;
   } else if (userPlan === 'pro') {
     limit = 4;
-    dailyLimit = 50;
   } else if (userPlan === 'developer') {
     limit = 1000;
-    dailyLimit = 5000;
   } else if (userPlan === 'video_pro') {
     limit = 500;
-    dailyLimit = 50;
   }
 
   if (apiKeyInfo && apiKeyInfo.rateLimit > limit) {

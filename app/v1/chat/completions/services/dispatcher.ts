@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { trackUsage, getRateLimitInfo, getDailyLimitInfo, ApiKey } from '@/lib/api-keys';
+import { trackUsage, getRateLimitInfo, getDailyLimitInfo, ApiKey, getModelUsageWeight } from '@/lib/api-keys';
 import { handleStableHordeChat } from './stablehorde';
 import {
   PROVIDER_URLS,
@@ -332,7 +332,8 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   }
 
   if (apiKeyInfo && !isSystemRequest) {
-    const usageWeight = model.usageWeight || 1;
+    const usageWeight = getModelUsageWeight(modelId);
+    console.log(`[${requestId}] Tracking usage with weight: ${usageWeight} for model: ${modelId}`);
     await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages, usageWeight);
   }
 
@@ -359,7 +360,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       'X-Request-Id': requestId,
       'X-Accel-Buffering': 'no',
       'X-Vetra-Provider': model.provider || 'unknown',
-      'X-Vetra-Weight': String(model.usageWeight || 1),
+      'X-Vetra-Weight': String(getModelUsageWeight(modelId)),
     };
 
     const kickStream = new ReadableStream({
@@ -495,7 +496,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       'X-Request-Id': requestId,
       'X-Vetra-Latency': `${Date.now() - startTime}ms`,
       'X-Vetra-Provider': model.provider || 'unknown',
-      'X-Vetra-Weight': String(model.usageWeight || 1),
+      'X-Vetra-Weight': String(getModelUsageWeight(modelId)),
     },
   });
 }
