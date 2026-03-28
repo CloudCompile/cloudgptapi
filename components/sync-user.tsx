@@ -14,12 +14,12 @@ export async function SyncUser() {
     if (user) {
       const email = user.email || '';
       const username = user.email?.split('@')[0] || '';
-      const name = user.name || '';
+      const name = [user.given_name, user.family_name].filter(Boolean).join(' ') || '';
       const avatar = user.picture || '';
       
       if (email) {
         try {
-          await syncUser(userId, email, username, name, avatar);
+          await syncUser(userId, email, username, name || undefined, avatar || undefined);
         } catch (err) {
           console.error('Failed to sync user profile:', err);
         }
