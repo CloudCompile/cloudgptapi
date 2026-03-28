@@ -41,7 +41,7 @@ export default async function AdminUserViewPage({
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
-  // Fetch Token Usage
+  // Fetch API Requests
   const { data: usageLogs } = await supabaseAdmin
     .from('usage_logs')
     .select('id, model, tokens_used, created_at')
@@ -57,7 +57,8 @@ export default async function AdminUserViewPage({
   // Sync Clerk Data for robust Ban / 2FA status handling
   let clerkUser;
   try {
-    clerkUser = await clerkClient.users.getUser(userId);
+    const client = await clerkClient();
+    clerkUser = await client.users.getUser(userId);
   } catch (e) {
     console.error('Clerk user not found, might be deleted', e);
   }
@@ -69,9 +70,11 @@ export default async function AdminUserViewPage({
     'use server';
     if (!clerkUser) return;
     if (isBanned) {
-      await clerkClient.users.unbanUser(userId);
+      const client = await clerkClient();
+      await client.users.unbanUser(userId);
     } else {
-      await clerkClient.users.banUser(userId);
+      const client = await clerkClient();
+      await client.users.banUser(userId);
     }
     revalidatePath(`/admin/users/${userId}`);
   }
@@ -79,7 +82,8 @@ export default async function AdminUserViewPage({
   async function deleteUserAction() {
     'use server';
     try {
-      await clerkClient.users.deleteUser(userId);
+      const client = await clerkClient();
+      await client.users.deleteUser(userId);
       await supabaseAdmin.from('profiles').delete().eq('id', userId);
     } catch (e) {
       console.error('Failed to delete user:', e);
@@ -241,11 +245,11 @@ export default async function AdminUserViewPage({
             </div>
           </div>
 
-          {/* Token Usage Table */}
+          {/* API Requests Table */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
             <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <h2 className="font-bold flex items-center">
-                <Activity className="h-4 w-4 mr-2 text-emerald-500" /> Recent Token Usage 
+                <Activity className="h-4 w-4 mr-2 text-emerald-500" /> Recent API Requests 
               </h2>
               <span className="text-sm text-slate-500 font-medium">Total Calls: {totalUsage || 0}</span>
             </div>
@@ -255,7 +259,7 @@ export default async function AdminUserViewPage({
                   <thead>
                     <tr className="bg-slate-50/50 dark:bg-slate-800/50 text-slate-500 text-xs uppercase tracking-wider">
                       <th className="px-5 py-3 font-semibold">Model</th>
-                      <th className="px-5 py-3 font-semibold">Tokens</th>
+                      <th className="px-5 py-3 font-semibold">Requests (RPD)</th>
                       <th className="px-5 py-3 font-semibold">Date</th>
                     </tr>
                   </thead>

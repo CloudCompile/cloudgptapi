@@ -74,7 +74,8 @@ export async function assignPlan(userId: string, plan: 'free' | 'developer' | 'p
 
   // Update Clerk metadata with plan
   try {
-    await clerkClient.users.updateUser(userId, {
+    const client = await clerkClient();
+    await client.users.updateUser(userId, {
       publicMetadata: {
         plan: plan
       }
@@ -259,7 +260,8 @@ export async function syncUser(userId: string, email: string, username?: string,
 
   // Update Clerk metadata with plan (default to 'free' if not set from subscription)
   try {
-    await clerkClient.users.updateUser(userId, {
+    const client = await clerkClient();
+    await client.users.updateUser(userId, {
       publicMetadata: {
         plan: initialPlan || 'free'
       }
