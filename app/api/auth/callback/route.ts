@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { jwtDecode } from 'jwt-decode';
+import { syncUser } from '@/lib/admin-actions';
 
 /**
  * Kinde OAuth callback endpoint
@@ -77,6 +79,29 @@ export async function GET(req: NextRequest) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
       });
+    }
+
+    // Sync/migrate user profile in Supabase (handles Clerk → Kinde ID migration by email)
+    try {
+      const decoded: any = jwtDecode(access_token);
+      const userId: string = decoded.sub;
+      const email: string = decoded.email || '';
+      const givenName: string = decoded.given_name || '';
+      const familyName: string = decoded.family_name || '';
+      const picture: string = decoded.picture || '';
+
+      if (userId && email) {
+        await syncUser(
+          userId,
+          email,
+          email.split('@')[0],
+          [givenName, familyName].filter(Boolean).join(' ') || undefined,
+          picture || undefined
+        );
+      }
+    } catch (syncError) {
+      // Non-fatal: log but don't block login
+      console.error('[Callback] Failed to sync user profile:', syncError);
     }
 
     // Get redirect destination from state parameter (encoded in base64 or similar)
