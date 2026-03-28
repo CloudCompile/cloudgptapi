@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
 
     // Exchange the authorization code for tokens
     const tokenResponse = await fetch(
-      `${process.env.KINDE_AUTH_DOMAIN}/oauth/token`,
+      `${process.env.KINDE_AUTH_DOMAIN}/oauth2/token`,
       {
         method: 'POST',
         headers: {

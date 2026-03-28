@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 
     // Ensure auth domain doesn't have trailing slash before appending path
     const cleanAuthDomain = kindeAuthDomain.replace(/\/$/, '');
-    const loginUrl = new URL(`${cleanAuthDomain}/oauth/authorize`);
+    const loginUrl = new URL(`${cleanAuthDomain}/oauth2/auth`);
     loginUrl.searchParams.set('client_id', kindeClientId);
     loginUrl.searchParams.set('response_type', 'code');
     loginUrl.searchParams.set('redirect_uri', kindeRedirectUri);
