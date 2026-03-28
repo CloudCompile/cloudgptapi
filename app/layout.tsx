@@ -28,7 +28,12 @@ export default function RootLayout({
   return (
     <ClerkProvider dynamic>
       <html lang="en" className="scroll-smooth" suppressHydrationWarning>
-        <body className="min-h-screen bg-background antialiased selection:bg-primary/10 selection:text-primary">
+        <body className="min-h-screen bg-background antialiased selection:bg-primary/10 selection:text-primary relative overflow-x-hidden">
+          {/* Global Ambient Background */}
+          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px] animate-pulse-slow" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-500/5 blur-[120px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
+          </div>
           <Suspense fallback={null}>
             <SyncUser />
           </Suspense>

@@ -209,8 +209,8 @@ export default function Dashboard() {
           <p className="text-slate-500 dark:text-slate-400 mt-1 sm:mt-2 font-medium text-xs sm:text-sm md:text-base">Create and manage access keys for your applications.</p>
         </div>
         <div className="flex gap-3">
-          <div className={`flex items-center gap-3 sm:gap-4 bg-white dark:bg-slate-900 border border-border p-2.5 sm:p-4 rounded-xl sm:rounded-2xl shadow-sm w-full sm:w-auto transition-all duration-500 ${loadingStatus ? 'opacity-50' : 'opacity-100'}`}>
-            <div className={`h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 ${Object.values(providerStatuses).some((s: any) => s.status === 'down') ? 'bg-amber-500/10 text-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.2)]' : 'bg-emerald-500/10 text-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.2)]'}`}>
+          <div className={`flex items-center gap-3 sm:gap-4 glass-card p-2.5 sm:p-4 rounded-xl sm:rounded-2xl shadow-sm w-full sm:w-auto transition-all duration-500 ${loadingStatus ? 'opacity-50' : 'opacity-100'}`}>
+            <div className={`h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 ${Object.values(providerStatuses).some((s: any) => s.status === 'down') ? 'bg-amber-500/10 text-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.2)]' : 'bg-emerald-500/10 text-emerald-500 glow-primary'}`}>
               <Activity className={`h-4 w-4 sm:h-5 sm:w-5 ${!loadingStatus && 'animate-pulse'}`} />
             </div>
             <div>
@@ -228,8 +228,8 @@ export default function Dashboard() {
       <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Main Content: Key List */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-border rounded-2xl sm:rounded-[2rem] shadow-sm overflow-hidden">
-            <div className="p-4 sm:p-8 border-b border-border flex items-center justify-between gap-3 sm:gap-4">
+          <div className="glass-card rounded-2xl sm:rounded-[2rem] shadow-sm overflow-hidden border-border/50">
+            <div className="p-4 sm:p-8 border-b border-white/5 flex items-center justify-between gap-3 sm:gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-400" />
                 <input 
@@ -237,25 +237,26 @@ export default function Dashboard() {
                   placeholder="Search keys..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-muted/50 border border-border rounded-lg sm:rounded-xl pl-9 sm:pl-11 pr-3 sm:pr-4 py-2 sm:py-2.5 text-base font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg sm:rounded-xl pl-9 sm:pl-11 pr-3 sm:pr-4 py-2 sm:py-2.5 text-base font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
               <button 
                 onClick={fetchKeys}
-                className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl border border-border hover:bg-muted transition-colors shrink-0"
+                className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl border border-white/10 hover:bg-white/5 transition-colors shrink-0"
                 title="Refresh keys"
               >
                 <RefreshCcw className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4", loading && "animate-spin")} />
               </button>
             </div>
 
-            <div className="divide-y divide-border">
+            <div className="divide-y divide-white/5">
               {filteredKeys.length > 0 ? (
                 filteredKeys.map((key) => (
-                  <div key={key.id} className="p-4 sm:p-8 hover:bg-muted/30 transition-colors group">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-6">
+                  <div key={key.id} className="p-4 sm:p-8 hover:bg-white/5 transition-colors group relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-6 relative z-10">
                       <div className="flex gap-3 sm:gap-4">
-                        <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-lg sm:rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors shrink-0">
+                        <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-lg sm:rounded-2xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors shrink-0">
                           <Key className="h-4 w-4 sm:h-6 sm:w-6" />
                         </div>
                         <div className="min-w-0">
@@ -333,8 +334,8 @@ export default function Dashboard() {
 
         {/* Sidebar: Create Key & Info */}
         <div className="space-y-6">
-          <div className="bg-slate-950 text-white rounded-2xl sm:rounded-[2rem] p-6 sm:p-8 shadow-2xl shadow-primary/10 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-primary/30 transition-all duration-700" />
+          <div className="glass-card rounded-2xl sm:rounded-[2rem] p-6 sm:p-8 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
             <div className="relative z-10">
               <h3 className="text-lg sm:text-xl font-black tracking-tighter mb-4 sm:mb-6 flex items-center gap-3">
                 <Plus className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -346,11 +347,11 @@ export default function Dashboard() {
                   placeholder="Production App Key..." 
                   value={newKeyName}
                   onChange={(e) => setNewKeyName(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg sm:rounded-xl px-4 py-2.5 sm:py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg sm:rounded-xl px-4 py-2.5 sm:py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all placeholder:text-slate-600"
                 />
                 <button 
                   onClick={createKey}
-                  className="w-full bg-primary text-white font-black py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all text-xs sm:text-sm"
+                  className="w-full bg-primary text-white font-black py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all text-sm uppercase tracking-widest"
                 >
                   Generate Key
                 </button>
@@ -364,12 +365,13 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 border border-border rounded-2xl sm:rounded-[2rem] p-6 sm:p-8">
-            <h3 className="text-[10px] sm:text-sm font-black uppercase tracking-[0.2em] text-slate-400 mb-4 sm:mb-6 flex items-center justify-between">
+          <div className="glass-card rounded-2xl sm:rounded-[2rem] p-6 sm:p-8 relative overflow-hidden">
+             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent pointer-events-none" />
+            <h3 className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 sm:mb-6 flex items-center justify-between relative z-10">
               Live Providers Status
-              <span className={`w-2 h-2 rounded-full ${loadingStatus ? 'bg-slate-400 animate-pulse' : 'bg-emerald-500'}`} />
+              <span className={`w-2 h-2 rounded-full ${loadingStatus ? 'bg-slate-400 animate-pulse' : 'bg-emerald-500 shadow-[0_0_8px_var(--color-primary)]'}`} />
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-4 relative z-10">
               {['pollinations', 'openrouter', 'poe', 'github', 'liz', 'kivest'].map((provider) => {
                 const status = providerStatuses[provider];
                 const isOnline = status?.status === 'online';
@@ -377,7 +379,7 @@ export default function Dashboard() {
                   <div key={provider} className="flex items-center justify-between group/p">
                     <div className="flex items-center gap-3">
                       <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]'}`} />
-                      <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300">
+                      <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 group-hover/p:text-slate-200 transition-colors">
                         {provider}
                       </span>
                     </div>
@@ -387,7 +389,7 @@ export default function Dashboard() {
                           {status.latency}ms
                         </span>
                       )}
-                      <span className={`text-[10px] font-black uppercase px-1.5 py-0.5 rounded border ${isOnline ? 'border-emerald-500/10 text-emerald-500 bg-emerald-500/5' : 'border-amber-500/10 text-amber-500 bg-amber-500/5'}`}>
+                      <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded border ${isOnline ? 'border-emerald-500/10 text-emerald-500 bg-emerald-500/5' : 'border-amber-500/10 text-amber-500 bg-amber-500/5'}`}>
                         {isOnline ? 'LIVE' : 'DOWN'}
                       </span>
                     </div>
@@ -397,7 +399,27 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 border border-border rounded-2xl sm:rounded-[2rem] p-6 sm:p-8">
+          <div className="glass-card rounded-2xl sm:rounded-[2rem] p-6 sm:p-8 relative overflow-hidden">
+             <div className="absolute inset-0 bg-gradient-to-br from-slate-500/5 to-transparent pointer-events-none" />
+             <div className="relative z-10">
+              <h3 className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 sm:mb-6">Security Console</h3>
+              <ul className="space-y-3 sm:space-y-4">
+                <li className="flex gap-3">
+                  <div className="h-4 w-4 sm:h-5 sm:w-5 rounded bg-amber-500/10 flex items-center justify-center text-amber-500 shrink-0">
+                    <Lock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                  </div>
+                  <p className="text-[10px] sm:text-xs font-medium text-slate-500 leading-relaxed">Never share your API keys or expose them in client-side code.</p>
+                </li>
+                <li className="flex gap-3">
+                  <div className="h-4 w-4 sm:h-5 sm:w-5 rounded bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                    <Shield className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                  </div>
+                  <p className="text-[10px] sm:text-xs font-medium text-slate-500 leading-relaxed">Rotate your keys regularly to maintain high security standards.</p>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
         </div>
       </div>
     </div>

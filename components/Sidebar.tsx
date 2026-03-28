@@ -69,26 +69,26 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
       )}
 
       <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 sm:w-72 bg-white/50 dark:bg-slate-950/50 backdrop-blur-xl border-r border-border/50 transition-transform duration-300 ease-in-out lg:translate-x-0",
+        "fixed inset-y-0 left-0 z-50 w-64 sm:w-72 glass-card border-r transition-transform duration-300 ease-in-out lg:translate-x-0",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full pt-6 sm:pt-8 pb-4 sm:pb-6 overflow-y-auto">
-          <div className="px-6 sm:px-8 mb-6 sm:mb-10 flex items-center justify-between">
+          <div className="px-6 sm:px-8 mb-6 sm:mb-10 flex items-center justify-between transition-colors">
             <Logo />
             {onClose && (
               <button 
                 onClick={onClose}
-                className="lg:hidden p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg transition-colors"
+                className="lg:hidden p-1.5 text-slate-500 hover:bg-white/10 rounded-lg transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
             )}
           </div>
           
-          <nav className="flex-1 px-3 sm:px-4 space-y-8 sm:space-y-10">
+          <nav className="flex-1 px-3 sm:px-4 space-y-8 sm:space-y-10 font-mono tracking-tight">
           <div>
-            <h3 className="px-3 sm:px-4 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 sm:mb-4">
-              Platform
+            <h3 className="px-3 sm:px-4 text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 sm:mb-4">
+              Platform_Core
             </h3>
             <div className="space-y-1">
               {navigation.map((item) => {
@@ -98,20 +98,22 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      'group flex items-center px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold rounded-xl sm:rounded-2xl transition-all duration-300',
+                      'group flex items-center px-3 sm:px-4 py-2.5 sm:py-3 text-[11px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-300 relative overflow-hidden',
                       isActive
-                        ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                        : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900/50'
+                        ? 'bg-primary/10 text-primary border border-primary/20 glow-primary'
+                        : 'text-slate-500 hover:bg-white/5 hover:text-white border border-transparent'
                     )}
                   >
                     <item.icon
                       className={cn(
                         'mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 transition-colors',
-                        isActive ? 'text-white' : 'text-slate-400 group-hover:text-primary'
+                        isActive ? 'text-primary' : 'text-slate-400 group-hover:text-primary'
                       )}
                     />
                     {item.name}
-                    {isActive && <ChevronRight className="ml-auto h-3.5 w-3.5 sm:h-4 sm:w-4 animate-in slide-in-from-left-2" />}
+                    {isActive && (
+                      <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_var(--color-primary)]" />
+                    )}
                   </Link>
                 );
               })}
@@ -119,8 +121,8 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
           </div>
 
           <div>
-            <h3 className="px-3 sm:px-4 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 sm:mb-4">
-              Resources
+            <h3 className="px-3 sm:px-4 text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 sm:mb-4">
+              Resource_Auth
             </h3>
             <div className="space-y-1">
               {secondaryNavigation.map((item) => {
@@ -130,16 +132,16 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      'group flex items-center px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold rounded-xl sm:rounded-2xl transition-all duration-300',
+                      'group flex items-center px-3 sm:px-4 py-2.5 sm:py-3 text-[11px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all duration-300 border border-transparent',
                       isActive
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-900/50'
+                        ? 'bg-white/10 text-white'
+                        : 'text-slate-500 hover:bg-white/5 hover:text-white'
                     )}
                   >
                     <item.icon
                       className={cn(
                         'mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 transition-colors',
-                        isActive ? 'text-primary' : 'text-slate-400 group-hover:text-primary'
+                        isActive ? 'text-white' : 'text-slate-400 group-hover:text-primary'
                       )}
                     />
                     {item.name}
