@@ -43,7 +43,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getModelMultiplier, getMultiplierLabel } from './multiplier-utils';
+import { getModelMultiplier, getMultiplierLabel, getMultiplierDescription } from './multiplier-utils';
 
 interface ModelStatus {
   id: string;
@@ -52,6 +52,7 @@ interface ModelStatus {
 }
 
 type ModelType = (ChatModel | ImageModel | VideoModel) & { type: 'chat' | 'image' | 'video' };
+type FilteredModelType = ModelType & { isRoleplay: boolean };
 
 // Countdown hook for downtime
 function useCountdown(targetDate?: string) {
@@ -199,7 +200,7 @@ export default function ModelsPage() {
                   model.id.includes('llama') ||
                   model.id.includes('qwen') ||
                   model.id.includes('mistral')
-    })).filter(model => {
+    } as FilteredModelType)).filter(model => {
       const isFree = model.id.endsWith(':free') || !PREMIUM_MODELS.has(model.id);
       
       const matchesSearch = model.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -315,6 +316,41 @@ export default function ModelsPage() {
                 trend={`${usage.remaining} left`}
               />
             )}
+          </div>
+        </div>
+
+        {/* Multiplier Explainer Section */}
+        <div className="mb-8 sm:mb-16 p-5 sm:p-10 rounded-[1.5rem] sm:rounded-[2.5rem] bg-gradient-to-br from-blue-500/5 to-cyan-500/5 dark:from-blue-500/10 dark:to-cyan-500/10 border border-blue-200/30 dark:border-blue-800/30 backdrop-blur-xl animate-in fade-in slide-in-from-top-4 duration-700 delay-100">
+          <div className="flex flex-col md:flex-row items-start gap-6 md:gap-10">
+            <div className="flex-shrink-0">
+              <div className="p-3 sm:p-4 rounded-2xl sm:rounded-[1.5rem] bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400">
+                <TrendingUp className="h-8 w-8 sm:h-10 sm:w-10" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white mb-2 sm:mb-4 tracking-tight">What are Request Multipliers?</h3>
+              <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed mb-4 font-medium">
+                Each model has a <span className="font-bold text-blue-600 dark:text-blue-400">request multiplier</span> that determines how your API quota is consumed. For example:
+              </p>
+              <div className="grid sm:grid-cols-3 gap-3 sm:gap-4">
+                <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-sm">
+                  <div className="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">0.5x Model</div>
+                  <div className="text-lg sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">1 request = 0.5 quota</div>
+                  <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-500 mt-2">Discounted, efficient models</p>
+                </div>
+                <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/50 dark:bg-slate-800/50 border border-blue-200/30 dark:border-blue-800/30 backdrop-blur-sm ring-2 ring-blue-400/30">
+                  <div className="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">1x Model</div>
+                  <div className="text-lg sm:text-2xl font-black text-blue-600 dark:text-blue-400">1 request = 1 quota</div>
+                  <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-500 mt-2">Standard cost models</p>
+                </div>
+                <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-sm">
+                  <div className="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">5x Model</div>
+                  <div className="text-lg sm:text-2xl font-black text-amber-600 dark:text-amber-400">1 request = 5 quota</div>
+                  <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-500 mt-2">Premium, powerful models</p>
+                </div>
+              </div>
+              <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-4 italic">Your daily limit is divided by each model's multiplier. Higher multipliers use quota faster but offer superior capabilities.</p>
+            </div>
           </div>
         </div>
 
@@ -500,20 +536,21 @@ function TabButton({ active, onClick, icon, label }: { active: boolean, onClick:
   );
 }
 
-function ModelCard({ model, status, onClick, index }: { model: any, status: ModelStatus, onClick: () => void, index: number }) {
+function ModelCard({ model, status, onClick, index }: { model: FilteredModelType, status: ModelStatus, onClick: () => void, index: number }) {
   const countdown = useCountdown(model.downtimeUntil);
   const isFree = model.id.endsWith(':free') || !PREMIUM_MODELS.has(model.id);
+  const isRoleplay = model.isRoleplay;
   
-  const typeColors = {
-    chat: model.isRoleplay 
+  const typeColors: Record<'chat' | 'image' | 'video', string> = {
+    chat: isRoleplay 
       ? "from-pink-500/20 to-purple-500/20 text-pink-600 dark:text-pink-400 border-pink-200/50 dark:border-pink-800/50 shadow-pink-500/10" 
       : "from-blue-500/20 to-indigo-500/20 text-blue-600 dark:text-blue-400 border-blue-200/50 dark:border-blue-800/50 shadow-blue-500/10",
     image: "from-purple-500/20 to-pink-500/20 text-purple-600 dark:text-purple-400 border-purple-200/50 dark:border-purple-800/50 shadow-purple-500/10",
     video: "from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 border-amber-200/50 dark:border-amber-800/50 shadow-amber-500/10"
   };
 
-  const typeIcons = {
-    chat: model.isRoleplay ? <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 animate-pulse" /> : <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />,
+  const typeIcons: Record<'chat' | 'image' | 'video', React.ReactNode> = {
+    chat: isRoleplay ? <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 animate-pulse" /> : <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />,
     image: <ImageIcon className="h-5 w-5 sm:h-6 sm:w-6" />,
     video: <Video className="h-5 w-5 sm:h-6 sm:w-6" />
   };
@@ -627,12 +664,12 @@ function ModelCard({ model, status, onClick, index }: { model: any, status: Mode
       >
         <div className={cn(
           "p-2.5 rounded-xl bg-gradient-to-br shrink-0",
-          model.type === 'chat' && (model as any).isRoleplay ? "from-pink-500 to-purple-600 text-white" :
+          model.type === 'chat' && isRoleplay ? "from-pink-500 to-purple-600 text-white" :
           model.type === 'chat' ? "from-blue-500 to-indigo-600 text-white" :
           model.type === 'image' ? "from-purple-500 to-pink-600 text-white" :
           "from-amber-500 to-orange-600 text-white"
         )}>
-          {(model as any).isRoleplay ? <Sparkles className="h-5 w-5 animate-pulse" /> :
+          {isRoleplay ? <Sparkles className="h-5 w-5 animate-pulse" /> :
            React.cloneElement(typeIcons[model.type] as React.ReactElement, { className: "h-5 w-5" })}
         </div>
         
@@ -676,11 +713,12 @@ function ModelCard({ model, status, onClick, index }: { model: any, status: Mode
 }
 
 
-function ModelListItem({ model, status, onClick, index }: { model: any, status: ModelStatus, onClick: () => void, index: number }) {
+function ModelListItem({ model, status, onClick, index }: { model: FilteredModelType, status: ModelStatus, onClick: () => void, index: number }) {
   const isFree = model.id.endsWith(':free') || !PREMIUM_MODELS.has(model.id);
+  const isRoleplay = model.isRoleplay;
   
-  const typeIcons = {
-    chat: model.isRoleplay ? <Sparkles className="h-4 w-4 animate-pulse" /> : <MessageSquare className="h-4 w-4" />,
+  const typeIcons: Record<'chat' | 'image' | 'video', React.ReactNode> = {
+    chat: isRoleplay ? <Sparkles className="h-4 w-4 animate-pulse" /> : <MessageSquare className="h-4 w-4" />,
     image: <ImageIcon className="h-4 w-4" />,
     video: <Video className="h-4 w-4" />
   };
@@ -693,7 +731,7 @@ function ModelListItem({ model, status, onClick, index }: { model: any, status: 
     >
       <div className={cn(
         "p-3.5 rounded-2xl bg-gradient-to-br shrink-0 shadow-lg transition-transform group-hover:scale-110 duration-500",
-        model.type === 'chat' && model.isRoleplay ? "from-pink-500 to-purple-600 text-white shadow-purple-500/20" :
+        model.type === 'chat' && isRoleplay ? "from-pink-500 to-purple-600 text-white shadow-purple-500/20" :
         model.type === 'chat' ? "from-blue-500 to-indigo-600 text-white shadow-blue-500/20" :
         model.type === 'image' ? "from-purple-500 to-pink-600 text-white shadow-purple-500/20" :
         "from-amber-500 to-orange-600 text-white shadow-amber-500/20"
@@ -907,6 +945,25 @@ function ModelDetailsModal({ model, status, onClose }: { model: ModelType, statu
 
           {details ? (
             <div className="space-y-10">
+              {/* Request Multiplier */}
+              <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600">
+                    <TrendingUp className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Request Multiplier</h3>
+                </div>
+                <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-500/5 to-cyan-500/5 dark:from-blue-500/10 dark:to-cyan-500/10 border border-blue-200/30 dark:border-blue-800/30 backdrop-blur-sm">
+                  <div className="flex items-baseline gap-4 mb-4">
+                    <span className="text-4xl sm:text-5xl font-black text-blue-600 dark:text-blue-400">{getMultiplierLabel(getModelMultiplier(model.id))}</span>
+                    <span className="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">per request</span>
+                  </div>
+                  <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                    {getMultiplierDescription(getModelMultiplier(model.id))}
+                  </p>
+                </div>
+              </section>
+
               {/* Strengths */}
               {details.strengths && details.strengths.length > 0 && (
                 <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
