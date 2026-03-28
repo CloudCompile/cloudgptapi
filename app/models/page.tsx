@@ -31,7 +31,13 @@ import {
   TrendingDown,
   Target,
   Settings,
-  Crown
+  Crown,
+  Heart,
+  Sparkles,
+  BookOpen,
+  Send,
+  User,
+  Coffee
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -83,7 +89,7 @@ const ALL_MODELS: ModelType[] = [
 export default function ModelsPage() {
   const [statuses, setStatuses] = useState<Record<string, ModelStatus>>({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | 'chat' | 'image' | 'video' | 'free' | 'premium'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'chat' | 'image' | 'video' | 'free' | 'premium' | 'roleplay'>('roleplay');
   const [selectedProvider, setSelectedProvider] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedModel, setSelectedModel] = useState<ModelType | null>(null);
@@ -180,8 +186,17 @@ export default function ModelsPage() {
   }, [fetchStatuses, fetchUsage]);
 
   const filteredModels = useMemo(() => {
-    return ALL_MODELS.filter(model => {
+    return ALL_MODELS.map(model => ({
+      ...model,
+      isRoleplay: model.id.includes('kimi') || 
+                  model.id.includes('glm') || 
+                  model.id.includes('deepseek') || 
+                  model.id.includes('llama') ||
+                  model.id.includes('qwen') ||
+                  model.id.includes('mistral')
+    })).filter(model => {
       const isFree = model.id.endsWith(':free') || !PREMIUM_MODELS.has(model.id);
+      
       const matchesSearch = model.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            model.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            model.provider.toLowerCase().includes(searchQuery.toLowerCase());
@@ -191,13 +206,20 @@ export default function ModelsPage() {
         matchesTab = isFree;
       } else if (activeTab === 'premium') {
         matchesTab = !isFree;
+      } else if (activeTab === 'roleplay') {
+        matchesTab = model.isRoleplay && model.type === 'chat';
       }
 
       const matchesProvider = selectedProvider === 'all' || model.provider.toLowerCase() === selectedProvider;
       
       return matchesSearch && matchesTab && matchesProvider;
     }).sort((a, b) => {
-      // First sort by Premium status (Premium first)
+      // First sort by Roleplay status (Roleplay first)
+      if (a.isRoleplay !== b.isRoleplay) {
+        return a.isRoleplay ? -1 : 1;
+      }
+
+      // Then sort by Premium status (Premium first)
       const isPremiumA = !((a.id.endsWith(':free') || !PREMIUM_MODELS.has(a.id)));
       const isPremiumB = !((b.id.endsWith(':free') || !PREMIUM_MODELS.has(b.id)));
       
@@ -255,15 +277,15 @@ export default function ModelsPage() {
           <div className="text-left">
             <div className="flex items-center justify-start gap-2 text-primary font-bold mb-2 sm:mb-4">
               <div className="p-1 sm:p-1.5 rounded-lg sm:rounded-xl bg-primary/10 backdrop-blur-md border border-primary/20">
-                <Activity className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
+                <Heart className="h-3.5 w-3.5 sm:h-5 sm:w-5 fill-current" />
               </div>
-              <span className="tracking-[0.2em] uppercase text-[9px] sm:text-xs">System Intelligence</span>
+              <span className="tracking-[0.2em] uppercase text-[9px] sm:text-xs">Creative Intelligence</span>
             </div>
             <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-slate-900 dark:text-white mb-2 sm:mb-6 tracking-tight leading-[0.9]">
-              Model <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-pink-500">Monitor</span>
+              The Model <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-pink-500">Multiverse</span>
             </h1>
             <p className="text-sm sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed font-medium hidden sm:block">
-              Real-time performance metrics and availability status for our next-generation multi-modal AI infrastructure.
+              Choose your partner for creative writing, storytelling, and complex roleplay. Our models are optimized for lengthy histories and deep character immersion.
             </p>
           </div>
           
@@ -331,12 +353,11 @@ export default function ModelsPage() {
             </div>
             
             <div className="flex items-center gap-1 p-1 sm:p-2 bg-slate-100/50 dark:bg-slate-800/50 rounded-[1rem] sm:rounded-[2rem] w-full md:w-auto overflow-x-auto no-scrollbar">
+              <TabButton active={activeTab === 'roleplay'} onClick={() => setActiveTab('roleplay')} icon={<Sparkles className="h-3.5 w-3.5" />} label="Roleplay" />
               <TabButton active={activeTab === 'all'} onClick={() => setActiveTab('all')} icon={<Globe className="h-3.5 w-3.5" />} label="All" />
               <TabButton active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} icon={<MessageSquare className="h-3.5 w-3.5" />} label="Chat" />
               <TabButton active={activeTab === 'image'} onClick={() => setActiveTab('image')} icon={<ImageIcon className="h-3.5 w-3.5" />} label="Image" />
-              <TabButton active={activeTab === 'video'} onClick={() => setActiveTab('video')} icon={<Video className="h-3.5 w-3.5" />} label="Video" />
               <TabButton active={activeTab === 'free'} onClick={() => setActiveTab('free')} icon={<Zap className="h-3.5 w-3.5" />} label="Free" />
-              <TabButton active={activeTab === 'premium'} onClick={() => setActiveTab('premium')} icon={<Crown className="h-3.5 w-3.5" />} label="Premium" />
             </div>
           </div>
 
@@ -438,18 +459,20 @@ function TabButton({ active, onClick, icon, label }: { active: boolean, onClick:
   );
 }
 
-function ModelCard({ model, status, onClick, index }: { model: ModelType, status: ModelStatus, onClick: () => void, index: number }) {
+function ModelCard({ model, status, onClick, index }: { model: any, status: ModelStatus, onClick: () => void, index: number }) {
   const countdown = useCountdown(model.downtimeUntil);
   const isFree = model.id.endsWith(':free') || !PREMIUM_MODELS.has(model.id);
   
   const typeColors = {
-    chat: "from-blue-500/20 to-indigo-500/20 text-blue-600 dark:text-blue-400 border-blue-200/50 dark:border-blue-800/50 shadow-blue-500/10",
+    chat: model.isRoleplay 
+      ? "from-pink-500/20 to-purple-500/20 text-pink-600 dark:text-pink-400 border-pink-200/50 dark:border-pink-800/50 shadow-pink-500/10" 
+      : "from-blue-500/20 to-indigo-500/20 text-blue-600 dark:text-blue-400 border-blue-200/50 dark:border-blue-800/50 shadow-blue-500/10",
     image: "from-purple-500/20 to-pink-500/20 text-purple-600 dark:text-purple-400 border-purple-200/50 dark:border-purple-800/50 shadow-purple-500/10",
     video: "from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 border-amber-200/50 dark:border-amber-800/50 shadow-amber-500/10"
   };
 
   const typeIcons = {
-    chat: <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />,
+    chat: model.isRoleplay ? <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 animate-pulse" /> : <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />,
     image: <ImageIcon className="h-5 w-5 sm:h-6 sm:w-6" />,
     video: <Video className="h-5 w-5 sm:h-6 sm:w-6" />
   };
@@ -556,13 +579,17 @@ function ModelCard({ model, status, onClick, index }: { model: ModelType, status
       {/* Mobile List Item */}
       <div 
         onClick={onClick}
-        className="sm:hidden flex items-center gap-3 p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 active:scale-[0.98] transition-all shadow-sm"
+        className="sm:hidden flex items-center gap-3 p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 active:scale-[0.98] transition-all shadow-sm group"
       >
         <div className={cn(
           "p-2.5 rounded-xl bg-gradient-to-br shrink-0",
-          typeColors[model.type]
+          model.type === 'chat' && (model as any).isRoleplay ? "from-pink-500 to-purple-600 text-white" :
+          model.type === 'chat' ? "from-blue-500 to-indigo-600 text-white" :
+          model.type === 'image' ? "from-purple-500 to-pink-600 text-white" :
+          "from-amber-500 to-orange-600 text-white"
         )}>
-          {React.cloneElement(typeIcons[model.type] as React.ReactElement, { className: "h-5 w-5" })}
+          {(model as any).isRoleplay ? <Sparkles className="h-5 w-5 animate-pulse" /> :
+           React.cloneElement(typeIcons[model.type] as React.ReactElement, { className: "h-5 w-5" })}
         </div>
         
         <div className="flex-1 min-w-0">
@@ -648,12 +675,14 @@ function ModelDetailsModal({ model, status, onClose }: { model: ModelType, statu
           
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-8 text-center sm:text-left">
             <div className={cn(
-              "p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] shadow-2xl shrink-0",
-              model.type === 'chat' ? "bg-blue-500 text-white shadow-blue-500/20" :
-              model.type === 'image' ? "bg-purple-500 text-white shadow-purple-500/20" :
-              "bg-amber-500 text-white shadow-amber-500/20"
+              "p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] shadow-2xl shrink-0 transition-transform hover:scale-105 duration-500",
+              model.type === 'chat' && (model as any).isRoleplay ? "bg-gradient-to-br from-pink-500 to-purple-600 text-white shadow-purple-500/40" :
+              model.type === 'chat' ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-blue-500/40" :
+              model.type === 'image' ? "bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-purple-500/40" :
+              "bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-amber-500/40"
             )}>
-              {model.type === 'chat' ? <MessageSquare className="h-6 w-6 sm:h-10 sm:w-10" /> :
+              {(model as any).isRoleplay ? <Sparkles className="h-6 w-6 sm:h-10 sm:w-10 animate-pulse" /> :
+               model.type === 'chat' ? <MessageSquare className="h-6 w-6 sm:h-10 sm:w-10" /> :
                model.type === 'image' ? <ImageIcon className="h-6 w-6 sm:h-10 sm:w-10" /> :
                <Video className="h-6 w-6 sm:h-10 sm:w-10" />}
             </div>
