@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { jwtDecode } from 'jwt-decode';
 import { syncUser } from '@/lib/admin-actions';
 
@@ -54,33 +53,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(new URL('/login?error=no_access_token', req.url));
     }
 
-    // Store tokens in secure httpOnly cookies
-    const cookieStore = await cookies();
-    
-    cookieStore.set('kinde_access_token', access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 3600, // 1 hour
-    });
-
-    if (refresh_token) {
-      cookieStore.set('kinde_refresh_token', refresh_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 86400 * 7, // 7 days
-      });
-    }
-
-    if (id_token) {
-      cookieStore.set('kinde_id_token', id_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-      });
-    }
-
     // Sync/migrate user profile in Supabase (handles Clerk → Kinde ID migration by email)
     try {
       const decoded: any = jwtDecode(access_token);
@@ -104,7 +76,7 @@ export async function GET(req: NextRequest) {
       console.error('[Callback] Failed to sync user profile:', syncError);
     }
 
-    // Get redirect destination from state parameter (encoded in base64 or similar)
+    // Get redirect destination from state parameter (encoded in base64)
     let redirectUrl = '/dashboard';
     if (state) {
       try {
@@ -114,7 +86,38 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    return NextResponse.redirect(new URL(redirectUrl, req.url));
+    const isProduction = process.env.NODE_ENV === 'production';
+    const response = NextResponse.redirect(new URL(redirectUrl, req.url));
+
+    response.cookies.set('kinde_access_token', access_token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'lax',
+      maxAge: 3600, // 1 hour
+      path: '/',
+    });
+
+    if (refresh_token) {
+      response.cookies.set('kinde_refresh_token', refresh_token, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: 'lax',
+        maxAge: 86400 * 7, // 7 days
+        path: '/',
+      });
+    }
+
+    if (id_token) {
+      response.cookies.set('kinde_id_token', id_token, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: 'lax',
+        maxAge: 3600,
+        path: '/',
+      });
+    }
+
+    return response;
   } catch (error) {
     console.error('Callback error:', error);
     return NextResponse.redirect(new URL('/login?error=callback_error', req.url));
