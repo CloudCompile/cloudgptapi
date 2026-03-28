@@ -345,8 +345,7 @@ export const PREMIUM_MODELS = new Set([
   'openai-large', // OpenAI GPT-5.2
   'perplexity-reasoning', // Perplexity Sonar Reasoning
   'perplexity-fast', // Perplexity Sonar
-  // Kivest models
-  ...KIVEST_CHAT_MODELS.map(model => model.id),
+  // Kivest models (Excluding Kivest models from premium for roleplayers)
 ]);
 
 // Available image models

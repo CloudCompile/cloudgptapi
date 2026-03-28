@@ -16,10 +16,10 @@ const hashString = (str: string, seed = 0) => {
   return (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0');
 };
 
-export const MAX_MESSAGE_LENGTH = 2000000; // 2MB per message (~1.5M tokens)
-export const MAX_TOTAL_LENGTH = 10000000; // 10MB total for all messages
-export const MAX_MESSAGES_COUNT = 500;
-export const PROVIDER_TIMEOUT_MS = 180000; // 180 seconds (3 minutes) for slow models like Opus
+export const MAX_MESSAGE_LENGTH = 10000000; // 10MB per message (Roleplay friendly)
+export const MAX_TOTAL_LENGTH = 50000000; // 50MB total for all messages (Long context RP)
+export const MAX_MESSAGES_COUNT = 2000; // More history for roleplayers
+export const PROVIDER_TIMEOUT_MS = 300000; // 5 minutes (RP models can be slow)
 
 /**
  * Generate a stable hash for a character based on its metadata.

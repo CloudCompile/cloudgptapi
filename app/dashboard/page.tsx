@@ -25,7 +25,8 @@ import {
   Globe,
   Lock,
   Zap,
-  BookOpen
+  BookOpen,
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -55,10 +56,36 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [providerStatuses, setProviderStatuses] = useState<any>({});
+  const [loadingStatus, setLoadingStatus] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     fetchKeys();
+    fetchProviderStatuses();
+
+    // Auto-refresh status every 30 seconds
+    const interval = setInterval(fetchProviderStatuses, 30000);
+    return () => clearInterval(interval);
   }, []);
+
+  async function fetchProviderStatuses() {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    setLoadingStatus(true);
+    try {
+      const response = await fetch('/api/status');
+      if (response.ok) {
+        const data = await response.json();
+        setProviderStatuses(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch provider status');
+    } finally {
+      setLoadingStatus(false);
+      setTimeout(() => setIsRefreshing(false), 2000);
+    }
+  }
 
   async function fetchKeys() {
     setLoading(true);
@@ -182,13 +209,17 @@ export default function Dashboard() {
           <p className="text-slate-500 dark:text-slate-400 mt-1 sm:mt-2 font-medium text-xs sm:text-sm md:text-base">Create and manage access keys for your applications.</p>
         </div>
         <div className="flex gap-3">
-          <div className="flex items-center gap-3 sm:gap-4 bg-white dark:bg-slate-900 border border-border p-2.5 sm:p-4 rounded-xl sm:rounded-2xl shadow-sm w-full sm:w-auto">
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
-              <Activity className="h-4 w-4 sm:h-5 sm:w-5" />
+          <div className={`flex items-center gap-3 sm:gap-4 bg-white dark:bg-slate-900 border border-border p-2.5 sm:p-4 rounded-xl sm:rounded-2xl shadow-sm w-full sm:w-auto transition-all duration-500 ${loadingStatus ? 'opacity-50' : 'opacity-100'}`}>
+            <div className={`h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 ${Object.values(providerStatuses).some((s: any) => s.status === 'down') ? 'bg-amber-500/10 text-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.2)]' : 'bg-emerald-500/10 text-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.2)]'}`}>
+              <Activity className={`h-4 w-4 sm:h-5 sm:w-5 ${!loadingStatus && 'animate-pulse'}`} />
             </div>
             <div>
-              <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-slate-400 font-black">Status</div>
-              <div className="text-xs sm:text-sm font-bold">Systems Operational</div>
+              <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-slate-400 font-black">
+                {loadingStatus ? 'FETCHING_METRICS...' : 'NETWORK_HEALTH'}
+              </div>
+              <div className="text-xs sm:text-sm font-bold">
+                {loadingStatus ? 'SYNCING...' : (Object.values(providerStatuses).some((s: any) => s.status === 'down') ? 'PARTIAL_OUTAGE' : 'ALL_SYSTEMS_LIVE')}
+              </div>
             </div>
           </div>
         </div>
@@ -228,7 +259,17 @@ export default function Dashboard() {
                           <Key className="h-4 w-4 sm:h-6 sm:w-6" />
                         </div>
                         <div className="min-w-0">
-                          <h3 className="font-black text-sm sm:text-lg tracking-tight truncate">{key.name}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-black text-sm sm:text-lg tracking-tight truncate">{key.name}</h3>
+                            <Link 
+                              href={`/dashboard/plugins/${key.id}`}
+                              className="p-1 px-2 flex items-center gap-1.5 rounded-md bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-all shadow-none shrink-0 border border-emerald-500/10 group/zap"
+                              title="Configure Plugins"
+                            >
+                              <Zap className="h-3 w-3 sm:h-3.5 sm:w-3.5 fill-current group-hover/zap:scale-110 transition-transform" />
+                              <span className="text-[9px] font-black uppercase tracking-widest hidden sm:inline">Active</span>
+                            </Link>
+                          </div>
                           <div className="flex items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
                             <code className="text-[9px] sm:text-[10px] font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 sm:px-2 py-0.5 rounded uppercase tracking-wider truncate max-w-[80px] xs:max-w-[120px] sm:max-w-none">
                               {key.keyPreview}
@@ -324,22 +365,39 @@ export default function Dashboard() {
           </div>
 
           <div className="bg-white dark:bg-slate-900 border border-border rounded-2xl sm:rounded-[2rem] p-6 sm:p-8">
-            <h3 className="text-[10px] sm:text-sm font-black uppercase tracking-[0.2em] text-slate-400 mb-4 sm:mb-6">Security Tips</h3>
-            <ul className="space-y-3 sm:space-y-4">
-              <li className="flex gap-3">
-                <div className="h-4 w-4 sm:h-5 sm:w-5 rounded bg-amber-500/10 flex items-center justify-center text-amber-500 shrink-0">
-                  <Lock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                </div>
-                <p className="text-[10px] sm:text-xs font-medium text-slate-500 leading-relaxed">Never share your API keys or expose them in client-side code.</p>
-              </li>
-              <li className="flex gap-3">
-                <div className="h-4 w-4 sm:h-5 sm:w-5 rounded bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                  <Shield className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                </div>
-                <p className="text-[10px] sm:text-xs font-medium text-slate-500 leading-relaxed">Rotate your keys regularly to maintain high security standards.</p>
-              </li>
-            </ul>
+            <h3 className="text-[10px] sm:text-sm font-black uppercase tracking-[0.2em] text-slate-400 mb-4 sm:mb-6 flex items-center justify-between">
+              Live Providers Status
+              <span className={`w-2 h-2 rounded-full ${loadingStatus ? 'bg-slate-400 animate-pulse' : 'bg-emerald-500'}`} />
+            </h3>
+            <div className="space-y-4">
+              {['pollinations', 'openrouter', 'poe', 'github', 'liz', 'kivest'].map((provider) => {
+                const status = providerStatuses[provider];
+                const isOnline = status?.status === 'online';
+                return (
+                  <div key={provider} className="flex items-center justify-between group/p">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]'}`} />
+                      <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300">
+                        {provider}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {status?.latency && (
+                        <span className="text-[10px] font-mono text-slate-500 opacity-0 group-hover/p:opacity-100 transition-opacity">
+                          {status.latency}ms
+                        </span>
+                      )}
+                      <span className={`text-[10px] font-black uppercase px-1.5 py-0.5 rounded border ${isOnline ? 'border-emerald-500/10 text-emerald-500 bg-emerald-500/5' : 'border-amber-500/10 text-amber-500 bg-amber-500/5'}`}>
+                        {isOnline ? 'LIVE' : 'DOWN'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
+
+          <div className="bg-white dark:bg-slate-900 border border-border rounded-2xl sm:rounded-[2rem] p-6 sm:p-8">
         </div>
       </div>
     </div>

@@ -238,7 +238,15 @@ export default function PluginSettingsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8 sm:space-y-10 animate-in fade-in duration-700">
+      {/* Breadcrumbs */}
+      <nav className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 overflow-hidden">
+        <Link href="/dashboard" className="hover:text-primary transition-colors whitespace-nowrap">Dashboard</Link>
+        <ChevronRight className="h-3 w-3 shrink-0" />
+        <span className="text-slate-300 whitespace-nowrap">API Key Plugins</span>
+        <ChevronRight className="h-3 w-3 shrink-0" />
+        <span className="text-primary truncate max-w-[150px]">{id}</span>
+      </nav>
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
         <div className="space-y-1">

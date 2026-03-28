@@ -45,6 +45,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     isSystemRequest, lastMessage
   } = options;
 
+  const startTime = Date.now();
   let providerUrl: string;
   let providerApiKey: string | undefined;
 
@@ -357,6 +358,9 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       'Connection': 'keep-alive',
       'X-Request-Id': requestId,
       'X-Accel-Buffering': 'no',
+      'X-Vetra-Provider': model.provider || 'unknown',
+      'X-Vetra-Weight': String(model.usageWeight || 1),
+    };
     };
 
     const kickStream = new ReadableStream({
@@ -490,6 +494,9 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
       'X-DailyLimit-Limit': String(dailyLimitInfo.limit),
       'X-Request-Id': requestId,
+      'X-Vetra-Latency': `${Date.now() - startTime}ms`,
+      'X-Vetra-Provider': model.provider || 'unknown',
+      'X-Vetra-Weight': String(model.usageWeight || 1),
     },
   });
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PROVIDER_URLS } from '@/lib/chat-utils';
+import { PROVIDER_URLS } from '@/lib/providers';
 import { getPollinationsApiKey, getPoeApiKey, getLizApiKey, getKivestApiKey } from '@/lib/utils';
 
 // Cache status for 1 minute to avoid hammering providers
@@ -8,36 +8,52 @@ let statusCache: {
   timestamp: number;
 } | null = null;
 
-const CACHE_DURATION = 60 * 1000; // 1 minute
+const CACHE_DURATION = 15 * 1000; // 15 seconds for more "live" feeling
 
 async function checkProviderStatus(name: string, url: string, apiKey?: string) {
   const start = Date.now();
   try {
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = {
+      'User-Agent': 'Vetra-Status-Monitor/1.0',
+      'Accept': 'application/json'
+    };
+    
     if (apiKey) {
-      headers['Authorization'] = `Bearer ${apiKey}`;
+      if (name === 'poe' || name === 'kivest' || name === 'liz') {
+        headers['Authorization'] = `Bearer ${apiKey}`;
+      } else if (name === 'pollinations') {
+        headers['Authorization'] = `Bearer ${apiKey}`;
+      }
     }
 
-    // Use a lightweight GET request to check if provider is up
-    // Most providers have a /v1/models or similar endpoint that doesn't cost tokens
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+
     const response = await fetch(url, {
       method: 'GET',
       headers,
-      next: { revalidate: 30 } // Cache for 30 seconds at Next.js level
+      signal: controller.signal,
+      cache: 'no-store'
     });
-
+    
+    clearTimeout(timeoutId);
     const latency = Date.now() - start;
     
+    // Some providers might return 401/403 if the models list is protected but the service is UP
+    // We treat 200, 401, 403 as "online" (the service is responding)
+    const isOnline = response.ok || response.status === 401 || response.status === 403;
+    
     return {
-      status: response.ok ? 'online' : 'offline',
+      status: isOnline ? 'online' : 'down',
       latency,
-      statusCode: response.status
+      statusCode: response.status,
+      lastChecked: new Date().toISOString()
     };
   } catch (err) {
     return {
-      status: 'offline',
+      status: 'down',
       latency: Date.now() - start,
-      error: err instanceof Error ? err.message : 'Unknown error'
+      error: err instanceof Error ? err.name : 'Unknown'
     };
   }
 }

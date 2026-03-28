@@ -30,7 +30,6 @@ import { Logo } from './Logo';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Playground', href: '/playground', icon: Zap },
-  { name: 'Plugins', href: '/dashboard/plugins', icon: Code },
   { name: 'Models', href: '/models', icon: Rocket },
   { name: 'Documentation', href: '/docs', icon: BookOpen },
 ];
