@@ -1,11 +1,41 @@
-import { Tag, Plus, Trash2, Info, CheckCircle, Percent, DollarSign, Clock } from 'lucide-react';
+import { Tag, Plus, Trash2, Info, CheckCircle, Percent, DollarSign, Clock, X } from 'lucide-react';
 import { supabaseAdmin } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminPromoCodesPage() {
+async function createPromoCode(formData: FormData) {
+  'use server';
+  
+  const code = formData.get('code') as string;
+  const discountAmount = parseFloat(formData.get('discount_amount') as string);
+  const discountType = formData.get('discount_type') as 'percent' | 'fixed';
+  const usageLimit = formData.get('usage_limit') ? parseInt(formData.get('usage_limit') as string) : null;
+  const expiresAt = formData.get('expires_at') as string || null;
+
+  if (!code || isNaN(discountAmount)) return;
+
+  try {
+    await supabaseAdmin.from('promo_codes').insert({
+      code: code.toUpperCase(),
+      discount_amount: discountAmount,
+      discount_type: discountType,
+      usage_limit: usageLimit,
+      expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
+    });
+  } catch (e) {
+    console.error('Error creating promo code', e);
+  }
+  revalidatePath('/admin/promo-codes');
+}
+
+export default async function AdminPromoCodesPage({
+  searchParams,
+}: {
+  searchParams: { showCreate?: string };
+}) {
+  const showCreateDialog = searchParams?.showCreate === 'true';
   
   const fetchPromoCodes = async () => {
     try {
@@ -48,9 +78,15 @@ export default async function AdminPromoCodesPage() {
         </div>
         <div>
           {dbReady && (
-            <button className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors shadow-sm">
-              <Plus className="h-4 w-4" /> Create Promo Code
-            </button>
+            <form action="">
+              <input type="hidden" name="showCreate" value="true" />
+              <button 
+                type="submit"
+                className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors shadow-sm"
+              >
+                <Plus className="h-4 w-4" /> Create Promo Code
+              </button>
+            </form>
           )}
         </div>
       </div>
@@ -61,6 +97,91 @@ export default async function AdminPromoCodesPage() {
           <div>
             <h3 className="font-bold text-lg mb-1">Setup Needed</h3>
             <p className="text-sm">The <code>promo_codes</code> table in Supabase might not exist in your database schema yet. To use this feature natively, create a table with <code>code</code>, <code>discount_amount</code>, <code>discount_type</code> (percent/fixed), <code>usage_limit</code>, and <code>expires_at</code> columns.</p>
+          </div>
+        </div>
+      )}
+
+      {showCreateDialog && dbReady && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div className="flex justify-between items-center p-5 border-b border-slate-200 dark:border-slate-800">
+              <h2 className="font-bold text-lg">Create Promo Code</h2>
+              <form action="">
+                <button type="submit" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                  <X className="h-5 w-5" />
+                </button>
+              </form>
+            </div>
+            
+            <form action={createPromoCode} className="p-5 flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Code</label>
+                <input 
+                  type="text" 
+                  name="code" 
+                  required 
+                  placeholder="e.g. SUMMER2026"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  style={{ textTransform: 'uppercase' }}
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium mb-1.5">Discount Amount</label>
+                  <input 
+                    type="number" 
+                    name="discount_amount" 
+                    required 
+                    min="0"
+                    step="0.01"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+                <div className="w-1/3">
+                  <label className="block text-sm font-medium mb-1.5">Type</label>
+                  <select 
+                    name="discount_type"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  >
+                    <option value="percent">% Percent</option>
+                    <option value="fixed">$ Fixed</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium mb-1.5">Usage Limit <span className="text-slate-500 font-normal">(Optional)</span></label>
+                  <input 
+                    type="number" 
+                    name="usage_limit" 
+                    min="1"
+                    placeholder="e.g. 100"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium mb-1.5">Expires At <span className="text-slate-500 font-normal">(Optional)</span></label>
+                  <input 
+                    type="date" 
+                    name="expires_at" 
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 flex gap-3 justify-end">
+                <form action="">
+                  <button type="submit" className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                    Cancel
+                  </button>
+                </form>
+                <button type="submit" className="px-5 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 transition-colors shadow-sm">
+                  Create Code
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
