@@ -37,7 +37,10 @@ import {
   BookOpen,
   Send,
   User,
-  Coffee
+  Coffee,
+  LayoutGrid,
+  List,
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -94,6 +97,7 @@ export default function ModelsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedModel, setSelectedModel] = useState<ModelType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [usage, setUsage] = useState<{
     plan: string;
     limit: number;
@@ -359,6 +363,27 @@ export default function ModelsPage() {
               <TabButton active={activeTab === 'image'} onClick={() => setActiveTab('image')} icon={<ImageIcon className="h-3.5 w-3.5" />} label="Image" />
               <TabButton active={activeTab === 'free'} onClick={() => setActiveTab('free')} icon={<Zap className="h-3.5 w-3.5" />} label="Free" />
             </div>
+
+            <div className="flex items-center gap-1 p-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl sm:rounded-2xl ml-auto border border-white/10 dark:border-slate-800/30">
+              <button 
+                onClick={() => setViewMode('grid')}
+                className={cn(
+                  "p-2 rounded-lg transition-all",
+                  viewMode === 'grid' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                )}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+              <button 
+                onClick={() => setViewMode('list')}
+                className={cn(
+                  "p-2 rounded-lg transition-all",
+                  viewMode === 'list' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                )}
+              >
+                <List className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           {/* Provider Quick Filter */}
@@ -381,16 +406,31 @@ export default function ModelsPage() {
           </div>
         </div>
 
-        {/* Models Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+        {/* Models Grid/List */}
+        <div className={cn(
+          "animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300",
+          viewMode === 'grid' 
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
+            : "flex flex-col gap-3"
+        )}>
           {filteredModels.map((model, i) => (
-            <ModelCard 
-              key={model.id} 
-              model={model} 
-              status={statuses[model.id] || { id: model.id, status: 'checking' }} 
-              onClick={() => handleModelClick(model)}
-              index={i}
-            />
+            viewMode === 'grid' ? (
+              <ModelCard 
+                key={model.id} 
+                model={model} 
+                status={statuses[model.id] || { id: model.id, status: 'checking' }} 
+                onClick={() => handleModelClick(model)}
+                index={i}
+              />
+            ) : (
+              <ModelListItem
+                key={model.id}
+                model={model}
+                status={statuses[model.id] || { id: model.id, status: 'checking' }}
+                onClick={() => handleModelClick(model)}
+                index={i}
+              />
+            )
           ))}
           
           {filteredModels.length === 0 && (
@@ -625,6 +665,88 @@ function ModelCard({ model, status, onClick, index }: { model: any, status: Mode
         </div>
       </div>
     </>
+  );
+}
+
+
+function ModelListItem({ model, status, onClick, index }: { model: any, status: ModelStatus, onClick: () => void, index: number }) {
+  const isFree = model.id.endsWith(':free') || !PREMIUM_MODELS.has(model.id);
+  
+  const typeIcons = {
+    chat: model.isRoleplay ? <Sparkles className="h-4 w-4 animate-pulse" /> : <MessageSquare className="h-4 w-4" />,
+    image: <ImageIcon className="h-4 w-4" />,
+    video: <Video className="h-4 w-4" />
+  };
+
+  return (
+    <div 
+      onClick={onClick}
+      className="group flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5 rounded-3xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 hover:border-primary/40 hover:bg-white/80 dark:hover:bg-slate-900/80 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 animate-in slide-in-from-left-4 fade-in"
+      style={{ animationDelay: `${index * 30}ms` }}
+    >
+      <div className={cn(
+        "p-3.5 rounded-2xl bg-gradient-to-br shrink-0 shadow-lg transition-transform group-hover:scale-110 duration-500",
+        model.type === 'chat' && model.isRoleplay ? "from-pink-500 to-purple-600 text-white shadow-pink-500/20" :
+        model.type === 'chat' ? "from-blue-500 to-indigo-600 text-white shadow-blue-500/20" :
+        model.type === 'image' ? "from-purple-500 to-pink-600 text-white shadow-purple-500/20" :
+        "from-amber-500 to-orange-600 text-white shadow-amber-500/20"
+      )}>
+        {typeIcons[model.type]}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1">
+          <h3 className="text-lg font-black text-slate-900 dark:text-white truncate tracking-tight group-hover:text-primary transition-colors">
+            {model.name}
+          </h3>
+          <div className="flex items-center gap-2">
+            {isFree ? (
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest border border-emerald-500/10">Free</span>
+            ) : (
+              <span className="px-2 py-0.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest border border-amber-500/10">Premium</span>
+            )}
+            <span className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">{model.provider}</span>
+          </div>
+        </div>
+        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-1 font-medium group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
+          {model.description || `High-performance ${model.type} model powered by ${model.provider}.`}
+        </p>
+      </div>
+
+      <div className="flex items-center gap-4 sm:gap-6 sm:ml-4 border-t sm:border-t-0 border-slate-100 dark:border-slate-800/50 pt-3 sm:pt-0">
+        <div className="flex flex-col items-start sm:items-end min-w-[80px]">
+          <span className="text-[9px] uppercase text-slate-400 dark:text-slate-500 font-black tracking-[0.2em] mb-0.5">Latency</span>
+          <div className="flex items-center gap-1.5 text-xs font-mono font-black text-slate-900 dark:text-white">
+            <Zap className="h-3 w-3 text-primary" />
+            {status.latency || '---'}ms
+          </div>
+        </div>
+
+        <div className="flex flex-col items-start sm:items-end min-w-[80px]">
+          <span className="text-[9px] uppercase text-slate-400 dark:text-slate-500 font-black tracking-[0.2em] mb-0.5">Status</span>
+          {status.status === 'online' ? (
+            <div className="flex items-center gap-1.5 text-xs font-black text-emerald-500 uppercase tracking-widest">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Online
+            </div>
+          ) : status.status === 'maintenance' ? (
+            <div className="flex items-center gap-1.5 text-xs font-black text-amber-500 uppercase tracking-widest">
+              <Clock className="w-3 h-3 animate-pulse" />
+              Maint.
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 text-xs font-black text-slate-400 uppercase tracking-widest">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+              {status.status}
+            </div>
+          )}
+        </div>
+
+        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 group-hover:bg-primary/10 group-hover:border-primary/20 transition-all ml-auto sm:ml-0">
+          <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-primary transition-all translate-x-0 group-hover:translate-x-1" />
+        </div>
+      </div>
+    </div>
   );
 }
 
