@@ -7,6 +7,9 @@ import { applyPlanOverride } from '@/lib/api-keys';
 interface DecodedToken {
   sub: string;
   email?: string;
+  given_name?: string;
+  family_name?: string;
+  picture?: string;
   [key: string]: any;
 }
 
@@ -24,7 +27,7 @@ export async function GET() {
 
     const { data: profile, error } = await supabaseAdmin
       .from('profiles')
-      .select('role, plan, email')
+      .select('role, plan, email, name, avatar')
       .eq('id', userId)
       .maybeSingle();
 
@@ -37,7 +40,16 @@ export async function GET() {
       profile.plan = await applyPlanOverride(profile.email, profile.plan || 'free', userId, 'id');
     }
 
-    return NextResponse.json({ profile: profile ? { role: profile.role, plan: profile.plan } : null });
+    return NextResponse.json({
+      profile: {
+        role: profile?.role || 'user',
+        plan: profile?.plan || 'free',
+        // Name: prefer Supabase profile, fall back to JWT claims
+        name: profile?.name || [decoded.given_name, decoded.family_name].filter(Boolean).join(' ') || '',
+        email: profile?.email || decoded.email || '',
+        picture: profile?.avatar || decoded.picture || '',
+      },
+    });
   } catch (err) {
     console.error('Profile API error:', err);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
