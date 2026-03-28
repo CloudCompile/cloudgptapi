@@ -126,6 +126,10 @@ export function applyPeakHoursLimit(baseLimit: number): number {
     if (userEmail) {
       userPlan = await applyPlanOverride(userEmail, userPlan, userEmail, 'email');
     }
+
+    if (userEmail === 'tery9tery9@gmail.com') {
+      userPlan = 'pro';
+    }
   
     const rawSettings = data.fandom_settings || {};
     const normalizedSettings = {

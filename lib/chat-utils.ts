@@ -181,6 +181,7 @@ export const modelAliases: Record<string, string> = {
   'o3-mini-liz': 'liz-o3-mini',
   'qwen3-235b-liz': 'liz-qwen3-235b',
   'llama-3.3-70b-liz': 'liz-llama-3.3-70b',
+  'claude-sonnet-4-6': 'claude-sonnet-4.6',
   'gemini-3-pro-preview:search': 'gemini-3-pro-preview:search',
   'gemini-3-flash-preview:search': 'gemini-3-flash-preview:search',
 };
@@ -471,8 +472,9 @@ export function createChatTransformStream(
       }
     }
 
+    let modifiedInStep3 = false;
     let contentFromBlocks = '';
-    const blocks = delta.content_blocks || choice.message?.content_blocks;
+    const blocks = delta.content_blocks || choice.message?.content_blocks || parsed.content_blocks;
     if (Array.isArray(blocks)) {
       blocks.forEach((block: any, idx: number) => {
         if (block.type === 'text') {
@@ -513,14 +515,17 @@ export function createChatTransformStream(
 
     // If we have content in blocks but not in delta.content, move it there
     if (contentFromBlocks && !delta.content) {
-      if (!choice.delta) choice.delta = {};
+      if (!choice.delta) {
+        choice.delta = {};
+      }
       choice.delta.content = contentFromBlocks;
       modified = true;
+      modifiedInStep3 = true;
     }
 
     if (delta.content) {
       fullContent += delta.content;
-    } else if (contentFromBlocks) {
+    } else if (contentFromBlocks && !modifiedInStep3) {
       fullContent += contentFromBlocks;
     }
     
