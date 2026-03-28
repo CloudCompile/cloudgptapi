@@ -1,4 +1,4 @@
-import { getModelUsageWeight } from '@/lib/api-keys';
+import { getModelUsageWeight } from '@/lib/api-keys-utils';
 
 export function getMultiplierLabel(weight: number) {
   if (weight === 1) return '1x';
