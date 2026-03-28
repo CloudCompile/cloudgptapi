@@ -86,12 +86,12 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isSecure = req.nextUrl.protocol === 'https:';
     const response = NextResponse.redirect(new URL(redirectUrl, req.url));
 
     response.cookies.set('kinde_access_token', access_token, {
       httpOnly: true,
-      secure: isProduction,
+      secure: isSecure,
       sameSite: 'lax',
       maxAge: 3600, // 1 hour
       path: '/',
@@ -100,7 +100,7 @@ export async function GET(req: NextRequest) {
     if (refresh_token) {
       response.cookies.set('kinde_refresh_token', refresh_token, {
         httpOnly: true,
-        secure: isProduction,
+        secure: isSecure,
         sameSite: 'lax',
         maxAge: 86400 * 7, // 7 days
         path: '/',
@@ -110,7 +110,7 @@ export async function GET(req: NextRequest) {
     if (id_token) {
       response.cookies.set('kinde_id_token', id_token, {
         httpOnly: true,
-        secure: isProduction,
+        secure: isSecure,
         sameSite: 'lax',
         maxAge: 3600,
         path: '/',
