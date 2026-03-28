@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
     loginUrl.searchParams.set('redirect_uri', kindeRedirectUri);
     loginUrl.searchParams.set('state', state);
     loginUrl.searchParams.set('scope', 'openid profile email offline');
+    loginUrl.searchParams.set('prompt', 'login');
 
     console.log(`[LOGIN] Redirecting to Kinde: ${loginUrl.toString().substring(0, 100)}...`);
     return NextResponse.redirect(loginUrl.toString());
