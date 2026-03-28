@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { jwtDecode } from 'jwt-decode';
 import { syncUser } from '@/lib/admin-actions';
 
@@ -86,19 +87,32 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const isSecure = req.nextUrl.protocol === 'https:';
-    const response = NextResponse.redirect(new URL(redirectUrl, req.url));
-
-    response.cookies.set('kinde_access_token', access_token, {
+    const isSecure = req.nextUrl.protocol === 'https:' || process.env.NODE_ENV === 'production';
+    
+    // In Next.js App Router on Vercel, cookies().set() is intercepted correctly 
+    // for all responses including redirects.
+    const cookieStore = await cookies();
+    
+    cookieStore.set('kinde_access_token', access_token, {
       httpOnly: true,
       secure: isSecure,
       sameSite: 'lax',
-      maxAge: 3600, // 1 hour
+      maxAge: 86400 * 7, // 7 days
       path: '/',
     });
 
     if (refresh_token) {
-      response.cookies.set('kinde_refresh_token', refresh_token, {
+      cookieStore.set('kinde_refresh_token', refresh_token, {
+        httpOnly: true,
+        secure: isSecure,
+        sameSite: 'lax',
+        maxAge: 86400 * 30, // 30 days
+        path: '/',
+      });
+    }
+
+    if (id_token) {
+      cookieStore.set('kinde_id_token', id_token, {
         httpOnly: true,
         secure: isSecure,
         sameSite: 'lax',
@@ -107,17 +121,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    if (id_token) {
-      response.cookies.set('kinde_id_token', id_token, {
-        httpOnly: true,
-        secure: isSecure,
-        sameSite: 'lax',
-        maxAge: 3600,
-        path: '/',
-      });
-    }
-
-    return response;
+    return NextResponse.redirect(new URL(redirectUrl, req.url));
   } catch (error) {
     console.error('Callback error:', error);
     return NextResponse.redirect(new URL('/login?error=callback_error', req.url));

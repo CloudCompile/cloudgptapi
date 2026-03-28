@@ -27,7 +27,7 @@ export async function GET() {
 
     const { data: profile, error } = await supabaseAdmin
       .from('profiles')
-      .select('role, plan, email, name, avatar')
+      .select('role, plan, email, name, avatar, username')
       .eq('id', userId)
       .maybeSingle();
 
@@ -44,8 +44,13 @@ export async function GET() {
       profile: {
         role: profile?.role || 'user',
         plan: profile?.plan || 'free',
-        // Name: prefer Supabase profile, fall back to JWT claims
-        name: profile?.name || [decoded.given_name, decoded.family_name].filter(Boolean).join(' ') || '',
+        // Name: prefer Supabase profile -> JWT name -> JWT given/family -> username -> email prefix
+        name: profile?.name 
+          || decoded.name 
+          || [decoded.given_name, decoded.family_name].filter(Boolean).join(' ') 
+          || profile?.username
+          || (profile?.email || decoded.email)?.split('@')[0] 
+          || '',
         email: profile?.email || decoded.email || '',
         picture: profile?.avatar || decoded.picture || '',
       },
