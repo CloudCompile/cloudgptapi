@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { getCurrentUserId } from '@/lib/kinde-auth';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit } from '@/lib/api-keys';
 import { IMAGE_MODELS, PROVIDER_URLS, ImageModel, PREMIUM_MODELS } from '@/lib/providers';
 import { getPollinationsApiKey, safeResponseJson, safeJsonParse, hasProAccess } from '@/lib/utils';
@@ -326,7 +326,7 @@ export async function POST(request: NextRequest) {
     // Get user from session
     let sessionUserId = null;
     try {
-      const { userId } = await auth();
+      const userId = await getCurrentUserId();
       if (userId) {
         sessionUserId = userId;
       }

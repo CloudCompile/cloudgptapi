@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from 'uuid';
-import { clerkClient } from '@clerk/nextjs/server';
 import { supabaseAdmin } from './supabase';
 import { estimateTokens } from './chat-utils';
 import { ApiKeyPluginSettings } from './types';
@@ -60,27 +59,6 @@ export { getModelUsageWeight, generateApiKey, extractApiKey, isPeakHours, applyP
       .from('api_keys')
       .update({ last_used_at: new Date().toISOString() })
       .eq('id', data.id);
-  
-    let userPlan = profile?.plan || 'free';
-    let userEmail = profile?.email;
-
-    // Fallback to Clerk metadata if profile is missing or incomplete
-    if (!profile?.plan || !profile?.email) {
-      try {
-        const client = await clerkClient();
-        const clerkUser = await client.users.getUser(data.user_id);
-        if (!profile?.plan && clerkUser?.publicMetadata?.plan) {
-          userPlan = String(clerkUser.publicMetadata.plan);
-        }
-        if (!profile?.email && clerkUser?.emailAddresses?.[0]?.emailAddress) {
-          userEmail = clerkUser.emailAddresses[0].emailAddress;
-        }
-      } catch (clerkError) {
-        console.warn('[validateApiKey] Clerk fallback failed:', clerkError);
-      }
-    }
-  
-    console.log(`[validateApiKey] Key validated for user: ${data.user_id}, profile email: ${userEmail}, db plan: ${userPlan}`);
   
     // Manual override for specific users requested by admin
     if (userEmail) {

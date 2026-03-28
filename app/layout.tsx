@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { SyncUser } from '@/components/sync-user';
 import { MainLayout } from '@/components/MainLayout';
-import { ClerkProvider } from '@clerk/nextjs';
 
 import { Suspense } from 'react';
 
@@ -26,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider dynamic>
+    <>
       <html lang="en" className="scroll-smooth" suppressHydrationWarning>
         <body className="min-h-screen bg-background antialiased selection:bg-primary/10 selection:text-primary relative overflow-x-hidden">
           {/* Global Ambient Background */}
@@ -40,6 +39,6 @@ export default function RootLayout({
           <MainLayout>{children}</MainLayout>
         </body>
       </html>
-    </ClerkProvider>
+    </>
   );
 }

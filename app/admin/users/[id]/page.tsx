@@ -1,7 +1,6 @@
 import { Shield, Ban, Trash2, Key, Activity, Clock, UserCircle, ChevronLeft } from 'lucide-react';
 import { supabaseAdmin } from '@/lib/supabase';
 import { promoteUser, assignPlan } from '@/lib/admin-actions';
-import { clerkClient } from '@clerk/nextjs/server';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -54,27 +53,26 @@ export default async function AdminUserViewPage({
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId);
 
-  // Sync Clerk Data for robust Ban / 2FA status handling
-  let clerkUser;
-  try {
-    const client = await clerkClient();
-    clerkUser = await client.users.getUser(userId);
-  } catch (e) {
-    console.error('Clerk user not found, might be deleted', e);
-  }
-
-  const isBanned = clerkUser?.banned || false;
-  const twoFactorEnabled = clerkUser?.twoFactorEnabled || false;
+  // Get user ban/2FA status from the profiles table (Kinde-managed via custom fields)
+  // With Kinde, we store these states in the database instead
+  const isBanned = user.metadata?.is_banned || false;
+  const twoFactorEnabled = user.metadata?.two_factor_enabled || false;
 
   async function toggleBan() {
     'use server';
-    if (!clerkUser) return;
-    if (isBanned) {
-      const client = await clerkClient();
-      await client.users.unbanUser(userId);
-    } else {
-      const client = await clerkClient();
-      await client.users.banUser(userId);
+    try {
+      const newBannedState = !isBanned;
+      await supabaseAdmin
+        .from('profiles')
+        .update({
+          metadata: {
+            ...user.metadata,
+            is_banned: newBannedState
+          }
+        })
+        .eq('id', userId);
+    } catch (e) {
+      console.error('Failed to toggle ban status:', e);
     }
     revalidatePath(`/admin/users/${userId}`);
   }
@@ -82,9 +80,12 @@ export default async function AdminUserViewPage({
   async function deleteUserAction() {
     'use server';
     try {
-      const client = await clerkClient();
-      await client.users.deleteUser(userId);
-      await supabaseAdmin.from('profiles').delete().eq('id', userId);
+      // Delete user and all related data
+      await Promise.all([
+        supabaseAdmin.from('profiles').delete().eq('id', userId),
+        supabaseAdmin.from('api_keys').delete().eq('user_id', userId),
+        supabaseAdmin.from('usage_logs').delete().eq('user_id', userId),
+      ]);
     } catch (e) {
       console.error('Failed to delete user:', e);
     }

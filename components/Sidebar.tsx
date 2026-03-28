@@ -24,7 +24,6 @@ import {
   X
 } from 'lucide-react';
 import { cn, hasProAccess } from '@/lib/utils';
-import { useUser } from '@clerk/nextjs';
 import { Logo } from './Logo';
 
 const navigation = [
@@ -43,18 +42,35 @@ const secondaryNavigation = [
 
 export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
-  const { user, isSignedIn } = useUser();
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const [plan, setPlan] = useState<string>('free');
+  const [userProfile, setUserProfile] = useState<{ email?: string; name?: string; picture?: string } | null>(null);
 
   useEffect(() => {
-    if (!isSignedIn) return;
     fetch('/api/profile', { cache: 'no-store' })
-      .then(res => res.json())
+      .then(res => {
+        if (res.ok) {
+          setIsSignedIn(true);
+          return res.json();
+        } else {
+          setIsSignedIn(false);
+          return null;
+        }
+      })
       .then(data => {
         if (data?.profile?.plan) setPlan(String(data.profile.plan));
+        if (data?.profile?.email || data?.profile?.name || data?.profile?.picture) {
+          setUserProfile({
+            email: data.profile.email,
+            name: data.profile.name,
+            picture: data.profile.picture
+          });
+        }
       })
-      .catch(() => undefined);
-  }, [isSignedIn]);
+      .catch(() => {
+        setIsSignedIn(false);
+      });
+  }, []);
 
   const isPro = hasProAccess(plan);
 
@@ -180,17 +196,15 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
 
           <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 sm:py-4 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-950 border border-border shadow-sm">
             <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center overflow-hidden">
-              {user?.imageUrl ? (
-                <img src={user.imageUrl} alt="Profile" className="h-full w-full object-cover" />
+              {userProfile?.picture ? (
+                <img src={userProfile.picture} alt="Profile" className="h-full w-full object-cover" />
               ) : (
                 <User className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500" />
               )}
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-xs sm:text-sm font-black truncate">
-                {user?.firstName && user?.lastName 
-                  ? `${user.firstName} ${user.lastName}` 
-                  : user?.firstName || user?.username || 'User'}
+                {userProfile?.name || 'User'}
               </div>
               <div className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">Developer</div>
             </div>

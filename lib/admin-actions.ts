@@ -1,12 +1,11 @@
 'use server';
 
-import { auth, currentUser } from '@clerk/nextjs/server';
-import { clerkClient } from '@clerk/nextjs/server';
+import { getCurrentUserId } from './kinde-auth';
 import { supabaseAdmin } from './supabase';
 import { revalidatePath } from 'next/cache';
 
 async function verifyAdmin() {
-  const { userId } = await auth();
+  const userId = await getCurrentUserId();
 
   if (!userId) {
     throw new Error('Unauthorized: Admin access required');
@@ -72,16 +71,15 @@ export async function assignPlan(userId: string, plan: 'free' | 'developer' | 'p
     throw new Error(`Failed to assign plan: ${error.message}`);
   }
 
-  // Update Clerk metadata with plan
+  // Update user metadata in Supabase (Kinde doesn't have publicMetadata like Clerk)
+  // The plan is stored in the profiles table instead
   try {
-    const client = await clerkClient();
-    await client.users.updateUser(userId, {
-      publicMetadata: {
-        plan: plan
-      }
-    });
-  } catch (clerkError) {
-    console.error(`Failed to update Clerk metadata for ${userId}:`, clerkError);
+    await supabaseAdmin
+      .from('profiles')
+      .update({ plan })
+      .eq('id', userId);
+  } catch (error) {
+    console.error(`Failed to update profile metadata for ${userId}:`, error);
   }
 
   // Also update rate limits for their API keys if they upgrade
@@ -258,16 +256,16 @@ export async function syncUser(userId: string, email: string, username?: string,
     return;
   }
 
-  // Update Clerk metadata with plan (default to 'free' if not set from subscription)
+  // Update profile with plan (stored in Supabase, not in Kinde metadata)
   try {
-    const client = await clerkClient();
-    await client.users.updateUser(userId, {
-      publicMetadata: {
+    await supabaseAdmin
+      .from('profiles')
+      .update({
         plan: initialPlan || 'free'
-      }
-    });
-  } catch (clerkError) {
-    console.error(`Failed to update Clerk metadata for new user ${userId}:`, clerkError);
+      })
+      .eq('id', userId);
+  } catch (error) {
+    console.error(`Failed to update profile for new user ${userId}:`, error);
   }
 
   // Only notify Discord if this is a truly new user (didn't exist before in any form)

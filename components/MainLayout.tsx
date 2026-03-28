@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { useUser, useClerk } from '@clerk/nextjs';
+import React, { useState, useEffect } from 'react';
 import { Cloud, LayoutDashboard, Zap, Rocket, BookOpen, FileText, Shield, Code } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
@@ -36,8 +35,18 @@ function Header({
 }: { 
   isAppPage: boolean;
 }) {
-  const { isSignedIn } = useUser();
-  const { openSignIn, signOut } = useClerk();
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if user is authenticated
+    fetch('/api/profile')
+      .then(res => {
+        setIsSignedIn(res.ok);
+      })
+      .catch(() => {
+        setIsSignedIn(false);
+      });
+  }, []);
 
   return (
     <header className={cn(
@@ -67,21 +76,21 @@ function Header({
 
         <div className="flex items-center gap-4">
           {!isSignedIn ? (
-            <button 
-              onClick={() => openSignIn()}
+            <Link 
+              href="/api/auth/login"
               className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-md shadow-primary/20 hover:bg-primary/90 transition-all"
             >
               Sign In
-            </button>
+            </Link>
           ) : (
             <div className="flex items-center gap-4">
               <UserStatus />
-              <button 
-                onClick={() => signOut()}
+              <Link 
+                href="/api/auth/logout"
                 className="text-sm font-medium text-slate-600 hover:text-primary transition-colors"
               >
                 Sign Out
-              </button>
+              </Link>
             </div>
           )}
         </div>

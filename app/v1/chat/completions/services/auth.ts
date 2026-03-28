@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { getCurrentUserId } from '@/lib/kinde-auth';
 import { extractApiKey, validateApiKey, applyPlanOverride, applyPeakHoursLimit, ApiKey, getDailyLimitForPlan } from '@/lib/api-keys';
 import { supabaseAdmin } from '@/lib/supabase';
 
@@ -21,7 +21,7 @@ export async function processAuth(
 ): Promise<AuthResult> {
   let sessionUserId: string | null = null;
   try {
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     if (userId) {
       sessionUserId = userId;
       console.log(`[${requestId}] Session User ID: ${sessionUserId}`);
@@ -52,16 +52,6 @@ export async function processAuth(
     if (profile) {
       userPlan = profile.plan || 'free';
       userPlan = await applyPlanOverride(profile.email, userPlan, sessionUserId, 'id');
-    } else {
-      try {
-        const user = await currentUser();
-        const clerkPlan = user?.publicMetadata?.plan;
-        if (clerkPlan) {
-          userPlan = String(clerkPlan);
-        }
-      } catch (clerkError) {
-        console.warn(`[${requestId}] Clerk plan fallback failed`, clerkError);
-      }
     }
   }
 

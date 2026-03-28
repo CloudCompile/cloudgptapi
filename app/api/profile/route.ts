@@ -1,15 +1,26 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { cookies } from 'next/headers';
+import { jwtDecode } from 'jwt-decode';
 import { supabaseAdmin } from '@/lib/supabase';
 import { applyPlanOverride } from '@/lib/api-keys';
 
+interface DecodedToken {
+  sub: string;
+  email?: string;
+  [key: string]: any;
+}
+
 export async function GET() {
   try {
-    const { userId } = await auth();
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('kinde_access_token')?.value;
     
-    if (!userId) {
+    if (!accessToken) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const decoded = jwtDecode<DecodedToken>(accessToken);
+    const userId = decoded.sub;
 
     const { data: profile, error } = await supabaseAdmin
       .from('profiles')

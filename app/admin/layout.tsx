@@ -1,7 +1,8 @@
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { getCurrentUserId, getCurrentUser } from '@/lib/kinde-auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { AlertCircle, Shield, Users, Tag, Crown } from 'lucide-react';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 // Force dynamic rendering to prevent prerendering errors with authentication
 export const dynamic = 'force-dynamic';
@@ -11,8 +12,8 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { userId } = await auth();
-  const user = await currentUser();
+  const userId = await getCurrentUserId();
+  const user = await getCurrentUser();
 
   const renderAccessDenied = (email?: string) => (
     <div className="container mx-auto px-4 py-24 flex flex-col items-center justify-center min-h-[60vh]">
@@ -33,7 +34,8 @@ export default async function AdminLayout({
   );
 
   if (!userId) {
-    return renderAccessDenied();
+    // Redirect to login if not authenticated
+    redirect('/api/auth/login?redirect=/admin');
   }
 
   const { data: profile, error } = await supabaseAdmin
@@ -45,7 +47,7 @@ export default async function AdminLayout({
   const isAdmin = !error && profile?.role === 'admin';
 
   if (!isAdmin) {
-    const userEmail = user?.emailAddresses[0]?.emailAddress || 'Unknown user';
+    const userEmail = user?.email || 'Unknown user';
     return renderAccessDenied(userEmail);
   }
 

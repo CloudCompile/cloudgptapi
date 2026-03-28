@@ -1,23 +1,21 @@
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { getCurrentUserId, getCurrentUser } from '@/lib/kinde-auth';
 import { syncUser } from '@/lib/admin-actions';
 
 export async function SyncUser() {
   try {
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     
     if (!userId) {
       return null;
     }
 
-    const user = await currentUser();
+    const user = await getCurrentUser();
     
     if (user) {
-      const email = user.emailAddresses[0]?.emailAddress || '';
-      const username = user.username || '';
-      const name = user.firstName && user.lastName 
-        ? `${user.firstName} ${user.lastName}` 
-        : user.firstName || user.lastName || '';
-      const avatar = user.imageUrl || '';
+      const email = user.email || '';
+      const username = user.email?.split('@')[0] || '';
+      const name = user.name || '';
+      const avatar = user.picture || '';
       
       if (email) {
         try {

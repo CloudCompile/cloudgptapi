@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
 import { Crown, Shield, Zap, ArrowUpCircle } from 'lucide-react';
 import { cn, hasProAccess } from '@/lib/utils';
 import Link from 'next/link';
@@ -10,36 +9,46 @@ import Link from 'next/link';
 let profileCache: { role: string; plan: string; timestamp: number } | null = null;
 
 export function UserStatus() {
-  const { isSignedIn } = useUser();
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const [profile, setProfile] = useState<{ role: string; plan: string } | null>(profileCache);
 
   useEffect(() => {
-    if (!isSignedIn) return;
-
     const refreshProfile = () => {
       const now = Date.now();
       // Use cache if it's less than 30 seconds old
       if (profileCache && now - profileCache.timestamp < 1000 * 30) {
         setProfile(profileCache);
+        setIsSignedIn(true);
         return;
       }
 
       fetch('/api/profile', { cache: 'no-store' })
-        .then(res => res.json())
+        .then(res => {
+          if (res.ok) {
+            setIsSignedIn(true);
+            return res.json();
+          } else {
+            setIsSignedIn(false);
+            return null;
+          }
+        })
         .then(data => {
-          if (data.profile) {
+          if (data?.profile) {
             const newProfile = { ...data.profile, timestamp: now };
             profileCache = newProfile;
             setProfile(newProfile);
           }
         })
-        .catch(err => console.error('Failed to fetch user profile:', err));
+        .catch(err => {
+          console.error('Failed to fetch user profile:', err);
+          setIsSignedIn(false);
+        });
     };
 
     refreshProfile();
     window.addEventListener('focus', refreshProfile);
     return () => window.removeEventListener('focus', refreshProfile);
-  }, [isSignedIn]);
+  }, []);
 
   if (!isSignedIn || !profile) return null;
   

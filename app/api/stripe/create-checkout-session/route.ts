@@ -1,18 +1,18 @@
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { getCurrentUserId, getCurrentUser } from '@/lib/kinde-auth';
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
 
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    // Get the user's email from Clerk
-    const user = await currentUser();
-    const userEmail = user?.emailAddresses[0]?.emailAddress;
+    // Get the user's email from Kinde
+    const user = await getCurrentUser();
+    const userEmail = user?.email;
 
     const body = await req.json();
     const { priceId } = body;

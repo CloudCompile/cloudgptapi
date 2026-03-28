@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import { CHAT_MODELS, IMAGE_MODELS, VIDEO_MODELS, PREMIUM_MODELS } from '@/lib/providers';
 import { cn, hasProAccess, hasVideoAccess } from '@/lib/utils';
-import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 
 type Mode = 'chat' | 'image' | 'video';
@@ -60,7 +59,7 @@ function useCountdown(targetDate?: string) {
 }
 
 export default function PlaygroundPage() {
-  const { isSignedIn } = useUser();
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const [profile, setProfile] = useState<{ plan: string } | null>(null);
   const [mode, setMode] = useState<Mode>('chat');
   const [selectedModel, setSelectedModel] = useState(CHAT_MODELS[0].id);
@@ -78,17 +77,27 @@ export default function PlaygroundPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isSignedIn) {
-      fetch('/api/profile')
-        .then(res => res.json())
-        .then(data => {
-          if (data.profile) {
-            setProfile(data.profile);
-          }
-        })
-        .catch(err => console.error('Failed to fetch user profile:', err));
-    }
-  }, [isSignedIn]);
+    // Check authentication status and fetch profile
+    fetch('/api/profile')
+      .then(res => {
+        if (res.ok) {
+          setIsSignedIn(true);
+          return res.json();
+        } else {
+          setIsSignedIn(false);
+          return null;
+        }
+      })
+      .then(data => {
+        if (data?.profile) {
+          setProfile(data.profile);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch user profile:', err);
+        setIsSignedIn(false);
+      });
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {

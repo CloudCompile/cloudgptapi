@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUserId } from '@/lib/kinde-auth';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit } from '@/lib/api-keys';
 import { VIDEO_MODELS, PROVIDER_URLS, VideoModel, PREMIUM_MODELS } from '@/lib/providers';
 import { getPollinationsApiKey, safeResponseJson, hasProAccess, hasVideoAccess } from '@/lib/utils';
@@ -57,7 +57,7 @@ async function handleVideoGeneration(request: NextRequest, body: any) {
     // Get user from session
     let sessionUserId = null;
     try {
-      const { userId } = await auth();
+      const userId = await getCurrentUserId();
       if (userId) {
         sessionUserId = userId;
       }
@@ -84,28 +84,8 @@ async function handleVideoGeneration(request: NextRequest, body: any) {
         userPlan = apiKeyInfo.plan;
       }
     } else if (sessionUserId) {
-      // First, try to get plan from Clerk public metadata
+      // Get plan from Supabase
       try {
-        const { clerkClient } = await import('@clerk/nextjs/server');
-        const user = await clerkClient.users.getUser(sessionUserId);
-        if (user?.publicMetadata?.plan) {
-          userPlan = user.publicMetadata.plan as string;
-        } else {
-          // Fallback to Supabase if not in Clerk metadata
-          const { data: profile } = await supabaseAdmin
-            .from('profiles')
-            .select('plan, email')
-            .eq('id', sessionUserId)
-            .maybeSingle();
-          
-          if (profile) {
-            userPlan = profile.plan || 'free';
-            // Manual override for specific users requested by admin
-            userPlan = await applyPlanOverride(profile.email, userPlan, sessionUserId, 'id');
-          }
-        }
-      } catch (err) {
-        console.warn('Failed to fetch plan:', err);
         const { data: profile } = await supabaseAdmin
           .from('profiles')
           .select('plan, email')
@@ -114,7 +94,11 @@ async function handleVideoGeneration(request: NextRequest, body: any) {
         
         if (profile) {
           userPlan = profile.plan || 'free';
+          // Manual override for specific users requested by admin
+          userPlan = await applyPlanOverride(profile.email, userPlan, sessionUserId, 'id');
         }
+      } catch (err) {
+        console.warn('Failed to fetch plan:', err);
       }
     }
 

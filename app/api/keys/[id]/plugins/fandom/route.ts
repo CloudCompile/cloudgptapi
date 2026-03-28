@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUserId } from '@/lib/kinde-auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { isFandomPluginConfigured } from '@/lib/plugins';
@@ -14,7 +14,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     const { id: keyId } = await params;
 
     if (!userId) {
@@ -80,7 +80,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     const { id: keyId } = await params;
 
     if (!userId) {

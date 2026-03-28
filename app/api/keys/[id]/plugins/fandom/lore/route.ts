@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUserId } from '@/lib/kinde-auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { isFandomPluginConfigured } from '@/lib/plugins';
 
@@ -25,7 +25,7 @@ export async function GET(
   const { id: keyId } = await params;
   
   try {
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     if (!await verifyOwnership(userId, keyId)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -58,7 +58,7 @@ export async function POST(
   const { id: keyId } = await params;
   
   try {
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     if (!await verifyOwnership(userId, keyId)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -100,7 +100,7 @@ export async function DELETE(
   }
   
   try {
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     if (!await verifyOwnership(userId, keyId)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
