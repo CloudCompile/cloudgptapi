@@ -45,7 +45,8 @@ const POLLINATIONS_CHAT_MODELS: ChatModel[] = [
   { id: 'qwen3.5-plus', name: 'Qwen 3.5 Plus', provider: 'pollinations', description: 'Qwen 3.5 Plus', contextWindow: 256, usageWeight: 1 },
   { id: 'qwen3.5-flash', name: 'Qwen 3.5 Flash', provider: 'pollinations', description: 'Qwen 3.5 Flash', contextWindow: 256, usageWeight: 1 },
   { id: 'qwen-deep-research', name: 'Qwen Deep Research', provider: 'pollinations', description: 'Qwen Deep Research', contextWindow: 256, usageWeight: 4 },
-  { id: 'kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'pollinations', description: 'Moonshot Kimi K2 Thinking', contextWindow: 256, usageWeight: 2 },
+  { id: 'kimi-k2', name: 'Kimi K2', provider: 'pollinations', description: 'Moonshot Kimi K2', contextWindow: 256, usageWeight: 1 },
+  { id: 'kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'pollinations', description: 'Moonshot Kimi K2 Thinking', contextWindow: 256, usageWeight: 3 },
 ];
 
 const KIVEST_CHAT_MODELS: ChatModel[] = [

@@ -181,6 +181,8 @@ export const modelAliases: Record<string, string> = {
   'o3-mini-liz': 'liz-o3-mini',
   'qwen3-235b-liz': 'liz-qwen3-235b',
   'llama-3.3-70b-liz': 'liz-llama-3.3-70b',
+  'kimi-k2-thinking': 'kimi-k2-thinking',
+  'kimi-k2': 'kimi-k2',
   'claude-sonnet-4-6': 'claude-sonnet-4.6',
   'gemini-3-pro-preview:search': 'gemini-3-pro-preview:search',
   'gemini-3-flash-preview:search': 'gemini-3-flash-preview:search',
