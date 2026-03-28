@@ -312,7 +312,7 @@ export function getDailyLimitForPlan(plan: string): number {
   if (p === 'developer') return 50000;
   if (p === 'admin') return 1000000;
   
-  return 1000; // Default Free tier limit (1k per request)
+  return 75; // Default Free tier limit (75 RPD)
 }
 
 export async function checkDailyLimit(key: string, limit: number = 1000, apiKeyId?: string): Promise<boolean> {
