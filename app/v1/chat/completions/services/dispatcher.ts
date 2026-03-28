@@ -361,7 +361,6 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       'X-Vetra-Provider': model.provider || 'unknown',
       'X-Vetra-Weight': String(model.usageWeight || 1),
     };
-    };
 
     const kickStream = new ReadableStream({
       async start(controller) {

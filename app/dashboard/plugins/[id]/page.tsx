@@ -244,6 +244,7 @@ export default function PluginSettingsPage() {
   }
 
   return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8 sm:space-y-10 animate-in fade-in duration-700">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 overflow-hidden">
         <Link href="/dashboard" className="hover:text-primary transition-colors whitespace-nowrap">Dashboard</Link>
