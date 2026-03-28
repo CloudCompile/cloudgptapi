@@ -26,6 +26,13 @@ export async function getCurrentUserId(): Promise<string | null> {
     }
 
     const decoded = jwtDecode<DecodedToken>(accessToken);
+
+    // Don't return stale user IDs from expired tokens
+    const now = Math.floor(Date.now() / 1000);
+    if (decoded.exp && decoded.exp < now) {
+      return null;
+    }
+
     return decoded.sub || null;
   } catch (error: any) {
     // Only log errors in development or if not a dynamic server error

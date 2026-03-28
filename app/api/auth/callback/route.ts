@@ -93,8 +93,7 @@ export async function GET(req: NextRequest) {
     // for all responses including redirects.
     const cookieStore = await cookies();
     
-    // Only store the access_token in cookies because Kinde JWTs are huge.
-    // Setting all 3 tokens often exceeds the strict 4KB browser limit per domain!
+    // Store access_token in cookie (id_token omitted — Kinde JWTs are huge and would exceed 4KB)
     cookieStore.set('kinde_access_token', access_token, {
       httpOnly: true,
       secure: isSecure,
@@ -102,6 +101,17 @@ export async function GET(req: NextRequest) {
       maxAge: 86400 * 7, // 7 days
       path: '/',
     });
+
+    // Store refresh_token so the middleware can silently refresh expired access tokens
+    if (refresh_token) {
+      cookieStore.set('kinde_refresh_token', refresh_token, {
+        httpOnly: true,
+        secure: isSecure,
+        sameSite: 'lax',
+        maxAge: 86400 * 30, // 30 days (refresh tokens are long-lived)
+        path: '/',
+      });
+    }
 
     return NextResponse.redirect(new URL(redirectUrl, req.url));
   } catch (error) {
