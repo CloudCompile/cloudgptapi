@@ -103,7 +103,8 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                    pathname.startsWith('/playground') || 
                    pathname.startsWith('/models') || 
                    pathname.startsWith('/docs') ||
-                   pathname.startsWith('/pricing');
+                   pathname.startsWith('/pricing') ||
+                   pathname.startsWith('/admin');
   const isLandingPage = pathname === '/';
 
   return (
