@@ -43,6 +43,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getModelMultiplier, getMultiplierLabel } from './multiplier-utils';
 
 interface ModelStatus {
   id: string;
@@ -586,6 +587,9 @@ function ModelCard({ model, status, onClick, index }: { model: any, status: Mode
               <code className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800/50 px-2 py-1 rounded-lg text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 font-bold group-hover:border-primary/30 transition-colors">
                 {model.id}
               </code>
+              <span className="ml-2 px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-[10px] border border-primary/20" title="Request Multiplier">
+                {getMultiplierLabel(getModelMultiplier(model.id))}
+              </span>
             </div>
             <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 h-10 mt-4 leading-relaxed font-medium group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
               {model.description || `High-performance ${model.type} model powered by ${model.provider}.`}
@@ -656,6 +660,9 @@ function ModelCard({ model, status, onClick, index }: { model: any, status: Mode
               ) : (
                 <span className="text-[8px] font-black uppercase tracking-[0.15em] text-amber-500">Premium</span>
               )}
+              <span className="ml-2 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-[8px] border border-primary/20" title="Request Multiplier">
+                {getMultiplierLabel(getModelMultiplier(model.id))}
+              </span>
             </div>
           </div>
         </div>
@@ -686,7 +693,7 @@ function ModelListItem({ model, status, onClick, index }: { model: any, status: 
     >
       <div className={cn(
         "p-3.5 rounded-2xl bg-gradient-to-br shrink-0 shadow-lg transition-transform group-hover:scale-110 duration-500",
-        model.type === 'chat' && model.isRoleplay ? "from-pink-500 to-purple-600 text-white shadow-pink-500/20" :
+        model.type === 'chat' && model.isRoleplay ? "from-pink-500 to-purple-600 text-white shadow-purple-500/20" :
         model.type === 'chat' ? "from-blue-500 to-indigo-600 text-white shadow-blue-500/20" :
         model.type === 'image' ? "from-purple-500 to-pink-600 text-white shadow-purple-500/20" :
         "from-amber-500 to-orange-600 text-white shadow-amber-500/20"
