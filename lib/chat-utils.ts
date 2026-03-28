@@ -181,6 +181,8 @@ export const modelAliases: Record<string, string> = {
   'o3-mini-liz': 'liz-o3-mini',
   'qwen3-235b-liz': 'liz-qwen3-235b',
   'llama-3.3-70b-liz': 'liz-llama-3.3-70b',
+  'gemini-3-pro-preview:search': 'gemini-3-pro-preview:search',
+  'gemini-3-flash-preview:search': 'gemini-3-flash-preview:search',
 };
 
 // Provider-specific model mapping (Vetra ID -> Provider ID)
@@ -236,7 +238,8 @@ export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
 
 export function resolveModelId(modelId: string): string {
   const normalizedModelId = modelId.trim().replace(/^['"]+|['"]+$/g, '');
-  return modelAliases[normalizedModelId] || normalizedModelId;
+  const aliased = modelAliases[normalizedModelId] || normalizedModelId;
+  return PROVIDER_MODEL_MAPPING[aliased] || aliased;
 }
 
 export const SEARCH_MODEL_ALIASES: Record<string, string> = {
@@ -375,6 +378,20 @@ export function createChatTransformStream(
             delta: { content: delta }
           }];
           modified = true;
+        }
+      }
+      // Check for top-level message (Zhipu/GLM format)
+      else if (parsed.message) {
+        const text = parsed.message.content || parsed.message;
+        if (typeof text === 'string') {
+          const delta = getDelta(text, 'lastContent');
+          if (delta) {
+            parsed.choices = [{
+              index: 0,
+              delta: { content: delta }
+            }];
+            modified = true;
+          }
         }
       }
       // Check for top-level content_blocks (sometimes seen in raw Gemini/Vertex streams)

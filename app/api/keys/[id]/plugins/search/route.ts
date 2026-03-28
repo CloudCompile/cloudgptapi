@@ -7,11 +7,15 @@ function getSearchEnabled(settings: any): boolean {
 }
 
 function withSearchEnabled(settings: any, enabled: boolean): any {
+  const currentPlugins = settings?.plugins || {};
   return {
     ...(settings || {}),
     plugins: {
-      ...(settings?.plugins || {}),
-      search: { enabled: Boolean(enabled) }
+      ...currentPlugins,
+      search: { 
+        ...(currentPlugins.search || {}),
+        enabled: Boolean(enabled) 
+      }
     }
   };
 }

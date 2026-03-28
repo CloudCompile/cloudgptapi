@@ -7,11 +7,15 @@ function getMemoryEnabled(settings: any): boolean {
 }
 
 function withMemoryEnabled(settings: any, enabled: boolean): any {
+  const currentPlugins = settings?.plugins || {};
   return {
     ...(settings || {}),
     plugins: {
-      ...(settings?.plugins || {}),
-      memory: { enabled: Boolean(enabled) }
+      ...currentPlugins,
+      memory: { 
+        ...(currentPlugins.memory || {}),
+        enabled: Boolean(enabled) 
+      }
     }
   };
 }
