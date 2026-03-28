@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { clerkClient } from '@clerk/nextjs/server';
 import { supabaseAdmin } from './supabase';
 import { estimateTokens } from './chat-utils';
+import { ApiKeyPluginSettings } from './types';
 
 export interface ApiKey {
   id: string;
@@ -14,16 +15,7 @@ export interface ApiKey {
   usageCount: number;
   plan?: string;
   fandomPluginEnabled?: boolean;
-  fandomSettings?: {
-    maxLoreTokens: number;
-    autoSummarize: boolean;
-    cacheMode: string;
-    preferredSources: string[];
-    plugins?: {
-      memory?: { enabled: boolean };
-      search?: { enabled: boolean };
-    };
-  };
+  fandomSettings?: ApiKeyPluginSettings;
 }
 
 // Generate a new API key with the vtai prefix

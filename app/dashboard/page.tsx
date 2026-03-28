@@ -26,10 +26,12 @@ import {
   Lock,
   Zap,
   BookOpen,
-  Loader2
+  Loader2,
+  Code
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { UsageStatsResponse } from '@/lib/types';
 
 interface ApiKey {
   id: string;
@@ -60,7 +62,7 @@ export default function Dashboard() {
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [userUsage, setUserUsage] = useState<any>(null);
-  const [usageStats, setUsageStats] = useState<any>(null);
+  const [usageStats, setUsageStats] = useState<UsageStatsResponse | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
 
   useEffect(() => {
@@ -194,6 +196,19 @@ export default function Dashboard() {
   function copyToClipboard(text: string, id: string) {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  }
+
+  function copyAsCurl(keyId: string, name: string) {
+    const curl = `curl https://api.vetralabs.com/v1/chat/completions \\
+  -H "Authorization: Bearer YOUR_KEY_HERE" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "gpt-5.1",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'`;
+    navigator.clipboard.writeText(curl);
+    setCopiedId(`curl-${keyId}`);
     setTimeout(() => setCopiedId(null), 2000);
   }
 
@@ -471,6 +486,13 @@ export default function Dashboard() {
                             Plugins
                           </Link>
                           <button 
+                            onClick={() => copyAsCurl(key.id, key.name)}
+                            className="p-1.5 sm:p-2 rounded-lg text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-all lg:opacity-0 lg:group-hover:opacity-100"
+                            title="Copy as cURL"
+                          >
+                            {copiedId === `curl-${key.id}` ? <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-500" /> : <Code className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                          </button>
+                          <button 
                             onClick={() => deleteKey(key.id)}
                             className="p-1.5 sm:p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all lg:opacity-0 lg:group-hover:opacity-100"
                           >
@@ -560,6 +582,34 @@ export default function Dashboard() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          <div className="glass-card rounded-2xl sm:rounded-[2rem] p-6 sm:p-8 relative overflow-hidden bg-white/5 border border-white/10 group">
+             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+             <div className="relative z-10">
+              <h3 className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2">
+                <Cpu className="h-3 w-3 text-indigo-400" />
+                Inference Intelligence
+              </h3>
+              <div className="space-y-4">
+                 {[
+                   { name: 'Kimi K2 Thinking', id: 'kimi-k2-thinking', caps: 'Reasoning' },
+                   { name: 'Gemini 3 Pro Search', id: 'gemini-search', caps: 'Research' },
+                   { name: 'GLM 5 Intelligence', id: 'glm-5', caps: 'Productivity' }
+                 ].map(m => (
+                   <div key={m.id} className="p-3 rounded-xl bg-slate-900/50 border border-white/5 group-hover:border-indigo-500/20 transition-all shadow-sm">
+                     <div className="flex items-center justify-between mb-1">
+                       <span className="text-[10px] font-black text-slate-200">{m.name}</span>
+                       <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">{m.caps}</span>
+                     </div>
+                     <code className="text-[8px] font-mono text-slate-500 block truncate leading-none mt-1">{m.id}</code>
+                   </div>
+                 ))}
+                 <Link href="/docs" className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-white/5 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-indigo-400 hover:bg-white/5 transition-all">
+                   System Reference <ExternalLink className="h-2.5 w-2.5" />
+                 </Link>
+              </div>
             </div>
           </div>
 

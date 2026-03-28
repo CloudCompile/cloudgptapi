@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { DailyUsageStat, UsageLog, TopModelStat } from '@/lib/types';
 
 export const runtime = 'nodejs';
 
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Process logs into daily buckets
-    const dailyStats: Record<string, { date: string, total: number, chat: number, image: number, video: number, tokens: number }> = {};
+    const dailyStats: Record<string, DailyUsageStat> = {};
     
     // Initialize buckets for all days in range
     for (let i = 0; i < days; i++) {
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
         dailyStats[dateStr] = { date: dateStr, total: 0, chat: 0, image: 0, video: 0, tokens: 0 };
     }
 
-    logs?.forEach((log: any) => {
+    (logs as UsageLog[])?.forEach((log) => {
       const dateStr = new Date(log.timestamp).toISOString().split('T')[0];
       if (dailyStats[dateStr]) {
         dailyStats[dateStr].total++;
@@ -66,11 +67,11 @@ export async function GET(request: NextRequest) {
 
     // Get top models
     const modelUsage: Record<string, number> = {};
-    logs?.forEach((log: any) => {
+    (logs as UsageLog[])?.forEach((log) => {
         modelUsage[log.model_id] = (modelUsage[log.model_id] || 0) + 1;
     });
 
-    const topModels = Object.entries(modelUsage)
+    const topModels: TopModelStat[] = Object.entries(modelUsage)
         .map(([id, count]) => ({ id, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
       topModels,
       summary: {
           totalRequests: logs?.length || 0,
-          totalTokens: logs?.reduce((acc: number, log: any) => acc + (log.tokens || 0), 0) || 0
+          totalTokens: (logs as UsageLog[])?.reduce((acc: number, log: UsageLog) => acc + (log.tokens || 0), 0) || 0
       }
     });
 
