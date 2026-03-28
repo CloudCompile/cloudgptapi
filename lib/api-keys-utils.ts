@@ -2,6 +2,7 @@
 // This file contains functions that don't depend on server-only modules
 // and can be safely imported in Client Components
 
+import { v4 as uuidv4 } from 'uuid';
 import { CHAT_MODELS, IMAGE_MODELS, VIDEO_MODELS } from './providers';
 
 /**
@@ -39,7 +40,6 @@ export function getModelUsageWeight(modelId: string): number {
 
 // Generate a new API key with the vtai prefix
 export function generateApiKey(): string {
-  const { v4: uuidv4 } = require('uuid');
   const prefix = 'vtai';
   const key = uuidv4().replace(/-/g, '');
   return `${prefix}_${key}`;
