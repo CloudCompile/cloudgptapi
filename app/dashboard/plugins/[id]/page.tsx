@@ -166,31 +166,37 @@ export default function PluginSettingsPage() {
     setSaving(true);
     setSaveStatus('idle');
     try {
-      const [fandomRes, memoryRes, searchRes] = await Promise.all([
-        fetch(`/api/keys/${id}/plugins/fandom`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ enabled, settings }),
-        }),
-        fetch(`/api/keys/${id}/plugins/memory`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ enabled: memoryEnabled }),
-        }),
-        fetch(`/api/keys/${id}/plugins/search`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ enabled: searchPluginEnabled }),
-        })
-      ]);
+      // 1. Save fandom/main settings first (this is the most complex one)
+      const fandomRes = await fetch(`/api/keys/${id}/plugins/fandom`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled, settings }),
+      });
 
-      if (fandomRes.ok && memoryRes.ok && searchRes.ok) {
-        setSaveStatus('success');
-        setTimeout(() => setSaveStatus('idle'), 3000);
-      } else {
-        setSaveStatus('error');
-      }
+      if (!fandomRes.ok) throw new Error('Failed to save fandom settings');
+
+      // 2. Save memory settings
+      const memoryRes = await fetch(`/api/keys/${id}/plugins/memory`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: memoryEnabled }),
+      });
+
+      if (!memoryRes.ok) throw new Error('Failed to save memory settings');
+
+      // 3. Save search settings
+      const searchRes = await fetch(`/api/keys/${id}/plugins/search`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: searchPluginEnabled }),
+      });
+
+      if (!searchRes.ok) throw new Error('Failed to save search settings');
+
+      setSaveStatus('success');
+      setTimeout(() => setSaveStatus('idle'), 3000);
     } catch (err) {
+      console.error('Plugin save error:', err);
       setSaveStatus('error');
     } finally {
       setSaving(false);

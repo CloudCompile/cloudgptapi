@@ -59,15 +59,34 @@ export default function Dashboard() {
   const [providerStatuses, setProviderStatuses] = useState<any>({});
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [userUsage, setUserUsage] = useState<any>(null);
 
   useEffect(() => {
     fetchKeys();
     fetchProviderStatuses();
+    fetchUserUsage();
 
+    // Auto-refresh stats every minute
+    const usageInterval = setInterval(fetchUserUsage, 60000);
     // Auto-refresh status every 30 seconds
-    const interval = setInterval(fetchProviderStatuses, 30000);
-    return () => clearInterval(interval);
+    const statusInterval = setInterval(fetchProviderStatuses, 30000);
+    return () => {
+      clearInterval(statusInterval);
+      clearInterval(usageInterval);
+    };
   }, []);
+
+  async function fetchUserUsage() {
+    try {
+      const response = await fetch('/api/usage');
+      if (response.ok) {
+        const data = await response.json();
+        setUserUsage(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch usage stats');
+    }
+  }
 
   async function fetchProviderStatuses() {
     if (isRefreshing) return;
@@ -228,6 +247,37 @@ export default function Dashboard() {
       <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Main Content: Key List */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Quick Stats Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="glass-card p-4 rounded-2xl border border-border/50">
+              <div className="text-[10px] uppercase font-black text-slate-500 tracking-wider mb-1">Daily Usage</div>
+              <div className="flex items-end gap-2">
+                <div className="text-xl font-black text-primary">{userUsage?.used || 0}</div>
+                <div className="text-[10px] text-slate-500 font-bold mb-1.5">/ {userUsage?.limit || 1000}</div>
+              </div>
+              <div className="mt-2 h-1 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-primary transition-all duration-1000" 
+                  style={{ width: `${Math.min(100, ((userUsage?.used || 0) / (userUsage?.limit || 1000)) * 100)}%` }}
+                />
+              </div>
+            </div>
+            
+            <div className="glass-card p-4 rounded-2xl border border-border/50">
+              <div className="text-[10px] uppercase font-black text-slate-500 tracking-wider mb-1">Active Keys</div>
+              <div className="text-xl font-black text-white">{keys.length}</div>
+              <div className="text-[10px] text-emerald-500 font-bold mt-1">OPERATIONAL</div>
+            </div>
+
+            <div className="glass-card p-4 rounded-2xl border border-border/50 hidden sm:block">
+              <div className="text-[10px] uppercase font-black text-slate-500 tracking-wider mb-1">Current Plan</div>
+              <div className="text-xl font-black text-white uppercase tracking-tight">{(userUsage?.plan || 'Free').replace('_', ' ')}</div>
+              <div className="text-[10px] text-primary font-bold mt-1 flex items-center gap-1">
+                <Zap className="h-2 w-2 fill-current" /> UPGRADE
+              </div>
+            </div>
+          </div>
+
           <div className="glass-card rounded-2xl sm:rounded-[2rem] shadow-sm overflow-hidden border-border/50">
             <div className="p-4 sm:p-8 border-b border-white/5 flex items-center justify-between gap-3 sm:gap-4">
               <div className="relative flex-1">
