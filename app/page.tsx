@@ -3,6 +3,9 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/Logo';
 
+// Allow static generation but enable ISR if needed
+export const revalidate = 3600;
+
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">

@@ -27,8 +27,15 @@ export async function getCurrentUserId(): Promise<string | null> {
 
     const decoded = jwtDecode<DecodedToken>(accessToken);
     return decoded.sub || null;
-  } catch (error) {
-    console.error('Failed to get current user ID:', error);
+  } catch (error: any) {
+    // Only log errors in development or if not a dynamic server error
+    if (error?.message?.includes('Dynamic server') || error?.message?.includes('cookies')) {
+      // Silently handle static generation attempts
+      return null;
+    }
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Failed to get current user ID:', error);
+    }
     return null;
   }
 }

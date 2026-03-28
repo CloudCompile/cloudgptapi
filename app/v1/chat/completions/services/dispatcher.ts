@@ -269,10 +269,25 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
 
   let providerResponse: Response;
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS);
+  
+  // Model-specific timeout tuning
+  // Reasoning models and slow providers need more time
+  let overrideTimeout = PROVIDER_TIMEOUT_MS;
+  if (modelId.includes('reasoning') || modelId.includes('o1') || modelId.includes('o3')) {
+    overrideTimeout = 600000; // 10 minutes for reasoning models
+    console.log(`[${requestId}] Using extended timeout (10 min) for reasoning model: ${modelId}`);
+  } else if (modelId.includes('deepseek-r1') || modelId.includes('thinking')) {
+    overrideTimeout = 480000; // 8 minutes for thinking models
+    console.log(`[${requestId}] Using extended timeout (8 min) for thinking model: ${modelId}`);
+  } else if (model.provider === 'stablehorde') {
+    overrideTimeout = 420000; // 7 minutes for Stable Horde (distributed service)
+    console.log(`[${requestId}] Using extended timeout (7 min) for Stable Horde`);
+  }
+  
+  const timeoutId = setTimeout(() => controller.abort(), overrideTimeout);
   
   try {
-    console.log(`[${requestId}] Forwarding to provider: ${model.provider}, URL: ${providerUrl}`);
+    console.log(`[${requestId}] Forwarding to provider: ${model.provider}, URL: ${providerUrl}, Timeout: ${overrideTimeout}ms`);
     const keyPrefix = headers['Authorization']?.substring(0, 15) || 'none';
     console.log(`[${requestId}] Auth Header Prefix: ${keyPrefix}`);
     
@@ -288,10 +303,10 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   } catch (fetchError: any) {
     clearTimeout(timeoutId);
     if (fetchError.name === 'AbortError') {
-      console.error(`[${requestId}] Provider request timed out after ${PROVIDER_TIMEOUT_MS}ms`);
+      console.error(`[${requestId}] Provider request timed out after ${overrideTimeout}ms for model ${modelId} with provider ${model.provider}`);
       return NextResponse.json(
-        { error: { message: 'Request timed out', type: 'timeout_error', param: null, code: 'request_timeout', request_id: requestId } },
-        { status: 504, headers: getCorsHeaders() }
+        { error: { message: `Request timed out after ${overrideTimeout / 1000}s. This ${modelId} may be experiencing high load. Try again or use a faster model.`, type: 'timeout_error', param: null, code: 'request_timeout', request_id: requestId, should_retry: true } },
+        { status: 504, headers: { ...getCorsHeaders(), 'Retry-After': '30' } }
       );
     }
     throw fetchError;
@@ -306,27 +321,66 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
 
     let mappedStatus = providerResponse.status;
     let errorMessage = sanitizedMessage;
+    let errorCode = 'upstream_error';
+    let shouldRetry = false;
     
     if (providerResponse.status === 418) {
       mappedStatus = 503;
       errorMessage = 'The upstream provider is temporarily unavailable. Please try again or use a different model.';
+      errorCode = 'provider_unavailable';
+      shouldRetry = true;
+    } else if (providerResponse.status === 429) {
+      mappedStatus = 429;
+      errorMessage = 'Rate limit exceeded for the upstream provider. Please wait a moment and try again.';
+      errorCode = 'rate_limit_exceeded';
+      shouldRetry = true;
+    } else if (providerResponse.status === 504 || providerResponse.status === 503) {
+      errorMessage = `The upstream provider (${model.provider}) is temporarily unavailable or overloaded. Please try again in a few moments or use a different model.`;
+      errorCode = 'provider_timeout';
+      shouldRetry = true;
     } else if (providerResponse.status >= 500) {
-      errorMessage = sanitizedMessage || 'The upstream provider encountered an error. Please try again later.';
+      errorMessage = `Server error from upstream provider ${model.provider}. This usually resolves quickly. Please try again or use a different model.`;
+      errorCode = 'provider_server_error';
+      shouldRetry = true;
     } else if (providerResponse.status === 401 || providerResponse.status === 403) {
-      errorMessage = sanitizedMessage || `Authentication error with upstream provider (${model.provider}).`;
+      errorMessage = `Authentication error with upstream provider (${model.provider}). Our team has been notified.`;
+      errorCode = 'provider_auth_error';
+    } else if (providerResponse.status === 400) {
+      errorMessage = sanitizedMessage || `Invalid request format for ${model.provider}. Please check your message format and try again.`;
+      errorCode = 'invalid_request';
     }
 
     try {
       const errorJson = JSON.parse(errorText);
-      if (errorJson.error) return NextResponse.json(errorJson, { status: mappedStatus, headers: getCorsHeaders() });
+      if (errorJson.error) {
+        return NextResponse.json(errorJson, { 
+          status: mappedStatus, 
+          headers: {
+            ...getCorsHeaders(),
+            ...(shouldRetry && { 'Retry-After': '10' })
+          }
+        });
+      }
       return NextResponse.json(
-        { error: { message: errorMessage, type: 'api_error', param: null, code: errorJson.code || 'upstream_error', details: errorJson, request_id: requestId, original_status: providerResponse.status } },
-        { status: mappedStatus, headers: getCorsHeaders() }
+        { error: { message: errorMessage, type: 'api_error', param: null, code: errorJson.code || errorCode, details: errorJson.error?.message || errorJson.message, request_id: requestId, original_status: providerResponse.status, should_retry: shouldRetry } },
+        { 
+          status: mappedStatus, 
+          headers: {
+            ...getCorsHeaders(),
+            ...(shouldRetry && { 'Retry-After': '10' })
+          }
+        }
       );
     } catch (e) {
       return NextResponse.json(
-        { error: { message: errorMessage, type: 'api_error', param: null, code: 'upstream_error', details: sanitizedMessage, request_id: requestId, original_status: providerResponse.status } },
-        { status: mappedStatus, headers: getCorsHeaders() }
+        { error: { message: errorMessage, type: 'api_error', param: null, code: errorCode, request_id: requestId, original_status: providerResponse.status, should_retry: shouldRetry } },
+        { 
+          status: mappedStatus, 
+          headers: {
+            ...getCorsHeaders(),
+            ...(shouldRetry && { 'Retry-After': '10' })
+          }
+        }
       );
     }
   }
@@ -369,35 +423,63 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
         const reader = providerResponse.body!.pipeThrough(transformStream).getReader();
         
         let firstTokenReceived = false;
-        const streamTimeout = setTimeout(() => {
+        let lastTokenTime = Date.now();
+        
+        // Streaming-specific timeout: wait up to 60 seconds for first token, then 30 seconds between tokens
+        const firstTokenTimeout = setTimeout(() => {
           if (!firstTokenReceived) {
-            console.error(`[${requestId}] STREAM TIMEOUT`);
-            const timeoutError = { error: { message: "The model is taking too long to respond. Please try again with a shorter prompt.", type: "timeout_error", code: "provider_timeout" } };
+            console.error(`[${requestId}] STREAM FIRST TOKEN TIMEOUT - no response after 60s`);
+            const timeoutError = { error: { message: "The model is taking too long to start responding. This usually happens when the provider is overloaded. Try again in a moment.", type: "timeout_error", code: "first_token_timeout" } };
             controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(timeoutError)}\n\n`));
             controller.enqueue(new TextEncoder().encode(`data: [DONE]\n\n`));
             try { reader.cancel(); } catch (e) {}
             controller.close();
           }
-        }, 15000);
+        }, 60000); // 60 seconds for first token
+
+        const checkTokenTimeout = setInterval(() => {
+          const now = Date.now();
+          // If no token received in 45 seconds (but we did get the first one), give up
+          if (firstTokenReceived && (now - lastTokenTime) > 45000) {
+            console.error(`[${requestId}] STREAM TOKEN TIMEOUT - no token after ${now - lastTokenTime}ms`);
+            clearInterval(checkTokenTimeout);
+            clearTimeout(firstTokenTimeout);
+            const timeoutError = { error: { message: "The model stopped responding mid-stream. The response may be incomplete. Try again.", type: "timeout_error", code: "token_timeout" } };
+            controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(timeoutError)}\n\n`));
+            controller.enqueue(new TextEncoder().encode(`data: [DONE]\n\n`));
+            try { reader.cancel(); } catch (e) {}
+            controller.close();
+          }
+        }, 10000); // Check every 10 seconds
 
         try {
           while (true) {
             const { done, value } = await reader.read();
-            if (done) break;
+            if (done) {
+              clearInterval(checkTokenTimeout);
+              clearTimeout(firstTokenTimeout);
+              break;
+            }
             if (!firstTokenReceived && value.length > 0) {
               firstTokenReceived = true;
-              clearTimeout(streamTimeout);
-              console.log(`[${requestId}] First stream chunk received successfully.`);
+              lastTokenTime = Date.now();
+              clearTimeout(firstTokenTimeout);
+              console.log(`[${requestId}] First stream chunk received after ${Date.now() - lastTokenTime}ms.`);
+            }
+            if (firstTokenReceived && value.length > 0) {
+              lastTokenTime = Date.now();
             }
             controller.enqueue(value);
           }
         } catch (err) {
-          clearTimeout(streamTimeout);
+          clearInterval(checkTokenTimeout);
+          clearTimeout(firstTokenTimeout);
           console.error(`[${requestId}] Stream processing error:`, err);
           const errorMessage = err instanceof Error ? err.message : String(err);
           controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ error: { message: `Stream error: ${errorMessage}` } })}\n\n`));
         } finally {
-          clearTimeout(streamTimeout);
+          clearInterval(checkTokenTimeout);
+          clearTimeout(firstTokenTimeout);
           try { controller.close(); } catch (e) {}
         }
       }
@@ -454,12 +536,9 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   }
   
   let assistantContent = responseData?.choices?.[0]?.message?.content || '';
-  if (modelId === 'gemini-large' && assistantContent.length > 12000) {
-    console.warn(`[${requestId}] Extremely long response detected (${assistantContent.length} chars). Truncating for frontend compatibility.`);
-    assistantContent = assistantContent.substring(0, 12000) + '\n\n[Response truncated by Vetra for frontend compatibility. Use "Continue" to fetch more if supported.]';
-    if (responseData.choices[0].message) responseData.choices[0].message.content = assistantContent;
-  }
-
+  
+  // Don't truncate responses - let the model output its full response
+  // Frontend can handle scrolling for long responses
   if (!assistantContent && modelId.includes('gemini')) {
     console.error(`[${requestId}] EMPTY CONTENT DETECTED from Gemini! Full response:`, JSON.stringify(responseData, null, 2));
     const fallbackMessage = "I apologize, but I encountered an issue generating a response for this request. This can sometimes happen with complex prompts or sensitive topics. Please try rephrasing your message or switching to a different model (like OpenAI or Claude).";

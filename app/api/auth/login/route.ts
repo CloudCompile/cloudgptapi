@@ -24,13 +24,16 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const loginUrl = new URL(`${kindeAuthDomain}/oauth/authorize`);
+    // Ensure auth domain doesn't have trailing slash before appending path
+    const cleanAuthDomain = kindeAuthDomain.replace(/\/$/, '');
+    const loginUrl = new URL(`${cleanAuthDomain}/oauth/authorize`);
     loginUrl.searchParams.set('client_id', kindeClientId);
     loginUrl.searchParams.set('response_type', 'code');
     loginUrl.searchParams.set('redirect_uri', kindeRedirectUri);
     loginUrl.searchParams.set('state', state);
     loginUrl.searchParams.set('scope', 'openid profile email offline');
 
+    console.log(`[LOGIN] Redirecting to Kinde: ${loginUrl.toString().substring(0, 100)}...`);
     return NextResponse.redirect(loginUrl.toString());
   } catch (error) {
     console.error('Login error:', error);
