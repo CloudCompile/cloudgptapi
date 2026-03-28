@@ -60,14 +60,20 @@ export default function Dashboard() {
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [userUsage, setUserUsage] = useState<any>(null);
+  const [usageStats, setUsageStats] = useState<any>(null);
+  const [loadingStats, setLoadingStats] = useState(false);
 
   useEffect(() => {
     fetchKeys();
     fetchProviderStatuses();
     fetchUserUsage();
+    fetchUsageStats();
 
     // Auto-refresh stats every minute
-    const usageInterval = setInterval(fetchUserUsage, 60000);
+    const usageInterval = setInterval(() => {
+        fetchUserUsage();
+        fetchUsageStats();
+    }, 60000);
     // Auto-refresh status every 30 seconds
     const statusInterval = setInterval(fetchProviderStatuses, 30000);
     return () => {
@@ -75,6 +81,21 @@ export default function Dashboard() {
       clearInterval(usageInterval);
     };
   }, []);
+
+  async function fetchUsageStats() {
+    setLoadingStats(true);
+    try {
+      const response = await fetch('/api/usage/stats?days=7');
+      if (response.ok) {
+        const data = await response.json();
+        setUsageStats(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch historical stats');
+    } finally {
+      setLoadingStats(false);
+    }
+  }
 
   async function fetchUserUsage() {
     try {
@@ -264,9 +285,24 @@ export default function Dashboard() {
             </div>
             
             <div className="glass-card p-4 rounded-2xl border border-border/50">
-              <div className="text-[10px] uppercase font-black text-slate-500 tracking-wider mb-1">Active Keys</div>
-              <div className="text-xl font-black text-white">{keys.length}</div>
-              <div className="text-[10px] text-emerald-500 font-bold mt-1">OPERATIONAL</div>
+              <div className="text-[10px] uppercase font-black text-slate-500 tracking-wider mb-1">Weekly Volume</div>
+              <div className="flex items-end gap-2">
+                <div className="text-xl font-black text-white">{usageStats?.summary?.totalRequests || 0}</div>
+                <div className="text-[10px] text-emerald-500 font-bold mb-1.5">REQ/7D</div>
+              </div>
+              <div className="mt-2 flex gap-0.5 h-1">
+                {(usageStats?.chartData || []).slice(-7).map((d: any, i: number) => (
+                    <div 
+                        key={i} 
+                        className="flex-1 bg-primary/20 rounded-full overflow-hidden"
+                    >
+                        <div 
+                            className="h-full bg-primary" 
+                            style={{ height: '100%', width: `${Math.min(100, (d.total / (Math.max(...usageStats.chartData.map((x:any)=>x.total)) || 1)) * 100)}%` }}
+                        />
+                    </div>
+                ))}
+              </div>
             </div>
 
             <div className="glass-card p-4 rounded-2xl border border-border/50 hidden sm:block">
@@ -275,6 +311,84 @@ export default function Dashboard() {
               <div className="text-[10px] text-primary font-bold mt-1 flex items-center gap-1">
                 <Zap className="h-2 w-2 fill-current" /> UPGRADE
               </div>
+            </div>
+          </div>
+
+          {/* Usage Chart Section */}
+          <div className="glass-card rounded-[2rem] p-6 sm:p-8 border border-border/50">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-black tracking-tight">Traffic Overview</h3>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Last 7 Days Activity</p>
+              </div>
+              <div className="flex gap-2">
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/5 border border-white/10">
+                    <div className="w-2 h-2 rounded-full bg-primary" />
+                    <span className="text-[9px] font-black text-slate-400 uppercase">Requests</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="h-48 w-full flex items-end gap-1 sm:gap-2 px-2">
+                {usageStats?.chartData ? (
+                    usageStats.chartData.map((day: any, i: number) => {
+                        const max = Math.max(...usageStats.chartData.map((d: any) => d.total)) || 1;
+                        const height = (day.total / max) * 100;
+                        return (
+                            <div key={day.date} className="flex-1 group/bar relative">
+                                <div 
+                                    className="w-full bg-primary/10 group-hover/bar:bg-primary/20 transition-all rounded-t-lg relative"
+                                    style={{ height: `${Math.max(5, height)}%` }}
+                                >
+                                    <div className="absolute inset-0 bg-primary opacity-40 rounded-t-lg group-hover/bar:opacity-100 transition-opacity" />
+                                    
+                                    {/* Tooltip */}
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 border border-border rounded text-[9px] font-bold text-white opacity-0 group-hover/bar:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none shadow-xl">
+                                        {day.total} reqs • {new Date(day.date).toLocaleDateString(undefined, { weekday: 'short' })}
+                                    </div>
+                                </div>
+                                <div className="text-[8px] font-black text-slate-500 text-center mt-2 uppercase tracking-tighter">
+                                    {new Date(day.date).toLocaleDateString(undefined, { weekday: 'narrow' })}
+                                </div>
+                            </div>
+                        );
+                    })
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                        <Loader2 className="h-6 w-6 animate-spin text-slate-700" />
+                    </div>
+                )}
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4 mt-8 pt-8 border-t border-white/5">
+                <div>
+                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Top Models</h4>
+                    <div className="space-y-2">
+                        {usageStats?.topModels?.length > 0 ? usageStats.topModels.map((m: any) => (
+                            <div key={m.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+                                <span className="text-[10px] font-mono font-bold text-slate-300 truncate max-w-[140px]">{m.id}</span>
+                                <span className="text-[10px] font-black text-primary">{m.count}</span>
+                            </div>
+                        )) : <div className="text-[10px] text-slate-600 font-bold uppercase py-2">No data recorded</div>}
+                    </div>
+                </div>
+                <div>
+                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Network Summary</h4>
+                    <div className="glass-card p-3 rounded-xl bg-primary/5 border-primary/10">
+                        <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] font-bold text-slate-500">AVG REQUESTS/DAY</span>
+                            <span className="text-xs font-black text-white">
+                                {usageStats?.chartData ? Math.round(usageStats.summary.totalRequests / usageStats.chartData.length) : 0}
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold text-slate-500">EST. TOKENS (7D)</span>
+                            <span className="text-xs font-black text-white">
+                                {usageStats?.summary?.totalTokens?.toLocaleString() || 0}
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
           </div>
 
