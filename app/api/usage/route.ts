@@ -11,7 +11,7 @@ export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = await getCurrentUserId();
+    const userId = await getCurrentUserId(request);
     
     if (!userId) {
       await logErrorToSupabase('error', 'Unauthorized access attempt to GET /api/usage: No Kinde session found', '/api/usage');

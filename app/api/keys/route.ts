@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const cookieHeader = request.headers.get('cookie');
     console.log('[GET /api/keys] Cookies present:', !!cookieHeader, 'Length:', cookieHeader?.length);
     
-    const userId = await getCurrentUserId();
+    const userId = await getCurrentUserId(request);
     
     if (!userId) {
       console.log('[GET /api/keys] getCurrentUserId returned null. Unauthorized.');
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     const cookieHeader = request.headers.get('cookie');
     console.log('[POST /api/keys] Cookies present:', !!cookieHeader, 'Length:', cookieHeader?.length);
 
-    const userId = await getCurrentUserId();
+    const userId = await getCurrentUserId(request);
     
     if (!userId) {
       console.log('[POST /api/keys] getCurrentUserId returned null. Unauthorized.');
@@ -201,7 +201,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const userId = await getCurrentUserId();
+    const userId = await getCurrentUserId(request);
     
     if (!userId) {
       console.log('[DELETE /api/keys] getCurrentUserId returned null. Unauthorized.');

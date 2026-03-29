@@ -1,14 +1,12 @@
 'use server';
 
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
+import { NextRequest } from 'next/server';
 
-/**
- * Get the current user ID from Kinde authentication
- * @returns The user ID if authenticated, null otherwise
- */
-export async function getCurrentUserId(): Promise<string | null> {
+export async function getCurrentUserId(req?: NextRequest): Promise<string | null> {
   try {
-    const { isAuthenticated, getUser } = getKindeServerSession();
+    const session = req ? getKindeServerSession(req as any) : getKindeServerSession();
+    const { isAuthenticated, getUser } = session;
     if (!(await isAuthenticated())) {
       return null;
     }
@@ -25,24 +23,18 @@ export async function getCurrentUserId(): Promise<string | null> {
   }
 }
 
-/**
- * Require authentication and return the user ID
- * @throws Error with descriptive message if not authenticated
- */
-export async function requireAuth(): Promise<string> {
-  const userId = await getCurrentUserId();
+export async function requireAuth(req?: NextRequest): Promise<string> {
+  const userId = await getCurrentUserId(req);
   if (!userId) {
     throw new Error('Authentication required: No valid user session found');
   }
   return userId;
 }
 
-/**
- * Get the current user information from Kinde
- */
-export async function getCurrentUser() {
+export async function getCurrentUser(req?: NextRequest) {
   try {
-    const { isAuthenticated, getUser } = getKindeServerSession();
+    const session = req ? getKindeServerSession(req as any) : getKindeServerSession();
+    const { isAuthenticated, getUser } = session;
     if (!(await isAuthenticated())) {
       return null;
     }
@@ -53,11 +45,7 @@ export async function getCurrentUser() {
     return null;
   }
 }
-
-/**
- * Get the access token from Kinde
- */
-export async function getAccessToken(): Promise<string | null> {
+rt async function getAccessToken(): Promise<string | null> {
   try {
     const { getAccessTokenRaw } = getKindeServerSession();
     const token = await getAccessTokenRaw();
@@ -68,9 +56,6 @@ export async function getAccessToken(): Promise<string | null> {
   }
 }
 
-/**
- * Verify that a user is authenticated
- */
 export async function isAuthenticated(): Promise<boolean> {
   try {
     const session = getKindeServerSession();

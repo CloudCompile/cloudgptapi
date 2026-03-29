@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { applyPlanOverride } from '@/lib/api-keys';
@@ -7,13 +7,13 @@ import { logErrorToSupabase } from '@/lib/error-logger';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const headers = {
     'Cache-Control': 'no-store, max-age=0, must-revalidate',
   };
 
   try {
-    const { isAuthenticated, getUser } = getKindeServerSession();
+    const { isAuthenticated, getUser } = getKindeServerSession(request as any);
     
     if (!(await isAuthenticated())) {
       console.error('[Profile] Not authenticated with Kinde');
