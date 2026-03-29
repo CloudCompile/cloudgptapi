@@ -16,9 +16,14 @@ interface DecodedToken {
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get('kinde_access_token')?.value;
-    
+    const accessToken = cookieStore.get('kinde_access_token')?.value
+      || cookieStore.get('kinde_id_token')?.value
+      || cookieStore.get('id_token')?.value
+      || cookieStore.get('access_token')?.value
+      || null;
+
     if (!accessToken) {
+      console.error('[Profile] No Kinde token cookie found');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

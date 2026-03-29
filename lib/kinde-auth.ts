@@ -19,7 +19,12 @@ interface DecodedToken {
 export async function getCurrentUserId(): Promise<string | null> {
   try {
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get('kinde_access_token')?.value;
+    // Support multiple cookie names (legacy variations or different environments)
+    const accessToken = cookieStore.get('kinde_access_token')?.value
+      || cookieStore.get('kinde_id_token')?.value
+      || cookieStore.get('id_token')?.value
+      || cookieStore.get('access_token')?.value
+      || null;
 
     if (!accessToken) {
       return null;
