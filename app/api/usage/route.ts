@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const userId = await getCurrentUserId(request);
     
     if (!userId) {
-      await logErrorToSupabase('error', 'Unauthorized access attempt to GET /api/usage: No Kinde session found', '/api/usage');
+      await logErrorToSupabase('warn', 'Unauthorized access attempt to GET /api/usage: No Kinde session found', '/api/usage');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: getCorsHeaders() });
     }
 

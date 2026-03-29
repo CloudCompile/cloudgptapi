@@ -1,5 +1,3 @@
-'use server';
-
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import { NextRequest } from 'next/server';
 
@@ -45,7 +43,8 @@ export async function getCurrentUser(req?: NextRequest) {
     return null;
   }
 }
-rt async function getAccessToken(): Promise<string | null> {
+
+export async function getAccessToken(): Promise<string | null> {
   try {
     const { getAccessTokenRaw } = getKindeServerSession();
     const token = await getAccessTokenRaw();
@@ -56,7 +55,7 @@ rt async function getAccessToken(): Promise<string | null> {
   }
 }
 
-export async function isAuthenticated(): Promise<boolean> {
+export async function isUserAuthenticated(): Promise<boolean> {
   try {
     const session = getKindeServerSession();
     const isAuth = await session.isAuthenticated();
