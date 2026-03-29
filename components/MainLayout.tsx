@@ -16,7 +16,7 @@ interface MainLayoutContextType {
 
 export const MainLayoutContext = React.createContext<MainLayoutContextType>({
   isSidebarCollapsed: false,
-  setIsSidebarCollapsed: () => {},
+  setIsSidebarCollapsed: () => { },
 });
 
 export function useMainLayout() {
@@ -44,16 +44,15 @@ function LaunchBanner() {
   );
 }
 
-function Header({ 
-  isAppPage, 
-}: { 
+function Header({
+  isAppPage,
+}: {
   isAppPage: boolean;
 }) {
   const [isSignedIn, setIsSignedIn] = useState(false);
 
   useEffect(() => {
-    // Check if user is authenticated
-    fetch('/api/profile')
+    fetch('/api/profile', { cache: 'no-store' })
       .then(res => {
         setIsSignedIn(res.ok);
       })
@@ -78,7 +77,7 @@ function Header({
             </Link>
           </div>
         </div>
-        
+
         {!isAppPage && (
           <nav className="hidden md:flex items-center gap-8">
             <Link href="/models" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Models</Link>
@@ -90,7 +89,7 @@ function Header({
 
         <div className="flex items-center gap-4">
           {!isSignedIn ? (
-            <Link 
+            <Link
               href="/api/auth/login"
               className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-md shadow-primary/20 hover:bg-primary/90 transition-all"
             >
@@ -99,7 +98,7 @@ function Header({
           ) : (
             <div className="flex items-center gap-4">
               <UserStatus />
-              <Link 
+              <Link
                 href="/api/auth/logout"
                 className="text-sm font-medium text-slate-600 hover:text-primary transition-colors"
               >
@@ -117,36 +116,36 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  
+
   // Close mobile menu when pathname changes
   React.useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
-  
-  const isAppPage = pathname.startsWith('/dashboard') || 
-                   pathname.startsWith('/playground') || 
-                   pathname.startsWith('/models') || 
-                   pathname.startsWith('/docs') ||
-                   pathname.startsWith('/pricing') ||
-                   pathname.startsWith('/admin');
+
+  const isAppPage = pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/playground') ||
+    pathname.startsWith('/models') ||
+    pathname.startsWith('/docs') ||
+    pathname.startsWith('/pricing') ||
+    pathname.startsWith('/admin');
   const isLandingPage = pathname === '/';
 
   return (
     <MainLayoutContext.Provider value={{ isSidebarCollapsed, setIsSidebarCollapsed }}>
       <div className="min-h-screen bg-background dot-grid">
         {isLandingPage && <LaunchBanner />}
-        <Header 
-          isAppPage={isAppPage} 
+        <Header
+          isAppPage={isAppPage}
         />
-        
+
         <div className="flex">
           {isAppPage && (
-            <Sidebar 
-              isOpen={mobileMenuOpen} 
-              onClose={() => setMobileMenuOpen(false)} 
+            <Sidebar
+              isOpen={mobileMenuOpen}
+              onClose={() => setMobileMenuOpen(false)}
             />
           )}
-          
+
           {isAppPage && (
             <button
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
