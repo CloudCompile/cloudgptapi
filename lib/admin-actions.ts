@@ -61,9 +61,9 @@ export async function assignPlan(userId: string, plan: 'free' | 'developer' | 'p
 
   const { error } = await supabaseAdmin
     .from('profiles')
-    .update({ 
-      plan, 
-      stripe_product_id: stripeProductId || null 
+    .update({
+      plan,
+      stripe_product_id: stripeProductId || null
     })
     .eq('id', userId);
 
@@ -84,7 +84,7 @@ export async function assignPlan(userId: string, plan: 'free' | 'developer' | 'p
 
   // Also update rate limits for their API keys if they upgrade
   if (plan === 'pro' || plan === 'enterprise' || plan === 'developer') {
-    let rateLimit = 100; // Developer default
+    let rateLimit = 100;
     if (plan === 'pro') rateLimit = 500;
     if (plan === 'enterprise') rateLimit = 1000;
 
@@ -92,7 +92,7 @@ export async function assignPlan(userId: string, plan: 'free' | 'developer' | 'p
       .from('api_keys')
       .update({ rate_limit: rateLimit })
       .eq('user_id', userId);
-      
+
     if (keyError) {
       console.error('Failed to update API key rate limits:', keyError);
     }
@@ -103,7 +103,6 @@ export async function assignPlan(userId: string, plan: 'free' | 'developer' | 'p
 }
 
 export async function syncUser(userId: string, email: string, username?: string, name?: string, avatar?: string) {
-  // 1. Check if user already exists by ID
   const { data: existingProfileById } = await supabaseAdmin
     .from('profiles')
     .select('id')
@@ -111,10 +110,9 @@ export async function syncUser(userId: string, email: string, username?: string,
     .maybeSingle();
 
   if (existingProfileById) {
-    // Already synced, just ensure profile info is up to date
     await supabaseAdmin
       .from('profiles')
-      .update({ 
+      .update({
         email,
         username: username || undefined,
         name: name || undefined,
@@ -124,7 +122,6 @@ export async function syncUser(userId: string, email: string, username?: string,
     return;
   }
 
-  // 2. Check if user exists by email (Clerk to Logto migration case)
   const { data: existingProfileByEmail } = await supabaseAdmin
     .from('profiles')
     .select('*')
@@ -136,24 +133,15 @@ export async function syncUser(userId: string, email: string, username?: string,
     console.log(`[Migration] Migrating user ${email} from old ID ${oldId} to new ID ${userId}`);
 
     try {
-      // 1. Update related tables that reference user_id
-      // We do this first to ensure data is moved before we create the new profile
-      const updateResults = await Promise.all([
-        supabaseAdmin.from('api_keys').update({ user_id: userId }).eq('user_id', oldId),
-        supabaseAdmin.from('usage_logs').update({ user_id: userId }).eq('user_id', oldId),
-        supabaseAdmin.from('user_subscriptions').update({ user_id: userId }).eq('user_id', oldId),
-      ]);
+      await supabaseAdmin
+        .from('profiles')
+        .update({ email: `migrated_${oldId}@temp.com` })
+        .eq('id', oldId);
 
-      const errors = updateResults.filter(r => r.error);
-      if (errors.length > 0) {
-        console.error(`[Migration] Errors updating related tables for ${email}:`, errors);
-      }
-
-      // 3. Check for existing subscription to determine initial plan
       const { data: subscription } = await supabaseAdmin
         .from('user_subscriptions')
         .select('stripe_price_id')
-        .eq('user_id', userId)
+        .eq('user_id', oldId)
         .eq('status', 'active')
         .maybeSingle();
 
@@ -172,7 +160,6 @@ export async function syncUser(userId: string, email: string, username?: string,
         else if (priceId === VIDEO_PRICE_ID) initialPlan = 'video_pro';
       }
 
-      // Create new profile with new ID but old data
       const { error: insertError } = await supabaseAdmin
         .from('profiles')
         .insert({
@@ -182,31 +169,40 @@ export async function syncUser(userId: string, email: string, username?: string,
           updated_at: new Date().toISOString()
         });
 
-      if (!insertError || insertError.code === '23505') { // Success or already exists
-        // 3. Delete the old profile record
-        await supabaseAdmin.from('profiles').delete().eq('id', oldId);
-        console.log(`[Migration] Successfully migrated all data for ${email} from ${oldId} to ${userId}`);
-        return;
-      } else {
+      if (insertError) {
         console.error(`[Migration] Failed to create new profile for ${email}:`, insertError);
+        await supabaseAdmin.from('profiles').update({ email }).eq('id', oldId);
+        return;
       }
+
+      const updateResults = await Promise.all([
+        supabaseAdmin.from('api_keys').update({ user_id: userId }).eq('user_id', oldId),
+        supabaseAdmin.from('usage_logs').update({ user_id: userId }).eq('user_id', oldId),
+        supabaseAdmin.from('user_subscriptions').update({ user_id: userId }).eq('user_id', oldId),
+      ]);
+
+      const errors = updateResults.filter(r => r.error);
+      if (errors.length > 0) {
+        console.error(`[Migration] Errors updating related tables for ${email}:`, errors);
+      }
+
+      await supabaseAdmin.from('profiles').delete().eq('id', oldId);
+      console.log(`[Migration] Successfully migrated all data for ${email} from ${oldId} to ${userId}`);
+      return;
     } catch (migError) {
       console.error(`[Migration] Critical error during migration for ${email}:`, migError);
     }
   }
 
-  // 3. Brand new user case
   console.log(`[Sync] Creating new profile for brand new user ${email} (${userId})`);
 
-  // Check if they have an existing subscription by email (from Stripe sync or webhook)
   const { data: emailSubscription } = await supabaseAdmin
     .from('user_subscriptions')
     .select('stripe_price_id, stripe_subscription_id')
-    .eq('user_id', email) // Some webhooks might store email as user_id temporarily if user not found
+    .eq('user_id', email)
     .eq('status', 'active')
     .maybeSingle();
 
-  // Also check by ID in case it was already linked
   const { data: idSubscription } = await supabaseAdmin
     .from('user_subscriptions')
     .select('stripe_price_id')
@@ -230,7 +226,6 @@ export async function syncUser(userId: string, email: string, username?: string,
     else if (priceId === DEV_PRICE_ID) initialPlan = 'developer';
     else if (priceId === VIDEO_PRICE_ID) initialPlan = 'video_pro';
 
-    // If we found it by email, we should update the user_id in the subscription record
     if (emailSubscription && !idSubscription) {
       await supabaseAdmin
         .from('user_subscriptions')
@@ -256,7 +251,6 @@ export async function syncUser(userId: string, email: string, username?: string,
     return;
   }
 
-  // Update profile with plan (stored in Supabase, not in Kinde metadata)
   try {
     await supabaseAdmin
       .from('profiles')
@@ -268,7 +262,6 @@ export async function syncUser(userId: string, email: string, username?: string,
     console.error(`Failed to update profile for new user ${userId}:`, error);
   }
 
-  // Only notify Discord if this is a truly new user (didn't exist before in any form)
   if (!existingProfileById && !existingProfileByEmail) {
     const discordWebhookUrl = process.env.DISCORD_PRO_WEBHOOK;
     if (discordWebhookUrl) {
@@ -276,7 +269,7 @@ export async function syncUser(userId: string, email: string, username?: string,
         const embed = {
           title: 'New User Joined! 🚀',
           description: `A new user has just signed up for Vetra.`,
-          color: 0x3498db, // Blue
+          color: 0x3498db,
           fields: [
             {
               name: 'User ID',
