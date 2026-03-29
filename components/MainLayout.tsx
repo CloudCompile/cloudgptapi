@@ -89,21 +89,21 @@ function Header({
 
         <div className="flex items-center gap-4">
           {!isSignedIn ? (
-            <Link
+            <a
               href="/api/auth/login"
               className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-md shadow-primary/20 hover:bg-primary/90 transition-all"
             >
               Sign In
-            </Link>
+            </a>
           ) : (
             <div className="flex items-center gap-4">
               <UserStatus />
-              <Link
+              <a
                 href="/api/auth/logout"
                 className="text-sm font-medium text-slate-600 hover:text-primary transition-colors"
               >
                 Sign Out
-              </Link>
+              </a>
             </div>
           )}
         </div>

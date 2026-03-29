@@ -215,7 +215,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
               {isSignedIn ? (
                 <div className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">{role}</div>
               ) : (
-                <Link href="/api/auth/login" className="text-[9px] sm:text-[10px] font-bold text-primary uppercase tracking-widest hover:underline truncate">Sign In</Link>
+                <a href="/api/auth/login" className="text-[9px] sm:text-[10px] font-bold text-primary uppercase tracking-widest hover:underline truncate">Sign In</a>
               )}
             </div>
           </div>
