@@ -87,7 +87,7 @@ export default function Dashboard() {
   async function fetchUsageStats() {
     setLoadingStats(true);
     try {
-      const response = await fetch('/api/usage/stats?days=7');
+      const response = await fetch('/api/usage/stats?days=7', { credentials: 'include' });
       if (response.ok) {
         const data = await response.json();
         setUsageStats(data);
@@ -101,7 +101,7 @@ export default function Dashboard() {
 
   async function fetchUserUsage() {
     try {
-      const response = await fetch('/api/usage');
+      const response = await fetch('/api/usage', { credentials: 'include' });
       if (response.ok) {
         const data = await response.json();
         setUserUsage(data);
@@ -116,7 +116,7 @@ export default function Dashboard() {
     setIsRefreshing(true);
     setLoadingStatus(true);
     try {
-      const response = await fetch('/api/status');
+      const response = await fetch('/api/status', { credentials: 'include' });
       if (response.ok) {
         const data = await response.json();
         setProviderStatuses(data);
@@ -132,7 +132,7 @@ export default function Dashboard() {
   async function fetchKeys() {
     setLoading(true);
     try {
-      const response = await fetch('/api/keys');
+      const response = await fetch('/api/keys', { credentials: 'include' });
       const data = await response.json();
       setKeys(data.keys || []);
     } catch (err) {
@@ -152,6 +152,7 @@ export default function Dashboard() {
       const response = await fetch('/api/keys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ name: newKeyName }),
       });
 
@@ -178,6 +179,7 @@ export default function Dashboard() {
       const response = await fetch('/api/keys', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ id }),
       });
 

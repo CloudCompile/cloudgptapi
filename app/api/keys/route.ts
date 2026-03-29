@@ -4,6 +4,7 @@ import { generateApiKey } from '@/lib/api-keys';
 import { supabaseAdmin } from '@/lib/supabase';
 import { logErrorToSupabase } from '@/lib/error-logger';
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 function isMissingFandomColumnError(error: any): boolean {
