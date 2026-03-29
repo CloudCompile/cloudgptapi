@@ -59,6 +59,9 @@ export { getModelUsageWeight, generateApiKey, extractApiKey, isPeakHours, applyP
       .from('api_keys')
       .update({ last_used_at: new Date().toISOString() })
       .eq('id', data.id);
+
+    let userEmail = profile?.email;
+    let userPlan = profile?.plan || 'free';
   
     // Manual override for specific users requested by admin
     if (userEmail) {
