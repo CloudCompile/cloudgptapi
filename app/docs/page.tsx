@@ -7,9 +7,10 @@ import { cn } from '@/lib/utils';
 
 export default function DocsPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDocsSidebarOpen, setIsDocsSidebarOpen] = useState(true);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-20 sm:pt-24 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-8 relative">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-20 sm:pt-24 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background Elements */}
       <div className="fixed inset-0 mesh-gradient opacity-60 dark:opacity-40" />
       <div className="fixed inset-0 dot-grid opacity-30" />
@@ -31,13 +32,14 @@ export default function DocsPage() {
       )}
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="flex flex-col lg:flex-row gap-8 sm:gap-12">
+        <div className="flex flex-col lg:flex-row gap-8 sm:gap-12 relative">
           
           {/* Sidebar Navigation */}
           <aside className={cn(
-            "lg:w-72 shrink-0 lg:sticky lg:top-32 h-fit transition-all duration-500 z-40",
+            "shrink-0 lg:sticky lg:top-32 h-fit transition-all duration-500 z-40",
             "fixed inset-y-0 left-0 w-[280px] bg-white dark:bg-slate-900 lg:bg-transparent lg:dark:bg-transparent p-6 lg:p-0 border-r lg:border-none",
-            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+            isDocsSidebarOpen ? "lg:w-72" : "lg:w-0 lg:overflow-hidden lg:opacity-0 lg:pointer-events-none"
           )}>
             <nav className="h-full lg:h-auto overflow-y-auto lg:overflow-visible p-0 lg:p-6 rounded-none lg:rounded-[2.5rem] lg:bg-white/60 lg:dark:bg-slate-900/60 lg:backdrop-blur-2xl lg:border lg:border-white/20 lg:dark:border-slate-800/50 lg:shadow-2xl lg:shadow-slate-200/50 lg:dark:shadow-none space-y-2">
               <div className="px-3 sm:px-4 py-1 sm:py-2 mb-3 sm:mb-4">
@@ -81,6 +83,21 @@ export default function DocsPage() {
 
           {/* Main Content */}
           <main className="flex-1 min-w-0 animate-in fade-in slide-in-from-right-8 duration-1000">
+            {/* Docs Sidebar Toggle */}
+            <div className="hidden lg:flex items-center gap-3 mb-6">
+              <button
+                onClick={() => setIsDocsSidebarOpen(!isDocsSidebarOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-white/20 dark:border-slate-800/50 text-slate-500 dark:text-slate-400 hover:text-primary hover:border-primary/30 transition-all text-xs font-semibold shadow-sm"
+                title={isDocsSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current strokeWidth-2" strokeWidth="2">
+                  {isDocsSidebarOpen
+                    ? <><path d="M11 19l-7-7 7-7" /><path d="M21 12H4" /></>
+                    : <><path d="M13 5l7 7-7 7" /><path d="M3 12h18" /></>}
+                </svg>
+                {isDocsSidebarOpen ? 'Collapse' : 'Expand'} Sidebar
+              </button>
+            </div>
             <header className="mb-10 sm:mb-16">
               <div className="flex items-center gap-2 text-primary font-bold mb-3 sm:mb-4">
                 <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-primary/10 backdrop-blur-md border border-primary/20">
