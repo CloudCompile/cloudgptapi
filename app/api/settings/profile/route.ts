@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import jwtDecode from 'jwt-decode';
+import decodeJwt from '@/lib/jwt';
 import { supabaseAdmin } from '@/lib/supabase';
 
 interface DecodedToken {
@@ -27,7 +27,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const decoded = jwtDecode<DecodedToken>(accessToken);
+    const decoded = decodeJwt<DecodedToken>(accessToken);
     const userId = decoded.sub;
 
     const { data: profile } = await supabaseAdmin

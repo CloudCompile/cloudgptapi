@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import jwtDecode from 'jwt-decode';
+import decodeJwt from '@/lib/jwt';
 import { syncUser } from '@/lib/admin-actions';
 
 /**
@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
     try {
       // Prefer decoding the ID token (contains user claims). Fall back to access_token.
       const tokenToDecode = id_token || access_token;
-      const decoded: any = jwtDecode(tokenToDecode);
+      const decoded: any = decodeJwt(tokenToDecode);
       const userId: string = decoded.sub;
       const email: string = decoded.email || '';
       const givenName: string = decoded.given_name || '';

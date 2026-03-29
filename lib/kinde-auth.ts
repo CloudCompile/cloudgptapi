@@ -1,7 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import jwtDecode from 'jwt-decode';
+import decodeJwt from './jwt';
 
 interface DecodedToken {
   sub: string;
@@ -30,7 +30,7 @@ export async function getCurrentUserId(): Promise<string | null> {
       return null;
     }
 
-    const decoded = jwtDecode<DecodedToken>(accessToken);
+    const decoded = decodeJwt<DecodedToken>(accessToken);
 
     // Don't return stale user IDs from expired tokens
     const now = Math.floor(Date.now() / 1000);
@@ -76,7 +76,7 @@ export async function getCurrentUser() {
       return null;
     }
 
-    const decoded = jwtDecode<DecodedToken>(accessToken);
+    const decoded = decodeJwt<DecodedToken>(accessToken);
     return {
       id: decoded.sub,
       email: decoded.email,
@@ -115,7 +115,7 @@ export async function isAuthenticated(): Promise<boolean> {
       return false;
     }
 
-    const decoded = jwtDecode<DecodedToken>(accessToken);
+    const decoded = decodeJwt<DecodedToken>(accessToken);
     const now = Math.floor(Date.now() / 1000);
 
     // Check if token is expired
