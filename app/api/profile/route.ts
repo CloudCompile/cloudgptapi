@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { applyPlanOverride } from '@/lib/api-keys';
+import { logErrorToSupabase } from '@/lib/error-logger';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -16,11 +17,13 @@ export async function GET() {
     
     if (!(await isAuthenticated())) {
       console.error('[Profile] Not authenticated with Kinde');
+      await logErrorToSupabase('error', 'Unauthorized access attempt to GET /api/profile', '/api/profile');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers });
     }
 
     const user = await getUser();
     if (!user || !user.id) {
+      await logErrorToSupabase('error', 'Unauthorized access attempt to GET /api/profile: No user ID', '/api/profile');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers });
     }
     const userId = user.id;

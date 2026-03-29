@@ -3,6 +3,7 @@ import { getCurrentUserId } from '@/lib/kinde-auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getDailyLimitInfo, applyPlanOverride, applyPeakHoursLimit, isPeakHours } from '@/lib/api-keys';
 import { getCorsHeaders } from '@/lib/utils';
+import { logErrorToSupabase } from '@/lib/error-logger';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,6 +14,7 @@ export async function GET(request: NextRequest) {
     const userId = await getCurrentUserId();
     
     if (!userId) {
+      await logErrorToSupabase('error', 'Unauthorized access attempt to GET /api/usage: No Kinde session found', '/api/usage');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: getCorsHeaders() });
     }
 

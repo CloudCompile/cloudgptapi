@@ -2,6 +2,7 @@ import { getCurrentUserId } from '@/lib/kinde-auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateApiKey } from '@/lib/api-keys';
 import { supabaseAdmin } from '@/lib/supabase';
+import { logErrorToSupabase } from '@/lib/error-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,11 +21,17 @@ type NewApiKeyInsert = {
   fandom_plugin_enabled?: boolean;
 };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    console.log('[GET /api/keys] Request received');
+    const cookieHeader = request.headers.get('cookie');
+    console.log('[GET /api/keys] Cookies present:', !!cookieHeader, 'Length:', cookieHeader?.length);
+    
     const userId = await getCurrentUserId();
     
     if (!userId) {
+      console.log('[GET /api/keys] getCurrentUserId returned null. Unauthorized.');
+      await logErrorToSupabase('error', 'Unauthorized access attempt to GET /api/keys: No Kinde session found', '/api/keys');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -71,9 +78,15 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('[POST /api/keys] Request received - Method:', request.method);
+    const cookieHeader = request.headers.get('cookie');
+    console.log('[POST /api/keys] Cookies present:', !!cookieHeader, 'Length:', cookieHeader?.length);
+
     const userId = await getCurrentUserId();
     
     if (!userId) {
+      console.log('[POST /api/keys] getCurrentUserId returned null. Unauthorized.');
+      await logErrorToSupabase('error', `Unauthorized access attempt to POST /api/keys: No Kinde session found. Cookies length: ${cookieHeader?.length || 0}`, '/api/keys');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -191,6 +204,8 @@ export async function DELETE(request: NextRequest) {
     const userId = await getCurrentUserId();
     
     if (!userId) {
+      console.log('[DELETE /api/keys] getCurrentUserId returned null. Unauthorized.');
+      await logErrorToSupabase('error', 'Unauthorized access attempt to DELETE /api/keys: No Kinde session found', '/api/keys');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
