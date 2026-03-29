@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Cloud, LayoutDashboard, Zap, Rocket, BookOpen, FileText, Shield, Code } from 'lucide-react';
+import { Cloud, LayoutDashboard, Zap, Rocket, BookOpen, FileText, Shield, Code, ChevronRight } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { UserStatus } from './user-status';
@@ -146,6 +146,20 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
               onClose={() => setMobileMenuOpen(false)} 
             />
           )}
+          
+          {isAppPage && (
+            <button
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className={cn(
+                "hidden lg:flex fixed top-1/2 -translate-y-1/2 z-50 h-10 w-5 bg-white dark:bg-slate-950 border border-border border-l-0 items-center justify-center rounded-r-lg shadow-sm hover:bg-slate-50 dark:hover:bg-slate-900 transition-all duration-300",
+                isSidebarCollapsed ? "left-0" : "left-72"
+              )}
+              title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <ChevronRight className={cn("h-3.5 w-3.5 text-slate-500 transition-transform duration-300", isSidebarCollapsed ? "" : "rotate-180")} />
+            </button>
+          )}
+
           <main className={cn(
             "flex-1 transition-all duration-300 relative",
             isAppPage ? (isSidebarCollapsed ? "lg:pl-0" : "lg:pl-72") : "",
