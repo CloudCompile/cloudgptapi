@@ -1,7 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { jwtDecode } from 'jwt-decode';
+import jwtDecode from 'jwt-decode';
 
 interface DecodedToken {
   sub: string;

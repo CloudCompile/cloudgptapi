@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { jwtDecode } from 'jwt-decode';
+import jwtDecode from 'jwt-decode';
 import { syncUser } from '@/lib/admin-actions';
 
 /**
@@ -56,7 +56,9 @@ export async function GET(req: NextRequest) {
 
     // Sync/migrate user profile in Supabase (handles Clerk → Kinde ID migration by email)
     try {
-      const decoded: any = jwtDecode(access_token);
+      // Prefer decoding the ID token (contains user claims). Fall back to access_token.
+      const tokenToDecode = id_token || access_token;
+      const decoded: any = jwtDecode(tokenToDecode);
       const userId: string = decoded.sub;
       const email: string = decoded.email || '';
       const givenName: string = decoded.given_name || '';
@@ -93,8 +95,9 @@ export async function GET(req: NextRequest) {
     // for all responses including redirects.
     const cookieStore = await cookies();
     
-    // Store access_token in cookie (id_token omitted — Kinde JWTs are huge and would exceed 4KB)
-    cookieStore.set('kinde_access_token', access_token, {
+    // Store the ID token if available (contains claims); otherwise store access_token
+    const tokenToStore = id_token || access_token;
+    cookieStore.set('kinde_access_token', tokenToStore, {
       httpOnly: true,
       secure: isSecure,
       sameSite: 'lax',
