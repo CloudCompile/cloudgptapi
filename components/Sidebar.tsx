@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { cn, hasProAccess } from '@/lib/utils';
 import { Logo } from './Logo';
+import { useMainLayout } from './MainLayout';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -43,6 +44,7 @@ const secondaryNavigation = [
 
 export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
+  const { isSidebarCollapsed } = useMainLayout();
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [plan, setPlan] = useState<string>('free');
   const [userProfile, setUserProfile] = useState<{ email?: string; name?: string; picture?: string } | null>(null);
@@ -86,8 +88,9 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
       )}
 
       <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 sm:w-72 glass-card border-r transition-transform duration-300 ease-in-out lg:translate-x-0",
-        isOpen ? "translate-x-0" : "-translate-x-full"
+        "fixed inset-y-0 left-0 z-50 w-64 sm:w-72 glass-card border-r transition-transform duration-300 ease-in-out",
+        isOpen ? "translate-x-0" : "-translate-x-full",
+        !isSidebarCollapsed ? "lg:translate-x-0" : ""
       )}>
         <div className="flex flex-col h-full pt-6 sm:pt-8 pb-4 sm:pb-6 overflow-y-auto">
           <div className="px-6 sm:px-8 mb-6 sm:mb-10 flex items-center justify-between transition-colors">

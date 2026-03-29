@@ -9,6 +9,20 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
+interface MainLayoutContextType {
+  isSidebarCollapsed: boolean;
+  setIsSidebarCollapsed: (value: boolean | ((prev: boolean) => boolean)) => void;
+}
+
+export const MainLayoutContext = React.createContext<MainLayoutContextType>({
+  isSidebarCollapsed: false,
+  setIsSidebarCollapsed: () => {},
+});
+
+export function useMainLayout() {
+  return React.useContext(MainLayoutContext);
+}
+
 function LaunchBanner() {
   return (
     <div className="relative isolate flex items-center gap-x-6 overflow-hidden bg-slate-900 px-6 py-2.5 sm:px-3.5 sm:before:flex-1">
@@ -102,6 +116,7 @@ function Header({
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   
   // Close mobile menu when pathname changes
   React.useEffect(() => {
@@ -117,29 +132,32 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const isLandingPage = pathname === '/';
 
   return (
-    <div className="min-h-screen bg-background dot-grid">
-      {isLandingPage && <LaunchBanner />}
-      <Header 
-        isAppPage={isAppPage} 
-      />
-      
-      <div className="flex">
-        {isAppPage && (
-          <Sidebar 
-            isOpen={mobileMenuOpen} 
-            onClose={() => setMobileMenuOpen(false)} 
-          />
-        )}
-        <main className={cn(
-          "flex-1 transition-all duration-300 relative",
-          isAppPage ? "lg:pl-72 pb-16 lg:pb-0" : ""
-        )}>
-          <div className="min-h-screen relative z-10">
-            {children}
-          </div>
-        </main>
+    <MainLayoutContext.Provider value={{ isSidebarCollapsed, setIsSidebarCollapsed }}>
+      <div className="min-h-screen bg-background dot-grid">
+        {isLandingPage && <LaunchBanner />}
+        <Header 
+          isAppPage={isAppPage} 
+        />
+        
+        <div className="flex">
+          {isAppPage && (
+            <Sidebar 
+              isOpen={mobileMenuOpen} 
+              onClose={() => setMobileMenuOpen(false)} 
+            />
+          )}
+          <main className={cn(
+            "flex-1 transition-all duration-300 relative",
+            isAppPage ? (isSidebarCollapsed ? "lg:pl-0" : "lg:pl-72") : "",
+            isAppPage ? "pb-16 lg:pb-0" : ""
+          )}>
+            <div className="min-h-screen relative z-10">
+              {children}
+            </div>
+          </main>
+        </div>
+        {isAppPage && <BottomNav onMenuClick={() => setMobileMenuOpen(true)} />}
       </div>
-      {isAppPage && <BottomNav onMenuClick={() => setMobileMenuOpen(true)} />}
-    </div>
+    </MainLayoutContext.Provider>
   );
 }
