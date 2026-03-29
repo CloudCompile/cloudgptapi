@@ -50,7 +50,7 @@ export async function validateApiKey(key: string): Promise<ApiKey | null> {
     .eq('id', data.user_id)
     .maybeSingle();
 
-  -    await supabaseAdmin
+  await supabaseAdmin
     .from('api_keys')
     .update({ last_used_at: new Date().toISOString() })
     .eq('id', data.id);
