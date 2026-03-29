@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateApiKey } from '@/lib/api-keys';
 import { supabaseAdmin } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 function isMissingFandomColumnError(error: any): boolean {
   if (!error || error.code !== 'PGRST204' || typeof error.message !== 'string') {
     return false;
@@ -211,22 +213,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to delete API key' }, { status: 500 });
     }
 
-    // Also remove from Clerk private metadata
-    try {
-      const user = await currentUser();
-      if (user && user.privateMetadata?.apiKeys) {
-        const client = await clerkClient();
-        const apiKeys = (user.privateMetadata.apiKeys as any[]).filter(k => k.id !== keyId);
-        await client.users.updateUser(userId, {
-          privateMetadata: {
-            apiKeys
-          }
-        });
-      }
-    } catch (clerkError) {
-      console.warn('Failed to remove from Clerk metadata:', clerkError);
-    }
-
+// Also remove from Clerk private metadata -> REMOVED
     return NextResponse.json({ success: true });
   } catch (err: any) {
     console.error('Unexpected error in DELETE /api/keys:', err);
