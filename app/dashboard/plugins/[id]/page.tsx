@@ -21,7 +21,8 @@ import {
   Plus,
   Trash2,
   FileText,
-  History
+  History,
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
