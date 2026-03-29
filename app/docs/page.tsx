@@ -9,7 +9,7 @@ export default function DocsPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-20 sm:pt-24 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-20 sm:pt-24 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-8 relative">
       {/* Background Elements */}
       <div className="fixed inset-0 mesh-gradient opacity-60 dark:opacity-40" />
       <div className="fixed inset-0 dot-grid opacity-30" />
@@ -80,7 +80,7 @@ export default function DocsPage() {
           </aside>
 
           {/* Main Content */}
-          <main className="flex-1 max-w-4xl animate-in fade-in slide-in-from-right-8 duration-1000">
+          <main className="flex-1 min-w-0 animate-in fade-in slide-in-from-right-8 duration-1000">
             <header className="mb-10 sm:mb-16">
               <div className="flex items-center gap-2 text-primary font-bold mb-3 sm:mb-4">
                 <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-primary/10 backdrop-blur-md border border-primary/20">
