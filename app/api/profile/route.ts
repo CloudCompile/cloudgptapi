@@ -3,18 +3,25 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { applyPlanOverride } from '@/lib/api-keys';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
+  const headers = {
+    'Cache-Control': 'no-store, max-age=0, must-revalidate',
+  };
+
   try {
     const { isAuthenticated, getUser } = getKindeServerSession();
     
     if (!(await isAuthenticated())) {
       console.error('[Profile] Not authenticated with Kinde');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers });
     }
 
     const user = await getUser();
     if (!user || !user.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers });
     }
     const userId = user.id;
 
@@ -26,7 +33,7 @@ export async function GET() {
 
     if (error) {
       console.error('Error fetching profile:', error);
-      return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500, headers });
     }
 
     // Determine derived properties
@@ -51,9 +58,9 @@ export async function GET() {
         email: email,
         picture: avatar,
       },
-    });
+    }, { headers });
   } catch (err) {
     console.error('Profile API error:', err);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500, headers });
   }
 }

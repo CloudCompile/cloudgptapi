@@ -48,6 +48,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [plan, setPlan] = useState<string>('free');
   const [userProfile, setUserProfile] = useState<{ email?: string; name?: string; picture?: string } | null>(null);
+  const [role, setRole] = useState<string>('User');
 
   useEffect(() => {
     fetch('/api/profile', { cache: 'no-store' })
@@ -62,6 +63,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
       })
       .then(data => {
         if (data?.profile?.plan) setPlan(String(data.profile.plan));
+        if (data?.profile?.role) setRole(String(data.profile.role));
         if (data?.profile?.email || data?.profile?.name || data?.profile?.picture) {
           setUserProfile({
             email: data.profile.email,
@@ -210,7 +212,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
               <div className="text-xs sm:text-sm font-black truncate">
                 {userProfile?.name || 'User'}
               </div>
-              <div className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">Developer</div>
+              <div className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">{role}</div>
             </div>
           </div>
         </div>
