@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUserId } from '@/lib/kinde-auth';
-import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit, getDailyLimitForPlan } from '@/lib/api-keys';
 import { VIDEO_MODELS, PROVIDER_URLS, PREMIUM_MODELS } from '@/lib/providers';
 import { getCorsHeaders, hasProAccess, hasVideoAccess } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -79,20 +79,16 @@ export async function POST(request: NextRequest) {
 
     // Determine limit based on plan
     let limit = 2; // Default anonymous/free limit (2 RPM for video)
-    let dailyLimit = 1000; // Default 1000 RPD
+    let dailyLimit = getDailyLimitForPlan(userPlan);
     
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 20;
-      dailyLimit = 100000;
     } else if (userPlan === 'pro' || userPlan === 'video_pro') {
       limit = 2; // 2 RPM for video as requested
-      dailyLimit = 2000; // 2000 RPD for pro/video_pro
     } else if (userPlan === 'developer') {
       limit = 5;
-      dailyLimit = 5000;
     } else if (userPlan === 'free') {
       limit = 2; // 2 RPM for video
-      dailyLimit = 1000; // 1000 RPD for free
     }
 
     // Apply peak hours reduction (5 PM - 5 AM UTC): 50% reduction for all users

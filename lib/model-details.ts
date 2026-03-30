@@ -1072,6 +1072,54 @@ export const CHAT_MODEL_DETAILS: Record<string, ModelDetails> = {
       architecture: 'Transformer-based',
       releaseDate: '2024'
     }
+  },
+  'claude-sonnet-4.6': {
+    id: 'claude-sonnet-4.6',
+    name: 'Claude Sonnet 4.6',
+    provider: 'Kivest',
+    family: 'Claude 4.6',
+    description: 'Anthropic Claude Sonnet 4.6',
+    longDescription: 'Claude Sonnet 4.6 is Anthropic\'s balanced model offering excellent performance and advanced capabilities.',
+    strengths: ['Reasoning', 'Coding', 'Vision'],
+    weaknesses: ['Newer model'],
+    useCases: ['Complex problem solving', 'Coding'],
+    technicalSpecs: {
+      contextWindow: '200',
+      architecture: 'Transformer-based',
+      releaseDate: '2024'
+    }
+  },
+  'gpt-5.4': {
+    id: 'gpt-5.4',
+    name: 'GPT-5.4',
+    provider: 'Kivest',
+    family: 'GPT-5',
+    description: 'OpenAI GPT-5.4',
+    longDescription: 'GPT-5.4 is OpenAI\'s latest flagship model, featuring unprecedented reasoning and multimodal capabilities.',
+    strengths: ['Ultimate reasoning', 'Coding', 'Multimodal'],
+    weaknesses: ['High cost'],
+    useCases: ['Advanced logic', 'Data analysis'],
+    technicalSpecs: {
+      contextWindow: '128',
+      architecture: 'Transformer-based',
+      releaseDate: '2025'
+    }
+  },
+  'gemini-3-pro-preview': {
+    id: 'gemini-3-pro-preview',
+    name: 'Gemini 3 Pro Preview',
+    provider: 'Kivest',
+    family: 'Gemini 3',
+    description: 'Google Gemini 3 Pro Preview',
+    longDescription: 'Gemini 3 Pro Preview features a massive context window and strong multimodal capabilities.',
+    strengths: ['Massive context window', 'Multimodal'],
+    weaknesses: ['Preview stability'],
+    useCases: ['Long document analysis', 'Video understanding'],
+    technicalSpecs: {
+      contextWindow: '1000',
+      architecture: 'Gemini Architecture',
+      releaseDate: '2025'
+    }
   }
 };
 
@@ -1284,9 +1332,9 @@ export const VIDEO_MODEL_DETAILS: Record<string, ModelDetails> = {
 
 // Default details for models without specific information
 export function getModelDetails(modelId: string, modelType: 'chat' | 'image' | 'video'): ModelDetails | null {
-  const detailsMap = modelType === 'chat' ? CHAT_MODEL_DETAILS : 
-                     modelType === 'image' ? IMAGE_MODEL_DETAILS : 
-                     VIDEO_MODEL_DETAILS;
-  
+  const detailsMap = modelType === 'chat' ? CHAT_MODEL_DETAILS :
+    modelType === 'image' ? IMAGE_MODEL_DETAILS :
+      VIDEO_MODEL_DETAILS;
+
   return detailsMap[modelId] || null;
 }

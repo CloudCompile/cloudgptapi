@@ -65,6 +65,7 @@ export default function Dashboard() {
   const [usageStats, setUsageStats] = useState<UsageStatsResponse | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
 
+
   useEffect(() => {
     fetchKeys();
     fetchProviderStatuses();
@@ -291,34 +292,41 @@ export default function Dashboard() {
               <div className="text-[10px] uppercase font-black text-slate-500 tracking-wider mb-1">Daily Usage</div>
               <div className="flex items-end gap-2">
                 <div className="text-xl font-black text-primary">{userUsage?.used || 0}</div>
-                <div className="text-[10px] text-slate-500 font-bold mb-1.5">/ {userUsage?.limit || 1000}</div>
+                <div className="text-[10px] text-slate-500 font-bold mb-1.5">/ {userUsage?.limit || 100}</div>
               </div>
               <div className="mt-2 h-1 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-primary transition-all duration-1000" 
-                  style={{ width: `${Math.min(100, ((userUsage?.used || 0) / (userUsage?.limit || 1000)) * 100)}%` }}
+                  style={{ width: `${Math.min(100, ((userUsage?.used || 0) / (userUsage?.limit || 100)) * 100)}%` }}
                 />
               </div>
             </div>
             
             <div className="glass-card p-4 rounded-2xl border border-border/50">
-              <div className="text-[10px] uppercase font-black text-slate-500 tracking-wider mb-1">Weekly Volume</div>
+              <div className="text-[10px] uppercase font-black text-slate-500 tracking-wider mb-1">Rate Limit</div>
               <div className="flex items-end gap-2">
-                <div className="text-xl font-black text-white">{usageStats?.summary?.totalRequests || 0}</div>
-                <div className="text-[10px] text-emerald-500 font-bold mb-1.5">REQ/7D</div>
+                <div className="text-xl font-black text-white">{userUsage?.rpmLimit || 5}</div>
+                <div className="text-[10px] text-primary font-bold mb-1.5">RPM</div>
               </div>
-              <div className="mt-2 flex gap-0.5 h-1">
-                {(usageStats?.chartData || []).slice(-7).map((d: any, i: number) => (
+              <div className="mt-3 flex gap-1 h-1 w-full">
+                {[...Array(12)].map((_, i) => {
+                  const usageRatio = (userUsage?.rpmUsed || 0) / (userUsage?.rpmLimit || 5);
+                  const isFilled = i < Math.ceil(usageRatio * 12);
+                  return (
                     <div 
-                        key={i} 
-                        className="flex-1 bg-primary/20 rounded-full overflow-hidden"
+                      key={i} 
+                      className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"
                     >
-                        <div 
-                            className="h-full bg-primary" 
-                            style={{ height: '100%', width: `${Math.min(100, (d.total / (Math.max(...usageStats.chartData.map((x:any)=>x.total)) || 1)) * 100)}%` }}
-                        />
+                      <div 
+                        className={cn(
+                          "h-full transition-all duration-500",
+                          isFilled ? "bg-primary" : "bg-transparent"
+                        )} 
+                        style={{ width: '100%' }}
+                      />
                     </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -354,10 +362,10 @@ export default function Dashboard() {
                         return (
                             <div key={day.date} className="flex-1 group/bar relative">
                                 <div 
-                                    className="w-full bg-primary/10 group-hover/bar:bg-primary/20 transition-all rounded-t-lg relative"
-                                    style={{ height: `${Math.max(5, height)}%` }}
+                                    className="w-full bg-primary/20 group-hover/bar:bg-primary/40 transition-all rounded-t-lg relative"
+                                    style={{ height: `${Math.max(8, height)}%` }}
                                 >
-                                    <div className="absolute inset-0 bg-primary opacity-40 rounded-t-lg group-hover/bar:opacity-100 transition-opacity" />
+                                    <div className="absolute inset-0 bg-primary opacity-60 rounded-t-lg group-hover/bar:opacity-100 transition-opacity" />
                                     
                                     {/* Tooltip */}
                                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 border border-border rounded text-[9px] font-bold text-white opacity-0 group-hover/bar:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none shadow-xl">
@@ -381,7 +389,7 @@ export default function Dashboard() {
                 <div>
                     <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Top Models</h4>
                     <div className="space-y-2">
-                        {usageStats?.topModels?.length > 0 ? usageStats.topModels.map((m: any) => (
+                        {usageStats?.topModels?.length ? usageStats.topModels.slice(0, 5).map((m: any) => (
                             <div key={m.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
                                 <span className="text-[10px] font-mono font-bold text-slate-300 truncate max-w-[140px]">{m.id}</span>
                                 <span className="text-[10px] font-black text-primary">{m.count}</span>

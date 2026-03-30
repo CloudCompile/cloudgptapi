@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUserId } from '@/lib/kinde-auth';
-import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit, getDailyLimitForPlan } from '@/lib/api-keys';
 import { CHAT_MODELS, PROVIDER_URLS } from '@/lib/providers';
 import { getCorsHeaders, safeResponseJson } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -59,17 +59,14 @@ export async function POST(request: NextRequest) {
     }
 
     let limit = 100;
-    let dailyLimit = 1000;
+    let dailyLimit = getDailyLimitForPlan(userPlan);
     
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 10000; 
-      dailyLimit = 100000;
     } else if (userPlan === 'pro') {
       limit = 200;
-      dailyLimit = 2000;
     } else if (userPlan === 'developer') {
       limit = 1000;
-      dailyLimit = 5000;
     }
 
     if (apiKeyInfo && apiKeyInfo.rateLimit > limit) {

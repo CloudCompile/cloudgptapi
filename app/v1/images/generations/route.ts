@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUserId } from '@/lib/kinde-auth';
-import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit, getDailyLimitForPlan } from '@/lib/api-keys';
 import { IMAGE_MODELS, PROVIDER_URLS, ImageModel, PREMIUM_MODELS } from '@/lib/providers';
 import { getCorsHeaders, getPollinationsApiKey, getPollinationsApiKeys, safeResponseJson, hasProAccess } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -94,20 +94,16 @@ export async function POST(request: NextRequest) {
 
     // Determine limit based on plan
     let limit = 5; // Default anonymous/free limit (5 RPM for images)
-    let dailyLimit = 1000; // Default 1000 RPD
+    let dailyLimit = getDailyLimitForPlan(userPlan);
     
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 100;
-      dailyLimit = 100000;
     } else if (userPlan === 'pro') {
       limit = 5; // 5 RPM for images as requested
-      dailyLimit = 2000; // 2000 RPD for pro
     } else if (userPlan === 'developer') {
       limit = 20;
-      dailyLimit = 5000;
     } else if (userPlan === 'free') {
       limit = 5; // 5 RPM for images
-      dailyLimit = 1000; // 1000 RPD for free
     }
 
     // If API key has a specific custom limit that's higher, use that

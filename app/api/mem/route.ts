@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUserId } from '@/lib/kinde-auth';
-import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, applyPeakHoursLimit } from '@/lib/api-keys';
+import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, applyPeakHoursLimit, checkDailyLimit, getDailyLimitInfo, getDailyLimitForPlan } from '@/lib/api-keys';
 
 export const runtime = 'nodejs';
 
@@ -44,20 +44,16 @@ export async function POST(request: NextRequest) {
     
     // Determine limit based on plan
     let limit = 20; // Default baseline limit for mem
-    let dailyLimit = 1000; // Default 1000 RPD
+    let dailyLimit = getDailyLimitForPlan(userPlan);
     
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 1000;
-      dailyLimit = 100000;
     } else if (userPlan === 'pro') {
       limit = 50;
-      dailyLimit = 2000; // 2000 RPD for pro
     } else if (userPlan === 'developer') {
       limit = 100;
-      dailyLimit = 5000;
     } else if (userPlan === 'free') {
       limit = 20;
-      dailyLimit = 1000; // 1000 RPD for free
     }
 
     // Apply peak hours reduction (5 PM - 5 AM UTC): 50% reduction for all users
@@ -70,6 +66,21 @@ export async function POST(request: NextRequest) {
     
     // VPS Bypass: Don't count requests from our own VPS against RPD
     const isSystemRequest = clientIp === '157.151.169.121';
+
+    // Check daily limit
+    if (!isSystemRequest && !await checkDailyLimit(rawApiKey, dailyLimit, apiKeyInfo?.id)) {
+      const dailyInfo = await getDailyLimitInfo(rawApiKey, dailyLimit, apiKeyInfo?.id);
+      return NextResponse.json(
+        { error: 'Daily limit exceeded', resetAt: dailyInfo.resetAt },
+        { 
+          status: 429,
+          headers: {
+            'X-DailyLimit-Remaining': '0',
+            'X-DailyLimit-Reset': String(dailyInfo.resetAt),
+          },
+        }
+      );
+    }
 
     // Check rate limit
     if (!isSystemRequest && !await checkRateLimit(rawApiKey, limit, 'mem')) {
@@ -137,11 +148,14 @@ export async function POST(request: NextRequest) {
     const data = await providerResponse.json();
 
     const rateLimitInfo = await getRateLimitInfo(rawApiKey);
+    const dailyLimitInfo = await getDailyLimitInfo(rawApiKey, dailyLimit, apiKeyInfo?.id);
 
     return NextResponse.json(data, {
       headers: {
         'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
         'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
+        'X-DailyLimit-Remaining': String(dailyLimitInfo.remaining),
+        'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
       },
     });
     
