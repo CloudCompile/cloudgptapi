@@ -103,13 +103,13 @@ const KIVEST_CHAT_MODELS: ChatModel[] = [
 // Shalom (Bluesminds) Chat Models
 const SHALOM_CHAT_MODELS: ChatModel[] = [
   { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'shalom', description: 'DeepSeek Chat', usageWeight: 2 },
-  { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner', provider: 'shalom', description: 'DeepSeek Reasoner', usageWeight: 2 },
-  { id: 'deepseek-v3.2', name: 'DeepSeek V3.2', provider: 'shalom', description: 'DeepSeek V3.2', usageWeight: 1 },
-  { id: 'moonshotai/kimi-k2.5', name: 'Kimi K2.5', provider: 'shalom', description: 'Moonshot Kimi K2.5', usageWeight: 1 },
-  { id: 'moonshotai/kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'shalom', description: 'Moonshot Kimi K2 Thinking', usageWeight: 1 },
-  { id: 'glm-4.6', name: 'GLM 4.6', provider: 'shalom', description: 'Zhipu GLM 4.6', usageWeight: 1 },
-  { id: 'z-ai/glm5', name: 'GLM 5', provider: 'shalom', description: 'Zhipu GLM 5', usageWeight: 1 },
-  { id: 'MiniMax-M2.7', name: 'MiniMax M2.7', provider: 'shalom', description: 'MiniMax M2.7', usageWeight: 1 },
+  { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner', provider: 'shalom', description: 'DeepSeek Reasoner', usageWeight: 3 },
+  { id: 'deepseek-v3.2', name: 'DeepSeek V3.2', provider: 'shalom', description: 'DeepSeek V3.2', usageWeight: 3 },
+  { id: 'moonshotai/kimi-k2.5', name: 'Kimi K2.5', provider: 'shalom', description: 'Moonshot Kimi K2.5', usageWeight: 6 },
+  { id: 'moonshotai/kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'shalom', description: 'Moonshot Kimi K2 Thinking', usageWeight: 4 },
+  { id: 'glm-4.6', name: 'GLM 4.6', provider: 'shalom', description: 'Zhipu GLM 4.6', usageWeight: 2 },
+  { id: 'z-ai/glm5', name: 'GLM 5', provider: 'shalom', description: 'Zhipu GLM 5', usageWeight: 3 },
+  { id: 'MiniMax-M2.7', name: 'MiniMax M2.7', provider: 'shalom', description: 'MiniMax M2.7', usageWeight: 3 },
 ];
 
 const GEMINI_CHAT_MODELS: ChatModel[] = [
