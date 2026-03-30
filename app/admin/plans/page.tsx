@@ -28,7 +28,7 @@ export default async function AdminPlansPage() {
       color: 'text-emerald-500 dark:text-emerald-400',
       bg: 'bg-emerald-50 dark:bg-emerald-900/20',
       border: 'border-emerald-200 dark:border-emerald-800/50',
-      features: ['Access to ALL Flagship models', 'GPT-5.4, Claude 4.6, Gemini 3 Pro', 'Reasoning & Specialized models', 'High-res image & Video generation', '10 requests per minute', '500 requests per day', 'Priority email support'],
+      features: ['Access to ALL Flagship models', 'GPT-5.4, Claude 4.6, Gemini 3 Pro', 'Reasoning & Specialized models', 'High-res image & Video generation', '10 requests per minute', '1000 requests per day', 'Priority email support'],
       stripeId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || 'price_1Sn50iRG5zp0rTvzA3lI8SE2',
       status: 'Active',
     },

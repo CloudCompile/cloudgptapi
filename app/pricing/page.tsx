@@ -65,7 +65,7 @@ const plans = [
       'Reasoning & Specialized models',
       'High-res image & Video generation',
       '10 requests per minute',
-      '500 requests per day',
+      '1000 requests per day',
       'Priority email support',
     ],
     buttonText: 'Upgrade to Pro',

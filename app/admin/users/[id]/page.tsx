@@ -43,9 +43,9 @@ export default async function AdminUserViewPage({
   // Fetch API Requests
   const { data: usageLogs } = await supabaseAdmin
     .from('usage_logs')
-    .select('id, model, tokens_used, created_at')
+    .select('id, model_id, tokens, timestamp')
     .eq('user_id', userId)
-    .order('created_at', { ascending: false })
+    .order('timestamp', { ascending: false })
     .limit(10);
 
   const { count: totalUsage } = await supabaseAdmin
@@ -267,13 +267,13 @@ export default async function AdminUserViewPage({
                   <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                     {usageLogs.map((usage) => (
                       <tr key={usage.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                        <td className="px-5 py-3 text-sm font-medium">{usage.model || 'Unknown Model'}</td>
+                        <td className="px-5 py-3 text-sm font-medium">{usage.model_id || 'Unknown Model'}</td>
                         <td className="px-5 py-3 text-sm font-mono text-emerald-600 dark:text-emerald-400">
-                          {usage.tokens_used?.toLocaleString() || '0'}
+                          {usage.tokens?.toLocaleString() || '0'}
                         </td>
                         <td className="px-5 py-3 text-sm flex items-center text-slate-600 dark:text-slate-400">
                           <Clock className="w-3.5 h-3.5 mr-1.5 opacity-50" />
-                          {new Date(usage.created_at).toLocaleString()}
+                          {new Date(usage.timestamp).toLocaleString()}
                         </td>
                       </tr>
                     ))}
