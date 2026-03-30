@@ -618,15 +618,15 @@ function ModelCard({ model, status, onClick, index }: { model: FilteredModelType
           <div className="mb-6">
             <h3 className="text-2xl font-black text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors flex items-center gap-2 tracking-tight">
               {model.name}
+              <span className="px-2 py-1 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-black text-sm border border-blue-200 dark:border-blue-800">
+                x{getModelMultiplier(model.id)}
+              </span>
               <ArrowUpRight className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1 group-hover:-translate-y-1" />
             </h3>
             <div className="flex items-center gap-2 mt-2">
               <code className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800/50 px-2 py-1 rounded-lg text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 font-bold group-hover:border-primary/30 transition-colors">
                 {model.id}
               </code>
-              <span className="ml-2 px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-[10px] border border-primary/20" title="Request Multiplier">
-                {getMultiplierLabel(getModelMultiplier(model.id))}
-              </span>
             </div>
             <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 h-10 mt-4 leading-relaxed font-medium group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
               {model.description || `High-performance ${model.type} model powered by ${model.provider}.`}
@@ -675,7 +675,12 @@ function ModelCard({ model, status, onClick, index }: { model: FilteredModelType
         
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2 mb-0.5">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate tracking-tight">{model.name}</h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate tracking-tight">
+              {model.name}
+              <span className="ml-1.5 px-1.5 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-black text-[10px] border border-blue-200 dark:border-blue-800">
+                x{getModelMultiplier(model.id)}
+              </span>
+            </h3>
             {status.status === 'online' ? (
               <div className="flex items-center gap-1">
                 <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">{status.latency}ms</span>
@@ -697,9 +702,6 @@ function ModelCard({ model, status, onClick, index }: { model: FilteredModelType
               ) : (
                 <span className="text-[8px] font-black uppercase tracking-[0.15em] text-amber-500">Premium</span>
               )}
-              <span className="ml-2 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-[8px] border border-primary/20" title="Request Multiplier">
-                {getMultiplierLabel(getModelMultiplier(model.id))}
-              </span>
             </div>
           </div>
         </div>
@@ -743,6 +745,9 @@ function ModelListItem({ model, status, onClick, index }: { model: FilteredModel
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1">
           <h3 className="text-lg font-black text-slate-900 dark:text-white truncate tracking-tight group-hover:text-primary transition-colors">
             {model.name}
+            <span className="ml-2 px-2 py-0.5 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-black text-xs border border-blue-200 dark:border-blue-800">
+              x{getModelMultiplier(model.id)}
+            </span>
           </h3>
           <div className="flex items-center gap-2">
             {isFree ? (
