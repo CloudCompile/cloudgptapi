@@ -300,6 +300,7 @@ export const PROVIDER_URLS = {
   liz: 'https://lizley.zeabur.app',
   openai: 'https://api.openai.com/v1',
   kivest: 'https://ai.ezif.in/v1',
+  shalom: 'https://api.bluesminds.com/v1',
 };
 
 export function createChatTransformStream(

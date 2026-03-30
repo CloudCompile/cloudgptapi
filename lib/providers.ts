@@ -3,7 +3,7 @@
 export interface ChatModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'poe' | 'liz' | 'openai' | 'kivest';
+  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'poe' | 'liz' | 'openai' | 'kivest' | 'shalom';
   description?: string;
   contextWindow?: number;
   downtimeUntil?: string; // ISO timestamp for maintenance countdown
@@ -98,6 +98,18 @@ const KIVEST_CHAT_MODELS: ChatModel[] = [
   { id: 'seed-oss-36b-instruct', name: 'Seed OSS 36B Instruct', provider: 'kivest', description: 'ByteDance Seed OSS 36B Instruct', usageWeight: 2 },
   { id: 'nemotron-3-nano-30b-a3b', name: 'Nemotron 3 Nano 30B A3B', provider: 'kivest', description: 'NVIDIA Nemotron 3 Nano 30B A3B', usageWeight: 2 },
   { id: 'step-3.5-flash', name: 'Step 3.5 Flash', provider: 'kivest', description: 'StepFun Step 3.5 Flash', usageWeight: 2 },
+];
+
+// Shalom (Bluesminds) Chat Models
+const SHALOM_CHAT_MODELS: ChatModel[] = [
+  { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'shalom', description: 'DeepSeek Chat', usageWeight: 2 },
+  { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner', provider: 'shalom', description: 'DeepSeek Reasoner', usageWeight: 2 },
+  { id: 'deepseek-v3.2', name: 'DeepSeek V3.2', provider: 'shalom', description: 'DeepSeek V3.2', usageWeight: 1 },
+  { id: 'moonshotai/kimi-k2.5', name: 'Kimi K2.5', provider: 'shalom', description: 'Moonshot Kimi K2.5', usageWeight: 1 },
+  { id: 'moonshotai/kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'shalom', description: 'Moonshot Kimi K2 Thinking', usageWeight: 1 },
+  { id: 'glm-4.6', name: 'GLM 4.6', provider: 'shalom', description: 'Zhipu GLM 4.6', usageWeight: 1 },
+  { id: 'z-ai/glm5', name: 'GLM 5', provider: 'shalom', description: 'Zhipu GLM 5', usageWeight: 1 },
+  { id: 'MiniMax-M2.7', name: 'MiniMax M2.7', provider: 'shalom', description: 'MiniMax M2.7', usageWeight: 1 },
 ];
 
 const GEMINI_CHAT_MODELS: ChatModel[] = [
@@ -321,15 +333,24 @@ const LIZ_CHAT_MODELS: ChatModel[] = [
   { id: 'liz-llama-3.3-70b', name: 'Llama 3.3 70B (Liz)', provider: 'liz', description: 'Meta Llama 3.3 70B via Liz Proxy', contextWindow: 128, usageWeight: 12 },
 ];
 
-export const CHAT_MODELS: ChatModel[] = [
+// Deduplicate models by ID - first provider wins (pollinations free, shalom premium via separate check)
+const ALL_CHAT_MODELS = [
   ...POLLINATIONS_CHAT_MODELS,
   ...KIVEST_CHAT_MODELS,
+  ...SHALOM_CHAT_MODELS,
 ];
+
+// Keep first occurrence of each model ID
+const seen = new Set<string>();
+export const CHAT_MODELS: ChatModel[] = ALL_CHAT_MODELS.filter(model => {
+  if (seen.has(model.id)) return false;
+  seen.add(model.id);
+  return true;
+});
 
 // All models require PRO subscription
 export const PREMIUM_MODELS = new Set([
   // Originally free models now locked to pro
-  'deepseek', // DeepSeek V3.2
   'openai', // OpenAI GPT-5 Mini
   'openai-fast', // OpenAI GPT-5 Nano
   'mistral', // Mistral Small
@@ -338,15 +359,20 @@ export const PREMIUM_MODELS = new Set([
   'nova-fast', // Amazon Nova Micro
   // Originally premium models
   'chickytutor', // ChickyTutor
-  'kimi-k2-thinking', // Moonshot Kimi K2 Thinking
   'openai-audio', // OpenAI GPT-4o Mini Audio
   'midijourney', // MIDIjourney (music generation)
-  'glm', // Z.ai GLM-4.7
-  'minimax', // MiniMax M2.1
   'openai-large', // OpenAI GPT-5.2
   'perplexity-reasoning', // Perplexity Sonar Reasoning
   'perplexity-fast', // Perplexity Sonar
-  // Kivest models (Excluding Kivest models from premium for roleplayers)
+  // Shalom (Bluesminds) models - Pro only
+  'deepseek-chat',
+  'deepseek-reasoner',
+  'moonshotai/kimi-k2.5',
+  'moonshotai/kimi-k2-thinking',
+  'glm-4.6',
+  'z-ai/glm5',
+  'MiniMax-M2.7',
+  // Pollinations and Kivest models are FREE (first occurrence wins)
 ]);
 
 // Available image models
@@ -375,4 +401,5 @@ export const PROVIDER_URLS = {
   liz: 'https://api.lizai.xyz',
   openai: 'https://api.openai.com/v1',
   kivest: 'https://ai.ezif.in/v1',
+  shalom: 'https://api.bluesminds.com/v1',
 };

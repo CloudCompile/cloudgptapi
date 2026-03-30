@@ -201,6 +201,13 @@ export function getKivestApiKey(): string | undefined {
 }
 
 /**
+ * Get Shalom (Bluesminds) API key
+ */
+export function getShalomApiKey(): string | undefined {
+  return process.env.SHALOM_API_KEY;
+}
+
+/**
  * Get all available Liz API keys
  */
 export function getLizApiKeys(): string[] {

@@ -1,0 +1,63 @@
+{
+  "title": "🎭 Zero Commands",
+  "description": "Add to your **Custom Prompt** field. Copy with `< >` brackets. Stack multiple for combos.",
+  "color": "0x9b59b6",
+  "footer": "45 Commands Available",
+  "fields": [
+    {
+      "name": "📚 How to Use",
+      "value": "• Copy with `< >` brackets into **Custom Prompt**\n• Stack: `<JAILBREAK_CLAUDE> <NSFW> <LONG_RESPONSE>`",
+      "inline": false
+    },
+    {
+      "name": "🔓 Jailbreaks",
+      "value": "`<JAILBREAK>` - Other models\n`<JAILBREAK_CLAUDE>` - For Claude\n`<JAILBREAK_GEMINI>` - For Gemini\n`<ANTI_SLOP>` - Less slop",
+      "inline": false
+    },
+    {
+      "name": "🔞 Adult",
+      "value": "`<NSFW>` - Smut\n`<BETTERSPICE>` - Enhanced smut\n`<DEAD_DOVE>` - Brutal\n`<MPREG>` - Male pregnancy",
+      "inline": false
+    },
+    {
+      "name": "🎭 Mechanics",
+      "value": "`<PERSONA_SYNC>` - Respects your persona\n`<VISCERAL_COMBAT>` - Technical fights\n`<LIVE_AUDIENCE>` - Fake chat overlay\n`<CHOICE_PANEL>` - VN choice menu\n`<NO_OMNISCIENCE>` - No mind reading\n`<EVOCATIVE_NAMES>` - Unique names",
+      "inline": false
+    },
+    {
+      "name": "⚙️ Behavior",
+      "value": "`<GASLIGHT>` - Gaslighting\n`<MANIPULATION>` - Manipulation\n`<NPC_PROACTIVE>` - Active NPCs\n`<NPC_NEEDS>` - NPC needs\n`<CHARACTER_DEPTH>` - Deep characters\n`<CANON_ACCURATE>` - Canon accuracy",
+      "inline": false
+    },
+    {
+      "name": "✍️ Style",
+      "value": "`<NOVEL>` - Novel prose\n`<LITERARY>` - Sophisticated\n`<DETAILED>` - Sensory detail\n`<CONCISE>` - Short responses\n`<LONG_RESPONSE>` - Long responses\n`<STORY_PUSH>` - Plot momentum\n`<ANTI_MIRROR>` - No parroting\n`<SHOW_NOT_TELL>` - Show don't tell\n`<THIRD_PERSON>` - Third person POV",
+      "inline": false
+    },
+    {
+      "name": "📖 Narrative",
+      "value": "`<AUTOPLOT>` - Auto twists\n`<DRAMATIC>` - High tension\n`<SLOW_BURN>` - Slow romance\n`<SLICE_OF_LIFE>` - Cozy moments",
+      "inline": false
+    },
+    {
+      "name": "🗣️ Dialogue",
+      "value": "`<REALISTIC_DIALOGUE>` - Natural dialogue\n`<INNER_DIALOGUE>` - Inner thoughts\n`<FILLER_WORDS>` - Speech habits\n`<MODERN_LINGO>` - Modern slang\n`<FORMATTING>` - Format syntax",
+      "inline": false
+    },
+    {
+      "name": "🏰 Settings",
+      "value": "`<MEDIEVAL>` - Medieval\n`<FANTASY>` - Fantasy\n`<ANIME>` - Anime style\n`<HORROR>` - Horror",
+      "inline": false
+    },
+    {
+      "name": "🛠️ Tools",
+      "value": "`<SEARCH>` - Web search\n`<REASONING>` - Chain of thought\n`<HIDE_THINKING>` - Hide reasoning",
+      "inline": false
+    },
+    {
+      "name": "🔧 Settings",
+      "value": "**Temp:** 0.85-1.0 | **Top P:** 0.95 | **Context:** 24k+",
+      "inline": false
+    }
+  ]
+}

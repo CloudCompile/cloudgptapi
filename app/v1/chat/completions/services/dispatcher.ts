@@ -17,6 +17,7 @@ import {
   getLizApiKey,
   getKivestApiKey,
   getOpenAIApiKey,
+  getShalomApiKey,
   safeResponseJson
 } from '@/lib/utils';
 import { rememberInteraction } from '@/lib/memory';
@@ -108,6 +109,16 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       console.warn(`[${requestId}] Missing Kivest API key for model: ${modelId}`);
       return NextResponse.json(
         { error: { message: 'Kivest API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { status: 500, headers: getCorsHeaders() }
+      );
+    }
+  } else if (model.provider === 'shalom') {
+    providerUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
+    providerApiKey = getShalomApiKey();
+    if (!providerApiKey) {
+      console.warn(`[${requestId}] Missing Shalom API key for model: ${modelId}`);
+      return NextResponse.json(
+        { error: { message: 'Shalom API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
         { status: 500, headers: getCorsHeaders() }
       );
     }

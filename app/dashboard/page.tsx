@@ -263,7 +263,7 @@ export default function Dashboard() {
             <Zap className="h-3 w-3 sm:h-3.5 sm:w-3.5 fill-current" />
             <span>Developer Console</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tighter">API Management</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tighter">API Management</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1 sm:mt-2 font-medium text-xs sm:text-sm md:text-base">Create and manage access keys for your applications.</p>
         </div>
         <div className="flex gap-3">
