@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { 
   MessageSquare, 
   Image as ImageIcon, 
@@ -16,10 +16,16 @@ import {
   Zap,
   History,
   Info,
-  Clock
+  Clock,
+  Search,
+  X,
+  ChevronDown,
+  Filter,
+  Globe
 } from 'lucide-react';
-import { CHAT_MODELS, IMAGE_MODELS, VIDEO_MODELS, PREMIUM_MODELS } from '@/lib/providers';
+import { CHAT_MODELS, IMAGE_MODELS, VIDEO_MODELS, PREMIUM_MODELS, ChatModel } from '@/lib/providers';
 import { cn, hasProAccess, hasVideoAccess } from '@/lib/utils';
+import { getModelUsageWeight } from '@/lib/api-keys-utils';
 import Link from 'next/link';
 
 type Mode = 'chat' | 'image' | 'video';
@@ -70,9 +76,27 @@ export default function PlaygroundPage() {
   const [videoUrl, setVideoUrl] = useState('');
   const [error, setError] = useState('');
   
+  // Model selector modal state
+  const [showModelSelector, setShowModelSelector] = useState(false);
+  const [modelSearch, setModelSearch] = useState('');
+  const [modelFilter, setModelFilter] = useState<'all' | 'free' | 'premium'>('all');
+  
   const currentModels = mode === 'chat' ? CHAT_MODELS : mode === 'image' ? IMAGE_MODELS : VIDEO_MODELS;
   const selectedModelData = currentModels.find(m => m.id === selectedModel);
   const countdown = useCountdown(selectedModelData?.downtimeUntil);
+
+  // Filtered models for selector
+  const filteredModels = useMemo(() => {
+    return currentModels.filter(m => {
+      const isPremium = PREMIUM_MODELS.has(m.id);
+      const matchesSearch = m.name.toLowerCase().includes(modelSearch.toLowerCase()) || 
+                          m.id.toLowerCase().includes(modelSearch.toLowerCase());
+      const matchesFilter = modelFilter === 'all' || 
+                          (modelFilter === 'premium' && isPremium) ||
+                          (modelFilter === 'free' && !isPremium);
+      return matchesSearch && matchesFilter;
+    });
+  }, [currentModels, modelSearch, modelFilter]);
   
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -104,6 +128,17 @@ export default function PlaygroundPage() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, loading]);
+
+  // Close modal on Escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showModelSelector) {
+        setShowModelSelector(false);
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [showModelSelector]);
 
   const handleModeChange = (newMode: Mode) => {
     setMode(newMode);
@@ -264,23 +299,20 @@ export default function PlaygroundPage() {
 
           <div className="hidden sm:block h-6 w-px bg-border/50" />
 
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border bg-white dark:bg-slate-900 shadow-sm hover:border-primary/30 transition-colors group shrink-0">
-            <Settings2 className="h-3.5 w-3.5 text-slate-400 group-hover:text-primary transition-colors" />
-            <select 
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
-              className="bg-transparent text-xs sm:text-sm font-bold outline-none border-none focus:ring-0 cursor-pointer min-w-[120px]"
-            >
-              {currentModels.map(m => {
-                const isPremium = PREMIUM_MODELS.has(m.id);
-                return (
-                  <option key={m.id} value={m.id} className="dark:bg-slate-900">
-                    {m.name} {isPremium ? '(PRO)' : ''}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
+          {/* Model Selector Button */}
+          <button
+            onClick={() => setShowModelSelector(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border bg-white dark:bg-slate-900 shadow-sm hover:border-primary/30 transition-colors group shrink-0 min-w-[180px]"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-primary group-hover:text-primary transition-colors" />
+            <span className="text-xs sm:text-sm font-bold truncate max-w-[120px]">
+              {selectedModelData?.name || 'Select Model'}
+            </span>
+            <span className="px-1.5 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-black text-[10px] border border-blue-200 dark:border-blue-800">
+              x{getModelUsageWeight(selectedModel)}
+            </span>
+            <ChevronDown className="h-3.5 w-3.5 text-slate-400 group-hover:text-primary transition-colors" />
+          </button>
         </div>
 
         <div className="flex items-center justify-between w-full sm:w-auto gap-3">
@@ -299,6 +331,106 @@ export default function PlaygroundPage() {
           </button>
         </div>
       </div>
+
+      {/* Model Selector Modal */}
+      {showModelSelector && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-2xl max-h-[80vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-border overflow-hidden animate-in zoom-in-95 duration-300">
+            {/* Modal Header */}
+            <div className="p-4 sm:p-6 border-b border-border">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">Select Model</h2>
+                <button
+                  onClick={() => setShowModelSelector(false)}
+                  className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <X className="h-5 w-5 text-slate-400" />
+                </button>
+              </div>
+              
+              {/* Search & Filters */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search models..."
+                    value={modelSearch}
+                    onChange={(e) => setModelSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-slate-50 dark:bg-slate-800 text-sm font-medium outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <FilterButton active={modelFilter === 'all'} onClick={() => setModelFilter('all')}>All</FilterButton>
+                  <FilterButton active={modelFilter === 'free'} onClick={() => setModelFilter('free')}>Free</FilterButton>
+                  <FilterButton active={modelFilter === 'premium'} onClick={() => setModelFilter('premium')}>Premium</FilterButton>
+                </div>
+              </div>
+            </div>
+
+            {/* Model List */}
+            <div className="overflow-y-auto max-h-[60vh] p-3 sm:p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {filteredModels.map(m => {
+                  const isPremium = PREMIUM_MODELS.has(m.id);
+                  const isSelected = m.id === selectedModel;
+                  const weight = getModelUsageWeight(m.id);
+                  
+                  return (
+                    <button
+                      key={m.id}
+                      onClick={() => {
+                        setSelectedModel(m.id);
+                        setShowModelSelector(false);
+                        setModelSearch('');
+                      }}
+                      className={cn(
+                        "flex items-center gap-3 p-3 rounded-xl text-left transition-all border-2",
+                        isSelected 
+                          ? "bg-primary/10 border-primary shadow-md" 
+                          : "bg-white dark:bg-slate-800 border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                        isPremium ? "bg-amber-100 dark:bg-amber-900/30" : "bg-emerald-100 dark:bg-emerald-900/30"
+                      )}>
+                        {isPremium ? (
+                          <Zap className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                        ) : (
+                          <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{m.name}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[10px] font-medium text-slate-400 uppercase">{m.provider}</span>
+                          <span className="px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-black text-[9px]">
+                            x{weight}
+                          </span>
+                        </div>
+                      </div>
+                      {isSelected && (
+                        <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              
+              {filteredModels.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-slate-500 font-medium">No models found</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-1 overflow-hidden relative z-10">
         {/* Left Panel: Conversation/Result Area */}
@@ -562,6 +694,22 @@ function MetricCard({ label, value, sub }: { label: string, value: string, sub: 
       </div>
       <div className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">{value}</div>
     </div>
+  );
+}
+
+function FilterButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+        active 
+          ? "bg-primary text-white shadow-md" 
+          : "bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white"
+      )}
+    >
+      {children}
+    </button>
   );
 }
 
