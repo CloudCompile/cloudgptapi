@@ -309,24 +309,32 @@ export default function Dashboard() {
                 <div className="text-[10px] text-primary font-bold mb-1.5">RPM</div>
               </div>
               <div className="mt-3 flex gap-1 h-1 w-full">
-                {[...Array(12)].map((_, i) => {
-                  const usageRatio = (userUsage?.rpmUsed || 0) / (userUsage?.rpmLimit || 5);
-                  const isFilled = i < Math.ceil(usageRatio * 12);
-                  return (
-                    <div 
-                      key={i} 
-                      className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"
-                    >
-                      <div 
-                        className={cn(
-                          "h-full transition-all duration-500",
-                          isFilled ? "bg-primary" : "bg-transparent"
-                        )} 
-                        style={{ width: '100%' }}
-                      />
-                    </div>
-                  );
-                })}
+                {(() => {
+                  // Visual bars should correspond to the RPM limit, but cap to prevent
+                  // huge bar counts for high tiers (e.g. developer/admin).
+                  const rpmLimit = userUsage?.rpmLimit || 5;
+                  const barCount = Math.max(1, Math.min(10, Math.floor(rpmLimit)));
+                  const usageRatio = (userUsage?.rpmUsed || 0) / (rpmLimit || 1);
+                  const filledCount = Math.min(barCount, Math.ceil(usageRatio * barCount));
+
+                  return [...Array(barCount)].map((_, i) => {
+                    const isFilled = i < filledCount;
+                    return (
+                      <div
+                        key={i}
+                        className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"
+                      >
+                        <div
+                          className={cn(
+                            "h-full transition-all duration-500",
+                            isFilled ? "bg-primary" : "bg-transparent"
+                          )}
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             </div>
 
