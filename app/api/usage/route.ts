@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUserId } from '@/lib/kinde-auth';
 import { supabaseAdmin } from '@/lib/supabase';
-import { getDailyLimitInfo, applyPlanOverride, applyPeakHoursLimit, isPeakHours } from '@/lib/api-keys';
+import { getDailyLimitInfo, applyPlanOverride, applyPeakHoursLimit, isPeakHours, getDailyLimitForPlan } from '@/lib/api-keys';
 import { getCorsHeaders } from '@/lib/utils';
 import { logErrorToSupabase } from '@/lib/error-logger';
 
@@ -36,16 +36,20 @@ export async function GET(request: NextRequest) {
     }
 
     // Determine daily limit based on plan (sync with v1/chat/completions/route.ts)
-    let dailyLimit = 1000;
+    const dailyLimit = getDailyLimitForPlan(userPlan);
+    
+    // Determine RPM limit (for display in dashboard)
+    let rpmLimit = 5;
     if (userPlan === 'admin' || userPlan === 'enterprise') {
-      dailyLimit = 100000;
+      rpmLimit = 10000;
     } else if (userPlan === 'pro') {
-      dailyLimit = 2000;
+      rpmLimit = 10;
     } else if (userPlan === 'developer') {
-      dailyLimit = 5000;
-    } else if (userPlan === 'free') {
-      dailyLimit = 1000;
+      rpmLimit = 1000;
+    } else if (userPlan === 'video_pro') {
+      rpmLimit = 500;
     }
+    const finalRpmLimit = applyPeakHoursLimit(rpmLimit);
 
     // For daily limit info, we don't apply peak hours reduction to the quota itself
     // to avoid locking out users who already used their quota.
@@ -59,6 +63,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       plan: userPlan,
       limit: finalDailyLimit,
+      rpmLimit: finalRpmLimit,
       remaining: dailyInfo.remaining,
       used: Math.max(0, finalDailyLimit - dailyInfo.remaining),
       resetAt: dailyInfo.resetAt,

@@ -12,9 +12,9 @@ const plans = [
     features: [
       'Access to standard chat models',
       'Standard image generation',
-      '60 requests per minute',
+      '5 requests per minute',
       'Basic community support',
-      '1,000 requests per day',
+      '100 requests per day',
     ],
     buttonText: 'Get Started',
     buttonHref: '/dashboard',
@@ -61,10 +61,11 @@ const plans = [
     description: 'For professional developers and growing applications.',
     features: [
       'Access to ALL Flagship models',
-      'GPT-4o, Claude 3.5, Gemini 1.5 Pro',
+      'GPT-5.4, Claude 4.6, Gemini 3 Pro',
       'Reasoning & Specialized models',
       'High-res image & Video generation',
-      '500 requests per minute',
+      '10 requests per minute',
+      '500 requests per day',
       'Priority email support',
     ],
     buttonText: 'Upgrade to Pro',
@@ -122,12 +123,12 @@ export default function PricingPage() {
         <div className="container mx-auto max-w-7xl">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch">
             {plans.filter(p => p.name === 'Free' || p.name === 'Pro' || p.name === 'Enterprise').map((plan, i) => (
-              <div 
+              <div
                 key={plan.name}
                 className={cn(
                   "group relative flex flex-col p-6 sm:p-10 rounded-3xl sm:rounded-[2.5rem] border-2 transition-all duration-500 animate-in fade-in zoom-in-95",
-                  plan.highlight 
-                    ? "bg-white/30 dark:bg-white/10 text-slate-900 dark:text-white border-white/40 shadow-2xl shadow-primary/20 lg:scale-105 z-20 backdrop-blur-2xl" 
+                  plan.highlight
+                    ? "bg-white/30 dark:bg-white/10 text-slate-900 dark:text-white border-white/40 shadow-2xl shadow-primary/20 lg:scale-105 z-20 backdrop-blur-2xl"
                     : "bg-white/45 dark:bg-slate-900/40 backdrop-blur-2xl border-white/50 dark:border-white/10 hover:border-primary/30 z-10",
                   i === 0 && "delay-300",
                   i === 1 && "delay-400",
@@ -135,13 +136,13 @@ export default function PricingPage() {
                 )}
               >
                 <div className="absolute inset-0 dot-grid opacity-0 group-hover:opacity-10 transition-opacity rounded-3xl sm:rounded-[2.5rem]" />
-                
+
                 {plan.highlight && (
                   <div className="absolute -top-4 sm:-top-5 left-1/2 -translate-x-1/2 px-4 sm:px-6 py-1.5 sm:py-2 bg-gradient-to-r from-primary to-blue-600 text-white text-[9px] sm:text-[10px] font-black rounded-full uppercase tracking-[0.2em] shadow-xl whitespace-nowrap">
                     Most Popular
                   </div>
                 )}
-                
+
                 <div className="relative z-10 mb-8 sm:mb-10">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <h3 className="text-xl sm:text-2xl font-black tracking-tight uppercase">{plan.name}</h3>
@@ -149,9 +150,9 @@ export default function PricingPage() {
                       "h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl flex items-center justify-center",
                       plan.highlight ? "bg-white/10 dark:bg-slate-900/5" : "bg-primary/10"
                     )}>
-                      {plan.name === 'Free' ? <Rocket className="h-5 w-5 sm:h-6 sm:w-6 text-primary" /> : 
-                       plan.name === 'Pro' ? <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-primary" /> : 
-                       <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />}
+                      {plan.name === 'Free' ? <Rocket className="h-5 w-5 sm:h-6 sm:w-6 text-primary" /> :
+                        plan.name === 'Pro' ? <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-primary" /> :
+                          <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />}
                     </div>
                   </div>
                   <div className="flex items-baseline gap-1 mb-3 sm:mb-4">
@@ -205,7 +206,7 @@ export default function PricingPage() {
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-3 sm:mb-4 uppercase">Specialized Tiers</h2>
             <p className="text-sm sm:text-base text-slate-500 font-medium">Focused plans for specific development needs.</p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
             {[plans.find(p => p.name === 'Developer'), plans.find(p => p.name === 'Video Pro')].map((plan: any) => (
               <div key={plan.name} className="p-6 sm:p-8 rounded-3xl sm:rounded-[2rem] bg-white dark:bg-slate-900 border-2 border-border hover:border-primary/30 transition-all group relative overflow-hidden">
@@ -248,19 +249,19 @@ export default function PricingPage() {
 
           <div className="grid gap-4 sm:gap-6">
             {[
-              { 
-                title: 'What are "Advanced Models"?', 
-                content: 'Access state-of-the-art reasoning models like GPT-4.5, Claude 3.5 Sonnet, and Gemini 2.5 Pro through a single endpoint.',
+              {
+                title: 'What are "Advanced Models"?',
+                content: 'Access state-of-the-art reasoning models like GPT-5.4, Claude 4.6, and Gemini 3 Pro through a single endpoint.',
                 icon: <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
               },
-              { 
-                title: 'How does the rate limiting work?', 
-                content: 'Rate limits are applied per API key. Free users start at 60 RPM, while Pro users enjoy up to 500 RPM for heavy workloads.',
+              {
+                title: 'How does the rate limiting work?',
+                content: 'Rate limits are applied per API key. Free users start at 5 RPM, while Pro users enjoy up to 10 RPM for heavy workloads.',
                 icon: <Shield className="h-5 w-5 text-blue-500" />
               },
-              { 
-                title: 'Can I cancel my subscription?', 
-                content: 'Yes, manage your billing directly from the dashboard. Your features remain active until the end of your billing cycle.',
+              {
+                title: 'Can I cancel my subscription?',
+                content: 'Yes, manage your billing dire http://localhost:3000/api/auth/kinde_callback ctly from the dashboard. Your features remain active until the end of your billing cycle.',
                 icon: <Rocket className="h-5 w-5 text-purple-500" />
               }
             ].map((faq) => (
@@ -290,13 +291,13 @@ export default function PricingPage() {
                 Ready to build the<br />future of AI?
               </h2>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link 
+                <Link
                   href="/dashboard"
                   className="px-10 py-5 rounded-2xl bg-primary text-white font-black text-[12px] uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-primary/20"
                 >
                   Get Started for Free
                 </Link>
-                <Link 
+                <Link
                   href="/docs"
                   className="px-10 py-5 rounded-2xl bg-white/10 dark:bg-slate-900/10 text-white dark:text-slate-900 font-black text-[12px] uppercase tracking-[0.2em] border border-white/20 dark:border-slate-900/20 hover:bg-white/20 dark:hover:bg-slate-900/20 transition-all"
                 >

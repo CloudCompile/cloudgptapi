@@ -57,13 +57,13 @@ export async function processAuth(
 
   userPlan = (userPlan || 'free').toLowerCase();
 
-  let limit = 4;
+  let limit = 5;
   let dailyLimit = getDailyLimitForPlan(userPlan);
   
   if (userPlan === 'admin' || userPlan === 'enterprise') {
     limit = 10000; 
   } else if (userPlan === 'pro') {
-    limit = 4;
+    limit = 10;
   } else if (userPlan === 'developer') {
     limit = 1000;
   } else if (userPlan === 'video_pro') {
