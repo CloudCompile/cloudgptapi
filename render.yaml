@@ -1,0 +1,19 @@
+services:
+  - type: cron
+    name: discord-bot
+    env:
+      - key: DISCORD_TOKEN
+        value: your_discord_token_here
+      - key: AI_API_KEY
+        value: your_pollinations_api_key
+      - key: AI_BASE_URL
+        value: https://gen.pollinations.ai/v1/chat/completions
+      - key: AI_MODEL
+        value: minimax
+      - key: PYTHONUNBUFFERED
+        value: "1"
+    repo: https://github.com/CloudCompile/cloudgptapi
+    branch: main
+    buildCommand: pip install -r discord_bot/requirements.txt
+    startCommand: python discord_bot/bot.py
+    plan: free
