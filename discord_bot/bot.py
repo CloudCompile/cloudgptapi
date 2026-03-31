@@ -716,6 +716,14 @@ class ZeroXBot(commands.Bot):
         # loaded, failed = await setup_cogs(self)
         # print(f"SYSTEM: Loaded {loaded} cogs, {failed} failed")
 
+        # Load VibeCoder cog for AI-powered issue handling and Q&A
+        try:
+            from cogs.vibecoder import setup as vibecoder_setup
+            await vibecoder_setup(self)
+            print("✅ VibeCoder cog loaded!")
+        except Exception as e:
+            print(f"⚠️ VibeCoder cog failed to load: {e}")
+
     async def close(self):
         print("SYSTEM: Bot closing...")
         # Give pending tasks time to finish
