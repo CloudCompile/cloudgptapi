@@ -252,7 +252,7 @@ export default function PricingPage() {
               },
               {
                 title: 'Can I cancel my subscription?',
-                content: 'Yes, manage your billing dire http://localhost:3000/api/auth/kinde_callback ctly from the dashboard. Your features remain active until the end of your billing cycle.',
+                content: 'Yes, manage your billing directly from the dashboard. Your features remain active until the end of your billing cycle.',
                 icon: <Rocket className="h-5 w-5 text-purple-500" />
               }
             ].map((faq) => (
