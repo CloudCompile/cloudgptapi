@@ -22,9 +22,11 @@ from googleapiclient.discovery import build
 
 # Configuration
 REPO_PATH = os.path.expanduser("~/Documents/GitHub/cloudgptapi")
-POLLINATIONS_API_URL = "https://gen.pollinations.ai/v1/chat/completions"
-APPROVAL_EMAIL_FROM = "christopherhauser1234@gmail.com"
-APPROVAL_EMAIL_TO = "cjhauser_techie@icloud.com"
+POLLINATIONS_API_URL = os.getenv("AI_BASE_URL", "https://gen.pollinations.ai/v1/chat/completions")
+POLLINATIONS_API_KEY = os.getenv("AI_API_KEY", os.getenv("POLLINATIONS_API_KEY", ""))
+POLLINATIONS_MODEL = os.getenv("AI_MODEL", "minimax")
+APPROVAL_EMAIL_FROM = os.getenv("APPROVAL_EMAIL_FROM", "christopherhauser1234@gmail.com")
+APPROVAL_EMAIL_TO = os.getenv("APPROVAL_EMAIL_TO", "cjhauser_techie@icloud.com")
 
 # Gmail scopes for reading replies
 GMAIL_SCOPES = ['https://www.googleapis.com/auth/gmail.readonly', 'https://www.googleapis.com/auth/gmail.modify']
@@ -69,7 +71,7 @@ USER REQUEST:
 Think carefully, analyze the codebase, and provide a thorough response."""
 
         payload = {
-            "model": "minimax",
+            "model": POLLINATIONS_MODEL,
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"{context}\n\n{user_prompt}"}
@@ -81,6 +83,10 @@ Think carefully, analyze the codebase, and provide a thorough response."""
         headers = {
             "Content-Type": "application/json"
         }
+        
+        # Add API key if available
+        if POLLINATIONS_API_KEY:
+            headers["Authorization"] = f"Bearer {POLLINATIONS_API_KEY}"
 
         async with self.session.post(POLLINATIONS_API_URL, json=payload, headers=headers) as resp:
             if resp.status == 200:
