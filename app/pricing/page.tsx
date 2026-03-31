@@ -1,9 +1,9 @@
 'use client';
 
-import { Check, Zap, Shield, Rocket, Lock } from 'lucide-react';
+import { Check, Zap, Shield, Rocket, Lock, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const plans = [
   {
@@ -80,6 +80,18 @@ const plans = [
 export default function PricingPage() {
   const inviteOnlyLabel = 'Invite Only';
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/profile', { credentials: 'include' })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.profile?.plan) {
+          setCurrentPlan(data.profile.plan);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleUpgrade = async (stripePriceId: string, planName: string) => {
     if (!stripePriceId) return;
@@ -210,17 +222,28 @@ export default function PricingPage() {
                   ) : (
                     <button
                       onClick={() => plan.stripePriceId && handleUpgrade(plan.stripePriceId, plan.name)}
-                      disabled={loadingPlan === plan.name || !plan.stripePriceId}
+                      disabled={loadingPlan === plan.name || !plan.stripePriceId || (currentPlan === plan.name.toLowerCase())}
                       className={cn(
                         "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all border",
                         plan.highlight
                           ? "bg-white/30 text-slate-900 dark:text-white border-white/60 hover:bg-white/50"
                           : "bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 border-border hover:border-primary/30",
-                        loadingPlan === plan.name && "opacity-50 cursor-wait"
+                        (loadingPlan === plan.name || currentPlan === plan.name.toLowerCase()) && "opacity-50 cursor-wait"
                       )}
                     >
-                      <Zap className="h-4 w-4" />
-                      {loadingPlan === plan.name ? 'Processing...' : plan.buttonText}
+                      {currentPlan === plan.name.toLowerCase() ? (
+                        <>
+                          <CheckCircle className="h-4 w-4" />
+                          Current Plan
+                        </>
+                      ) : loadingPlan === plan.name ? (
+                        'Processing...'
+                      ) : (
+                        <>
+                          <Zap className="h-4 w-4" />
+                          {plan.buttonText}
+                        </>
+                      )}
                     </button>
                   )}
                 </div>
