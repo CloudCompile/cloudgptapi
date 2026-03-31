@@ -1,12 +1,25 @@
 "use client";
 
-import { useState } from 'react';
-import { Check, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Check, X, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function InvitePage() {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    fetch('/api/profile', { credentials: 'include' })
+      .then(res => {
+        if (res.ok) setIsSignedIn(true);
+      })
+      .catch(() => setIsSignedIn(false))
+      .finally(() => setCheckingAuth(false));
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -22,6 +35,29 @@ export default function InvitePage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (checkingAuth) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-12 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-12">
+        <h1 className="text-2xl font-black mb-4">Sign In Required</h1>
+        <p className="text-slate-400 mb-6">You need to sign in to use an invite code.</p>
+        <button
+          onClick={() => router.push('/sign-in')}
+          className="px-4 py-2 bg-primary text-white rounded-lg font-bold"
+        >
+          Sign In
+        </button>
+      </div>
+    );
   }
 
   return (
