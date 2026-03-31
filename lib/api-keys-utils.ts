@@ -89,6 +89,7 @@ export function getDailyLimitForPlan(plan: string): number {
   
   // Custom request: Free has 1k rpd
   if (p === 'pro') return 1000;
+  if (p === 'ultra') return 2500;
   if (p === 'pro_plus') return 25000;
   if (p === 'developer') return 50000;
   if (p === 'admin') return 1000000;

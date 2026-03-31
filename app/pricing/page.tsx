@@ -1,13 +1,14 @@
 'use client';
 
-import { Check, Zap, Shield, Rocket, Video, Lock } from 'lucide-react';
+import { Check, Zap, Shield, Rocket, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { useState } from 'react';
 
 const plans = [
   {
     name: 'Free',
-    price: '$0',
+    price: '€0',
     description: 'Perfect for exploring our API and personal projects.',
     features: [
       'Access to standard chat models',
@@ -21,49 +22,15 @@ const plans = [
     highlight: false,
   },
   {
-    name: 'Developer',
-    price: '$0',
-    description: 'For hobbyists and early stage developers.',
-    features: [
-      'Increased rate limits',
-      'Access to dev-tier models',
-      'Standard image generation',
-      'Priority community support',
-    ],
-    buttonText: 'Get Dev Access',
-    buttonHref: '#',
-    highlight: false,
-    stripeProductId: 'prod_TkaCL0ZNJH6rwf',
-    stripePriceId: 'price_1Sn51wRG5zp0rTvz8SeF3WXh', // Developer price ID
-  },
-  {
-    name: 'Video Pro',
-    price: '$5',
-    period: '/month',
-    description: 'Unlock high-quality AI video generation.',
-    features: [
-      'Access to ALL Video models',
-      'Google Veo, Seedance Pro',
-      'Up to 10s video duration',
-      'High-priority generation',
-      'Commercial usage rights',
-    ],
-    buttonText: 'Get Video Pro',
-    buttonHref: '#',
-    highlight: false,
-    stripeProductId: 'prod_video_pro',
-    stripePriceId: 'price_1SnLTHRG5zp0rTvzT7KuRE8v',
-  },
-  {
     name: 'Pro',
-    price: '$3',
+    price: '€5',
     period: '/month',
     description: 'For professional developers and growing applications.',
     features: [
       'Access to ALL Flagship models',
       'GPT-5.4, Claude 4.6, Gemini 3 Pro',
       'Reasoning & Specialized models',
-      'High-res image & Video generation',
+      'High-res image generation',
       '10 requests per minute',
       '1000 requests per day',
       'Priority email support',
@@ -71,15 +38,33 @@ const plans = [
     buttonText: 'Upgrade to Pro',
     buttonHref: '#',
     highlight: true,
-    stripeProductId: 'prod_TkaB1ApHkafWT1',
-    stripePriceId: 'price_1SnmRzRG5zp0rTvzlRi9k0EO', // Pro price ID
+    stripeProductId: 'prod_UFav3WC8TduOAB',
+    stripePriceId: 'price_1TH5jYQvLgyqzP00y0P6OYDO',
+  },
+  {
+    name: 'Ultra',
+    price: '€10',
+    period: '/month',
+    description: 'For power users who need higher limits.',
+    features: [
+      'Everything in Pro',
+      'Higher rate limits',
+      '2500 requests per day',
+      'Priority processing',
+      'Early access to new models',
+    ],
+    buttonText: 'Upgrade to Ultra',
+    buttonHref: '#',
+    highlight: false,
+    stripeProductId: 'prod_UFawzHE1IUU1Rb',
+    stripePriceId: 'price_1TH5l0QvLgyqzP00K7uLVmS4',
   },
   {
     name: 'Enterprise',
     price: 'Custom',
     description: 'Scalable solutions for large teams and high-volume needs.',
     features: [
-      'Everything in Pro',
+      'Everything in Ultra',
       'Custom rate limits',
       'Dedicated support engineer',
       'SLA guarantees',
@@ -87,13 +72,34 @@ const plans = [
       'Custom model fine-tuning',
     ],
     buttonText: 'Contact Sales',
-    buttonHref: 'mailto:enterprise@cloudgpt.com',
+    buttonHref: 'https://discord.gg/f7xR8qga',
     highlight: false,
   },
 ];
 
 export default function PricingPage() {
   const inviteOnlyLabel = 'Invite Only';
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const handleUpgrade = async (stripePriceId: string, planName: string) => {
+    if (!stripePriceId) return;
+    setLoadingPlan(planName);
+    try {
+      const res = await fetch('/api/stripe/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId: stripePriceId }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 relative overflow-hidden">
@@ -122,7 +128,7 @@ export default function PricingPage() {
       <section className="pb-20 sm:pb-32 px-4 relative z-10">
         <div className="container mx-auto max-w-7xl">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch">
-            {plans.filter(p => p.name === 'Free' || p.name === 'Pro' || p.name === 'Enterprise').map((plan, i) => (
+            {plans.filter(p => p.name === 'Free' || p.name === 'Pro' || p.name === 'Ultra' || p.name === 'Enterprise').map((plan, i) => (
               <div
                 key={plan.name}
                 className={cn(
@@ -179,59 +185,44 @@ export default function PricingPage() {
                 </div>
 
                 <div className="relative z-10">
-                  <button
-                    disabled
-                    className={cn(
-                      "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all cursor-not-allowed border",
-                      plan.highlight
-                        ? "bg-white/30 text-slate-900 dark:text-white border-white/60"
-                        : "bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 border-border"
-                    )}
-                  >
-                    <Lock className="h-4 w-4" />
-                    {inviteOnlyLabel}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Developer and Video Plans Section */}
-      <section className="py-20 sm:py-32 bg-slate-50/50 dark:bg-slate-900/20 border-y border-border relative overflow-hidden">
-        <div className="absolute inset-0 dot-grid opacity-[0.02]" />
-        <div className="container mx-auto px-4 max-w-6xl relative z-10">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-3 sm:mb-4 uppercase">Specialized Tiers</h2>
-            <p className="text-sm sm:text-base text-slate-500 font-medium">Focused plans for specific development needs.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
-            {[plans.find(p => p.name === 'Developer'), plans.find(p => p.name === 'Video Pro')].map((plan: any) => (
-              <div key={plan.name} className="p-6 sm:p-8 rounded-3xl sm:rounded-[2rem] bg-white dark:bg-slate-900 border-2 border-border hover:border-primary/30 transition-all group relative overflow-hidden">
-                <div className="absolute inset-0 dot-grid opacity-0 group-hover:opacity-[0.05] transition-opacity" />
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <div>
-                      <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight mb-1">{plan.name}</h3>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-2xl sm:text-3xl font-black tracking-tight">{plan.price}</span>
-                        {plan.period && <span className="text-[9px] sm:text-[10px] font-black opacity-40 uppercase tracking-widest">{plan.period}</span>}
-                      </div>
-                    </div>
-                    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      {plan.name === 'Developer' ? <Rocket className="h-5 w-5 sm:h-6 sm:w-6 text-primary" /> : <Video className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />}
-                    </div>
-                  </div>
-                  <p className="text-xs sm:text-sm font-medium text-slate-500 mb-6 sm:mb-8">{plan.description}</p>
-                  <button
-                    disabled
-                    className="w-full py-3.5 sm:py-4 rounded-xl bg-white/70 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border border-border cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    <Lock className="h-3.5 w-3.5" />
-                    {inviteOnlyLabel}
-                  </button>
+                  {plan.name === 'Free' ? (
+                    <Link
+                      href={plan.buttonHref}
+                      className={cn(
+                        "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all border",
+                        "bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 border-border hover:border-primary/30"
+                      )}
+                    >
+                      <Rocket className="h-4 w-4" />
+                      {plan.buttonText}
+                    </Link>
+                  ) : plan.name === 'Enterprise' ? (
+                    <a
+                      href={plan.buttonHref}
+                      className={cn(
+                        "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all border",
+                        "bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 border-border hover:border-primary/30"
+                      )}
+                    >
+                      <Shield className="h-4 w-4" />
+                      {plan.buttonText}
+                    </a>
+                  ) : (
+                    <button
+                      onClick={() => plan.stripePriceId && handleUpgrade(plan.stripePriceId, plan.name)}
+                      disabled={loadingPlan === plan.name || !plan.stripePriceId}
+                      className={cn(
+                        "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all border",
+                        plan.highlight
+                          ? "bg-white/30 text-slate-900 dark:text-white border-white/60 hover:bg-white/50"
+                          : "bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 border-border hover:border-primary/30",
+                        loadingPlan === plan.name && "opacity-50 cursor-wait"
+                      )}
+                    >
+                      <Zap className="h-4 w-4" />
+                      {loadingPlan === plan.name ? 'Processing...' : plan.buttonText}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

@@ -32,6 +32,7 @@ import {
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { UsageStatsResponse } from '@/lib/types';
+import { TermsAcknowledgment } from '@/components/terms-acknowledgment';
 
 interface ApiKey {
   id: string;
@@ -221,7 +222,9 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8 sm:space-y-10 animate-in fade-in duration-700">
+    <>
+      <TermsAcknowledgment />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8 sm:space-y-10 animate-in fade-in duration-700">
       {/* New Key Success Modal */}
       {createdKey && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -651,7 +654,8 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </div>
+          </div>
+    </>
   );
 }
 

@@ -56,7 +56,7 @@ export async function promoteUser(userId: string, role: 'user' | 'admin') {
   return { success: true };
 }
 
-export async function assignPlan(userId: string, plan: 'free' | 'developer' | 'pro' | 'enterprise', stripeProductId?: string) {
+export async function assignPlan(userId: string, plan: 'free' | 'developer' | 'pro' | 'ultra' | 'enterprise', stripeProductId?: string) {
   await verifyAdmin();
 
   const { error } = await supabaseAdmin
@@ -148,16 +148,11 @@ export async function syncUser(userId: string, email: string, username?: string,
       let initialPlan = 'free';
       if (subscription) {
         const priceId = subscription.stripe_price_id;
-        const PRO_PRICE_IDS = [
-          process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || 'price_1Sn50iRG5zp0rTvzA3lI8SE2',
-          'price_1SnmRzRG5zp0rTvzlRi9k0EO'
-        ];
-        const DEV_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_DEV_PRICE_ID || 'price_1Sn51wRG5zp0rTvz8SeF3WXh';
-        const VIDEO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_VIDEO_PRICE_ID || 'price_1SnLTHRG5zp0rTvzT7KuRE8v';
+        const PRO_PRICE_ID = 'price_1TH5jYQvLgyqzP00y0P6OYDO';
+        const ULTRA_PRICE_ID = 'price_1TH5l0QvLgyqzP00K7uLVmS4';
 
-        if (PRO_PRICE_IDS.includes(priceId)) initialPlan = 'pro';
-        else if (priceId === DEV_PRICE_ID) initialPlan = 'developer';
-        else if (priceId === VIDEO_PRICE_ID) initialPlan = 'video_pro';
+        if (priceId === PRO_PRICE_ID) initialPlan = 'pro';
+        else if (priceId === ULTRA_PRICE_ID) initialPlan = 'ultra';
       }
 
       const { error: insertError } = await supabaseAdmin
@@ -215,23 +210,11 @@ export async function syncUser(userId: string, email: string, username?: string,
 
   if (subscription) {
     const priceId = subscription.stripe_price_id;
-    const PRO_PRICE_IDS = [
-      process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || 'price_1Sn50iRG5zp0rTvzA3lI8SE2',
-      'price_1SnmRzRG5zp0rTvzlRi9k0EO'
-    ];
-    const DEV_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_DEV_PRICE_ID || 'price_1Sn51wRG5zp0rTvz8SeF3WXh';
-    const VIDEO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_VIDEO_PRICE_ID || 'price_1SnLTHRG5zp0rTvzT7KuRE8v';
+    const PRO_PRICE_ID = 'price_1TH5jYQvLgyqzP00y0P6OYDO';
+    const ULTRA_PRICE_ID = 'price_1TH5l0QvLgyqzP00K7uLVmS4';
 
-    if (PRO_PRICE_IDS.includes(priceId)) initialPlan = 'pro';
-    else if (priceId === DEV_PRICE_ID) initialPlan = 'developer';
-    else if (priceId === VIDEO_PRICE_ID) initialPlan = 'video_pro';
-
-    if (emailSubscription && !idSubscription) {
-      await supabaseAdmin
-        .from('user_subscriptions')
-        .update({ user_id: userId })
-        .eq('stripe_subscription_id', emailSubscription.stripe_subscription_id);
-    }
+    if (priceId === PRO_PRICE_ID) initialPlan = 'pro';
+    else if (priceId === ULTRA_PRICE_ID) initialPlan = 'ultra';
   }
 
   const { error: finalInsertError } = await supabaseAdmin

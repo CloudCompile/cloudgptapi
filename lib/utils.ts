@@ -118,12 +118,12 @@ export function getOpenRouterApiKeys(): string[] {
 /**
  * Plans that have Pro access to premium models
  */
-export const PRO_PLANS = ['pro', 'enterprise', 'developer', 'admin', 'video_pro'];
+export const PRO_PLANS = ['pro', 'ultra', 'enterprise', 'developer', 'admin', 'video_pro'];
 
 /**
  * Plans that have access to video generation
  */
-export const VIDEO_PLANS = ['video_pro', 'enterprise', 'admin'];
+export const VIDEO_PLANS = ['video_pro', 'ultra', 'enterprise', 'admin'];
 
 /**
  * Check if a user plan has pro access

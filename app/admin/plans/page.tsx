@@ -1,4 +1,4 @@
-import { Crown, Check, Zap, Building, Building2, ExternalLink, Video } from 'lucide-react';
+import { Crown, Check, Zap, Building, Building2, ExternalLink, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -8,28 +8,41 @@ export default async function AdminPlansPage() {
   const plans = [
     {
       name: 'FREE',
-      price: '$0',
+      price: '€0',
       period: '',
       description: 'Perfect for exploring our API and personal projects.',
       icon: Zap,
-      color: 'text-slate-500 text-slate-700 dark:text-slate-400',
+      color: 'text-slate-500 dark:text-slate-400',
       bg: 'bg-slate-100 dark:bg-slate-800',
       border: 'border-slate-200 dark:border-slate-800',
-      features: ['Access to standard chat models', 'Standard image generation', '5 requests per minute', 'Basic community support', '100 requests per day'],
+      features: ['Access to standard chat models', 'Standard image generation', '5 requests per minute', 'Community support', '100 requests per day'],
       stripeId: 'None',
       status: 'Active',
     },
     {
       name: 'PRO',
-      price: '$3',
+      price: '€5',
       period: '/MONTH',
       description: 'For professional developers and growing applications.',
       icon: Crown,
       color: 'text-emerald-500 dark:text-emerald-400',
       bg: 'bg-emerald-50 dark:bg-emerald-900/20',
       border: 'border-emerald-200 dark:border-emerald-800/50',
-      features: ['Access to ALL Flagship models', 'GPT-5.4, Claude 4.6, Gemini 3 Pro', 'Reasoning & Specialized models', 'High-res image & Video generation', '10 requests per minute', '1000 requests per day', 'Priority email support'],
-      stripeId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || 'price_1Sn50iRG5zp0rTvzA3lI8SE2',
+      features: ['Access to ALL Flagship models', 'GPT-5.4, Claude 4.6, Gemini 3 Pro', 'Reasoning & Specialized models', 'High-res image generation', '10 requests per minute', '1000 requests per day', 'Priority support'],
+      stripeId: 'price_1TH5jYQvLgyqzP00y0P6OYDO',
+      status: 'Active',
+    },
+    {
+      name: 'ULTRA',
+      price: '€10',
+      period: '/MONTH',
+      description: 'For power users who need higher limits.',
+      icon: Shield,
+      color: 'text-blue-500 dark:text-blue-400',
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      border: 'border-blue-200 dark:border-blue-800/50',
+      features: ['Everything in Pro', 'Higher rate limits', '2500 requests per day', 'Priority processing', 'Early access to new models'],
+      stripeId: 'price_1TH5l0QvLgyqzP00K7uLVmS4',
       status: 'Active',
     },
     {
@@ -41,36 +54,10 @@ export default async function AdminPlansPage() {
       color: 'text-purple-500 dark:text-purple-400',
       bg: 'bg-purple-50 dark:bg-purple-900/20',
       border: 'border-purple-200 dark:border-purple-800/50',
-      features: ['Everything in Pro', 'Custom rate limits', 'Dedicated support engineer', 'SLA guarantees', 'On-premise deployment options', 'Custom model fine-tuning'],
+      features: ['Everything in Ultra', 'Custom rate limits', 'Dedicated support engineer', 'SLA guarantees', 'On-premise deployment options', 'Custom model fine-tuning'],
       stripeId: 'Contact Sales',
       status: 'Active',
     },
-    {
-      name: 'DEVELOPER',
-      price: '$0',
-      period: '',
-      description: 'For hobbyists and early stage developers.',
-      icon: Building,
-      color: 'text-blue-500 dark:text-blue-400',
-      bg: 'bg-blue-50 dark:bg-blue-900/20',
-      border: 'border-blue-200 dark:border-blue-800/50',
-      features: ['Invite Only', 'Access to early-stage features'],
-      stripeId: process.env.NEXT_PUBLIC_STRIPE_DEV_PRICE_ID || 'price_1Sn51wRG5zp0rTvz8SeF3WXh',
-      status: 'Invite Only',
-    },
-    {
-      name: 'VIDEO PRO',
-      price: '$5',
-      period: '/MONTH',
-      description: 'Unlock high-quality AI video generation.',
-      icon: Video,
-      color: 'text-indigo-500 dark:text-indigo-400',
-      bg: 'bg-indigo-50 dark:bg-indigo-900/20',
-      border: 'border-indigo-200 dark:border-indigo-800/50',
-      features: ['Invite Only', 'High-quality Video Generation API access'],
-      stripeId: process.env.NEXT_PUBLIC_STRIPE_VIDEO_PRICE_ID || 'price_1SnLTHRG5zp0rTvzT7KuRE8v',
-      status: 'Invite Only',
-    }
   ];
 
   return (

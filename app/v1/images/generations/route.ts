@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
     
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 100;
-    } else if (userPlan === 'pro') {
+    } else if (userPlan === 'pro' || userPlan === 'ultra') {
       limit = 5; // 5 RPM for images as requested
     } else if (userPlan === 'developer') {
       limit = 20;

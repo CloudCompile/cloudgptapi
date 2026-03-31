@@ -377,9 +377,9 @@ export async function POST(request: NextRequest) {
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 100;
       dailyLimit = 100000;
-    } else if (userPlan === 'pro') {
+    } else if (userPlan === 'pro' || userPlan === 'ultra') {
       limit = 4; // 4 RPM for images
-      dailyLimit = 50; // 50 RPD for pro
+      dailyLimit = userPlan === 'ultra' ? 100 : 50; // 100 RPD for ultra, 50 for pro
     } else if (userPlan === 'developer') {
       limit = 20;
       dailyLimit = 5000;

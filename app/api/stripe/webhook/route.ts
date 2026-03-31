@@ -48,16 +48,13 @@ export async function POST(req: Request) {
       
       // Map price ID to plan name using env vars if available, fallback to hardcoded IDs from pricing page
       let planName = 'free';
-      const PRO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || 'price_1SnmRzRG5zp0rTvzlRi9k0EO';
-      const DEV_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_DEV_PRICE_ID || 'price_1Sn51wRG5zp0rTvz8SeF3WXh';
-      const VIDEO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_VIDEO_PRICE_ID || 'price_1SnLTHRG5zp0rTvzT7KuRE8v';
+      const PRO_PRICE_ID = 'price_1TH5jYQvLgyqzP00y0P6OYDO';
+      const ULTRA_PRICE_ID = 'price_1TH5l0QvLgyqzP00K7uLVmS4';
 
       if (priceId === PRO_PRICE_ID) {
         planName = 'pro';
-      } else if (priceId === DEV_PRICE_ID) {
-        planName = 'developer';
-      } else if (priceId === VIDEO_PRICE_ID) {
-        planName = 'video_pro';
+      } else if (priceId === ULTRA_PRICE_ID) {
+        planName = 'ultra';
       }
 
       console.log(`[${requestId}] Updating user ${userId} (${userEmail || 'no email'}) to plan ${planName} (price: ${priceId})`);
@@ -85,14 +82,14 @@ export async function POST(req: Request) {
         console.log(`[${requestId}] Successfully updated profile for user ${userId} to ${planName}`, updatedProfiles);
         
         // Notify Discord via webhook if user upgraded to Pro or Video Pro
-        if (planName === 'pro' || planName === 'video_pro' || planName === 'developer') {
+        if (planName === 'pro' || planName === 'ultra') {
           const discordWebhookUrl = process.env.DISCORD_PRO_WEBHOOK;
           if (discordWebhookUrl) {
             try {
               const embed = {
                 title: 'New Subscription Purchased!',
                 description: `A user has successfully upgraded to the **${planName.toUpperCase()}** plan.`,
-                color: planName === 'pro' ? 0x00ff00 : (planName === 'developer' ? 0x3498db : 0x9b59b6),
+                color: planName === 'ultra' ? 0x3498db : 0x00ff00,
                 fields: [
                   {
                     name: 'User ID',
@@ -201,16 +198,13 @@ export async function POST(req: Request) {
       // Sync new price/plan to database
       const priceId = subscription.items.data[0].price.id;
       let planName = 'free';
-      const PRO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || 'price_1SnmRzRG5zp0rTvzlRi9k0EO';
-      const DEV_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_DEV_PRICE_ID || 'price_1Sn51wRG5zp0rTvz8SeF3WXh';
-      const VIDEO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_VIDEO_PRICE_ID || 'price_1SnLTHRG5zp0rTvzT7KuRE8v';
+      const PRO_PRICE_ID = 'price_1TH5jYQvLgyqzP00y0P6OYDO';
+      const ULTRA_PRICE_ID = 'price_1TH5l0QvLgyqzP00K7uLVmS4';
 
       if (priceId === PRO_PRICE_ID) {
         planName = 'pro';
-      } else if (priceId === DEV_PRICE_ID) {
-        planName = 'developer';
-      } else if (priceId === VIDEO_PRICE_ID) {
-        planName = 'video_pro';
+      } else if (priceId === ULTRA_PRICE_ID) {
+        planName = 'ultra';
       }
 
       // Find user ID for this subscription

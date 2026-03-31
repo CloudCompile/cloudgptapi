@@ -1,4 +1,4 @@
-import { Shield, Search, Package, Crown, ChevronLeft, ChevronRight, UserCircle } from 'lucide-react';
+import { Shield, Search, Package, Crown, ChevronLeft, ChevronRight, UserCircle, X } from 'lucide-react';
 import { getAllUsers, promoteUser, assignPlan } from '@/lib/admin-actions';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -125,7 +125,7 @@ export default async function AdminUsersPage({
                   <td className="px-6 py-4">
                     <span className={cn(
                       "px-2.5 py-1 rounded-full text-xs font-medium border",
-                      userProfile.plan === 'pro' 
+                      userProfile.plan === 'pro' || userProfile.plan === 'ultra'
                         ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50" 
                         : userProfile.plan === 'developer' || userProfile.plan === 'enterprise'
                         ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/50"
@@ -140,21 +140,40 @@ export default async function AdminUsersPage({
                         'use server';
                         await promoteUser(userProfile.id, userProfile.role === 'admin' ? 'user' : 'admin');
                       }}>
-                        <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700" title="Toggle Admin">
-                          <Shield className="h-4 w-4" />
+                        <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700" title={userProfile.role === 'admin' ? 'Remove Admin' : 'Make Admin'}>
+                          <Shield className={cn("h-4 w-4", userProfile.role === 'admin' && "text-purple-500")} />
                         </button>
                       </form>
+                      {userProfile.plan && userProfile.plan !== 'free' && (
+                        <form action={async () => {
+                          'use server';
+                          await assignPlan(userProfile.id, 'free');
+                        }}>
+                          <button className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-slate-500 hover:text-red-600 transition-all border border-transparent hover:border-red-200 dark:hover:border-red-800" title="Remove Plan">
+                            <X className="h-4 w-4" />
+                          </button>
+                        </form>
+                      )}
+                      {userProfile.plan !== 'developer' && userProfile.plan !== 'admin' && (
+                        <form action={async () => {
+                          'use server';
+                          await assignPlan(userProfile.id, 'developer');
+                        }}>
+                          <button className="p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/20 text-slate-500 hover:text-blue-600 transition-all border border-transparent hover:border-blue-200 dark:hover:border-blue-800" title="Set Developer">
+                            <Package className="h-4 w-4" />
+                          </button>
+                        </form>
+                      )}
                       <form action={async () => {
                         'use server';
-                        const isPro = userProfile.plan === 'pro';
+                        const isProOrUltra = userProfile.plan === 'pro' || userProfile.plan === 'ultra';
                         await assignPlan(
                           userProfile.id, 
-                          isPro ? 'free' : 'pro', 
-                          isPro ? undefined : 'prod_pro_dummy'
+                          isProOrUltra ? 'free' : 'pro'
                         );
                       }}>
-                        <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700" title="Toggle Pro Status">
-                          <Package className={cn("h-4 w-4", userProfile.plan === 'pro' && "text-emerald-500")} />
+                        <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700" title={userProfile.plan === 'pro' || userProfile.plan === 'ultra' ? 'Remove Pro' : 'Set Pro'}>
+                          <Crown className={cn("h-4 w-4", (userProfile.plan === 'pro' || userProfile.plan === 'ultra') && "text-emerald-500")} />
                         </button>
                       </form>
                       <Link 

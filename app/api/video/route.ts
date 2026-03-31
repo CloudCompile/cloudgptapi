@@ -112,7 +112,7 @@ async function handleVideoGeneration(request: NextRequest, body: any) {
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 20;
       dailyLimit = 100000;
-    } else if (userPlan === 'pro' || userPlan === 'video_pro') {
+    } else if (userPlan === 'pro' || userPlan === 'ultra' || userPlan === 'video_pro') {
       limit = 1; // 1 RPM for video
       dailyLimit = 5; // 5 RPD for pro/video_pro
     } else if (userPlan === 'developer') {

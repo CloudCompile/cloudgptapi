@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     const rateLimit =
       plan === 'enterprise' || plan === 'admin'
         ? 1000
-        : plan === 'pro' || plan === 'developer' || plan === 'video_pro'
+        : plan === 'pro' || plan === 'ultra' || plan === 'developer' || plan === 'video_pro'
           ? 500
           : 60;
 

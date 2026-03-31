@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 20;
-    } else if (userPlan === 'pro' || userPlan === 'video_pro') {
+    } else if (userPlan === 'pro' || userPlan === 'ultra' || userPlan === 'video_pro') {
       limit = 2; // 2 RPM for video as requested
     } else if (userPlan === 'developer') {
       limit = 5;
