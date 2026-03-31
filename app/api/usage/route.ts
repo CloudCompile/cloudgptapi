@@ -60,12 +60,33 @@ export async function GET(request: NextRequest) {
     // For session users, we use their userId as the tracking key
     const dailyInfo = await getDailyLimitInfo(userId, finalDailyLimit);
 
+    // Also get usage from user's API keys
+    const { data: apiKeys } = await supabaseAdmin
+      .from('api_keys')
+      .select('daily_usage_count, last_reset_at')
+      .eq('user_id', userId);
+
+    let apiKeyUsage = 0;
+    const now = new Date();
+    if (apiKeys) {
+      for (const key of apiKeys) {
+        const lastReset = new Date(key.last_reset_at);
+        const isNewDay = lastReset.getUTCDate() !== now.getUTCDate();
+        const usage = isNewDay ? 0 : (key.daily_usage_count || 0);
+        apiKeyUsage += usage;
+      }
+    }
+
+    // Combine session usage + API key usage
+    const totalUsed = Math.max(0, finalDailyLimit - dailyInfo.remaining) + apiKeyUsage;
+    const totalRemaining = Math.max(0, finalDailyLimit - totalUsed);
+
     return NextResponse.json({
       plan: userPlan,
       limit: finalDailyLimit,
       rpmLimit: finalRpmLimit,
-      remaining: dailyInfo.remaining,
-      used: Math.max(0, finalDailyLimit - dailyInfo.remaining),
+      remaining: totalRemaining,
+      used: totalUsed,
       resetAt: dailyInfo.resetAt,
       isPeakHours: isPeakHours()
     }, {
