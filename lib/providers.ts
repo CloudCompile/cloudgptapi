@@ -100,16 +100,31 @@ const KIVEST_CHAT_MODELS: ChatModel[] = [
   { id: 'step-3.5-flash', name: 'Step 3.5 Flash', provider: 'kivest', description: 'StepFun Step 3.5 Flash', usageWeight: 2 },
 ];
 
-// Shalom (Bluesminds) Chat Models
+// Shalom (Bluesminds) Chat Models - Pro Only
 const SHALOM_CHAT_MODELS: ChatModel[] = [
+  // DeepSeek
   { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'shalom', description: 'DeepSeek Chat', usageWeight: 2 },
   { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner', provider: 'shalom', description: 'DeepSeek Reasoner', usageWeight: 3 },
   { id: 'deepseek-v3.2', name: 'DeepSeek V3.2', provider: 'shalom', description: 'DeepSeek V3.2', usageWeight: 3 },
+  // Kimi
   { id: 'moonshotai/kimi-k2.5', name: 'Kimi K2.5', provider: 'shalom', description: 'Moonshot Kimi K2.5', usageWeight: 6 },
   { id: 'moonshotai/kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'shalom', description: 'Moonshot Kimi K2 Thinking', usageWeight: 4 },
+  // GLM
   { id: 'glm-4.6', name: 'GLM 4.6', provider: 'shalom', description: 'Zhipu GLM 4.6', usageWeight: 2 },
   { id: 'z-ai/glm5', name: 'GLM 5', provider: 'shalom', description: 'Zhipu GLM 5', usageWeight: 3 },
+  { id: 'glm-5-turbo', name: 'GLM 5 Turbo', provider: 'shalom', description: 'GLM 5 Turbo', usageWeight: 1 },
+  // MiniMax
   { id: 'MiniMax-M2.7', name: 'MiniMax M2.7', provider: 'shalom', description: 'MiniMax M2.7', usageWeight: 3 },
+  // Claude (matching Kivest weights)
+  { id: 'claude-haiku-4-5', name: 'Claude Haiku 4.5', provider: 'shalom', description: 'Claude Haiku 4.5', usageWeight: 2 },
+  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'shalom', description: 'Claude 3.5 Sonnet', usageWeight: 10 },
+  { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet', provider: 'shalom', description: 'Claude 3.7 Sonnet', usageWeight: 10 },
+  { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', provider: 'shalom', description: 'Claude Sonnet 4.6', usageWeight: 10 },
+  // Gemini (matching Kivest weights)
+  { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', provider: 'shalom', description: 'Gemini 3 Flash Preview', usageWeight: 8 },
+  { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', provider: 'shalom', description: 'Gemini 3 Pro Preview', usageWeight: 8 },
+  { id: 'gemini-3-1-flash-lite-preview', name: 'Gemini 3.1 Flash Lite Preview', provider: 'shalom', description: 'Gemini 3.1 Flash Lite Preview', usageWeight: 1 },
+  { id: 'gemini-3-1-pro-preview', name: 'Gemini 3.1 Pro Preview', provider: 'shalom', description: 'Gemini 3.1 Pro Preview', usageWeight: 8 },
 ];
 
 const GEMINI_CHAT_MODELS: ChatModel[] = [
@@ -333,20 +348,21 @@ const LIZ_CHAT_MODELS: ChatModel[] = [
   { id: 'liz-llama-3.3-70b', name: 'Llama 3.3 70B (Liz)', provider: 'liz', description: 'Meta Llama 3.3 70B via Liz Proxy', contextWindow: 128, usageWeight: 12 },
 ];
 
-// Deduplicate models by ID - first provider wins (pollinations free, shalom premium via separate check)
+// Deduplicate models by ID - last provider wins (Shalom overrides for duplicates)
+// Order: pollinations → kivest → shalom (shalom takes priority)
 const ALL_CHAT_MODELS = [
   ...POLLINATIONS_CHAT_MODELS,
   ...KIVEST_CHAT_MODELS,
   ...SHALOM_CHAT_MODELS,
 ];
 
-// Keep first occurrence of each model ID
+// Keep last occurrence of each model ID (shalom overwrites kivest/pollinations)
 const seen = new Set<string>();
-export const CHAT_MODELS: ChatModel[] = ALL_CHAT_MODELS.filter(model => {
+export const CHAT_MODELS: ChatModel[] = [...ALL_CHAT_MODELS].reverse().filter(model => {
   if (seen.has(model.id)) return false;
   seen.add(model.id);
   return true;
-});
+}).reverse();
 
 // All models require PRO subscription
 export const PREMIUM_MODELS = new Set([
@@ -367,11 +383,21 @@ export const PREMIUM_MODELS = new Set([
   // Shalom (Bluesminds) models - Pro only
   'deepseek-chat',
   'deepseek-reasoner',
+  'deepseek-v3.2',
   'moonshotai/kimi-k2.5',
   'moonshotai/kimi-k2-thinking',
   'glm-4.6',
   'z-ai/glm5',
+  'glm-5-turbo',
   'MiniMax-M2.7',
+  'claude-haiku-4-5',
+  'claude-3-5-sonnet-20241022',
+  'claude-3-7-sonnet-20250219',
+  'claude-sonnet-4-6',
+  'gemini-3-flash-preview',
+  'gemini-3-pro-preview',
+  'gemini-3-1-flash-lite-preview',
+  'gemini-3-1-pro-preview',
   // Pollinations and Kivest models are FREE (first occurrence wins)
 ]);
 
