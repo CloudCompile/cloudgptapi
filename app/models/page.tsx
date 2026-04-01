@@ -114,6 +114,33 @@ export default function ModelsPage() {
     return ['all', ...Array.from(providers)].sort();
   }, []);
 
+  const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
+    all: 'All',
+    pollinations: 'Pollinations',
+    openrouter: 'OpenRouter',
+    kivest: 'Kivest',
+    liz: 'Liz',
+    openai: 'OpenAI',
+    anthropic: 'Anthropic',
+    google: 'Google',
+    deepseek: 'DeepSeek',
+    moonshot: 'Moonshot',
+    xai: 'xAI',
+    zhipu: 'Zhipu',
+    minimax: 'MiniMax',
+    shalom: '',
+    github: 'GitHub',
+    stablehorde: 'Stable Horde',
+    poe: 'Poe',
+    claude: 'Claude',
+    gemini: 'Gemini',
+    meridian: 'Meridian',
+  };
+
+  function getProviderDisplayName(provider: string): string {
+    return PROVIDER_DISPLAY_NAMES[provider] || provider;
+  }
+
   const fetchStatuses = useCallback(async () => {
     try {
       const response = await fetch('/api/status');
@@ -425,8 +452,7 @@ export default function ModelsPage() {
 
           {/* Provider Quick Filter */}
           <div className="flex items-center gap-2 px-3 sm:px-6 py-1.5 sm:py-3 overflow-x-auto no-scrollbar bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[1rem] sm:rounded-[2rem] border border-white/10 dark:border-slate-800/30">
-            <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 mr-1 sm:mr-2 whitespace-nowrap">Providers:</span>
-            {PROVIDERS.map(provider => (
+            {PROVIDERS.filter(p => p !== '').map(provider => (
               <button
                 key={provider}
                 onClick={() => setSelectedProvider(provider)}
@@ -437,7 +463,7 @@ export default function ModelsPage() {
                     : "bg-white/50 dark:bg-slate-800/50 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-primary/50"
                 )}
               >
-                {provider}
+                {getProviderDisplayName(provider)}
               </button>
             ))}
           </div>

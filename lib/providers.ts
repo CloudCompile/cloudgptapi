@@ -123,6 +123,7 @@ const SHALOM_CHAT_MODELS: ChatModel[] = [
   { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'anthropic', description: 'Claude 3.5 Sonnet', usageWeight: 10 },
   { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet', provider: 'anthropic', description: 'Claude 3.7 Sonnet', usageWeight: 10 },
   { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', provider: 'anthropic', description: 'Claude Sonnet 4.6', usageWeight: 10 },
+  { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', provider: 'anthropic', description: 'Claude Opus 4.6 - Best for coding', usageWeight: 12 },
   { id: 'provider-1/claude-opus-4-5', name: 'Claude Opus 4.5', provider: 'anthropic', description: 'Anthropic Claude Opus 4.5', usageWeight: 12 },
   { id: 'claude-opus-4-6-thinking', name: 'Claude Opus 4.6 Thinking', provider: 'anthropic', description: 'Anthropic Claude Opus 4.6 Thinking', usageWeight: 12 },
   // Gemini (matching Kivest weights)

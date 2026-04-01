@@ -112,7 +112,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
         { status: 500, headers: getCorsHeaders() }
       );
     }
-  } else if (model.provider === 'shalom') {
+  } else if (model.provider === 'shalom' || model.provider === 'anthropic' || model.provider === 'google' || model.provider === 'deepseek' || model.provider === 'moonshot' || model.provider === 'xai' || model.provider === 'zhipu' || model.provider === 'minimax') {
     providerUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
     providerApiKey = getShalomApiKey();
     if (!providerApiKey) {
