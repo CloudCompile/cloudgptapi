@@ -197,7 +197,7 @@ async function generateStableHordeImage(
       headers: {
         'Content-Type': 'application/json',
         'apikey': hordeApiKey,
-        'Client-Agent': 'Vetra:1.0:cloudgptapi@github.com',
+        'Client-Agent': 'Vetra:1.0:api@github.com',
       },
       body: JSON.stringify(generateRequest),
     });
@@ -228,7 +228,7 @@ async function generateStableHordeImage(
     while (Date.now() - startTime < maxWaitTime) {
       const checkResponse = await fetch(`${hordeUrl}/generate/check/${requestId}`, {
         headers: {
-          'Client-Agent': 'Vetra:1.0:cloudgptapi@github.com',
+          'Client-Agent': 'Vetra:1.0:api@github.com',
         },
       });
       
@@ -243,7 +243,7 @@ async function generateStableHordeImage(
         // Get the result
         const statusResponse = await fetch(`${hordeUrl}/generate/status/${requestId}`, {
           headers: {
-            'Client-Agent': 'Vetra:1.0:cloudgptapi@github.com',
+            'Client-Agent': 'Vetra:1.0:api@github.com',
           },
         });
         

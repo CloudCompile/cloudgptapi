@@ -44,7 +44,12 @@ export async function POST(req: Request) {
 
       const userId = session.metadata.userId;
       const userEmail = session.metadata.userEmail;
-      const priceId = subscription.items.data[0].price.id;
+      const priceId = subscription.items?.data?.[0]?.price?.id;
+      
+      if (!priceId) {
+        console.error(`[${requestId}] Could not get price ID from subscription`);
+        return new NextResponse('Invalid subscription price', { status: 400 });
+      }
       
       // Map price ID to plan name using env vars if available, fallback to hardcoded IDs from pricing page
       let planName = 'free';
@@ -59,11 +64,14 @@ export async function POST(req: Request) {
 
       console.log(`[${requestId}] Updating user ${userId} (${userEmail || 'no email'}) to plan ${planName} (price: ${priceId})`);
 
+      // Safely get subscription product ID
+      const stripeProductId = subscription.items?.data?.[0]?.plan?.product || null;
+
       // Use upsert to ensure profile exists
       const profileUpdate: any = { 
         id: userId,
         plan: planName,
-        stripe_product_id: subscription.items.data[0].plan.product as string,
+        stripe_product_id: stripeProductId,
         updated_at: new Date().toISOString()
       };
 
@@ -136,6 +144,8 @@ export async function POST(req: Request) {
       
       // Also track the subscription details for audit/debugging
       const sub = subscription as any;
+      const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : new Date().toISOString();
+      
       const { error: subError } = await supabaseAdmin
         .from('user_subscriptions')
         .upsert({
@@ -143,9 +153,7 @@ export async function POST(req: Request) {
           stripe_subscription_id: sub.id,
           stripe_customer_id: sub.customer as string,
           stripe_price_id: priceId,
-          stripe_current_period_end: new Date(
-            sub.current_period_end * 1000
-          ).toISOString(),
+          stripe_current_period_end: periodEnd,
           status: sub.status,
         }, { onConflict: 'stripe_subscription_id' });
 
@@ -166,7 +174,9 @@ export async function POST(req: Request) {
           .from('user_subscriptions')
           .update({ 
             status: subscription.status,
-            stripe_current_period_end: new Date(subscription.current_period_end * 1000).toISOString()
+            stripe_current_period_end: subscription.current_period_end 
+              ? new Date(subscription.current_period_end * 1000).toISOString() 
+              : new Date().toISOString()
           })
           .eq('stripe_subscription_id', subscription.id);
 
@@ -195,8 +205,13 @@ export async function POST(req: Request) {
       const subscription = event.data.object as any;
       console.log(`[${requestId}] Subscription updated: ${subscription.id}`);
       
-      // Sync new price/plan to database
-      const priceId = subscription.items.data[0].price.id;
+      // Safely get price ID
+      const priceId = subscription.items?.data?.[0]?.price?.id || null;
+      if (!priceId) {
+        console.error(`[${requestId}] Could not get price ID from subscription`);
+        return new NextResponse('Invalid subscription data', { status: 400 });
+      }
+      
       let planName = 'free';
       const PRO_PRICE_ID = 'price_1TH5jYQvLgyqzP00y0P6OYDO';
       const ULTRA_PRICE_ID = 'price_1TH5l0QvLgyqzP00K7uLVmS4';
@@ -235,7 +250,9 @@ export async function POST(req: Request) {
           .update({ 
             status: subscription.status,
             stripe_price_id: priceId,
-            stripe_current_period_end: new Date(subscription.current_period_end * 1000).toISOString()
+            stripe_current_period_end: subscription.current_period_end 
+              ? new Date(subscription.current_period_end * 1000).toISOString() 
+              : new Date().toISOString()
           })
           .eq('stripe_subscription_id', subscription.id);
 

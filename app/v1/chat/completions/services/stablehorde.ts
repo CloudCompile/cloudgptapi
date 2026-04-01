@@ -58,7 +58,7 @@ export async function handleStableHordeChat(
       headers: {
         'Content-Type': 'application/json',
         'apikey': hordeApiKey,
-        'Client-Agent': 'Vetra:1.0:cloudgptapi@github.com',
+        'Client-Agent': 'Vetra:1.0:api@github.com',
       },
       body: JSON.stringify(generateRequest),
     });
@@ -88,7 +88,7 @@ export async function handleStableHordeChat(
     while (Date.now() - startTime < maxWaitTime) {
       const checkResponse = await fetch(`${hordeUrl}/generate/text/status/${generationId}`, {
         headers: {
-          'Client-Agent': 'Vetra:1.0:cloudgptapi@github.com',
+          'Client-Agent': 'Vetra:1.0:api@github.com',
         },
       });
       
