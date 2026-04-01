@@ -104,8 +104,6 @@ const KIVEST_CHAT_MODELS: ChatModel[] = [
 const SHALOM_CHAT_MODELS: ChatModel[] = [
   // DeepSeek
   { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'deepseek', description: 'DeepSeek Chat', usageWeight: 2 },
-  { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner', provider: 'deepseek', description: 'DeepSeek Reasoner', usageWeight: 3 },
-  { id: 'deepseek-v3.2', name: 'DeepSeek V3.2', provider: 'deepseek', description: 'DeepSeek V3.2', usageWeight: 3 },
   // Kimi
   { id: 'moonshotai/kimi-k2.5', name: 'Kimi K2.5', provider: 'moonshot', description: 'Moonshot Kimi K2.5', usageWeight: 2 },
   { id: 'moonshotai/kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'moonshot', description: 'Moonshot Kimi K2 Thinking', usageWeight: 4 },
@@ -113,25 +111,12 @@ const SHALOM_CHAT_MODELS: ChatModel[] = [
   { id: 'grok-4.2', name: 'Grok 4.2', provider: 'xai', description: 'xAI Grok 4.2', usageWeight: 6 },
   // GLM
   { id: 'glm-4.6', name: 'GLM 4.6', provider: 'zhipu', description: 'Zhipu GLM 4.6', usageWeight: 2 },
-  { id: 'z-ai/glm5', name: 'GLM 5', provider: 'zhipu', description: 'Zhipu GLM 5', usageWeight: 3 },
-  { id: 'glm-5-turbo', name: 'GLM 5 Turbo', provider: 'zhipu', description: 'GLM 5 Turbo', usageWeight: 1 },
-  // MiniMax
-  { id: 'MiniMax-M2.7', name: 'MiniMax M2.7', provider: 'minimax', description: 'MiniMax M2.7', usageWeight: 3 },
-  // Claude (matching Kivest weights)
-  { id: 'claude-haiku-4-5', name: 'Claude Haiku 4.5', provider: 'anthropic', description: 'Claude Haiku 4.5', usageWeight: 2 },
-  { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5 (Oct)', provider: 'anthropic', description: 'Claude Haiku 4.5 Oct 2025', usageWeight: 2 },
-  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'anthropic', description: 'Claude 3.5 Sonnet', usageWeight: 10 },
-  { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet', provider: 'anthropic', description: 'Claude 3.7 Sonnet', usageWeight: 10 },
-  { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', provider: 'anthropic', description: 'Claude Sonnet 4.6', usageWeight: 10 },
+  // Claude - only working models
   { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', provider: 'anthropic', description: 'Claude Opus 4.6 - Best for coding', usageWeight: 12 },
   { id: 'provider-1/claude-opus-4-5', name: 'Claude Opus 4.5', provider: 'anthropic', description: 'Anthropic Claude Opus 4.5', usageWeight: 12 },
-  { id: 'claude-opus-4-6-thinking', name: 'Claude Opus 4.6 Thinking', provider: 'anthropic', description: 'Anthropic Claude Opus 4.6 Thinking', usageWeight: 12 },
-  // Gemini (matching Kivest weights)
+  // Gemini - only working models
   { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'google', description: 'Google Gemini 2.5 Pro', usageWeight: 8 },
   { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', provider: 'google', description: 'Google Gemini 3 Flash Preview', usageWeight: 8 },
-  { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', provider: 'google', description: 'Google Gemini 3 Pro Preview', usageWeight: 8 },
-  { id: 'gemini-3-1-flash-lite-preview', name: 'Gemini 3.1 Flash Lite Preview', provider: 'google', description: 'Google Gemini 3.1 Flash Lite Preview', usageWeight: 1 },
-  { id: 'gemini-3-1-pro-preview', name: 'Gemini 3.1 Pro Preview', provider: 'google', description: 'Google Gemini 3.1 Pro Preview', usageWeight: 8 },
 ];
 
 const GEMINI_CHAT_MODELS: ChatModel[] = [
@@ -389,28 +374,14 @@ export const PREMIUM_MODELS = new Set([
   'perplexity-fast', // Perplexity Sonar
   // Shalom (Bluesminds) models - Pro only
   'deepseek-chat',
-  'deepseek-reasoner',
-  'deepseek-v3.2',
   'moonshotai/kimi-k2.5',
   'moonshotai/kimi-k2-thinking',
   'glm-4.6',
-  'z-ai/glm5',
-  'glm-5-turbo',
-  'MiniMax-M2.7',
-  'claude-haiku-4-5',
-  'claude-3-5-sonnet-20241022',
-  'claude-3-7-sonnet-20250219',
-  'claude-sonnet-4-6',
   'gemini-2.5-pro',
   'gemini-3-flash-preview',
-  'gemini-3-pro-preview',
-  'gemini-3-1-flash-lite-preview',
-  'gemini-3-1-pro-preview',
   'grok-4.2',
   // Ultra-only models
   'provider-1/claude-opus-4-5',
-  'claude-opus-4-6-thinking',
-  'claude-haiku-4-5-20251001',
   // Image models (Ultra only)
   'dall-e-3',
   'gpt-image-1',
