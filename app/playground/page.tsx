@@ -30,6 +30,30 @@ import Link from 'next/link';
 
 type Mode = 'chat' | 'image' | 'video';
 
+// Provider display name mapping
+const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
+  pollinations: 'Pollinations',
+  openrouter: 'OpenRouter',
+  stablehorde: 'Stable Horde',
+  kivest: 'Kivest',
+  liz: 'Liz',
+  openai: 'OpenAI',
+  anthropic: 'Anthropic',
+  google: 'Google',
+  deepseek: 'DeepSeek',
+  moonshot: 'Moonshot',
+  xai: 'xAI',
+  zhipu: 'Zhipu',
+  minimax: 'MiniMax',
+  shalom: '',  // Hide Bluesminds completely
+};
+
+function formatProviderName(provider: string): string {
+  const name = PROVIDER_DISPLAY_NAMES[provider];
+  if (!name) return '';  // Hide if empty
+  return name;
+}
+
 // Countdown hook for downtime
 function useCountdown(targetDate?: string) {
   const [timeLeft, setTimeLeft] = useState<{hours: number, minutes: number, seconds: number} | null>(null);
@@ -404,7 +428,9 @@ export default function PlaygroundPage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{m.name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] font-medium text-slate-400 uppercase">{m.provider}</span>
+                          {formatProviderName(m.provider) && (
+                            <span className="text-[10px] font-medium text-slate-400 uppercase">{formatProviderName(m.provider)}</span>
+                          )}
                           <span className="px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-black text-[9px]">
                             x{weight}
                           </span>
@@ -628,11 +654,15 @@ export default function PlaygroundPage() {
             
             <div className="space-y-6">
               <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border-2 border-border shadow-sm hover:border-primary/30 transition-all group">
-                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Provider</div>
-                <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                  Vetra Unified
-                  <Zap className="h-3 w-3 text-amber-500 fill-amber-500" />
-                </p>
+                {formatProviderName(selectedModelData?.provider || '') && (
+                  <>
+                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Provider</div>
+                    <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                      {formatProviderName(selectedModelData?.provider || '')}
+                      <Zap className="h-3 w-3 text-amber-500 fill-amber-500" />
+                    </p>
+                  </>
+                )}
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Model ID</div>
                 <code className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg text-primary border border-border block w-fit">
                   {selectedModel}
@@ -657,13 +687,22 @@ export default function PlaygroundPage() {
               <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                 <History className="h-4 w-4 text-emerald-500" />
               </div>
-              <h3 className="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-[0.2em]">Live Metrics</h3>
+              <h3 className="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-[0.2em]">Model Info</h3>
             </div>
             
-            <div className="grid gap-4">
-              <MetricCard label="Tokens" value="0" sub="Approximate" />
-              <MetricCard label="Latency" value="0ms" sub="Response time" />
-              <MetricCard label="Context" value="128k" sub="Max window" />
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-border">
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Context Window</div>
+                <div className="text-lg font-black text-slate-900 dark:text-slate-100">
+                  {(selectedModelData as ChatModel)?.contextWindow ? `${(selectedModelData as ChatModel).contextWindow}k` : 'N/A'}
+                </div>
+              </div>
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-border">
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Provider</div>
+                <div className="text-sm font-bold text-slate-900 dark:text-slate-100 capitalize">
+                  {selectedModelData?.provider || 'Vetra'}
+                </div>
+              </div>
             </div>
           </section>
 
@@ -674,9 +713,12 @@ export default function PlaygroundPage() {
               <p className="text-[11px] font-bold opacity-70 mb-4 leading-relaxed">
                 Unlock specialized models and higher rate limits with Pro.
               </p>
-              <button className="w-full py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl">
+              <Link 
+                href="/pricing"
+                className="block w-full py-2.5 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl text-center"
+              >
                 Upgrade Now
-              </button>
+              </Link>
             </div>
           </div>
         </div>

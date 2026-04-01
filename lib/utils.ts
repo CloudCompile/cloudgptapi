@@ -126,6 +126,19 @@ export const PRO_PLANS = ['pro', 'ultra', 'enterprise', 'developer', 'admin', 'v
 export const VIDEO_PLANS = ['video_pro', 'ultra', 'enterprise', 'admin'];
 
 /**
+ * Plans that have Ultra-only access (highest tier)
+ */
+export const ULTRA_PLANS = ['ultra', 'enterprise', 'admin'];
+
+/**
+ * Check if a user plan has ultra-only access (for Ultra-tier models)
+ */
+export function hasUltraAccess(plan: string | undefined | null): boolean {
+  if (!plan) return false;
+  return ULTRA_PLANS.includes(plan.toLowerCase());
+}
+
+/**
  * Check if a user plan has pro access
  */
 export function hasProAccess(plan: string | undefined | null): boolean {

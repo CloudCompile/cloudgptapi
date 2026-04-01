@@ -3,17 +3,17 @@
 export interface ChatModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'poe' | 'liz' | 'openai' | 'kivest' | 'shalom';
+  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'poe' | 'liz' | 'openai' | 'kivest' | 'shalom' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'moonshot' | 'zhipu' | 'minimax';
   description?: string;
   contextWindow?: number;
-  downtimeUntil?: string; // ISO timestamp for maintenance countdown
-  usageWeight?: number; // How many "requests" this model counts as for daily limits
+  downtimeUntil?: string;
+  usageWeight?: number;
 }
 
 export interface ImageModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'appypie' | 'stablehorde' | 'github';
+  provider: 'pollinations' | 'openrouter' | 'appypie' | 'stablehorde' | 'github' | 'openai';
   description?: string;
   downtimeUntil?: string; // ISO timestamp for maintenance countdown
   usageWeight?: number; // How many "requests" this model counts as for daily limits
@@ -22,11 +22,11 @@ export interface ImageModel {
 export interface VideoModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'github';
+  provider: 'pollinations' | 'openrouter' | 'github' | 'google';
   description?: string;
   maxDuration?: number;
-  downtimeUntil?: string; // ISO timestamp for maintenance countdown
-  usageWeight?: number; // How many "requests" this model counts as for daily limits
+  downtimeUntil?: string;
+  usageWeight?: number;
 }
 
 // Available chat models by provider
@@ -103,28 +103,34 @@ const KIVEST_CHAT_MODELS: ChatModel[] = [
 // Shalom (Bluesminds) Chat Models - Pro Only
 const SHALOM_CHAT_MODELS: ChatModel[] = [
   // DeepSeek
-  { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'shalom', description: 'DeepSeek Chat', usageWeight: 2 },
-  { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner', provider: 'shalom', description: 'DeepSeek Reasoner', usageWeight: 3 },
-  { id: 'deepseek-v3.2', name: 'DeepSeek V3.2', provider: 'shalom', description: 'DeepSeek V3.2', usageWeight: 3 },
+  { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'deepseek', description: 'DeepSeek Chat', usageWeight: 2 },
+  { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner', provider: 'deepseek', description: 'DeepSeek Reasoner', usageWeight: 3 },
+  { id: 'deepseek-v3.2', name: 'DeepSeek V3.2', provider: 'deepseek', description: 'DeepSeek V3.2', usageWeight: 3 },
   // Kimi
-  { id: 'moonshotai/kimi-k2.5', name: 'Kimi K2.5', provider: 'shalom', description: 'Moonshot Kimi K2.5', usageWeight: 6 },
-  { id: 'moonshotai/kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'shalom', description: 'Moonshot Kimi K2 Thinking', usageWeight: 4 },
+  { id: 'moonshotai/kimi-k2.5', name: 'Kimi K2.5', provider: 'moonshot', description: 'Moonshot Kimi K2.5', usageWeight: 2 },
+  { id: 'moonshotai/kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'moonshot', description: 'Moonshot Kimi K2 Thinking', usageWeight: 4 },
+  // Grok
+  { id: 'grok-4.2', name: 'Grok 4.2', provider: 'xai', description: 'xAI Grok 4.2', usageWeight: 6 },
   // GLM
-  { id: 'glm-4.6', name: 'GLM 4.6', provider: 'shalom', description: 'Zhipu GLM 4.6', usageWeight: 2 },
-  { id: 'z-ai/glm5', name: 'GLM 5', provider: 'shalom', description: 'Zhipu GLM 5', usageWeight: 3 },
-  { id: 'glm-5-turbo', name: 'GLM 5 Turbo', provider: 'shalom', description: 'GLM 5 Turbo', usageWeight: 1 },
+  { id: 'glm-4.6', name: 'GLM 4.6', provider: 'zhipu', description: 'Zhipu GLM 4.6', usageWeight: 2 },
+  { id: 'z-ai/glm5', name: 'GLM 5', provider: 'zhipu', description: 'Zhipu GLM 5', usageWeight: 3 },
+  { id: 'glm-5-turbo', name: 'GLM 5 Turbo', provider: 'zhipu', description: 'GLM 5 Turbo', usageWeight: 1 },
   // MiniMax
-  { id: 'MiniMax-M2.7', name: 'MiniMax M2.7', provider: 'shalom', description: 'MiniMax M2.7', usageWeight: 3 },
+  { id: 'MiniMax-M2.7', name: 'MiniMax M2.7', provider: 'minimax', description: 'MiniMax M2.7', usageWeight: 3 },
   // Claude (matching Kivest weights)
-  { id: 'claude-haiku-4-5', name: 'Claude Haiku 4.5', provider: 'shalom', description: 'Claude Haiku 4.5', usageWeight: 2 },
-  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'shalom', description: 'Claude 3.5 Sonnet', usageWeight: 10 },
-  { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet', provider: 'shalom', description: 'Claude 3.7 Sonnet', usageWeight: 10 },
-  { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', provider: 'shalom', description: 'Claude Sonnet 4.6', usageWeight: 10 },
+  { id: 'claude-haiku-4-5', name: 'Claude Haiku 4.5', provider: 'anthropic', description: 'Claude Haiku 4.5', usageWeight: 2 },
+  { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5 (Oct)', provider: 'anthropic', description: 'Claude Haiku 4.5 Oct 2025', usageWeight: 2 },
+  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'anthropic', description: 'Claude 3.5 Sonnet', usageWeight: 10 },
+  { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet', provider: 'anthropic', description: 'Claude 3.7 Sonnet', usageWeight: 10 },
+  { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', provider: 'anthropic', description: 'Claude Sonnet 4.6', usageWeight: 10 },
+  { id: 'provider-1/claude-opus-4-5', name: 'Claude Opus 4.5', provider: 'anthropic', description: 'Anthropic Claude Opus 4.5', usageWeight: 12 },
+  { id: 'claude-opus-4-6-thinking', name: 'Claude Opus 4.6 Thinking', provider: 'anthropic', description: 'Anthropic Claude Opus 4.6 Thinking', usageWeight: 12 },
   // Gemini (matching Kivest weights)
-  { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', provider: 'shalom', description: 'Gemini 3 Flash Preview', usageWeight: 8 },
-  { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', provider: 'shalom', description: 'Gemini 3 Pro Preview', usageWeight: 8 },
-  { id: 'gemini-3-1-flash-lite-preview', name: 'Gemini 3.1 Flash Lite Preview', provider: 'shalom', description: 'Gemini 3.1 Flash Lite Preview', usageWeight: 1 },
-  { id: 'gemini-3-1-pro-preview', name: 'Gemini 3.1 Pro Preview', provider: 'shalom', description: 'Gemini 3.1 Pro Preview', usageWeight: 8 },
+  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'google', description: 'Google Gemini 2.5 Pro', usageWeight: 8 },
+  { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', provider: 'google', description: 'Google Gemini 3 Flash Preview', usageWeight: 8 },
+  { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', provider: 'google', description: 'Google Gemini 3 Pro Preview', usageWeight: 8 },
+  { id: 'gemini-3-1-flash-lite-preview', name: 'Gemini 3.1 Flash Lite Preview', provider: 'google', description: 'Google Gemini 3.1 Flash Lite Preview', usageWeight: 1 },
+  { id: 'gemini-3-1-pro-preview', name: 'Gemini 3.1 Pro Preview', provider: 'google', description: 'Google Gemini 3.1 Pro Preview', usageWeight: 8 },
 ];
 
 const GEMINI_CHAT_MODELS: ChatModel[] = [
@@ -394,19 +400,50 @@ export const PREMIUM_MODELS = new Set([
   'claude-3-5-sonnet-20241022',
   'claude-3-7-sonnet-20250219',
   'claude-sonnet-4-6',
+  'gemini-2.5-pro',
   'gemini-3-flash-preview',
   'gemini-3-pro-preview',
   'gemini-3-1-flash-lite-preview',
   'gemini-3-1-pro-preview',
+  'grok-4.2',
+  // Ultra-only models
+  'provider-1/claude-opus-4-5',
+  'claude-opus-4-6-thinking',
+  'claude-haiku-4-5-20251001',
+  // Image models (Ultra only)
+  'dall-e-3',
+  'gpt-image-1',
+  'gpt-image-1.5',
+  // Video models (Ultra only)
+  'veo-3.1-generate-preview',
+  'veo-3.1-fast-generate-preview',
   // Pollinations and Kivest models are FREE (first occurrence wins)
 ]);
 
 // Available image models
 export const IMAGE_MODELS: ImageModel[] = [
+  // OpenAI DALL-E models (Ultra only)
+  { id: 'dall-e-3', name: 'DALL-E 3', provider: 'openai', description: 'OpenAI DALL-E 3', usageWeight: 3 },
+  { id: 'gpt-image-1', name: 'GPT Image 1', provider: 'openai', description: 'OpenAI GPT Image 1', usageWeight: 1 },
+  { id: 'gpt-image-1.5', name: 'GPT Image 1.5', provider: 'openai', description: 'OpenAI GPT Image 1.5', usageWeight: 2 },
+  // Pollinations models (Free)
+  { id: 'flux', name: 'Flux', provider: 'pollinations', description: 'Fast & diverse image generation', usageWeight: 1 },
+  { id: 'flux-realism', name: 'Flux Realism', provider: 'pollinations', description: 'Realistic image generation', usageWeight: 1 },
+  { id: 'flux-anime', name: 'Flux Anime', provider: 'pollinations', description: 'Anime-style image generation', usageWeight: 1 },
+  { id: 'flux-3d', name: 'Flux 3D', provider: 'pollinations', description: '3D render style image generation', usageWeight: 1 },
+  { id: 'sdxl', name: 'SDXL', provider: 'pollinations', description: 'Stable Diffusion XL', usageWeight: 1 },
+  { id: 'any-dark', name: 'Any Dark', provider: 'pollinations', description: 'Dark themed image generation', usageWeight: 1 },
 ];
 
-// Available video models - ALL require pro/video_pro plan
-export const VIDEO_MODELS: VideoModel[] = [];
+// Available video models - ALL require ultra plan
+export const VIDEO_MODELS: VideoModel[] = [
+  // Veo models (Ultra only) - via Google
+  { id: 'veo-3.1-generate-preview', name: 'Veo 3.1 Generate', provider: 'google', description: 'Google Veo 3.1 Generate', usageWeight: 10, maxDuration: 8 },
+  { id: 'veo-3.1-fast-generate-preview', name: 'Veo 3.1 Fast Generate', provider: 'google', description: 'Google Veo 3.1 Fast Generate', usageWeight: 5, maxDuration: 8 },
+  // Pollinations video models
+  { id: 'pix2pix-video', name: 'Pix2Pix Video', provider: 'pollinations', description: 'Video generation', usageWeight: 2, maxDuration: 10 },
+  { id: 'svd', name: 'Stable Video Diffusion', provider: 'pollinations', description: 'SVD video generation', usageWeight: 3, maxDuration: 4 },
+];
 
 // Video models require pro/video_pro plan for access
 export const VIDEO_MODELS_SET = new Set(VIDEO_MODELS.map(m => m.id));

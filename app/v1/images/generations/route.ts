@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUserId } from '@/lib/kinde-auth';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit, getDailyLimitForPlan } from '@/lib/api-keys';
 import { IMAGE_MODELS, PROVIDER_URLS, ImageModel, PREMIUM_MODELS } from '@/lib/providers';
-import { getCorsHeaders, getPollinationsApiKey, getPollinationsApiKeys, safeResponseJson, hasProAccess } from '@/lib/utils';
+import { getCorsHeaders, getPollinationsApiKey, getPollinationsApiKeys, safeResponseJson, hasProAccess, hasUltraAccess } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export const runtime = 'nodejs';
@@ -205,10 +205,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if model is premium and if user has access
+    // Check if model is premium (Pro) or ultra-only, and if user has access
     const isPremium = PREMIUM_MODELS.has(modelId);
+    const isUltraOnly = ['dall-e-3', 'gpt-image-1', 'gpt-image-1.5'].includes(modelId);
     // Pro access if they have a pro/enterprise/developer/admin plan
     const hasPro = hasProAccess(userPlan);
+    const hasUltra = hasUltraAccess(userPlan);
+
+    if (isUltraOnly && !hasUltra) {
+      return NextResponse.json(
+        {
+          error: {
+            message: `The model '${modelId}' is only available on Ultra and Enterprise plans. Please upgrade at ${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+            type: 'access_denied',
+            param: 'model',
+            code: 'model_not_allowed'
+          }
+        },
+        { status: 403, headers: getCorsHeaders() }
+      );
+    }
 
     if (isPremium && !hasPro) {
       return NextResponse.json(
@@ -217,13 +233,10 @@ export async function POST(request: NextRequest) {
             message: `The model '${modelId}' is only available on Pro and Enterprise plans. Please upgrade at ${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
             type: 'access_denied',
             param: 'model',
-            code: 'premium_model_required'
+            code: 'model_not_allowed'
           }
         },
-        {
-          status: 403,
-          headers: getCorsHeaders()
-        }
+        { status: 403, headers: getCorsHeaders() }
       );
     }
 

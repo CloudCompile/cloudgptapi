@@ -300,7 +300,7 @@ export default function ModelsPage() {
               label="Active" 
               value={`${stats.online}/${stats.total}`} 
               icon={<CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />}
-              trend="+2 today"
+              trend="+10 today"
             />
             <StatCard 
               label="Latency" 
