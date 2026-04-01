@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { stripe } from '@/lib/stripe';
 import { getCorsHeaders } from '@/lib/utils';
+import { getCurrentUserId } from '@/lib/kinde-auth';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,8 +11,16 @@ const supabaseAdmin = createClient(
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { userId } = body;
+    let userId = null;
+    
+    // Try to get user from session
+    try {
+      userId = await getCurrentUserId();
+    } catch (authError) {
+      // Try from request body as fallback
+      const body = await request.json().catch(() => ({}));
+      userId = body.userId;
+    }
 
     if (!userId) {
       return NextResponse.json(
@@ -35,13 +44,13 @@ export async function POST(request: Request) {
     }
 
     // Create Stripe billing portal session
-    const session = await stripe.billingPortal.sessions.create({
+    const portalSession = await stripe.billingPortal.sessions.create({
       customer: subscription.stripe_customer_id,
       return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
     });
 
     return NextResponse.json(
-      { url: session.url },
+      { url: portalSession.url },
       { headers: getCorsHeaders() }
     );
   } catch (error: any) {

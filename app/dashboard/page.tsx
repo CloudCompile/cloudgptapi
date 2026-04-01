@@ -343,14 +343,27 @@ export default function Dashboard() {
               <div className="text-[10px] uppercase font-black text-slate-500 tracking-wider mb-1">Current Plan</div>
               <div className="text-xl font-black text-white uppercase tracking-tight">{(userUsage?.plan || 'Free').replace('_', ' ')}</div>
               {userUsage?.plan && userUsage.plan !== 'free' ? (
-                <a
-                  href="https://billing.stripe.com/p/login/self"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/stripe/create-portal-session', {
+                        method: 'POST',
+                        credentials: 'include'
+                      });
+                      const data = await res.json();
+                      if (data.url) {
+                        window.open(data.url, '_blank');
+                      } else {
+                        console.error('No portal URL:', data.error);
+                      }
+                    } catch (err) {
+                      console.error('Failed to open billing portal:', err);
+                    }
+                  }}
                   className="text-[10px] text-slate-400 font-bold mt-1 flex items-center gap-1 hover:text-white transition-colors"
                 >
                   Cancel Subscription
-                </a>
+                </button>
               ) : (
                 <div className="text-[10px] text-primary font-bold mt-1 flex items-center gap-1">
                   <Zap className="h-2 w-2 fill-current" /> UPGRADE
