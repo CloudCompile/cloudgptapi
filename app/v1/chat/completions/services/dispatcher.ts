@@ -338,10 +338,17 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       errorCode = 'provider_unavailable';
       shouldRetry = true;
     } else if (providerResponse.status === 429) {
-      mappedStatus = 429;
-      errorMessage = 'Rate limit exceeded for the upstream provider. Please wait a moment and try again.';
-      errorCode = 'rate_limit_exceeded';
-      shouldRetry = true;
+      const isQuotaError = errorText.includes('quota') || errorText.includes('Quota') || errorText.includes('allocated') || errorText.includes('exceeded');
+      if (isQuotaError) {
+        mappedStatus = 429;
+        errorMessage = 'Quota exhausted for this model. Please try a different model or contact support.';
+        errorCode = 'quota_exhausted';
+      } else {
+        mappedStatus = 429;
+        errorMessage = 'Rate limit exceeded for the upstream provider. Please wait a moment and try again.';
+        errorCode = 'rate_limit_exceeded';
+      }
+      shouldRetry = !isQuotaError;
     } else if (providerResponse.status === 504 || providerResponse.status === 503) {
       errorMessage = `The upstream provider (${model.provider}) is temporarily unavailable or overloaded. Please try again in a few moments or use a different model.`;
       errorCode = 'provider_timeout';

@@ -28,9 +28,10 @@ const plans = [
     description: 'For professional developers and growing applications.',
     features: [
       'Access to ALL Flagship models',
-      'GPT-5.4, Claude 4.6, Gemini 3 Pro',
-      'Reasoning & Specialized models',
-      'High-res image generation',
+      'Claude Sonnet, Gemini 3.1, GPT-4o',
+      'DeepSeek V3.1, Kimi K2, MiniMax',
+      'High-res image generation (Flux)',
+      'Video generation',
       '10 requests per minute',
       '1000 requests per day',
       'Priority email support',
@@ -45,9 +46,12 @@ const plans = [
     name: 'Ultra',
     price: '€10',
     period: '/month',
-    description: 'For power users who need higher limits.',
+    description: 'For power users who need higher limits and premium models.',
     features: [
       'Everything in Pro',
+      'Claude Opus (4.5 & 4.6)',
+      'DALL-E 3, GPT Image 1 & 1.5',
+      'Veo 3.1 Video generation',
       'Higher rate limits',
       '2500 requests per day',
       'Priority processing',
@@ -264,8 +268,8 @@ export default function PricingPage() {
           <div className="grid gap-4 sm:gap-6">
             {[
               {
-                title: 'What are "Advanced Models"?',
-                content: 'Access state-of-the-art reasoning models like GPT-5.4, Claude 4.6, and Gemini 3 Pro through a single endpoint.',
+                title: 'What models can I access?',
+                content: 'Pro gives you Claude Sonnet, Gemini 3.1, GPT-4o, DeepSeek, Kimi, MiniMax and more. Ultra adds Claude Opus and premium image/video models (DALL-E 3, GPT Image, Veo 3.1).',
                 icon: <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
               },
               {
