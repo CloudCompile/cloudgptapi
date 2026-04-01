@@ -103,15 +103,12 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       );
     }
   } else if (model.provider === 'kivest') {
-    providerUrl = `${PROVIDER_URLS.kivest}/chat/completions`;
-    providerApiKey = getKivestApiKey();
-    if (!providerApiKey) {
-      console.warn(`[${requestId}] Missing Kivest API key for model: ${modelId}`);
-      return NextResponse.json(
-        { error: { message: 'Kivest API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
-        { status: 500, headers: getCorsHeaders() }
-      );
-    }
+    // Kivest provider temporarily disabled - return clear error
+    console.warn(`[${requestId}] Kivest provider is temporarily disabled`);
+    return NextResponse.json(
+      { error: { message: 'Kivest provider is temporarily unavailable. Please try another model.', type: 'provider_error', param: null, code: 'provider_disabled', request_id: requestId } },
+      { status: 503, headers: getCorsHeaders() }
+    );
   } else if (model.provider === 'shalom' || model.provider === 'anthropic' || model.provider === 'google' || model.provider === 'deepseek' || model.provider === 'moonshot' || model.provider === 'xai' || model.provider === 'zhipu' || model.provider === 'minimax') {
     providerUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
     providerApiKey = getShalomApiKey();

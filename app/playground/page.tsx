@@ -35,7 +35,7 @@ const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
   pollinations: 'Pollinations',
   openrouter: 'OpenRouter',
   stablehorde: 'Stable Horde',
-  kivest: 'Kivest',
+  kivest: '',  // Temporarily disabled
   liz: 'Liz',
   openai: 'OpenAI',
   anthropic: 'Anthropic',
@@ -92,7 +92,8 @@ export default function PlaygroundPage() {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [profile, setProfile] = useState<{ plan: string } | null>(null);
   const [mode, setMode] = useState<Mode>('chat');
-  const [selectedModel, setSelectedModel] = useState(CHAT_MODELS[0].id);
+  const availableChatModels = CHAT_MODELS.filter(m => m.provider !== 'kivest');
+  const [selectedModel, setSelectedModel] = useState(availableChatModels[0]?.id || '');
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [loading, setLoading] = useState(false);
@@ -105,7 +106,7 @@ export default function PlaygroundPage() {
   const [modelSearch, setModelSearch] = useState('');
   const [modelFilter, setModelFilter] = useState<'all' | 'free' | 'premium'>('all');
   
-  const currentModels = mode === 'chat' ? CHAT_MODELS : mode === 'image' ? IMAGE_MODELS : VIDEO_MODELS;
+  const currentModels = mode === 'chat' ? CHAT_MODELS.filter(m => m.provider !== 'kivest') : mode === 'image' ? IMAGE_MODELS : VIDEO_MODELS;
   const selectedModelData = currentModels.find(m => m.id === selectedModel);
   const countdown = useCountdown(selectedModelData?.downtimeUntil);
 
@@ -170,7 +171,7 @@ export default function PlaygroundPage() {
     setVideoUrl('');
     setMessages([]);
     setError('');
-    if (newMode === 'chat') setSelectedModel(CHAT_MODELS[0].id);
+    if (newMode === 'chat') setSelectedModel(availableChatModels[0]?.id || '');
     if (newMode === 'image') setSelectedModel(IMAGE_MODELS[0].id);
     if (newMode === 'video') setSelectedModel(VIDEO_MODELS[0].id);
   };

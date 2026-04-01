@@ -86,7 +86,7 @@ function useCountdown(targetDate?: string) {
 }
 
 const ALL_MODELS: ModelType[] = [
-  ...CHAT_MODELS.map(m => ({ ...m, type: 'chat' as const })),
+  ...CHAT_MODELS.filter(m => m.provider !== 'kivest').map(m => ({ ...m, type: 'chat' as const })),
   ...IMAGE_MODELS.map(m => ({ ...m, type: 'image' as const })),
   ...VIDEO_MODELS.map(m => ({ ...m, type: 'video' as const })),
 ];
@@ -111,6 +111,8 @@ export default function ModelsPage() {
 
   const PROVIDERS = useMemo(() => {
     const providers = new Set(ALL_MODELS.map(m => m.provider.toLowerCase()));
+    // Filter out disabled providers
+    providers.delete('kivest');
     return ['all', ...Array.from(providers)].sort();
   }, []);
 
@@ -118,7 +120,7 @@ export default function ModelsPage() {
     all: 'All',
     pollinations: 'Pollinations',
     openrouter: 'OpenRouter',
-    kivest: 'Kivest',
+    kivest: '',  // Temporarily disabled
     liz: 'Liz',
     openai: 'OpenAI',
     anthropic: 'Anthropic',
