@@ -36,9 +36,18 @@ export async function POST(request: Request) {
       .eq('user_id', userId)
       .single();
 
-    if (subError || !subscription?.stripe_customer_id) {
+    if (subError) {
+      console.error('Error fetching subscription:', subError);
       return NextResponse.json(
-        { error: 'No active subscription found' },
+        { error: 'No active subscription found', details: subError.message },
+        { status: 404, headers: getCorsHeaders() }
+      );
+    }
+
+    if (!subscription?.stripe_customer_id) {
+      console.error('No customer ID for user:', userId);
+      return NextResponse.json(
+        { error: 'No active subscription found', hint: 'Please contact support' },
         { status: 404, headers: getCorsHeaders() }
       );
     }

@@ -8,7 +8,8 @@ import {
   ChatModel,
   ImageModel,
   VideoModel,
-  PREMIUM_MODELS
+  PREMIUM_MODELS,
+  ULTRA_MODELS
 } from '@/lib/providers';
 import { getModelDetails, ModelDetails } from '@/lib/model-details';
 import { 
@@ -111,8 +112,10 @@ export default function ModelsPage() {
 
   const PROVIDERS = useMemo(() => {
     const providers = new Set(ALL_MODELS.map(m => m.provider.toLowerCase()));
-    // Filter out disabled providers
+    // Filter out disabled providers and free providers
     providers.delete('kivest');
+    providers.delete('pollinations');
+    providers.delete('shalom');
     return ['all', ...Array.from(providers)].sort();
   }, []);
 
@@ -567,6 +570,7 @@ function TabButton({ active, onClick, icon, label }: { active: boolean, onClick:
 function ModelCard({ model, status, onClick, index }: { model: FilteredModelType, status: ModelStatus, onClick: () => void, index: number }) {
   const countdown = useCountdown(model.downtimeUntil);
   const isFree = model.id.endsWith(':free') || !PREMIUM_MODELS.has(model.id);
+  const isUltra = ULTRA_MODELS.has(model.id);
   const isRoleplay = model.isRoleplay;
   
   const typeColors: Record<'chat' | 'image' | 'video', string> = {
@@ -727,8 +731,10 @@ function ModelCard({ model, status, onClick, index }: { model: FilteredModelType
             <div className="flex items-center gap-1">
               {isFree ? (
                 <span className="text-[8px] font-black uppercase tracking-[0.15em] text-emerald-500">Free</span>
+              ) : isUltra ? (
+                <span className="text-[8px] font-black uppercase tracking-[0.15em] text-purple-500">Ultra</span>
               ) : (
-                <span className="text-[8px] font-black uppercase tracking-[0.15em] text-amber-500">Premium</span>
+                <span className="text-[8px] font-black uppercase tracking-[0.15em] text-amber-500">Pro</span>
               )}
             </div>
           </div>
@@ -745,6 +751,7 @@ function ModelCard({ model, status, onClick, index }: { model: FilteredModelType
 
 function ModelListItem({ model, status, onClick, index }: { model: FilteredModelType, status: ModelStatus, onClick: () => void, index: number }) {
   const isFree = model.id.endsWith(':free') || !PREMIUM_MODELS.has(model.id);
+  const isUltra = ULTRA_MODELS.has(model.id);
   const isRoleplay = model.isRoleplay;
   
   const typeIcons: Record<'chat' | 'image' | 'video', React.ReactNode> = {
@@ -780,8 +787,10 @@ function ModelListItem({ model, status, onClick, index }: { model: FilteredModel
           <div className="flex items-center gap-2">
             {isFree ? (
               <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest border border-emerald-500/10">Free</span>
+            ) : isUltra ? (
+              <span className="px-2 py-0.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20 text-[10px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest border border-purple-500/10">Ultra</span>
             ) : (
-              <span className="px-2 py-0.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest border border-amber-500/10">Premium</span>
+              <span className="px-2 py-0.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest border border-amber-500/10">Pro</span>
             )}
             <span className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">{model.provider}</span>
           </div>
@@ -833,6 +842,7 @@ function ModelDetailsModal({ model, status, onClose }: { model: ModelType, statu
   const details = getModelDetails(model.id, model.type);
   const countdown = useCountdown(model.downtimeUntil);
   const isFree = model.id.endsWith(':free') || !PREMIUM_MODELS.has(model.id);
+  const isUltra = ULTRA_MODELS.has(model.id);
   
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -898,10 +908,15 @@ function ModelDetailsModal({ model, status, onClose }: { model: ModelType, statu
                       <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-500" />
                       <span className="text-[10px] sm:text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Free</span>
                     </div>
+                  ) : isUltra ? (
+                    <div className="flex items-center gap-1 px-2 sm:px-4 py-1 sm:py-1.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20 border border-purple-500/20 backdrop-blur-md">
+                      <Target className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-purple-600 dark:text-purple-400" />
+                      <span className="text-[10px] sm:text-xs font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest">Ultra</span>
+                    </div>
                   ) : (
                     <div className="flex items-center gap-1 px-2 sm:px-4 py-1 sm:py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 backdrop-blur-md">
                       <Target className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600 dark:text-amber-400" />
-                      <span className="text-[10px] sm:text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">Premium</span>
+                      <span className="text-[10px] sm:text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">Pro</span>
                     </div>
                   )}
                 </div>

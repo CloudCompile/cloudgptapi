@@ -23,7 +23,7 @@ import {
   Filter,
   Globe
 } from 'lucide-react';
-import { CHAT_MODELS, IMAGE_MODELS, VIDEO_MODELS, PREMIUM_MODELS, ChatModel } from '@/lib/providers';
+import { CHAT_MODELS, IMAGE_MODELS, VIDEO_MODELS, PREMIUM_MODELS, ULTRA_MODELS, ChatModel } from '@/lib/providers';
 import { cn, hasProAccess, hasVideoAccess } from '@/lib/utils';
 import { getModelUsageWeight } from '@/lib/api-keys-utils';
 import Link from 'next/link';
@@ -398,6 +398,7 @@ export default function PlaygroundPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {filteredModels.map(m => {
                   const isPremium = PREMIUM_MODELS.has(m.id);
+                  const isUltra = ULTRA_MODELS.has(m.id);
                   const isSelected = m.id === selectedModel;
                   const weight = getModelUsageWeight(m.id);
                   
@@ -418,9 +419,11 @@ export default function PlaygroundPage() {
                     >
                       <div className={cn(
                         "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                        isPremium ? "bg-amber-100 dark:bg-amber-900/30" : "bg-emerald-100 dark:bg-emerald-900/30"
+                        isUltra ? "bg-purple-100 dark:bg-purple-900/30" : isPremium ? "bg-amber-100 dark:bg-amber-900/30" : "bg-emerald-100 dark:bg-emerald-900/30"
                       )}>
-                        {isPremium ? (
+                        {isUltra ? (
+                          <Zap className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                        ) : isPremium ? (
                           <Zap className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                         ) : (
                           <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />

@@ -1,4 +1,4 @@
-import { Shield, Search, Package, Crown, ChevronLeft, ChevronRight, UserCircle, X } from 'lucide-react';
+import { Shield, Search, Package, Crown, ChevronLeft, ChevronRight, UserCircle, X, Sparkles } from 'lucide-react';
 import { getAllUsers, promoteUser, assignPlan } from '@/lib/admin-actions';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -174,6 +174,14 @@ export default async function AdminUsersPage({
                       }}>
                         <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700" title={userProfile.plan === 'pro' || userProfile.plan === 'ultra' ? 'Remove Pro' : 'Set Pro'}>
                           <Crown className={cn("h-4 w-4", (userProfile.plan === 'pro' || userProfile.plan === 'ultra') && "text-emerald-500")} />
+                        </button>
+                      </form>
+                      <form action={async () => {
+                        'use server';
+                        await assignPlan(userProfile.id, 'ultra');
+                      }}>
+                        <button className="p-2 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/20 text-slate-500 transition-all border border-transparent hover:border-purple-200 dark:hover:border-purple-800" title="Set Ultra">
+                          <Sparkles className={cn("h-4 w-4", userProfile.plan === 'ultra' && "text-purple-500")} />
                         </button>
                       </form>
                       <Link 

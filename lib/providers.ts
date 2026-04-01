@@ -100,23 +100,43 @@ const KIVEST_CHAT_MODELS: ChatModel[] = [
   { id: 'step-3.5-flash', name: 'Step 3.5 Flash', provider: 'kivest', description: 'StepFun Step 3.5 Flash', usageWeight: 2 },
 ];
 
-// Shalom (Bluesminds) Chat Models - Pro Only
+// Shalom (Bluesminds) Chat Models - Pro or Ultra tier
+// Pro: Claude Sonnet/Haiku, Gemini 3.1, GLM, Kimi, GPT, MiniMax
+// Ultra: Claude Opus
 const SHALOM_CHAT_MODELS: ChatModel[] = [
-  // DeepSeek
-  { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'deepseek', description: 'DeepSeek Chat', usageWeight: 2 },
-  // Kimi
-  { id: 'moonshotai/kimi-k2.5', name: 'Kimi K2.5', provider: 'moonshot', description: 'Moonshot Kimi K2.5', usageWeight: 2 },
+  // DeepSeek - Pro
+  { id: 'deepseek-ai/deepseek-v3.1', name: 'DeepSeek V3.1', provider: 'deepseek', description: 'DeepSeek V3.1', usageWeight: 3 },
+  // Kimi - Pro
+  { id: 'moonshotai/kimi-k2.5', name: 'Kimi K2.5', provider: 'moonshot', description: 'Moonshot Kimi K2.5', usageWeight: 6 },
   { id: 'moonshotai/kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'moonshot', description: 'Moonshot Kimi K2 Thinking', usageWeight: 4 },
-  // Grok
+  { id: 'moonshotai/kimi-k2-instruct', name: 'Kimi K2 Instruct', provider: 'moonshot', description: 'Moonshot Kimi K2 Instruct', usageWeight: 2 },
+  // Grok - Pro
   { id: 'grok-4.2', name: 'Grok 4.2', provider: 'xai', description: 'xAI Grok 4.2', usageWeight: 6 },
-  // GLM
+  // GLM - Pro
   { id: 'glm-4.6', name: 'GLM 4.6', provider: 'zhipu', description: 'Zhipu GLM 4.6', usageWeight: 2 },
-  // Claude - only working models
+  { id: 'z-ai/glm4.7', name: 'GLM 4.7', provider: 'zhipu', description: 'Z-AI GLM 4.7', usageWeight: 2 },
+  { id: 'provider-1/glm-5', name: 'GLM 5', provider: 'zhipu', description: 'Zhipu GLM 5', usageWeight: 3 },
+  // Claude - Pro (Sonnet/Haiku) or Ultra (Opus)
+  { id: 'provider-4/claude-haiku-4-5', name: 'Claude Haiku 4.5', provider: 'anthropic', description: 'Anthropic Claude Haiku 4.5', usageWeight: 2 },
+  { id: 'provider-1/claude-sonnet-4-6', name: 'Claude Sonnet 4.6', provider: 'anthropic', description: 'Anthropic Claude Sonnet 4.6', usageWeight: 10 },
+  { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet', provider: 'anthropic', description: 'Anthropic Claude 3.7 Sonnet', usageWeight: 10 },
+  // Ultra only
   { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', provider: 'anthropic', description: 'Claude Opus 4.6 - Best for coding', usageWeight: 12 },
   { id: 'provider-1/claude-opus-4-5', name: 'Claude Opus 4.5', provider: 'anthropic', description: 'Anthropic Claude Opus 4.5', usageWeight: 12 },
-  // Gemini - only working models
+  // Gemini - Pro
   { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'google', description: 'Google Gemini 2.5 Pro', usageWeight: 8 },
   { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', provider: 'google', description: 'Google Gemini 3 Flash Preview', usageWeight: 8 },
+  { id: 'gemini-3.1-flash-lite-preview', name: 'Gemini 3.1 Flash Lite', provider: 'google', description: 'Google Gemini 3.1 Flash Lite', usageWeight: 4 },
+  { id: 'gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro', provider: 'google', description: 'Google Gemini 3.1 Pro', usageWeight: 8 },
+  // GPT - Pro
+  { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai', description: 'OpenAI GPT-4o', usageWeight: 10 },
+  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai', description: 'OpenAI GPT-4o Mini', usageWeight: 2 },
+  { id: 'gpt-5-nano', name: 'GPT-5 Nano', provider: 'openai', description: 'OpenAI GPT-5 Nano', usageWeight: 2 },
+  { id: 'gpt-5-mini', name: 'GPT-5 Mini', provider: 'openai', description: 'OpenAI GPT-5 Mini', usageWeight: 3 },
+  // MiniMax - Pro
+  { id: 'MiniMax-M2', name: 'MiniMax M2', provider: 'minimax', description: 'MiniMax M2', usageWeight: 3 },
+  { id: 'MiniMax-M2.1', name: 'MiniMax M2.1', provider: 'minimax', description: 'MiniMax M2.1', usageWeight: 4 },
+  { id: 'MiniMax-M2.7', name: 'MiniMax M2.7', provider: 'minimax', description: 'MiniMax M2.7', usageWeight: 3 },
 ];
 
 const GEMINI_CHAT_MODELS: ChatModel[] = [
@@ -372,49 +392,86 @@ export const PREMIUM_MODELS = new Set([
   'openai-large', // OpenAI GPT-5.2
   'perplexity-reasoning', // Perplexity Sonar Reasoning
   'perplexity-fast', // Perplexity Sonar
-  // Shalom (Bluesminds) models - Pro only
-  'deepseek-chat',
+  // Shalom (Bluesminds) models - Pro
+  'deepseek-ai/deepseek-v3.1',
   'moonshotai/kimi-k2.5',
   'moonshotai/kimi-k2-thinking',
+  'moonshotai/kimi-k2-instruct',
+  'grok-4.2',
   'glm-4.6',
+  'z-ai/glm4.7',
+  'provider-1/glm-5',
+  'provider-4/claude-haiku-4-5',
+  'provider-1/claude-sonnet-4-6',
+  'claude-3-7-sonnet-20250219',
   'gemini-2.5-pro',
   'gemini-3-flash-preview',
-  'grok-4.2',
-  // Ultra-only models
+  'gemini-3.1-flash-lite-preview',
+  'gemini-3.1-pro-preview',
+  'gpt-4o',
+  'gpt-4o-mini',
+  'gpt-5-nano',
+  'gpt-5-mini',
+  'MiniMax-M2',
+  'MiniMax-M2.1',
+  'MiniMax-M2.7',
+  // Ultra-only models (also premium)
+  'claude-opus-4-6',
   'provider-1/claude-opus-4-5',
-  // Image models (Ultra only)
+  'veo-3.1-generate-preview',
+  'veo-3.1-fast-generate-preview',
+  // Ultra-only image models
   'dall-e-3',
   'gpt-image-1',
   'gpt-image-1.5',
-  // Video models (Ultra only)
+  // Pro image models
+  'flux',
+  'flux-realism',
+  'flux-anime',
+  'flux-3d',
+  'sdxl',
+  'any-dark',
+  // Pro video models
+  'pix2pix-video',
+  'svd',
+]);
+
+// Ultra-only models (require ultra plan)
+export const ULTRA_MODELS = new Set([
+  'claude-opus-4-6',
+  'provider-1/claude-opus-4-5',
+  // Image models
+  'dall-e-3',
+  'gpt-image-1',
+  'gpt-image-1.5',
+  // Video models
   'veo-3.1-generate-preview',
   'veo-3.1-fast-generate-preview',
-  // Pollinations and Kivest models are FREE (first occurrence wins)
 ]);
 
 // Available image models
 export const IMAGE_MODELS: ImageModel[] = [
   // OpenAI DALL-E models (Ultra only)
-  { id: 'dall-e-3', name: 'DALL-E 3', provider: 'openai', description: 'OpenAI DALL-E 3', usageWeight: 3 },
-  { id: 'gpt-image-1', name: 'GPT Image 1', provider: 'openai', description: 'OpenAI GPT Image 1', usageWeight: 1 },
-  { id: 'gpt-image-1.5', name: 'GPT Image 1.5', provider: 'openai', description: 'OpenAI GPT Image 1.5', usageWeight: 2 },
+  { id: 'dall-e-3', name: 'DALL-E 3', provider: 'openai', description: 'OpenAI DALL-E 3', usageWeight: 8 },
+  { id: 'gpt-image-1', name: 'GPT Image 1', provider: 'openai', description: 'OpenAI GPT Image 1', usageWeight: 8 },
+  { id: 'gpt-image-1.5', name: 'GPT Image 1.5', provider: 'openai', description: 'OpenAI GPT Image 1.5', usageWeight: 8 },
   // Pollinations models (Free)
-  { id: 'flux', name: 'Flux', provider: 'pollinations', description: 'Fast & diverse image generation', usageWeight: 1 },
-  { id: 'flux-realism', name: 'Flux Realism', provider: 'pollinations', description: 'Realistic image generation', usageWeight: 1 },
-  { id: 'flux-anime', name: 'Flux Anime', provider: 'pollinations', description: 'Anime-style image generation', usageWeight: 1 },
-  { id: 'flux-3d', name: 'Flux 3D', provider: 'pollinations', description: '3D render style image generation', usageWeight: 1 },
-  { id: 'sdxl', name: 'SDXL', provider: 'pollinations', description: 'Stable Diffusion XL', usageWeight: 1 },
-  { id: 'any-dark', name: 'Any Dark', provider: 'pollinations', description: 'Dark themed image generation', usageWeight: 1 },
+  { id: 'flux', name: 'Flux', provider: 'pollinations', description: 'Fast & diverse image generation', usageWeight: 8 },
+  { id: 'flux-realism', name: 'Flux Realism', provider: 'pollinations', description: 'Realistic image generation', usageWeight: 8 },
+  { id: 'flux-anime', name: 'Flux Anime', provider: 'pollinations', description: 'Anime-style image generation', usageWeight: 8 },
+  { id: 'flux-3d', name: 'Flux 3D', provider: 'pollinations', description: '3D render style image generation', usageWeight: 8 },
+  { id: 'sdxl', name: 'SDXL', provider: 'pollinations', description: 'Stable Diffusion XL', usageWeight: 8 },
+  { id: 'any-dark', name: 'Any Dark', provider: 'pollinations', description: 'Dark themed image generation', usageWeight: 8 },
 ];
 
-// Available video models - ALL require ultra plan
+// Available video models - ALL require pro or ultra plan
 export const VIDEO_MODELS: VideoModel[] = [
   // Veo models (Ultra only) - via Google
   { id: 'veo-3.1-generate-preview', name: 'Veo 3.1 Generate', provider: 'google', description: 'Google Veo 3.1 Generate', usageWeight: 10, maxDuration: 8 },
-  { id: 'veo-3.1-fast-generate-preview', name: 'Veo 3.1 Fast Generate', provider: 'google', description: 'Google Veo 3.1 Fast Generate', usageWeight: 5, maxDuration: 8 },
-  // Pollinations video models
-  { id: 'pix2pix-video', name: 'Pix2Pix Video', provider: 'pollinations', description: 'Video generation', usageWeight: 2, maxDuration: 10 },
-  { id: 'svd', name: 'Stable Video Diffusion', provider: 'pollinations', description: 'SVD video generation', usageWeight: 3, maxDuration: 4 },
+  { id: 'veo-3.1-fast-generate-preview', name: 'Veo 3.1 Fast Generate', provider: 'google', description: 'Google Veo 3.1 Fast Generate', usageWeight: 8, maxDuration: 8 },
+  // Pollinations video models (Pro)
+  { id: 'pix2pix-video', name: 'Pix2Pix Video', provider: 'pollinations', description: 'Video generation', usageWeight: 8, maxDuration: 10 },
+  { id: 'svd', name: 'Stable Video Diffusion', provider: 'pollinations', description: 'SVD video generation', usageWeight: 8, maxDuration: 4 },
 ];
 
 // Video models require pro/video_pro plan for access
@@ -437,4 +494,5 @@ export const PROVIDER_URLS = {
   openai: 'https://api.openai.com/v1',
   kivest: 'https://ai.ezif.in/v1',
   shalom: 'https://api.bluesminds.com/v1',
+  minimax: 'https://api.bluesminds.com/v1',
 };
