@@ -72,11 +72,16 @@ export default function DocsPage() {
                   Need Help?
                 </p>
                 <p className="text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed mb-3">
-                  Our developer support team is available 24/7 for Enterprise customers.
+                  Join our Discord community for developer support.
                 </p>
-                <button className="w-full py-2 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-transform">
-                  Contact Support
-                </button>
+                <a 
+                  href="https://discord.gg/f7xR8qga" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-transform text-center block"
+                >
+                  Join Discord
+                </a>
               </div>
             </nav>
           </aside>
@@ -495,22 +500,28 @@ const videoUrl = data[0].url;`}</code>
                       </thead>
                       <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                         <tr>
-                          <td className="px-6 py-4 font-bold">Anonymous (IP-based)</td>
-                          <td className="px-6 py-4">10 / min</td>
-                          <td className="px-6 py-4">5 / min</td>
-                          <td className="px-6 py-4">2 / min</td>
+                          <td className="px-6 py-4 font-bold">Free Plan</td>
+                          <td className="px-6 py-4">100 / day</td>
+                          <td className="px-6 py-4">10 / day</td>
+                          <td className="px-6 py-4">5 / day</td>
                         </tr>
                         <tr>
-                          <td className="px-6 py-4 font-bold text-primary">Authenticated (API Key)</td>
-                          <td className="px-6 py-4">60 / min*</td>
-                          <td className="px-6 py-4">30 / min*</td>
-                          <td className="px-6 py-4">10 / min*</td>
+                          <td className="px-6 py-4 font-bold text-primary">Pro Plan</td>
+                          <td className="px-6 py-4">1000 / day</td>
+                          <td className="px-6 py-4">50 / day</td>
+                          <td className="px-6 py-4">5 / day</td>
+                        </tr>
+                        <tr>
+                          <td className="px-6 py-4 font-bold text-blue-600">Ultra Plan</td>
+                          <td className="px-6 py-4">2500 / day</td>
+                          <td className="px-6 py-4">100 / day</td>
+                          <td className="px-6 py-4">10 / day</td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
                   <p className="text-sm text-slate-500">
-                    *Default limits for API keys. If you require higher throughput, please contact us for custom quota adjustments.
+                    *Default limits for Pro plans. If you require higher throughput, join our Discord for custom quota adjustments.
                   </p>
                   <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50">
                     <h4 className="font-semibold text-amber-800 dark:text-amber-400 mb-1 flex items-center gap-2">
@@ -589,8 +600,8 @@ const videoUrl = data[0].url;`}</code>
             <div className="mt-24 pt-12 border-t text-center">
               <p className="text-slate-500 mb-6">Need more help? Join our community or contact support.</p>
               <div className="flex justify-center gap-4">
-                <a href="https://github.com" className="px-6 py-2 rounded-lg bg-slate-900 text-white font-bold hover:bg-slate-800 transition-colors flex items-center gap-2">
-                  GitHub Repository
+                <a href="https://discord.gg/f7xR8qga" target="_blank" rel="noopener noreferrer" className="px-6 py-2 rounded-lg bg-primary text-white font-bold hover:scale-105 transition-colors flex items-center gap-2">
+                  Join Discord
                   <ExternalLink className="h-4 w-4" />
                 </a>
                 <Link href="/playground" className="px-6 py-2 rounded-lg border border-slate-200 dark:border-slate-800 font-bold hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
