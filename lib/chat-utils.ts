@@ -239,6 +239,21 @@ export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
   'anthropic/claude-3.5-sonnet': 'claude-3-5-sonnet',
 };
 
+// Bluesminds model mapping (Vetra ID -> Bluesminds ID)
+// Used when Aqua fails and we fallback to Bluesminds
+export const BLUESMINDS_MODEL_MAPPING: Record<string, string> = {
+  'claude-opus-4-6': 'claude-opus-4-6',
+  'claude-opus-4.5': 'claude-opus-4-6',
+  'claude-sonnet-4-6': 'claude-sonnet-4-6',
+  'claude-sonnet-4.5': 'claude-sonnet-4-5-20250929',
+  'claude-sonnet-4.5-20250929': 'claude-sonnet-4-5-20250929',
+  'claude-haiku-4.5': 'claude-haiku-4-5',
+};
+
+export function getBluesmindsModelId(modelId: string): string {
+  return BLUESMINDS_MODEL_MAPPING[modelId] || modelId;
+}
+
 export function resolveModelId(modelId: string): string {
   const normalizedModelId = modelId.trim().replace(/^['"]+|['"]+$/g, '');
   const aliased = modelAliases[normalizedModelId] || normalizedModelId;

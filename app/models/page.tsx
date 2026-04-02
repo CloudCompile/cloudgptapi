@@ -118,6 +118,8 @@ export default function ModelsPage() {
   const [selectedProviders, setSelectedProviders] = useState<Set<string>>(new Set());
   const [selectedTiers, setSelectedTiers] = useState<Set<string>>(new Set(['free', 'premium', 'ultra']));
 
+  const isAllTiersSelected = selectedTiers.size === 3;
+
   const toggleSection = (section: string) => {
     setExpandedSections(prev => {
       const newSet = new Set(prev);
@@ -145,6 +147,10 @@ export default function ModelsPage() {
   const toggleTier = (tier: string) => {
     setSelectedTiers(prev => {
       const newSet = new Set(prev);
+      // If all tiers were selected, clicking any tier should select only that one
+      if (newSet.size === 3) {
+        return new Set([tier]);
+      }
       if (newSet.has(tier)) {
         newSet.delete(tier);
       } else {
@@ -617,12 +623,23 @@ export default function ModelsPage() {
                 {expandedSections.has('tier') && (
                   <div className="p-4 bg-white/50 dark:bg-slate-900/50">
                     <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setSelectedTiers(new Set(['free', 'premium', 'ultra']))}
+                        className={cn(
+                          "px-4 py-2 rounded-lg text-sm font-medium transition-all border flex items-center gap-2",
+                          selectedTiers.size === 3
+                            ? "bg-slate-500 border-slate-500 text-white"
+                            : "bg-slate-100/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border-slate-200/50 dark:border-slate-700 hover:border-primary/50"
+                        )}
+                      >
+                        All
+                      </button>
                       {[
                         { value: 'free', label: 'Free', color: 'emerald' },
                         { value: 'premium', label: 'Pro', color: 'amber' },
                         { value: 'ultra', label: 'Ultra', color: 'purple' }
                       ].map(option => {
-                        const isActive = selectedTiers.has(option.value);
+                        const isActive = !isAllTiersSelected && selectedTiers.has(option.value);
                         
                         const colorClasses = option.color === 'emerald' ? 'bg-emerald-500 border-emerald-500' :
                           option.color === 'amber' ? 'bg-amber-500 border-amber-500' :

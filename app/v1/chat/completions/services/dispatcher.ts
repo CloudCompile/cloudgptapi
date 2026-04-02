@@ -5,7 +5,9 @@ import {
   PROVIDER_MODEL_MAPPING,
   createChatTransformStream,
   PROVIDER_TIMEOUT_MS,
-  sanitizeErrorText
+  sanitizeErrorText,
+  BLUESMINDS_MODEL_MAPPING,
+  getBluesmindsModelId
 } from '@/lib/chat-utils';
 import { CHAT_MODELS } from '@/lib/providers';
 import {
@@ -48,6 +50,12 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   const startTime = Date.now();
   let providerUrl: string;
   let providerApiKey: string | undefined;
+
+  // Models that can fallback to Bluesminds on Aqua failure
+  const bluesmindsFallbackModels = new Set([
+    'claude-opus-4-6', 'claude-opus-4.5', 'claude-sonnet-4-6', 'claude-sonnet-4.5',
+    'claude-sonnet-4.5-20250929', 'claude-haiku-4.5'
+  ]);
 
   if (model.provider === 'pollinations') {
     providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
@@ -159,6 +167,9 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     top_p: body.top_p ?? 1,
   };
 
+  // Track actual model ID used (for Bluesminds fallback)
+  let actualModelId = standardBody.model;
+
   if (body.seed !== undefined) {
     standardBody.seed = body.seed;
   } else if (model.provider === 'pollinations' && !modelId.includes('gemini') && !modelId.includes('claude')) {
@@ -253,78 +264,124 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   if (!providerResponse.ok) {
     const errorText = await providerResponse.text();
     console.error(`[${requestId}] Provider error from ${model.provider} (${providerResponse.status}):`, errorText.substring(0, 500));
-    const sanitizedMessage = sanitizeErrorText(errorText);
 
-    let mappedStatus = providerResponse.status;
-    let errorMessage = sanitizedMessage;
-    let errorCode = 'upstream_error';
-    let shouldRetry = false;
+    // Check if we should fallback to Bluesminds for Claude models
+    const canFallbackToBluesminds = bluesmindsFallbackModels.has(modelId) && providerUrl.includes('aquadevs');
     
-    if (providerResponse.status === 418) {
-      mappedStatus = 503;
-      errorMessage = 'The upstream provider is temporarily unavailable. Please try again or use a different model.';
-      errorCode = 'provider_unavailable';
-      shouldRetry = true;
-    } else if (providerResponse.status === 429) {
-      const isQuotaError = errorText.includes('quota') || errorText.includes('Quota') || errorText.includes('allocated') || errorText.includes('exceeded');
-      if (isQuotaError) {
-        mappedStatus = 429;
-        errorMessage = 'Quota exhausted for this model. Please try a different model or contact support.';
-        errorCode = 'quota_exhausted';
-      } else {
-        mappedStatus = 429;
-        errorMessage = 'Rate limit exceeded for the upstream provider. Please wait a moment and try again.';
-        errorCode = 'rate_limit_exceeded';
+    if (canFallbackToBluesminds) {
+      console.log(`[${requestId}] Aqua failed for ${modelId}, falling back to Bluesminds...`);
+      
+      const bluesmindsUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
+      const bluesmindsApiKey = getShalomApiKey();
+      const bluesmindsModelId = getBluesmindsModelId(modelId);
+      
+      const fallbackBody = {
+        ...standardBody,
+        model: bluesmindsModelId
+      };
+
+      try {
+        const fallbackResponse = await fetch(bluesmindsUrl, {
+          method: 'POST',
+          headers: {
+            ...headers,
+            'Authorization': `Bearer ${bluesmindsApiKey}`
+          },
+          body: JSON.stringify(fallbackBody),
+          signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS)
+        });
+
+        if (fallbackResponse.ok) {
+          console.log(`[${requestId}] Bluesminds fallback succeeded for ${modelId}`);
+          providerResponse = fallbackResponse;
+          // Update actual model ID for response processing
+          actualModelId = bluesmindsModelId;
+        } else {
+          const fallbackErrorText = await fallbackResponse.text();
+          console.error(`[${requestId}] Bluesminds fallback also failed:`, fallbackErrorText.substring(0, 300));
+        }
+      } catch (fallbackError: any) {
+        console.error(`[${requestId}] Bluesminds fallback fetch error:`, fallbackError);
       }
-      shouldRetry = !isQuotaError;
-    } else if (providerResponse.status === 504 || providerResponse.status === 503) {
-      errorMessage = `The upstream provider (${model.provider}) is temporarily unavailable or overloaded. Please try again in a few moments or use a different model.`;
-      errorCode = 'provider_timeout';
-      shouldRetry = true;
-    } else if (providerResponse.status >= 500) {
-      errorMessage = `Server error from upstream provider ${model.provider}. This usually resolves quickly. Please try again or use a different model.`;
-      errorCode = 'provider_server_error';
-      shouldRetry = true;
-    } else if (providerResponse.status === 401 || providerResponse.status === 403) {
-      errorMessage = `Authentication error with upstream provider (${model.provider}). Our team has been notified.`;
-      errorCode = 'provider_auth_error';
-    } else if (providerResponse.status === 400) {
-      errorMessage = sanitizedMessage || `Invalid request format for ${model.provider}. Please check your message format and try again.`;
-      errorCode = 'invalid_request';
     }
 
-    try {
-      const errorJson = JSON.parse(errorText);
-      if (errorJson.error) {
-        return NextResponse.json(errorJson, { 
-          status: mappedStatus, 
-          headers: {
-            ...getCorsHeaders(),
-            ...(shouldRetry && { 'Retry-After': '10' })
-          }
-        });
+    // If providerResponse was replaced by fallback, check if it's now OK
+    if (providerResponse.ok) {
+      // Continue to success handling below
+    } else {
+      const sanitizedMessage = sanitizeErrorText(errorText);
+
+      let mappedStatus = providerResponse.status;
+      let errorMessage = sanitizedMessage;
+      let errorCode = 'upstream_error';
+      let shouldRetry = false;
+      
+      if (providerResponse.status === 418) {
+        mappedStatus = 503;
+        errorMessage = 'The upstream provider is temporarily unavailable. Please try again or use a different model.';
+        errorCode = 'provider_unavailable';
+        shouldRetry = true;
+      } else if (providerResponse.status === 429) {
+        const isQuotaError = errorText.includes('quota') || errorText.includes('Quota') || errorText.includes('allocated') || errorText.includes('exceeded');
+        if (isQuotaError) {
+          mappedStatus = 429;
+          errorMessage = 'Quota exhausted for this model. Please try a different model or contact support.';
+          errorCode = 'quota_exhausted';
+        } else {
+          mappedStatus = 429;
+          errorMessage = 'Rate limit exceeded for the upstream provider. Please wait a moment and try again.';
+          errorCode = 'rate_limit_exceeded';
+        }
+        shouldRetry = !isQuotaError;
+      } else if (providerResponse.status === 504 || providerResponse.status === 503) {
+        errorMessage = `The upstream provider (${model.provider}) is temporarily unavailable or overloaded. Please try again in a few moments or use a different model.`;
+        errorCode = 'provider_timeout';
+        shouldRetry = true;
+      } else if (providerResponse.status >= 500) {
+        errorMessage = `Server error from upstream provider ${model.provider}. This usually resolves quickly. Please try again or use a different model.`;
+        errorCode = 'provider_server_error';
+        shouldRetry = true;
+      } else if (providerResponse.status === 401 || providerResponse.status === 403) {
+        errorMessage = `Authentication error with upstream provider (${model.provider}). Our team has been notified.`;
+        errorCode = 'provider_auth_error';
+      } else if (providerResponse.status === 400) {
+        errorMessage = sanitizedMessage || `Invalid request format for ${model.provider}. Please check your message format and try again.`;
+        errorCode = 'invalid_request';
       }
-      return NextResponse.json(
-        { error: { message: errorMessage, type: 'api_error', param: null, code: errorJson.code || errorCode, details: errorJson.error?.message || errorJson.message, request_id: requestId, original_status: providerResponse.status, should_retry: shouldRetry } },
-        { 
-          status: mappedStatus, 
-          headers: {
-            ...getCorsHeaders(),
-            ...(shouldRetry && { 'Retry-After': '10' })
-          }
+
+      try {
+        const errorJson = JSON.parse(errorText);
+        if (errorJson.error) {
+          return NextResponse.json(errorJson, { 
+            status: mappedStatus, 
+            headers: {
+              ...getCorsHeaders(),
+              ...(shouldRetry && { 'Retry-After': '10' })
+            }
+          });
         }
-      );
-    } catch (e) {
-      return NextResponse.json(
-        { error: { message: errorMessage, type: 'api_error', param: null, code: errorCode, request_id: requestId, original_status: providerResponse.status, should_retry: shouldRetry } },
-        { 
-          status: mappedStatus, 
-          headers: {
-            ...getCorsHeaders(),
-            ...(shouldRetry && { 'Retry-After': '10' })
+        return NextResponse.json(
+          { error: { message: errorMessage, type: 'api_error', param: null, code: errorJson.code || errorCode, details: errorJson.error?.message || errorJson.message, request_id: requestId, original_status: providerResponse.status, should_retry: shouldRetry } },
+          { 
+            status: mappedStatus, 
+            headers: {
+              ...getCorsHeaders(),
+              ...(shouldRetry && { 'Retry-After': '10' })
+            }
           }
-        }
-      );
+        );
+      } catch (e) {
+        return NextResponse.json(
+          { error: { message: errorMessage, type: 'api_error', param: null, code: errorCode, request_id: requestId, original_status: providerResponse.status, should_retry: shouldRetry } },
+          { 
+            status: mappedStatus, 
+            headers: {
+              ...getCorsHeaders(),
+              ...(shouldRetry && { 'Retry-After': '10' })
+            }
+          }
+        );
+      }
     }
   }
 
