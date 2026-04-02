@@ -14,6 +14,8 @@ import {
   applySearchPluginModel,
 } from '@/lib/chat-utils';
 
+import { withErrorHandler } from '@/lib/api-wrapper';
+
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max for long reasoning or slow providers
 
@@ -25,7 +27,7 @@ export async function OPTIONS() {
   });
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withErrorHandler(async function GET(request: NextRequest) {
   // Check if the URL path is malformed (e.g., duplicated path segments)
   const url = new URL(request.url);
   const expectedPath = '/v1/chat/completions';
@@ -54,9 +56,9 @@ export async function GET(request: NextRequest) {
   }, {
     headers: getCorsHeaders()
   });
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withErrorHandler(async function POST(request: NextRequest) {
   const requestId = generateRequestId();
   console.log(`[${requestId}] POST /v1/chat/completions started`);
   
@@ -292,23 +294,6 @@ export async function POST(request: NextRequest) {
     
   } catch (error: any) {
     console.error(`[${requestId}] Chat API error:`, error?.message || error);
-    return NextResponse.json(
-      {
-        error: {
-          message: 'Internal server error',
-          type: 'server_error',
-          param: null,
-          code: 'internal_error',
-          request_id: requestId
-        }
-      },
-      {
-        status: 500,
-        headers: {
-          ...getCorsHeaders(),
-          'X-Request-Id': requestId,
-        }
-      }
-    );
+    throw error;
   }
-}
+});
