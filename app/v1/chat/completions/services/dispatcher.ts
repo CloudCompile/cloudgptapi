@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { trackUsage, getRateLimitInfo, getDailyLimitInfo, ApiKey, getModelUsageWeight } from '@/lib/api-keys';
-import { handleStableHordeChat } from './stablehorde';
 import {
   PROVIDER_URLS,
   PROVIDER_MODEL_MAPPING,
@@ -10,8 +9,7 @@ import {
 } from '@/lib/chat-utils';
 import { CHAT_MODELS } from '@/lib/providers';
 import {
-  getCorsHeaders, getOpenRouterApiKey,
-  getPollinationsApiKey,
+  getCorsHeaders, getPollinationsApiKey,
   getClaudeApiKey,
   getPoeApiKey,
   getLizApiKey,
@@ -50,78 +48,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   let providerUrl: string;
   let providerApiKey: string | undefined;
 
-  if (model.provider === 'openrouter') {
-    providerUrl = `${PROVIDER_URLS.openrouter}/api/v1/chat/completions`;
-    providerApiKey = getOpenRouterApiKey();
-  } else if (model.provider === 'gemini') {
-    providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
-    providerApiKey = getPollinationsApiKey();
-  } else if (model.provider === 'claude') {
-    providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
-    providerApiKey = getClaudeApiKey();
-  } else if (model.provider === 'meridian') {
-    providerUrl = `${PROVIDER_URLS.meridian}/chat`;
-    providerApiKey = process.env.MERIDIAN_API_KEY;
-  } else if (model.provider === 'github') {
-    providerUrl = `${PROVIDER_URLS.github}/chat/completions`;
-    providerApiKey = process.env.GITHUB_TOKEN;
-    if (!providerApiKey) {
-      console.warn(`[${requestId}] Missing GitHub token for model: ${modelId}`);
-      return NextResponse.json(
-        { error: { message: 'GitHub Models token is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
-        { status: 500, headers: getCorsHeaders() }
-      );
-    }
-  } else if (model.provider === 'poe') {
-    providerUrl = `${PROVIDER_URLS.poe}/chat/completions`;
-    providerApiKey = getPoeApiKey();
-    if (!providerApiKey) {
-      console.warn(`[${requestId}] Missing Poe API key for model: ${modelId}`);
-      return NextResponse.json(
-        { error: { message: 'Poe API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
-        { status: 500, headers: getCorsHeaders() }
-      );
-    }
-  } else if (model.provider === 'liz') {
-    providerUrl = `${PROVIDER_URLS.liz}/v1/chat/completions`;
-    providerApiKey = getLizApiKey();
-    if (!providerApiKey) {
-      console.warn(`[${requestId}] Missing Liz API key for model: ${modelId}`);
-      return NextResponse.json(
-        { error: { message: 'Liz API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
-        { status: 500, headers: getCorsHeaders() }
-      );
-    }
-  } else if (model.provider === 'openai') {
-    providerUrl = `${PROVIDER_URLS.openai}/chat/completions`;
-    providerApiKey = getOpenAIApiKey();
-    if (!providerApiKey) {
-      console.warn(`[${requestId}] Missing OpenAI API key for model: ${modelId}`);
-      return NextResponse.json(
-        { error: { message: 'OpenAI API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
-        { status: 500, headers: getCorsHeaders() }
-      );
-    }
-  } else if (model.provider === 'kivest') {
-    // Kivest provider temporarily disabled - return clear error
-    console.warn(`[${requestId}] Kivest provider is temporarily disabled`);
-    return NextResponse.json(
-      { error: { message: 'Kivest provider is temporarily unavailable. Please try another model.', type: 'provider_error', param: null, code: 'provider_disabled', request_id: requestId } },
-      { status: 503, headers: getCorsHeaders() }
-    );
-  } else if (model.provider === 'shalom' || model.provider === 'anthropic' || model.provider === 'google' || model.provider === 'deepseek' || model.provider === 'moonshot' || model.provider === 'xai' || model.provider === 'zhipu' || model.provider === 'minimax') {
-    providerUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
-    providerApiKey = getShalomApiKey();
-    if (!providerApiKey) {
-      console.warn(`[${requestId}] Missing Shalom API key for model: ${modelId}`);
-      return NextResponse.json(
-        { error: { message: 'Shalom API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
-        { status: 500, headers: getCorsHeaders() }
-      );
-    }
-  } else if (model.provider === 'stablehorde') {
-    return await handleStableHordeChat(body, modelId, apiKeyInfo, userId, effectiveKey, requestId, limit, dailyLimit, isSystemRequest, characterId);
-  } else {
+  if (model.provider === 'pollinations') {
     providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
     providerApiKey = getPollinationsApiKey();
     if (!providerApiKey) {
@@ -131,6 +58,28 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
         { status: 500, headers: getCorsHeaders() }
       );
     }
+  } else if (model.provider === 'kivest') {
+    console.warn(`[${requestId}] Kivest provider is temporarily disabled`);
+    return NextResponse.json(
+      { error: { message: 'Kivest provider is temporarily unavailable. Please try another model.', type: 'provider_error', param: null, code: 'provider_disabled', request_id: requestId } },
+      { status: 503, headers: getCorsHeaders() }
+    );
+  } else if (model.provider === 'shalom') {
+    providerUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
+    providerApiKey = getShalomApiKey();
+    if (!providerApiKey) {
+      console.warn(`[${requestId}] Missing Shalom API key for model: ${modelId}`);
+      return NextResponse.json(
+        { error: { message: 'Shalom/Bluesmind API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { status: 500, headers: getCorsHeaders() }
+      );
+    }
+  } else {
+    // Fallback or Unknown provider
+    return NextResponse.json(
+      { error: { message: 'Unsupported provider: ' + model.provider, type: 'config_error', param: null, code: 'unsupported_provider', request_id: requestId } },
+      { status: 400, headers: getCorsHeaders() }
+    );
   }
 
   const headers: Record<string, string> = {
@@ -235,91 +184,6 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       if (e.name === 'AbortError') console.warn(`[${requestId}] Fast-path timeout (30s) for Pollinations, falling back...`);
       else console.warn(`[${requestId}] Fast-path error for Pollinations:`, e);
     }
-  }
-
-  if (model.provider === 'meridian') {
-    delete headers['Authorization'];
-    if (providerApiKey) headers['x-api-key'] = providerApiKey;
-  }
-  if (model.provider === 'openrouter') {
-    headers['HTTP-Referer'] = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    headers['X-Title'] = 'Vetra API';
-  }
-
-  let requestBody = { ...standardBody };
-  if (PROVIDER_MODEL_MAPPING[modelId]) {
-    console.log(`[${requestId}] Mapping model ID for provider: ${modelId} -> ${PROVIDER_MODEL_MAPPING[modelId]}`);
-    requestBody.model = PROVIDER_MODEL_MAPPING[modelId];
-  }
-  
-  if (model.provider === 'meridian') {
-    const prompt = body.messages.map((msg: any) => `${msg.role}: ${msg.content}`).join('\n');
-    requestBody = { prompt };
-  } else {
-    const isGitHubReasoningModel = model.provider === 'github' && [
-      'o1', 'o1-preview', 'o1-mini', 'o3', 'o3-mini', 'o4-mini',
-      'Phi-4-reasoning', 'Phi-4-mini-reasoning', 'MAI-DS-R1'
-    ].includes(modelId);
-
-    const isVertexModel = (model.provider === 'gemini' || model.provider === 'claude' || modelId.includes('gemini') || modelId.includes('claude')) && 
-      model.provider !== 'liz' && model.provider !== 'openrouter';
-
-    if (isGitHubReasoningModel) {
-      delete requestBody.temperature;
-      delete requestBody.top_p;
-      delete requestBody.frequency_penalty;
-      delete requestBody.presence_penalty;
-    } else if (isVertexModel) {
-      if (body.top_p !== undefined) delete requestBody.temperature;
-      else delete requestBody.top_p;
-    }
-  }
-
-  let providerResponse: Response;
-  const controller = new AbortController();
-  
-  // Model-specific timeout tuning
-  // Reasoning models and slow providers need more time
-  let overrideTimeout = PROVIDER_TIMEOUT_MS;
-  if (modelId.includes('reasoning') || modelId.includes('o1') || modelId.includes('o3')) {
-    overrideTimeout = 600000; // 10 minutes for reasoning models
-    console.log(`[${requestId}] Using extended timeout (10 min) for reasoning model: ${modelId}`);
-  } else if (modelId.includes('deepseek-r1') || modelId.includes('thinking')) {
-    overrideTimeout = 480000; // 8 minutes for thinking models
-    console.log(`[${requestId}] Using extended timeout (8 min) for thinking model: ${modelId}`);
-  } else if (model.provider === 'stablehorde') {
-    overrideTimeout = 420000; // 7 minutes for Stable Horde (distributed service)
-    console.log(`[${requestId}] Using extended timeout (7 min) for Stable Horde`);
-  }
-  
-  const timeoutId = setTimeout(() => controller.abort(), overrideTimeout);
-  
-  try {
-    console.log(`[${requestId}] Forwarding to provider: ${model.provider}, URL: ${providerUrl}, Timeout: ${overrideTimeout}ms`);
-    const keyPrefix = headers['Authorization']?.substring(0, 15) || 'none';
-    console.log(`[${requestId}] Auth Header Prefix: ${keyPrefix}`);
-    
-    providerResponse = await fetch(providerUrl, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(requestBody),
-      signal: controller.signal,
-    });
-
-    console.log(`[${requestId}] Provider response status: ${providerResponse.status} ${providerResponse.statusText}`);
-    
-  } catch (fetchError: any) {
-    clearTimeout(timeoutId);
-    if (fetchError.name === 'AbortError') {
-      console.error(`[${requestId}] Provider request timed out after ${overrideTimeout}ms for model ${modelId} with provider ${model.provider}`);
-      return NextResponse.json(
-        { error: { message: `Request timed out after ${overrideTimeout / 1000}s. This ${modelId} may be experiencing high load. Try again or use a faster model.`, type: 'timeout_error', param: null, code: 'request_timeout', request_id: requestId, should_retry: true } },
-        { status: 504, headers: { ...getCorsHeaders(), 'Retry-After': '30' } }
-      );
-    }
-    throw fetchError;
-  } finally {
-    clearTimeout(timeoutId);
   }
 
   if (!providerResponse.ok) {
@@ -510,27 +374,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   }
   
   let responseData: any = data;
-  if (model.provider === 'meridian') {
-    responseData = {
-      id: 'meridian-' + Date.now(),
-      object: 'chat.completion',
-      created: Math.floor(Date.now() / 1000),
-      model: modelId,
-      choices: [{ index: 0, message: { role: 'assistant', content: (data as any)?.response || '', }, finish_reason: 'stop', }],
-      usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0, },
-    };
-  } else if (model.provider === 'pollinations') {
-    if (data && !(data as any).choices && (data as any).content) {
-      responseData = {
-        id: 'pollinations-' + Date.now(),
-        object: 'chat.completion',
-        created: Math.floor(Date.now() / 1000),
-        model: modelId,
-        choices: [{ index: 0, message: { role: 'assistant', content: (data as any).content, }, finish_reason: 'stop', }],
-        usage: (data as any).usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0, },
-      };
-    }
-    if (data && (data as any).choices) {
+  if (data && (data as any).choices) {
       for (const choice of (data as any).choices) {
         if (choice.message?.content_blocks && Array.isArray(choice.message.content_blocks)) {
           let textContent = '';
@@ -543,7 +387,6 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
         }
       }
     }
-  }
   
   if (responseData) {
     responseData.model = modelId;

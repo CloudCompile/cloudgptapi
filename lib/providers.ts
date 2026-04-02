@@ -362,11 +362,7 @@ const LIZ_CHAT_MODELS: ChatModel[] = [
 
 // Deduplicate models by ID - last provider wins (Shalom overrides for duplicates)
 // Order: pollinations → kivest → shalom (shalom takes priority)
-const ALL_CHAT_MODELS = [
-  ...POLLINATIONS_CHAT_MODELS,
-  ...KIVEST_CHAT_MODELS,
-  ...SHALOM_CHAT_MODELS,
-];
+const ALL_CHAT_MODELS = [...POLLINATIONS_CHAT_MODELS, ...KIVEST_CHAT_MODELS, ...SHALOM_CHAT_MODELS];
 
 // Keep last occurrence of each model ID (shalom overwrites kivest/pollinations)
 const seen = new Set<string>();
@@ -450,29 +446,10 @@ export const ULTRA_MODELS = new Set([
 ]);
 
 // Available image models
-export const IMAGE_MODELS: ImageModel[] = [
-  // OpenAI DALL-E models (Ultra only)
-  { id: 'dall-e-3', name: 'DALL-E 3', provider: 'openai', description: 'OpenAI DALL-E 3', usageWeight: 8 },
-  { id: 'gpt-image-1', name: 'GPT Image 1', provider: 'openai', description: 'OpenAI GPT Image 1', usageWeight: 8 },
-  { id: 'gpt-image-1.5', name: 'GPT Image 1.5', provider: 'openai', description: 'OpenAI GPT Image 1.5', usageWeight: 8 },
-  // Pollinations models (Free)
-  { id: 'flux', name: 'Flux', provider: 'pollinations', description: 'Fast & diverse image generation', usageWeight: 8 },
-  { id: 'flux-realism', name: 'Flux Realism', provider: 'pollinations', description: 'Realistic image generation', usageWeight: 8 },
-  { id: 'flux-anime', name: 'Flux Anime', provider: 'pollinations', description: 'Anime-style image generation', usageWeight: 8 },
-  { id: 'flux-3d', name: 'Flux 3D', provider: 'pollinations', description: '3D render style image generation', usageWeight: 8 },
-  { id: 'sdxl', name: 'SDXL', provider: 'pollinations', description: 'Stable Diffusion XL', usageWeight: 8 },
-  { id: 'any-dark', name: 'Any Dark', provider: 'pollinations', description: 'Dark themed image generation', usageWeight: 8 },
-];
+export const IMAGE_MODELS: ImageModel[] = [{ id: 'flux', name: 'Flux', provider: 'pollinations', description: 'Flux Free Image' }];
 
 // Available video models - ALL require pro or ultra plan
-export const VIDEO_MODELS: VideoModel[] = [
-  // Veo models (Ultra only) - via Google
-  { id: 'veo-3.1-generate-preview', name: 'Veo 3.1 Generate', provider: 'google', description: 'Google Veo 3.1 Generate', usageWeight: 10, maxDuration: 8 },
-  { id: 'veo-3.1-fast-generate-preview', name: 'Veo 3.1 Fast Generate', provider: 'google', description: 'Google Veo 3.1 Fast Generate', usageWeight: 8, maxDuration: 8 },
-  // Pollinations video models (Pro)
-  { id: 'pix2pix-video', name: 'Pix2Pix Video', provider: 'pollinations', description: 'Video generation', usageWeight: 8, maxDuration: 10 },
-  { id: 'svd', name: 'Stable Video Diffusion', provider: 'pollinations', description: 'SVD video generation', usageWeight: 8, maxDuration: 4 },
-];
+export const VIDEO_MODELS: VideoModel[] = [{ id: 'cogvideox-5b', name: 'CogVideoX 5B', provider: 'pollinations', description: 'CogVideoX 5B' }];
 
 // Video models require pro/video_pro plan for access
 export const VIDEO_MODELS_SET = new Set(VIDEO_MODELS.map(m => m.id));
