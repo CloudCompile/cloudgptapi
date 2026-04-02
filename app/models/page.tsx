@@ -97,6 +97,7 @@ export default function ModelsPage() {
   const [statuses, setStatuses] = useState<Record<string, ModelStatus>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'chat' | 'image' | 'video' | 'free' | 'premium' | 'ultra' | 'roleplay'>('roleplay');
+  const [modelTypeFilter, setModelTypeFilter] = useState<'all' | 'chat' | 'image' | 'video'>('all');
   const [selectedProvider, setSelectedProvider] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedModel, setSelectedModel] = useState<ModelType | null>(null);
@@ -275,21 +276,25 @@ export default function ModelsPage() {
       const matchesSearch = model.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            model.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            model.provider.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      let matchesTab = activeTab === 'all' || model.type === activeTab;
-      if (activeTab === 'free') {
-        matchesTab = isFree;
-      } else if (activeTab === 'premium') {
-        matchesTab = !isFree && !ULTRA_MODELS.has(model.id);
-      } else if (activeTab === 'ultra') {
-        matchesTab = ULTRA_MODELS.has(model.id);
-      } else if (activeTab === 'roleplay') {
-        matchesTab = model.isRoleplay && model.type === 'chat';
-      }
+       
+      // Model type filter (Chat/Image/Video)
+      const matchesType = modelTypeFilter === 'all' || model.type === modelTypeFilter;
+       
+      // Access level filter (Free/Pro/Ultra)
+       let matchesTier = activeTab === 'all' || activeTab === 'roleplay';
+       if (activeTab === 'free') {
+         matchesTier = isFree;
+       } else if (activeTab === 'premium') {
+         matchesTier = !isFree && !ULTRA_MODELS.has(model.id);
+       } else if (activeTab === 'ultra') {
+         matchesTier = ULTRA_MODELS.has(model.id);
+       } else if (activeTab === 'roleplay') {
+         matchesTier = model.isRoleplay && model.type === 'chat';
+       }
 
       const matchesProvider = selectedProviders.size === 0 || selectedProviders.has(model.provider.toLowerCase());
       
-      return matchesSearch && matchesTab && matchesProvider;
+      return matchesSearch && matchesType && matchesTier && matchesProvider;
     }).sort((a, b) => {
       // First sort by Roleplay status (Roleplay first)
       if (a.isRoleplay !== b.isRoleplay) {
@@ -565,10 +570,10 @@ export default function ModelsPage() {
                       ].map(option => (
                         <button
                           key={option.value}
-                          onClick={() => setActiveTab(option.value as any)}
+                          onClick={() => setModelTypeFilter(option.value as any)}
                           className={cn(
                             "px-4 py-2 rounded-lg text-sm font-medium transition-all border",
-                            activeTab === option.value
+                            modelTypeFilter === option.value
                               ? "bg-primary text-white border-primary"
                               : "bg-slate-100/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border-slate-200/50 dark:border-slate-700 hover:border-primary/50"
                           )}
