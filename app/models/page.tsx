@@ -116,6 +116,7 @@ export default function ModelsPage() {
   // Collapsible filter sections
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['providers']));
   const [selectedProviders, setSelectedProviders] = useState<Set<string>>(new Set());
+  const [selectedTiers, setSelectedTiers] = useState<Set<string>>(new Set(['free', 'premium', 'ultra']));
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => {
@@ -136,6 +137,18 @@ export default function ModelsPage() {
         newSet.delete(provider);
       } else {
         newSet.add(provider);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleTier = (tier: string) => {
+    setSelectedTiers(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(tier)) {
+        newSet.delete(tier);
+      } else {
+        newSet.add(tier);
       }
       return newSet;
     });
@@ -280,17 +293,16 @@ export default function ModelsPage() {
       // Model type filter (Chat/Image/Video)
       const matchesType = modelTypeFilter === 'all' || model.type === modelTypeFilter;
        
-      // Access level filter (Free/Pro/Ultra)
-       let matchesTier = activeTab === 'all' || activeTab === 'roleplay';
-       if (activeTab === 'free') {
-         matchesTier = isFree;
-       } else if (activeTab === 'premium') {
-         matchesTier = !isFree && !ULTRA_MODELS.has(model.id);
-       } else if (activeTab === 'ultra') {
-         matchesTier = ULTRA_MODELS.has(model.id);
-       } else if (activeTab === 'roleplay') {
-         matchesTier = model.isRoleplay && model.type === 'chat';
-       }
+      // Access level filter (Free/Pro/Ultra) - support multiple selections
+       let matchesTier = selectedTiers.size === 3; // All selected by default
+       
+       const isModelFree = isFree;
+       const isModelPremium = !isModelFree && !ULTRA_MODELS.has(model.id);
+       const isModelUltra = ULTRA_MODELS.has(model.id);
+       
+       if (selectedTiers.has('free') && isModelFree) matchesTier = true;
+       if (selectedTiers.has('premium') && isModelPremium) matchesTier = true;
+       if (selectedTiers.has('ultra') && isModelUltra) matchesTier = true;
 
       const matchesProvider = selectedProviders.size === 0 || selectedProviders.has(model.provider.toLowerCase());
       
@@ -320,7 +332,7 @@ export default function ModelsPage() {
       // Fallback to name
       return a.name.localeCompare(b.name);
     });
-  }, [searchQuery, activeTab, selectedProvider]);
+  }, [searchQuery, modelTypeFilter, selectedProviders, selectedTiers]);
 
   const stats = useMemo(() => {
     const online = Object.values(statuses).filter(s => s.status === 'online').length;
@@ -604,28 +616,22 @@ export default function ModelsPage() {
                 
                 {expandedSections.has('tier') && (
                   <div className="p-4 bg-white/50 dark:bg-slate-900/50">
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {[
-                        { value: 'all', label: 'All', color: 'slate' },
                         { value: 'free', label: 'Free', color: 'emerald' },
                         { value: 'premium', label: 'Pro', color: 'amber' },
                         { value: 'ultra', label: 'Ultra', color: 'purple' }
                       ].map(option => {
-                        const isActive = 
-                          (option.value === 'all' && activeTab === 'all') ||
-                          (option.value === 'free' && activeTab === 'free') ||
-                          (option.value === 'premium' && activeTab === 'premium') ||
-                          (option.value === 'ultra' && activeTab === 'ultra');
+                        const isActive = selectedTiers.has(option.value);
                         
-                        const colorClasses = option.color === 'slate' ? 'bg-slate-500 border-slate-500' :
-                          option.color === 'emerald' ? 'bg-emerald-500 border-emerald-500' :
+                        const colorClasses = option.color === 'emerald' ? 'bg-emerald-500 border-emerald-500' :
                           option.color === 'amber' ? 'bg-amber-500 border-amber-500' :
                           'bg-purple-500 border-purple-500';
                         
                         return (
                           <button
                             key={option.value}
-                            onClick={() => setActiveTab(option.value as any)}
+                            onClick={() => toggleTier(option.value)}
                             className={cn(
                               "px-4 py-2 rounded-lg text-sm font-medium transition-all border flex items-center gap-2",
                               isActive
@@ -633,15 +639,12 @@ export default function ModelsPage() {
                                 : "bg-slate-100/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border-slate-200/50 dark:border-slate-700 hover:border-primary/50"
                             )}
                           >
-                            {option.value !== 'all' && (
-                              <span className={cn(
-                                "w-2 h-2 rounded-full",
-                                option.color === 'slate' ? 'bg-slate-400' :
-                                option.color === 'emerald' ? 'bg-emerald-400' :
-                                option.color === 'amber' ? 'bg-amber-400' :
-                                'bg-purple-400'
-                              )} />
-                            )}
+                            <span className={cn(
+                              "w-2 h-2 rounded-full",
+                              option.color === 'emerald' ? 'bg-emerald-400' :
+                              option.color === 'amber' ? 'bg-amber-400' :
+                              'bg-purple-400'
+                            )} />
                             {option.label}
                           </button>
                         );
