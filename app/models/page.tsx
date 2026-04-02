@@ -41,7 +41,8 @@ import {
   Coffee,
   LayoutGrid,
   List,
-  ChevronRight
+  ChevronRight,
+  ChevronDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getModelMultiplier, getMultiplierLabel, getMultiplierDescription } from './multiplier-utils';
@@ -95,7 +96,7 @@ const ALL_MODELS: ModelType[] = [
 export default function ModelsPage() {
   const [statuses, setStatuses] = useState<Record<string, ModelStatus>>({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | 'chat' | 'image' | 'video' | 'free' | 'premium' | 'roleplay'>('roleplay');
+  const [activeTab, setActiveTab] = useState<'all' | 'chat' | 'image' | 'video' | 'free' | 'premium' | 'ultra' | 'roleplay'>('roleplay');
   const [selectedProvider, setSelectedProvider] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedModel, setSelectedModel] = useState<ModelType | null>(null);
@@ -109,6 +110,35 @@ export default function ModelsPage() {
     resetAt: number;
     isPeakHours: boolean;
   } | null>(null);
+  const [isProviderDropdownOpen, setIsProviderDropdownOpen] = useState(false);
+  
+  // Collapsible filter sections
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['providers']));
+  const [selectedProviders, setSelectedProviders] = useState<Set<string>>(new Set());
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(section)) {
+        newSet.delete(section);
+      } else {
+        newSet.add(section);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleProvider = (provider: string) => {
+    setSelectedProviders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(provider)) {
+        newSet.delete(provider);
+      } else {
+        newSet.add(provider);
+      }
+      return newSet;
+    });
+  };
 
   const PROVIDERS = useMemo(() => {
     const providers = new Set(ALL_MODELS.map(m => m.provider.toLowerCase()));
@@ -133,6 +163,13 @@ export default function ModelsPage() {
     xai: 'xAI',
     zhipu: 'Zhipu',
     minimax: 'MiniMax',
+    meta: 'Meta',
+    alibaba: 'Alibaba',
+    mistral: 'Mistral',
+    microsoft: 'Microsoft',
+    bytedance: 'ByteDance',
+    xiaomi: 'Xiaomi',
+    amazon: 'Amazon',
     shalom: '',
     github: 'GitHub',
     stablehorde: 'Stable Horde',
@@ -243,12 +280,14 @@ export default function ModelsPage() {
       if (activeTab === 'free') {
         matchesTab = isFree;
       } else if (activeTab === 'premium') {
-        matchesTab = !isFree;
+        matchesTab = !isFree && !ULTRA_MODELS.has(model.id);
+      } else if (activeTab === 'ultra') {
+        matchesTab = ULTRA_MODELS.has(model.id);
       } else if (activeTab === 'roleplay') {
         matchesTab = model.isRoleplay && model.type === 'chat';
       }
 
-      const matchesProvider = selectedProvider === 'all' || model.provider.toLowerCase() === selectedProvider;
+      const matchesProvider = selectedProviders.size === 0 || selectedProviders.has(model.provider.toLowerCase());
       
       return matchesSearch && matchesTab && matchesProvider;
     }).sort((a, b) => {
@@ -412,65 +451,202 @@ export default function ModelsPage() {
         )}
 
         {/* Filters & Search */}
-        <div className="sticky top-16 sm:top-24 z-30 mb-6 sm:mb-12 flex flex-col gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-2 duration-700 delay-200">
-          <div className="p-1.5 sm:p-3 rounded-[1.2rem] sm:rounded-[2.5rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 shadow-2xl shadow-slate-200/50 dark:shadow-none flex flex-col md:flex-row items-center gap-2 sm:gap-4">
-            <div className="relative flex-1 w-full">
-              <Search className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-5 sm:w-5 text-slate-400" />
-              <input 
-                type="text" 
-                placeholder="Search models..."
-                className="w-full pl-10 sm:pl-14 pr-4 sm:pr-6 py-2.5 sm:py-4 bg-slate-100/50 dark:bg-slate-800/50 border-none rounded-[1rem] sm:rounded-[2rem] focus:ring-2 focus:ring-primary/20 transition-all outline-none text-base font-medium"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+        <div className="sticky top-16 sm:top-24 z-30 mb-6 sm:mb-12 animate-in fade-in slide-in-from-top-2 duration-700 delay-200">
+          {/* Collapsible Filter Sections */}
+          <div className="p-4 sm:p-5 rounded-[1.5rem] sm:rounded-[2rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/20 dark:border-slate-800/50 shadow-xl shadow-slate-200/30 dark:shadow-none">
             
-            <div className="flex items-center gap-1 p-1 sm:p-2 bg-slate-100/50 dark:bg-slate-800/50 rounded-[1rem] sm:rounded-[2rem] w-full md:w-auto overflow-x-auto no-scrollbar">
-              <TabButton active={activeTab === 'roleplay'} onClick={() => setActiveTab('roleplay')} icon={<Sparkles className="h-3.5 w-3.5" />} label="Roleplay" />
-              <TabButton active={activeTab === 'all'} onClick={() => setActiveTab('all')} icon={<Globe className="h-3.5 w-3.5" />} label="All" />
-              <TabButton active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} icon={<MessageSquare className="h-3.5 w-3.5" />} label="Chat" />
-              <TabButton active={activeTab === 'image'} onClick={() => setActiveTab('image')} icon={<ImageIcon className="h-3.5 w-3.5" />} label="Image" />
-              <TabButton active={activeTab === 'free'} onClick={() => setActiveTab('free')} icon={<Zap className="h-3.5 w-3.5" />} label="Free" />
+            {/* Filter Header with Search and View Toggle */}
+            <div className="flex items-center gap-3 mb-4">
+              {/* Search Bar */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <input 
+                  type="text" 
+                  placeholder="Search models..."
+                  className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 bg-slate-100/50 dark:bg-slate-800/50 border-none rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all outline-none text-sm font-medium"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
+              {/* View Toggle */}
+              <div className="flex items-center gap-1 p-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl sm:rounded-2xl border border-white/10 dark:border-slate-800/30">
+                <button 
+                  onClick={() => setViewMode('grid')}
+                  className={cn(
+                    "p-2 rounded-lg transition-all",
+                    viewMode === 'grid' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  )}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </button>
+                <button 
+                  onClick={() => setViewMode('list')}
+                  className={cn(
+                    "p-2 rounded-lg transition-all",
+                    viewMode === 'list' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  )}
+                >
+                  <List className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-center gap-1 p-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-xl sm:rounded-2xl ml-auto border border-white/10 dark:border-slate-800/30">
-              <button 
-                onClick={() => setViewMode('grid')}
-                className={cn(
-                  "p-2 rounded-lg transition-all",
-                  viewMode === 'grid' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+            {/* Filter Sections */}
+            <div className="space-y-2">
+              
+              {/* Providers Section */}
+              <div className="border border-slate-200/50 dark:border-slate-700/50 rounded-xl overflow-hidden">
+                <button
+                  onClick={() => toggleSection('providers')}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-slate-500" />
+                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Providers</span>
+                    {selectedProviders.size > 0 && (
+                      <span className="px-2 py-0.5 text-[10px] font-bold bg-primary text-white rounded-full">
+                        {selectedProviders.size}
+                      </span>
+                    )}
+                  </div>
+                  <ChevronDown className={cn(
+                    "h-4 w-4 text-slate-400 transition-transform",
+                    expandedSections.has('providers') && "rotate-180"
+                  )} />
+                </button>
+                
+                {expandedSections.has('providers') && (
+                  <div className="p-4 bg-white/50 dark:bg-slate-900/50">
+                    <div className="flex flex-wrap gap-2">
+                      {PROVIDERS.filter(p => p !== 'all').map(provider => (
+                        <button
+                          key={provider}
+                          onClick={() => toggleProvider(provider)}
+                          className={cn(
+                            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize border",
+                            selectedProviders.has(provider)
+                              ? "bg-primary text-white border-primary"
+                              : "bg-slate-100/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border-slate-200/50 dark:border-slate-700 hover:border-primary/50"
+                          )}
+                        >
+                          {getProviderDisplayName(provider)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </button>
-              <button 
-                onClick={() => setViewMode('list')}
-                className={cn(
-                  "p-2 rounded-lg transition-all",
-                  viewMode === 'list' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                )}
-              >
-                <List className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
+              </div>
 
-          {/* Provider Quick Filter */}
-          <div className="flex items-center gap-2 px-3 sm:px-6 py-1.5 sm:py-3 overflow-x-auto no-scrollbar bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[1rem] sm:rounded-[2rem] border border-white/10 dark:border-slate-800/30">
-            {PROVIDERS.filter(p => p !== '').map(provider => (
-              <button
-                key={provider}
-                onClick={() => setSelectedProvider(provider)}
-                className={cn(
-                  "px-2.5 sm:px-4 py-0.5 sm:py-1.5 rounded-full text-[9px] sm:text-xs font-bold transition-all whitespace-nowrap border capitalize",
-                  selectedProvider === provider
-                    ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105"
-                    : "bg-white/50 dark:bg-slate-800/50 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-primary/50"
+              {/* Model Type Section */}
+              <div className="border border-slate-200/50 dark:border-slate-700/50 rounded-xl overflow-hidden">
+                <button
+                  onClick={() => toggleSection('type')}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Cpu className="h-4 w-4 text-slate-500" />
+                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Model Type</span>
+                  </div>
+                  <ChevronDown className={cn(
+                    "h-4 w-4 text-slate-400 transition-transform",
+                    expandedSections.has('type') && "rotate-180"
+                  )} />
+                </button>
+                
+                {expandedSections.has('type') && (
+                  <div className="p-4 bg-white/50 dark:bg-slate-900/50">
+                    <div className="flex gap-2">
+                      {[
+                        { value: 'all', label: 'All' },
+                        { value: 'chat', label: 'Chat' },
+                        { value: 'image', label: 'Image' },
+                        { value: 'video', label: 'Video' }
+                      ].map(option => (
+                        <button
+                          key={option.value}
+                          onClick={() => setActiveTab(option.value as any)}
+                          className={cn(
+                            "px-4 py-2 rounded-lg text-sm font-medium transition-all border",
+                            activeTab === option.value
+                              ? "bg-primary text-white border-primary"
+                              : "bg-slate-100/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border-slate-200/50 dark:border-slate-700 hover:border-primary/50"
+                          )}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
-              >
-                {getProviderDisplayName(provider)}
-              </button>
-            ))}
+              </div>
+
+              {/* Access Level Section */}
+              <div className="border border-slate-200/50 dark:border-slate-700/50 rounded-xl overflow-hidden">
+                <button
+                  onClick={() => toggleSection('tier')}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-slate-500" />
+                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Access Level</span>
+                  </div>
+                  <ChevronDown className={cn(
+                    "h-4 w-4 text-slate-400 transition-transform",
+                    expandedSections.has('tier') && "rotate-180"
+                  )} />
+                </button>
+                
+                {expandedSections.has('tier') && (
+                  <div className="p-4 bg-white/50 dark:bg-slate-900/50">
+                    <div className="flex gap-2">
+                      {[
+                        { value: 'all', label: 'All', color: 'slate' },
+                        { value: 'free', label: 'Free', color: 'emerald' },
+                        { value: 'premium', label: 'Pro', color: 'amber' },
+                        { value: 'ultra', label: 'Ultra', color: 'purple' }
+                      ].map(option => {
+                        const isActive = 
+                          (option.value === 'all' && activeTab === 'all') ||
+                          (option.value === 'free' && activeTab === 'free') ||
+                          (option.value === 'premium' && activeTab === 'premium') ||
+                          (option.value === 'ultra' && activeTab === 'ultra');
+                        
+                        const colorClasses = option.color === 'slate' ? 'bg-slate-500 border-slate-500' :
+                          option.color === 'emerald' ? 'bg-emerald-500 border-emerald-500' :
+                          option.color === 'amber' ? 'bg-amber-500 border-amber-500' :
+                          'bg-purple-500 border-purple-500';
+                        
+                        return (
+                          <button
+                            key={option.value}
+                            onClick={() => setActiveTab(option.value as any)}
+                            className={cn(
+                              "px-4 py-2 rounded-lg text-sm font-medium transition-all border flex items-center gap-2",
+                              isActive
+                                ? `${colorClasses} text-white`
+                                : "bg-slate-100/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border-slate-200/50 dark:border-slate-700 hover:border-primary/50"
+                            )}
+                          >
+                            {option.value !== 'all' && (
+                              <span className={cn(
+                                "w-2 h-2 rounded-full",
+                                option.color === 'slate' ? 'bg-slate-400' :
+                                option.color === 'emerald' ? 'bg-emerald-400' :
+                                option.color === 'amber' ? 'bg-amber-400' :
+                                'bg-purple-400'
+                              )} />
+                            )}
+                            {option.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+            </div>
           </div>
         </div>
 
