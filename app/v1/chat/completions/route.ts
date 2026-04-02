@@ -15,6 +15,7 @@ import {
 } from '@/lib/chat-utils';
 
 import { withErrorHandler } from '@/lib/api-wrapper';
+import { ChatCompletionRequestSchema } from '@/lib/schema';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max for long reasoning or slow providers
@@ -130,34 +131,34 @@ export const POST = withErrorHandler(async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    const rawBody = await request.json();
+    
+    // Validate request schema with Zod
+    const schemaValidation = ChatCompletionRequestSchema.safeParse(rawBody);
+    if (!schemaValidation.success) {
+      console.warn(`[${requestId}] Invalid request schema:`, schemaValidation.error.errors);
+      return NextResponse.json(
+        {
+          error: {
+            message: `Invalid request: ${schemaValidation.error.errors.map(e => e.message).join(', ')}`,
+            type: 'invalid_request_error',
+            param: schemaValidation.error.errors[0]?.path.join('.') || null,
+            code: 'invalid_request',
+            request_id: requestId
+          }
+        },
+        { status: 400, headers: getCorsHeaders() }
+      );
+    }
+    const body = schemaValidation.data;
+
     // Save last message before memory/lore injection for later tracking
     const lastMessage = body.messages && body.messages.length > 0 ? body.messages[body.messages.length - 1]?.content || '' : '';
     
     // Log request details for debugging (especially token issues)
     console.log(`[${requestId}] Request model: ${body.model}, max_tokens: ${body.max_tokens}, messages: ${body.messages?.length}`);
 
-    // Validate required fields
-    if (!body.messages || !Array.isArray(body.messages)) {
-      console.warn(`[${requestId}] Invalid request: messages array missing`);
-      return NextResponse.json(
-        {
-          error: {
-            message: 'messages array is required',
-            type: 'invalid_request_error',
-            param: 'messages',
-            code: null,
-            request_id: requestId
-          }
-        },
-        {
-          status: 400,
-          headers: getCorsHeaders()
-        }
-      );
-    }
-    
-    // Validate message structure and content
+    // Detailed content validation (ensure no completely empty strings if that's what validateMessages checks)
     const validation = validateMessages(body.messages);
     if (!validation.valid) {
       console.warn(`[${requestId}] Invalid messages: ${validation.error}`);
