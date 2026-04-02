@@ -459,4 +459,5 @@ export const PROVIDER_URLS = {
   kivest: 'https://ai.ezif.in/v1',
   shalom: 'https://api.bluesminds.com/v1',
   minimax: 'https://api.bluesminds.com/v1',
+  aqua: 'https://api.aquadevs.com/v1',
 };

@@ -301,6 +301,7 @@ export const PROVIDER_URLS = {
   openai: 'https://api.openai.com/v1',
   kivest: 'https://ai.ezif.in/v1',
   shalom: 'https://api.bluesminds.com/v1',
+  aqua: 'https://api.aquadevs.com/v1',
 };
 
 export function createChatTransformStream(

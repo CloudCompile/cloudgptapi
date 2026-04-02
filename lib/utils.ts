@@ -221,6 +221,13 @@ export function getShalomApiKey(): string | undefined {
 }
 
 /**
+ * Get Aqua API key (free tier for consumers)
+ */
+export function getAquaApiKey(): string | undefined {
+  return process.env.AQUA_API_KEY;
+}
+
+/**
  * Get all available Liz API keys
  */
 export function getLizApiKeys(): string[] {

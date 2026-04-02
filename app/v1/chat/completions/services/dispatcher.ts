@@ -16,6 +16,7 @@ import {
   getKivestApiKey,
   getOpenAIApiKey,
   getShalomApiKey,
+  getAquaApiKey,
   safeResponseJson
 } from '@/lib/utils';
 import { rememberInteraction } from '@/lib/memory';
@@ -73,6 +74,52 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
         { error: { message: 'Shalom/Bluesmind API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
         { status: 500, headers: getCorsHeaders() }
       );
+    }
+  } else if (model.provider === 'deepseek' || model.provider === 'google' || model.provider === 'anthropic' || model.provider === 'openai' || model.provider === 'xai' || model.provider === 'moonshot' || model.provider === 'zhipu' || model.provider === 'minimax' || model.provider === 'meta' || model.provider === 'mistral' || model.provider === 'microsoft' || model.provider === 'bytedance' || model.provider === 'xiaomi' || model.provider === 'alibaba' || model.provider === 'amazon') {
+    // Check if this model should route to Aqua API or Bluesminds
+    const aquaModels = new Set([
+      // Aqua standard tier (free)
+      'gpt-5', 'gemini-2.5', 'gemini-3', 'grok', 'nova', 'haiku-4.5', 'grok-4.1-thinking',
+      'gpt-oss', 'minimax', 'glm-5', 'deepseek-v3', 'deepseek-v3.2', 'deepseek-v3.1',
+      'kimi-k2', 'kimi-k2.5', 'qwen', 'qwen-3.5', 'mistral', 'step-3.5', 'grok-4.2',
+      'llama-4', 'gemini-3.1-lite', 'nemotron', 'llama-3.1', 'minimax-m2.7', 'gpt-5.4-mini',
+      'glm-5.1', 'mimo-omni',
+      // Aqua premium tier
+      'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
+      'gemini-2.5-pro', 'gemini-3.1-pro', 'sonnet-4.5', 'sonnet-4.6', 'opus-4.5', 'opus-4.6',
+      'mimo-pro'
+    ]);
+    
+    if (aquaModels.has(modelId)) {
+      // Route to Aqua API
+      providerUrl = `${PROVIDER_URLS.aqua}/chat/completions`;
+      const premiumTierModels = new Set([
+        'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
+        'gemini-2.5-pro', 'gemini-3.1-pro', 'sonnet-4.5', 'sonnet-4.6', 'opus-4.5', 'opus-4.6', 'mimo-pro'
+      ]);
+      if (premiumTierModels.has(modelId)) {
+        providerApiKey = process.env.AQUA_API_KEY_2;
+      } else {
+        providerApiKey = getAquaApiKey();
+      }
+      if (!providerApiKey) {
+        console.warn(`[${requestId}] Missing Aqua API key for model: ${modelId}`);
+        return NextResponse.json(
+          { error: { message: 'Aqua API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
+    } else {
+      // Route to Bluesminds/Shalom API
+      providerUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
+      providerApiKey = getShalomApiKey();
+      if (!providerApiKey) {
+        console.warn(`[${requestId}] Missing Shalom API key for model: ${modelId}`);
+        return NextResponse.json(
+          { error: { message: 'Shalom/Bluesmind API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
     }
   } else {
     // Fallback or Unknown provider
@@ -184,6 +231,23 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       if (e.name === 'AbortError') console.warn(`[${requestId}] Fast-path timeout (30s) for Pollinations, falling back...`);
       else console.warn(`[${requestId}] Fast-path error for Pollinations:`, e);
     }
+  }
+
+  // Make the actual request to the provider
+  let providerResponse: Response;
+  try {
+    providerResponse = await fetch(providerUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(standardBody),
+      signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS)
+    });
+  } catch (fetchError: any) {
+    console.error(`[${requestId}] Fetch error for ${model.provider}:`, fetchError);
+    return NextResponse.json(
+      { error: { message: `Failed to connect to provider: ${fetchError.message}`, type: 'network_error', param: null, code: 'fetch_failed', request_id: requestId } },
+      { status: 502, headers: getCorsHeaders() }
+    );
   }
 
   if (!providerResponse.ok) {
