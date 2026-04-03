@@ -21,7 +21,16 @@ export async function GET(request: NextRequest) {
 
     if (logsError) {
       console.error('[GET /api/admin/usage/stats] Error fetching logs:', logsError);
-      return NextResponse.json({ error: 'Failed to fetch usage stats' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch usage stats', details: logsError.message }, { status: 500 });
+    }
+
+    if (!logs) {
+      return NextResponse.json({
+        summary: { totalRequests: 0, totalTokens: 0, days },
+        topModels: [],
+        topProviders: [],
+        chartData: [],
+      });
     }
 
     const modelUsage: Record<string, { count: number; tokens: number }> = {};
@@ -108,6 +117,7 @@ export async function GET(request: NextRequest) {
 
   } catch (err) {
     console.error('[GET /api/admin/usage/stats] Unexpected error:', err);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    return NextResponse.json({ error: 'Internal Server Error', details: errorMessage }, { status: 500 });
   }
 }
