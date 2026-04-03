@@ -172,7 +172,6 @@ export function getPoeApiKeys(): string[] {
   const keys = [
     process.env.POE_API_KEY,
     process.env.POE_KEY,
-    'G7NomPrb7UaPFpi9vVUlgbCWQmmXZ7saGBISiU6SEmg', // User provided key
   ].filter(Boolean) as string[];
   
   return Array.from(new Set(keys));
@@ -214,9 +213,9 @@ export function getKivestApiKey(): string | undefined {
 }
 
 /**
- * Get Shalom (Bluesminds) API key
+ * Get Bluesminds API key
  */
-export function getShalomApiKey(): string | undefined {
+export function getBluesmindsApiKey(): string | undefined {
   return process.env.SHALOM_API_KEY;
 }
 
@@ -225,6 +224,30 @@ export function getShalomApiKey(): string | undefined {
  */
 export function getAquaApiKey(): string | undefined {
   return process.env.AQUA_API_KEY;
+}
+
+/**
+ * Get all available Aqua API keys
+ */
+export function getAquaApiKeys(): string[] {
+  const keys = [
+    process.env.AQUA_API_KEY,
+    process.env.AQUA_API_KEY_2,
+    process.env.AQUA_API_KEY_3,
+  ].filter(Boolean) as string[];
+  
+  return Array.from(new Set(keys));
+}
+
+/**
+ * Get a random Aqua API key
+ */
+export function getRandomAquaApiKey(): string | undefined {
+  const keys = getAquaApiKeys();
+  if (keys.length === 0) return undefined;
+  
+  const randomIndex = Math.floor(Math.random() * keys.length);
+  return keys[randomIndex];
 }
 
 /**
@@ -272,4 +295,11 @@ export function getOpenAIApiKey(): string | undefined {
   
   const randomIndex = Math.floor(Math.random() * keys.length);
   return keys[randomIndex];
+}
+
+/**
+ * Get LitRouter API key
+ */
+export function getLitRouterApiKey(): string | undefined {
+  return process.env.LITROUTER_API_KEY;
 }

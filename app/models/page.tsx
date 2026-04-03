@@ -88,7 +88,7 @@ function useCountdown(targetDate?: string) {
 }
 
 const ALL_MODELS: ModelType[] = [
-  ...CHAT_MODELS.filter(m => m.provider !== 'kivest').map(m => ({ ...m, type: 'chat' as const })),
+  ...CHAT_MODELS.map(m => ({ ...m, type: 'chat' as const })),
   ...IMAGE_MODELS.map(m => ({ ...m, type: 'image' as const })),
   ...VIDEO_MODELS.map(m => ({ ...m, type: 'video' as const })),
 ];
@@ -165,7 +165,7 @@ export default function ModelsPage() {
     // Filter out disabled providers and free providers
     providers.delete('kivest');
     providers.delete('pollinations');
-    providers.delete('shalom');
+    providers.delete('bluesminds');
     return ['all', ...Array.from(providers)].sort();
   }, []);
 
@@ -190,7 +190,7 @@ export default function ModelsPage() {
     bytedance: 'ByteDance',
     xiaomi: 'Xiaomi',
     amazon: 'Amazon',
-    shalom: '',
+    bluesminds: 'Bluesminds',
     github: 'GitHub',
     stablehorde: 'Stable Horde',
     poe: 'Poe',

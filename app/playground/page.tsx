@@ -45,7 +45,7 @@ const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
   xai: 'xAI',
   zhipu: 'Zhipu',
   minimax: 'MiniMax',
-  shalom: '',  // Hide Bluesminds completely
+  bluesminds: 'Bluesminds',
 };
 
 function formatProviderName(provider: string): string {

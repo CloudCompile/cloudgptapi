@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PROVIDER_URLS } from '@/lib/providers';
-import { getPollinationsApiKey, getPoeApiKey, getLizApiKey, getKivestApiKey, getShalomApiKey } from '@/lib/utils';
+import { getPollinationsApiKey, getPoeApiKey, getLizApiKey, getKivestApiKey, getBluesmindsApiKey } from '@/lib/utils';
 
 // Cache status for 1 minute to avoid hammering providers
 let statusCache: {
@@ -70,7 +70,7 @@ export async function GET() {
     { name: 'github', url: `https://models.inference.ai.azure.com/models` },
     { name: 'liz', url: `${PROVIDER_URLS.liz}/v1/models`, apiKey: getLizApiKey() },
     { name: 'kivest', url: `${PROVIDER_URLS.kivest}/models`, apiKey: getKivestApiKey() },
-    { name: 'shalom', url: `${PROVIDER_URLS.shalom}/models`, apiKey: getShalomApiKey() },
+    { name: 'bluesminds', url: `${PROVIDER_URLS.bluesminds}/models`, apiKey: getBluesmindsApiKey() },
   ];
 
   const results = await Promise.all(

@@ -1,4 +1,4 @@
-import { Shield, Users, Activity, Crown, AlertCircle, Tag, ArrowRight } from 'lucide-react';
+import { Shield, Users, Activity, Crown, AlertCircle, Tag, ArrowRight, BarChart3 } from 'lucide-react';
 import { getAllUsers } from '@/lib/admin-actions';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -11,6 +11,7 @@ export default async function AdminOverviewPage() {
 
   const quickLinks = [
     { name: 'User Management', desc: 'Manage accounts, roles & permissions', href: '/admin/users', icon: Users, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    { name: 'Usage Analytics', desc: 'View API usage stats across all users', href: '/admin/usage', icon: BarChart3, color: 'text-cyan-500', bg: 'bg-cyan-50 dark:bg-cyan-900/20' },
     { name: 'Error Logs', desc: 'View system errors and debugging logs', href: '/admin/error-logs', icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20' },
     { name: 'Plans & Features', desc: 'Configure subscription tiers & limits', href: '/admin/plans', icon: Crown, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
     { name: 'Promo Codes', desc: 'Create and distribute discount codes', href: '/admin/promo-codes', icon: Tag, color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20' },

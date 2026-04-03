@@ -17,7 +17,6 @@ import {
   getLizApiKey,
   getKivestApiKey,
   getOpenAIApiKey,
-  getShalomApiKey,
   getAquaApiKey,
   safeResponseJson
 } from '@/lib/utils';
@@ -51,10 +50,18 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   let providerUrl: string;
   let providerApiKey: string | undefined;
 
-  // Models that can fallback to Bluesminds on Aqua failure
-  const bluesmindsFallbackModels = new Set([
-    'claude-opus-4-6', 'claude-opus-4.5', 'claude-sonnet-4-6', 'claude-sonnet-4.5',
-    'claude-sonnet-4.5-20250929', 'claude-haiku-4.5'
+  // Models that can be routed to Aqua API
+  const aquaModels = new Set([
+    // Aqua standard tier (free)
+    'gpt-5', 'gemini-2.5', 'gemini-3', 'grok', 'nova', 'haiku-4.5', 'grok-4.1-thinking',
+    'gpt-oss', 'minimax', 'glm-5', 'deepseek-v3', 'deepseek-v3.2', 'deepseek-v3.1',
+    'kimi-k2', 'kimi-k2.5', 'qwen', 'qwen-3.5', 'mistral', 'step-3.5', 'grok-4.2',
+    'llama-4', 'gemini-3.1-lite', 'nemotron', 'llama-3.1', 'minimax-m2.7', 'gpt-5.4-mini',
+    'glm-5.1', 'mimo-omni',
+    // Aqua premium tier
+    'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
+    'gemini-2.5-pro', 'gemini-3.1-pro', 'sonnet-4.5', 'sonnet-4.6', 'opus-4.5', 'opus-4.6',
+    'mimo-pro', 'deepseek-v3-0324', 'deepseek-v3.1-terminus'
   ]);
 
   if (model.provider === 'pollinations') {
@@ -68,66 +75,45 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       );
     }
   } else if (model.provider === 'kivest') {
-    console.warn(`[${requestId}] Kivest provider is temporarily disabled`);
-    return NextResponse.json(
-      { error: { message: 'Kivest provider is temporarily unavailable. Please try another model.', type: 'provider_error', param: null, code: 'provider_disabled', request_id: requestId } },
-      { status: 503, headers: getCorsHeaders() }
-    );
-  } else if (model.provider === 'shalom') {
-    providerUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
-    providerApiKey = getShalomApiKey();
+    providerUrl = `${PROVIDER_URLS.kivest}/v1/chat/completions`;
+    providerApiKey = getKivestApiKey();
     if (!providerApiKey) {
-      console.warn(`[${requestId}] Missing Shalom API key for model: ${modelId}`);
+      console.warn(`[${requestId}] Missing Kivest API key for model: ${modelId}`);
       return NextResponse.json(
-        { error: { message: 'Shalom/Bluesmind API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { error: { message: 'Kivest API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
         { status: 500, headers: getCorsHeaders() }
       );
     }
-  } else if (model.provider === 'deepseek' || model.provider === 'google' || model.provider === 'anthropic' || model.provider === 'openai' || model.provider === 'xai' || model.provider === 'moonshot' || model.provider === 'zhipu' || model.provider === 'minimax' || model.provider === 'meta' || model.provider === 'mistral' || model.provider === 'microsoft' || model.provider === 'bytedance' || model.provider === 'xiaomi' || model.provider === 'alibaba' || model.provider === 'amazon') {
-    // Check if this model should route to Aqua API or Bluesminds
-    const aquaModels = new Set([
-      // Aqua standard tier (free)
-      'gpt-5', 'gemini-2.5', 'gemini-3', 'grok', 'nova', 'haiku-4.5', 'grok-4.1-thinking',
-      'gpt-oss', 'minimax', 'glm-5', 'deepseek-v3', 'deepseek-v3.2', 'deepseek-v3.1',
-      'kimi-k2', 'kimi-k2.5', 'qwen', 'qwen-3.5', 'mistral', 'step-3.5', 'grok-4.2',
-      'llama-4', 'gemini-3.1-lite', 'nemotron', 'llama-3.1', 'minimax-m2.7', 'gpt-5.4-mini',
-      'glm-5.1', 'mimo-omni',
-      // Aqua premium tier
+  } else if (aquaModels.has(modelId)) {
+    // Route to Aqua API
+    providerUrl = `${PROVIDER_URLS.aqua}/chat/completions`;
+    const premiumTierModels = new Set([
       'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
-      'gemini-2.5-pro', 'gemini-3.1-pro', 'sonnet-4.5', 'sonnet-4.6', 'opus-4.5', 'opus-4.6',
-      'mimo-pro'
+      'gemini-2.5-pro', 'gemini-3.1-pro', 'sonnet-4.5', 'sonnet-4.6', 'opus-4.5', 'opus-4.6', 'mimo-pro'
     ]);
-    
-    if (aquaModels.has(modelId)) {
-      // Route to Aqua API
-      providerUrl = `${PROVIDER_URLS.aqua}/chat/completions`;
-      const premiumTierModels = new Set([
-        'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
-        'gemini-2.5-pro', 'gemini-3.1-pro', 'sonnet-4.5', 'sonnet-4.6', 'opus-4.5', 'opus-4.6', 'mimo-pro'
-      ]);
-      if (premiumTierModels.has(modelId)) {
-        providerApiKey = process.env.AQUA_API_KEY_2;
-      } else {
-        providerApiKey = getAquaApiKey();
-      }
-      if (!providerApiKey) {
-        console.warn(`[${requestId}] Missing Aqua API key for model: ${modelId}`);
-        return NextResponse.json(
-          { error: { message: 'Aqua API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
-          { status: 500, headers: getCorsHeaders() }
-        );
+    if (premiumTierModels.has(modelId)) {
+      // Use premium Aqua keys (API_KEY_2 or API_KEY_3)
+      const premiumKeys = [process.env.AQUA_API_KEY_2, process.env.AQUA_API_KEY_3].filter(Boolean);
+      if (premiumKeys.length > 0) {
+        providerApiKey = premiumKeys[Math.floor(Math.random() * premiumKeys.length)];
       }
     } else {
-      // Route to Bluesminds/Shalom API
-      providerUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
-      providerApiKey = getShalomApiKey();
-      if (!providerApiKey) {
-        console.warn(`[${requestId}] Missing Shalom API key for model: ${modelId}`);
-        return NextResponse.json(
-          { error: { message: 'Shalom/Bluesmind API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
-          { status: 500, headers: getCorsHeaders() }
-        );
+      // Use any available Aqua key (random selection)
+      const allAquaKeys = [
+        process.env.AQUA_API_KEY,
+        process.env.AQUA_API_KEY_2,
+        process.env.AQUA_API_KEY_3
+      ].filter(Boolean);
+      if (allAquaKeys.length > 0) {
+        providerApiKey = allAquaKeys[Math.floor(Math.random() * allAquaKeys.length)];
       }
+    }
+    if (!providerApiKey) {
+      console.warn(`[${requestId}] Missing Aqua API key for model: ${modelId}`);
+      return NextResponse.json(
+        { error: { message: 'Aqua API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { status: 500, headers: getCorsHeaders() }
+      );
     }
   } else {
     // Fallback or Unknown provider
@@ -265,43 +251,48 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     const errorText = await providerResponse.text();
     console.error(`[${requestId}] Provider error from ${model.provider} (${providerResponse.status}):`, errorText.substring(0, 500));
 
-    // Check if we should fallback to Bluesminds for Claude models
-    const canFallbackToBluesminds = bluesmindsFallbackModels.has(modelId) && providerUrl.includes('aquadevs');
+    // Check if we should fallback to Kivest for Ultra models on Aqua failure
+    const ultraModelsWithKivest = new Set([
+      'gpt-5.4', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.2-codex', 'gpt-5.2', 'gpt-5.1',
+      'claude-sonnet-4.6', 'claude-sonnet-4-5', 'claude-opus-4-6', 'claude-opus-4-5',
+      'gemini-2.5-pro', 'gemini-3.1-pro',
+      'glm-5.1', 'mimo-pro'
+    ]);
+    const canFallbackToKivest = aquaModels.has(modelId) && ultraModelsWithKivest.has(modelId) && providerUrl.includes('aquadevs');
     
-    if (canFallbackToBluesminds) {
-      console.log(`[${requestId}] Aqua failed for ${modelId}, falling back to Bluesminds...`);
+    if (canFallbackToKivest && (providerResponse.status === 429 || providerResponse.status >= 500)) {
+      console.log(`[${requestId}] Aqua failed for ${modelId}, falling back to Kivest...`);
       
-      const bluesmindsUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
-      const bluesmindsApiKey = getShalomApiKey();
-      const bluesmindsModelId = getBluesmindsModelId(modelId);
+      const kivestUrl = `${PROVIDER_URLS.kivest}/v1/chat/completions`;
+      const kivestApiKey = getKivestApiKey();
       
-      const fallbackBody = {
-        ...standardBody,
-        model: bluesmindsModelId
-      };
+      if (kivestApiKey) {
+        const fallbackBody = {
+          ...standardBody,
+          model: modelId
+        };
 
-      try {
-        const fallbackResponse = await fetch(bluesmindsUrl, {
-          method: 'POST',
-          headers: {
-            ...headers,
-            'Authorization': `Bearer ${bluesmindsApiKey}`
-          },
-          body: JSON.stringify(fallbackBody),
-          signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS)
-        });
+        try {
+          const fallbackResponse = await fetch(kivestUrl, {
+            method: 'POST',
+            headers: {
+              ...headers,
+              'Authorization': `Bearer ${kivestApiKey}`
+            },
+            body: JSON.stringify(fallbackBody),
+            signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS)
+          });
 
-        if (fallbackResponse.ok) {
-          console.log(`[${requestId}] Bluesminds fallback succeeded for ${modelId}`);
-          providerResponse = fallbackResponse;
-          // Update actual model ID for response processing
-          actualModelId = bluesmindsModelId;
-        } else {
-          const fallbackErrorText = await fallbackResponse.text();
-          console.error(`[${requestId}] Bluesminds fallback also failed:`, fallbackErrorText.substring(0, 300));
+          if (fallbackResponse.ok) {
+            console.log(`[${requestId}] Kivest fallback succeeded for ${modelId}`);
+            providerResponse = fallbackResponse;
+          } else {
+            const fallbackErrorText = await fallbackResponse.text();
+            console.error(`[${requestId}] Kivest fallback also failed:`, fallbackErrorText.substring(0, 300));
+          }
+        } catch (fallbackError: any) {
+          console.error(`[${requestId}] Kivest fallback fetch error:`, fallbackError);
         }
-      } catch (fallbackError: any) {
-        console.error(`[${requestId}] Bluesminds fallback fetch error:`, fallbackError);
       }
     }
 
