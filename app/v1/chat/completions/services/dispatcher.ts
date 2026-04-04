@@ -335,7 +335,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     const isBluesmindsFailed = providerUrl.includes('bluesminds') && !providerResponse.ok;
     const canFallbackToKivest = (isAquaFailed || isBluesmindsFailed) && ultraModelsWithKivest.has(modelId);
     
-    if (canFallbackToKivest && (providerResponse.status === 429 || providerResponse.status >= 500)) {
+    if (canFallbackToKivest && (providerResponse.status === 429 || providerResponse.status === 401 || providerResponse.status === 403 || providerResponse.status >= 500)) {
       console.log(`[${requestId}] Both Aqua and Bluesminds failed for ${modelId}, falling back to Kivest...`);
       
       const kivestUrl = `${PROVIDER_URLS.kivest}/v1/chat/completions`;
