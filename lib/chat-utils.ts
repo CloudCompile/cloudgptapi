@@ -153,7 +153,7 @@ export function validateMessages(messages: any[]): { valid: boolean; error?: str
 // Model Aliases for compatibility with OpenAI-oriented apps
 export const modelAliases: Record<string, string> = {
   'gpt-4o': 'openai',
-  'gpt-4o-mini': 'openai-fast',
+
   'gpt-4.5': 'openai-large',
   'gpt-4': 'openai',
   'gpt-3.5-turbo': 'openai-fast',
@@ -240,14 +240,72 @@ export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
 };
 
 // Bluesminds model mapping (Vetra ID -> Bluesminds ID)
-// Used when Aqua fails and we fallback to Bluesminds
+// Used when routing to Bluesminds as primary provider
 export const BLUESMINDS_MODEL_MAPPING: Record<string, string> = {
-  'claude-opus-4-6': 'claude-opus-4-6',
-  'claude-opus-4.5': 'claude-opus-4-6',
-  'claude-sonnet-4-6': 'claude-sonnet-4-6',
-  'claude-sonnet-4.5': 'claude-sonnet-4-5-20250929',
-  'claude-sonnet-4.5-20250929': 'claude-sonnet-4-5-20250929',
-  'claude-haiku-4.5': 'claude-haiku-4-5',
+  // Claude models
+  'claude-opus-4-6': 'claude-4.6-sonnet',
+  'claude-opus-4.5': 'claude-4.6-sonnet',
+  'claude-sonnet-4-6': 'claude-sonnet-4-20250514',
+  'claude-sonnet-4.5': 'claude-sonnet-4-20250514',
+  'claude-sonnet-4.5-20250929': 'claude-sonnet-4-20250514',
+  'claude-haiku-4.5': 'claude-3-haiku',
+  'claude-3-haiku': 'claude-3-haiku',
+  // OpenAI models
+  'gpt-4o': 'gpt-4o',
+  'gpt-4o-mini': 'gpt-4o-mini',
+  'gpt-5': 'GPT-5',
+  'gpt-5.1': 'GPT-5',
+  'gpt-5.2': 'GPT-5',
+  'gpt-5.4': 'GPT-5',
+  'gpt-3.5-turbo': 'gpt-3.5-turbo-0613',
+  'gpt-oss-120b': 'openai/gpt-oss-120b',
+  // Google models
+  'gemini-2.5-flash': 'gemini-3-flash-preview',
+  'gemini-2.5-pro': 'gemini-3.1-pro-preview',
+  'gemini-3-flash-preview': 'gemini-3-flash-preview',
+  'gemini-3-pro-preview': 'gemini-3.1-pro-preview',
+  'gemma-3-12b': 'google/gemma-3-12b-it',
+  // DeepSeek models
+  'deepseek-v3.2': 'deepseek-ai/deepseek-v3.2',
+  'deepseek-v3.1': 'deepseek-ai/deepseek-v3.1',
+  'deepseek-chat': 'deepseek-chat',
+  'deepseek-reasoner': 'deepseek-reasoner',
+  // Meta models
+  'llama-3.1-405b': 'meta/llama-3.1-405b-instruct',
+  'llama-3.1-70b': 'meta/llama-3.1-70b-instruct',
+  'llama-3.1-8b': 'meta/llama-3.1-8b-instruct',
+  'llama-3.3-70b': 'meta/llama-3.3-70b-instruct',
+  'llama-4-maverick': 'meta/llama-4-maverick-17b-128e-instruct',
+  'llama-4-scout': 'meta/llama-4-scout-17b-16e-instruct',
+  // Mistral models
+  'mistral-large': 'mistralai/mistral-large',
+  'mistral-large-3': 'mistralai/mistral-large-3-675b-instruct-2512',
+  'mistral-small-24b': 'mistralai/mistral-small-24b-instruct',
+  'codestral': 'mistralai/codestral-22b-instruct-v0.1',
+  // Qwen models
+  'qwen3.5-plus': 'qwen/qwen3.5-397b-a17b',
+  'qwen3.5-flash': 'qwen/qwen2.5-7b-instruct',
+  'qwen3-32b': 'groq/qwen/qwen3-32b',
+  'qwen3-next-80b': 'qwen/qwen3-next-80b-a3b-instruct',
+  'qwen3-next-80b-thinking': 'qwen/qwen3-next-80b-a3b-thinking',
+  // MiniMax models
+  'minimax-m2.5': 'MiniMax-M2.5',
+  'minimax-m2.7': 'MiniMax-M2.7',
+  // Kimi models
+  'kimi-k2': 'moonshotai/kimi-k2-instruct',
+  'kimi-k2.5': 'Kimi-k2.5',
+  // Zhipu models
+  'glm-5': 'z-ai/glm5',
+  'glm-4.6': 'glm-4.6',
+  // Microsoft models
+  'phi-4-mini': 'microsoft/phi-4-mini-instruct',
+  'phi-4-multimodal': 'microsoft/phi-4-multimodal-instruct',
+  'phi-3.5-mini': 'microsoft/phi-3.5-mini-instruct',
+  // NVIDIA models
+  'nemotron-3-nano': 'nvidia/nemotron-3-nano-30b-a3b',
+  'nemotron-4-mini': 'nvidia/nemotron-mini-4b-instruct',
+  // StepFun
+  'step-3.5-flash': 'stepfun-ai/step-3.5-flash',
 };
 
 export function getBluesmindsModelId(modelId: string): string {

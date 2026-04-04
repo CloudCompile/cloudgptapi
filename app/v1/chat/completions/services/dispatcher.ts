@@ -53,7 +53,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   let providerUrl: string;
   let providerApiKey: string | undefined;
 
-  // Models that can be routed to Aqua API
+  // Models that can be routed to Aqua API (primary)
   const aquaModels = new Set([
     // Aqua standard tier (free)
     'gpt-5', 'gemini-2.5', 'gemini-3', 'grok', 'nova', 'haiku-4.5', 'grok-4.1-thinking',
@@ -65,11 +65,77 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
     'gemini-2.5-pro', 'gemini-3.1-pro', 'sonnet-4.5', 'sonnet-4.6', 'opus-4.5', 'opus-4.6',
     'mimo-pro', 'deepseek-v3-0324', 'deepseek-v3.1-terminus',
-    // xAI Grok models
-    'grok-3', 'grok-4',
+    // xAI Grok models (existing)
+    'grok-3', 'grok-4', 'grok-4.1', 'grok-4.2',
+    // Kimi/Moonshot models (existing via Kivest)
+    'kimi-k2-instruct-0905',
+    // Claude models (via Aqua)
+    'claude-opus-4-6', 'claude-opus-4.5', 'claude-sonnet-4-6', 'claude-sonnet-4.5',
+    'claude-sonnet-4.5-20250929', 'claude-haiku-4.5', 'claude-3-haiku', 'claude-3-7-sonnet',
+    // OpenAI models
+    'gpt-4o', 'gpt-4o-mini', 'gpt-3.5-turbo',
+    // Google models
+    'gemini-2.5-flash', 'gemini-3-flash-preview', 'gemini-3-pro-preview',
+    'gemini-3.1-flash-preview', 'gemini-3.1-pro-preview', 'gemma-3-12b', 'gemma-2-9b', 'gemma-2b',
+    // DeepSeek models
+    'deepseek-v3.2', 'deepseek-v3.1', 'deepseek-chat', 'deepseek-reasoner', 'deepseek-r1-0528',
+    // Meta models
+    'llama-3.1-405b', 'llama-3.1-70b', 'llama-3.1-8b', 'llama-3.3-70b', 'llama-4-maverick', 'llama-4-scout',
+    // Mistral models
+    'mistral-large', 'mistral-large-3', 'mistral-small-24b', 'mistral-small-4', 'codestral', 'devstral',
+    // Qwen models
+    'qwen3.5-plus', 'qwen3.5-flash', 'qwen3-32b', 'qwen3-next-80b', 'qwen3-next-80b-thinking',
+    // MiniMax models
+    'minimax-m2.5', 'minimax-m2.7', 'minimax-m2', 'minimax-m2.1',
+    // Zhipu models
+    'glm-4.6', 'glm-4.7',
+    // Microsoft models
+    'phi-4-mini', 'phi-4', 'phi-4-multimodal', 'phi-3.5-mini', 'phi-3-mini',
+    // NVIDIA models
+    'nemotron-3-nano', 'nemotron-4-mini', 'nemotron-4', 'nemotron-super',
+    // StepFun
+    'step-3.5-flash',
   ]);
 
-  if (model.provider === 'pollinations') {
+  // Models that can fallback to Bluesminds when Aqua fails (Premium & Ultra models)
+  const bluesmindsFallbackModels = new Set([
+    // Ultra models - most critical for fallback
+    'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
+    'claude-opus-4-6', 'claude-opus-4.5', 'claude-sonnet-4.6', 'claude-sonnet-4.5',
+    'claude-sonnet-4.5-20250929', 'gemini-2.5-pro', 'gemini-3.1-pro',
+    'glm-5.1', 'mimo-pro',
+    // Premium models - also fallback to Bluesminds
+    'gpt-5', 'gpt-4o', 'gpt-4o-mini', 'gpt-3.5-turbo',
+    'claude-haiku-4.5', 'claude-3-haiku', 'claude-3-7-sonnet',
+    'gemini-2.5-flash', 'gemini-3-flash-preview', 'gemini-3-pro-preview',
+    'gemini-3.1-flash-preview', 'gemini-3.1-pro-preview',
+    'deepseek-v3.2', 'deepseek-v3.1', 'deepseek-chat', 'deepseek-reasoner', 'deepseek-r1-0528',
+    'llama-3.1-405b', 'llama-3.1-70b', 'llama-3.1-8b', 'llama-3.3-70b', 'llama-4-maverick', 'llama-4-scout',
+    'mistral-large', 'mistral-large-3', 'mistral-small-24b', 'mistral-small-4', 'codestral', 'devstral',
+    'qwen3.5-plus', 'qwen3.5-flash', 'qwen3-32b', 'qwen3-next-80b', 'qwen3-next-80b-thinking',
+    'minimax-m2.5', 'minimax-m2.7', 'minimax-m2', 'minimax-m2.1',
+    'glm-4.6', 'glm-4.7',
+    'phi-4-mini', 'phi-4', 'phi-4-multimodal', 'phi-3.5-mini', 'phi-3-mini',
+    'nemotron-3-nano', 'nemotron-4-mini', 'nemotron-4', 'nemotron-super',
+    'step-3.5-flash',
+    'grok-3', 'grok-4', 'grok-4.2',
+    'kimi-k2.5', 'kimi-k2-instruct-0905',
+    'gemma-3-12b', 'gemma-2-9b', 'gemma-2b',
+  ]);
+
+  // Ultra models that can fallback to Kivest when both Aqua & Bluesminds fail
+  const ultraModelsWithKivest = new Set([
+    'gpt-5.4', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.2-codex', 'gpt-5.2', 'gpt-5.1',
+    'claude-sonnet-4.6', 'claude-sonnet-4-5', 'claude-opus-4-6', 'claude-opus-4-5',
+    'gemini-2.5-pro', 'gemini-3.1-pro',
+    'glm-5.1', 'mimo-pro'
+  ]);
+
+  // Determine routing: Aqua primary, Bluesminds fallback for Premium/Ultra
+  if (aquaModels.has(modelId)) {
+    // Primary: Aqua
+    providerUrl = `${PROVIDER_URLS.aqua}/chat/completions`;
+  } else if (model.provider === 'pollinations') {
     providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
     providerApiKey = getPollinationsApiKey();
     if (!providerApiKey) {
@@ -120,17 +186,6 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
         { status: 500, headers: getCorsHeaders() }
       );
     }
-  } else if (model.provider === 'zhipu' || model.provider === 'anthropic') {
-    // Route to Bluesminds/Shalom API
-    providerUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
-    providerApiKey = getBluesmindsApiKey();
-    if (!providerApiKey) {
-      console.warn(`[${requestId}] Missing Shalom API key for model: ${modelId}`);
-      return NextResponse.json(
-        { error: { message: 'Shalom/Bluesmind API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
-        { status: 500, headers: getCorsHeaders() }
-      );
-    }
   } else {
     // Fallback or Unknown provider
     return NextResponse.json(
@@ -169,8 +224,15 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     top_p: body.top_p ?? 1,
   };
 
-  // Track actual model ID used (for Bluesminds fallback)
+  // Track actual model ID used (for Bluesminds mapping)
   let actualModelId = standardBody.model;
+  
+  // If routing to Bluesminds, use the mapped model ID
+  if (providerUrl.includes('bluesminds') || providerUrl.includes('shalom')) {
+    const mappedModelId = getBluesmindsModelId(modelId);
+    standardBody.model = mappedModelId;
+    actualModelId = mappedModelId;
+  }
 
   if (body.seed !== undefined) {
     standardBody.seed = body.seed;
@@ -267,17 +329,14 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     const errorText = await providerResponse.text();
     console.error(`[${requestId}] Provider error from ${model.provider} (${providerResponse.status}):`, errorText.substring(0, 500));
 
-    // Check if we should fallback to Kivest for Ultra models on Aqua failure
-    const ultraModelsWithKivest = new Set([
-      'gpt-5.4', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.2-codex', 'gpt-5.2', 'gpt-5.1',
-      'claude-sonnet-4.6', 'claude-sonnet-4-5', 'claude-opus-4-6', 'claude-opus-4-5',
-      'gemini-2.5-pro', 'gemini-3.1-pro',
-      'glm-5.1', 'mimo-pro'
-    ]);
-    const canFallbackToKivest = aquaModels.has(modelId) && ultraModelsWithKivest.has(modelId) && providerUrl.includes('aquadevs');
+    // Check if we should fallback to Kivest for Ultra models when both Aqua AND Bluesminds fail
+    // This applies when: Aqua failed OR Bluesminds (fallback) failed, and model is Ultra
+    const isAquaFailed = providerUrl.includes('aquadevs') && !providerResponse.ok;
+    const isBluesmindsFailed = providerUrl.includes('bluesminds') && !providerResponse.ok;
+    const canFallbackToKivest = (isAquaFailed || isBluesmindsFailed) && ultraModelsWithKivest.has(modelId);
     
     if (canFallbackToKivest && (providerResponse.status === 429 || providerResponse.status >= 500)) {
-      console.log(`[${requestId}] Aqua failed for ${modelId}, falling back to Kivest...`);
+      console.log(`[${requestId}] Both Aqua and Bluesminds failed for ${modelId}, falling back to Kivest...`);
       
       const kivestUrl = `${PROVIDER_URLS.kivest}/v1/chat/completions`;
       const kivestApiKey = getKivestApiKey();
@@ -350,6 +409,45 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
           }
         } catch (fallbackError: any) {
           console.error(`[${requestId}] BlazeAI fallback fetch error:`, fallbackError);
+        }
+      }
+    }
+
+    // Fallback from Aqua to Bluesminds when Aqua fails (for Premium & Ultra models)
+    const canFallbackToBluesminds = aquaModels.has(modelId) && bluesmindsFallbackModels.has(modelId) && providerUrl.includes('aquadevs');
+    
+    if (canFallbackToBluesminds && !providerResponse.ok) {
+      console.log(`[${requestId}] Aqua failed for ${modelId}, falling back to Bluesminds...`);
+      
+      const bluesmindsUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
+      const bluesmindsApiKey = getBluesmindsApiKey();
+      
+      if (bluesmindsApiKey) {
+        const fallbackBody = {
+          ...standardBody,
+          model: modelId
+        };
+
+        try {
+          const fallbackResponse = await fetch(bluesmindsUrl, {
+            method: 'POST',
+            headers: {
+              ...headers,
+              'Authorization': `Bearer ${bluesmindsApiKey}`
+            },
+            body: JSON.stringify(fallbackBody),
+            signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS)
+          });
+
+          if (fallbackResponse.ok) {
+            console.log(`[${requestId}] Bluesminds fallback succeeded for ${modelId}`);
+            providerResponse = fallbackResponse;
+          } else {
+            const fallbackErrorText = await fallbackResponse.text();
+            console.error(`[${requestId}] Bluesminds fallback also failed:`, fallbackErrorText.substring(0, 300));
+          }
+        } catch (fallbackError: any) {
+          console.error(`[${requestId}] Bluesminds fallback fetch error:`, fallbackError);
         }
       }
     }

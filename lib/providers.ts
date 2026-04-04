@@ -94,7 +94,7 @@ const KIVEST_CHAT_MODELS: ChatModel[] = [
   // Mistral (via Kivest) - Pro tier
   { id: 'devstral-2-123b', name: 'Devstral 2 123B', provider: 'mistral', description: 'Mistral Devstral 2 123B', usageWeight: 6 },
   { id: 'mistral-large-3-675b-instruct', name: 'Mistral Large 3 675B', provider: 'mistral', description: 'Mistral Large 3 675B Instruct', usageWeight: 2 },
-  // Moonshot (via Kivest)
+  // Legacy Kimi (via Kivest)
   { id: 'kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'moonshot', description: 'Moonshot Kimi K2 Thinking', usageWeight: 3 },
   { id: 'kimi-k2-instruct-0905', name: 'Kimi K2 Instruct 0905', provider: 'moonshot', description: 'Moonshot Kimi K2 Instruct 0905', usageWeight: 4 },
   { id: 'kimi-k2.5', name: 'Kimi K2.5', provider: 'moonshot', description: 'Moonshot Kimi K2.5', usageWeight: 6 },
@@ -111,13 +111,12 @@ const KIVEST_CHAT_MODELS: ChatModel[] = [
   { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', provider: 'anthropic', description: 'Anthropic Claude Opus 4.6', usageWeight: 25 },
   { id: 'claude-opus-4-5', name: 'Claude Opus 4.5', provider: 'anthropic', description: 'Anthropic Claude Opus 4.5', usageWeight: 20 },
   { id: 'claude-sonnet-4-5', name: 'Claude Sonnet 4.5', provider: 'anthropic', description: 'Anthropic Claude Sonnet 4.5', usageWeight: 10 },
-  // Google (via Kivest) - Ultra/Pro tier
+  // Ultra/Pro tier
   { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'google', description: 'Google Gemini 2.5 Pro', usageWeight: 15 },
   { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', provider: 'google', description: 'Google Gemini 3 Pro Preview', usageWeight: 15 },
   { id: 'gemini-3.1-pro', name: 'Gemini 3.1 Pro', provider: 'google', description: 'Google Gemini 3.1 Pro', usageWeight: 15 },
   // xAI Grok (via Kivest)
   { id: 'grok-4', name: 'Grok 4', provider: 'xai', description: 'xAI Grok 4', usageWeight: 12 },
-  { id: 'grok-3', name: 'Grok 3', provider: 'xai', description: 'xAI Grok 3', usageWeight: 10 },
   // Meta (via Kivest) - Ultra
   { id: 'llama-4-maverick', name: 'Llama 4 Maverick', provider: 'meta', description: 'Meta Llama 4 Maverick', usageWeight: 8 },
   // Mistral (via Kivest) - Ultra
@@ -341,8 +340,8 @@ export const PREMIUM_MODELS = new Set([
   'nemotron-3-nano-30b-a3b', 'step-3.5-flash', 'gemma-3-27b-it',
   // MiniMax (Pro - except minimax-2.7 which is duplicate/free)
   'minimax-m2.1', 'minimax-m2.5', 'minimax-m2', 'minimax-m2.7', 'nova',
-  // Moonshot (Pro - except kimi-k2 and kimi-k2-thinking which are free)
-  'kimi-k2-instruct-0905', 'kimi-k2.5',
+  // Moonshot (Pro)
+  'kimi-k2-instruct-0905', 'kimi-k2.5', 'kimi-k2-thinking',
   // Zhipu (Pro - except glm-4.7 which is free)
   'glm-5', 'glm-4.6', 'glm-5.1', 'glm-4.5', 'glm-4.5-flash', 'glm-5-turbo',
   // xAI Grok (Pro)
@@ -398,6 +397,13 @@ export const ULTRA_MODELS = new Set([
   'dall-e-3', 'gpt-image-1', 'gpt-image-1.5',
   // Video models (Ultra)
   'cogvideox-5b', 'pix2pix-video', 'svd',
+]);
+
+// Free models (no subscription required)
+export const FREE_MODELS = new Set([
+  // Free models
+  'deepseek-chat', 'deepseek-v3.2', 'deepseek-v3.1', 'deepseek-reasoner',
+  'glm-4.7', 'mimo-omni',
 ]);
 
 // Available image models - Pro tier (except flux which is free)

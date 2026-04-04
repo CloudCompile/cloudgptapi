@@ -3,7 +3,7 @@ import { trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDaily
 import { processAuth } from './services/auth';
 import { processContextAndMemory, sanitizeMessagesForProvider } from './services/parser';
 import { dispatchChatRequest } from './services/dispatcher';
-import { CHAT_MODELS, PREMIUM_MODELS } from '@/lib/providers';
+import { CHAT_MODELS, PREMIUM_MODELS, ULTRA_MODELS, FREE_MODELS } from '@/lib/providers';
 import { getCorsHeaders, safeResponseJson, hasProAccess } from '@/lib/utils';
 import { rememberInteraction } from '@/lib/memory';
 import {
@@ -184,17 +184,40 @@ export const POST = withErrorHandler(async function POST(request: NextRequest) {
     const isSearchPluginEnabled = Boolean((apiKeyInfo?.fandomSettings as any)?.plugins?.search?.enabled);
     const modelId = applySearchPluginModel(resolvedModelId, isSearchPluginEnabled);
 
-    // Check if model is premium and if user has access
+    // Check if model is premium/ultra/free and if user has access
     const isPremium = PREMIUM_MODELS.has(modelId);
+    const isUltra = ULTRA_MODELS.has(modelId);
+    const isFree = FREE_MODELS.has(modelId);
     // Pro access if they have a pro/enterprise/developer/admin plan
     const hasPro = hasProAccess(userPlan);
 
     // Diagnostic logging for access issues
-    if (isPremium || userPlan !== 'free') {
-      console.log(`[${requestId}] Access Check: model=${modelId}, plan=${userPlan}, isPremium=${isPremium}, hasProAccess=${hasPro}`);
+    if (isPremium || isUltra || userPlan !== 'free') {
+      console.log(`[${requestId}] Access Check: model=${modelId}, plan=${userPlan}, isPremium=${isPremium}, isUltra=${isUltra}, isFree=${isFree}, hasProAccess=${hasPro}`);
     }
 
-    if (isPremium && !hasPro) {
+    // Ultra models require ultra plan
+    if (isUltra && !hasPro) {
+      console.warn(`[${requestId}] Ultra model access denied: ${modelId} for key: ${effectiveKey.substring(0, 10)}...`);
+      return NextResponse.json(
+        {
+          error: {
+            message: `The model '${modelId}' is only available on Ultra plans. Please upgrade at ${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+            type: 'access_denied',
+            param: 'model',
+            code: 'ultra_model_required',
+            request_id: requestId
+          }
+        },
+        {
+          status: 403,
+          headers: getCorsHeaders()
+        }
+      );
+    }
+
+    // Premium models require pro plan (unless it's also a free model)
+    if (isPremium && !isFree && !hasPro) {
       console.warn(`[${requestId}] Premium model access denied: ${modelId} for key: ${effectiveKey.substring(0, 10)}...`);
       return NextResponse.json(
         {
