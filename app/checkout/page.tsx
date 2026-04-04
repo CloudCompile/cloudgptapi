@@ -9,7 +9,7 @@ import Link from 'next/link';
 const plans = [
   {
     name: 'Pro',
-    price: '10',
+    price: '5',
     period: '/month',
     description: 'For professional developers and growing applications.',
     features: [
@@ -26,7 +26,7 @@ const plans = [
   },
   {
     name: 'Ultra',
-    price: '20',
+    price: '10',
     period: '/month',
     description: 'For power users who need higher limits and premium models.',
     features: [
