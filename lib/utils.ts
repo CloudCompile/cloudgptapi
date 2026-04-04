@@ -220,6 +220,13 @@ export function getBluesmindsApiKey(): string | undefined {
 }
 
 /**
+ * Get BlazeAI API key
+ */
+export function getBlazeAiApiKey(): string | undefined {
+  return process.env.BLAZEAI_API_KEY;
+}
+
+/**
  * Get Aqua API key (free tier for consumers)
  */
 export function getAquaApiKey(): string | undefined {

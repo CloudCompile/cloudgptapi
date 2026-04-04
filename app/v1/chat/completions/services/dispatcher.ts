@@ -7,7 +7,8 @@ import {
   PROVIDER_TIMEOUT_MS,
   sanitizeErrorText,
   BLUESMINDS_MODEL_MAPPING,
-  getBluesmindsModelId
+  getBluesmindsModelId,
+  getBlazeAiModelId
 } from '@/lib/chat-utils';
 import { CHAT_MODELS } from '@/lib/providers';
 import {
@@ -18,6 +19,8 @@ import {
   getKivestApiKey,
   getOpenAIApiKey,
   getAquaApiKey,
+  getBluesmindsApiKey,
+  getBlazeAiApiKey,
   safeResponseJson
 } from '@/lib/utils';
 import { rememberInteraction } from '@/lib/memory';
@@ -61,7 +64,9 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     // Aqua premium tier
     'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
     'gemini-2.5-pro', 'gemini-3.1-pro', 'sonnet-4.5', 'sonnet-4.6', 'opus-4.5', 'opus-4.6',
-    'mimo-pro', 'deepseek-v3-0324', 'deepseek-v3.1-terminus'
+    'mimo-pro', 'deepseek-v3-0324', 'deepseek-v3.1-terminus',
+    // xAI Grok models
+    'grok-3', 'grok-4',
   ]);
 
   if (model.provider === 'pollinations') {
@@ -112,6 +117,17 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       console.warn(`[${requestId}] Missing Aqua API key for model: ${modelId}`);
       return NextResponse.json(
         { error: { message: 'Aqua API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { status: 500, headers: getCorsHeaders() }
+      );
+    }
+  } else if (model.provider === 'zhipu' || model.provider === 'anthropic') {
+    // Route to Bluesminds/Shalom API
+    providerUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
+    providerApiKey = getBluesmindsApiKey();
+    if (!providerApiKey) {
+      console.warn(`[${requestId}] Missing Shalom API key for model: ${modelId}`);
+      return NextResponse.json(
+        { error: { message: 'Shalom/Bluesmind API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
         { status: 500, headers: getCorsHeaders() }
       );
     }
@@ -292,6 +308,48 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
           }
         } catch (fallbackError: any) {
           console.error(`[${requestId}] Kivest fallback fetch error:`, fallbackError);
+        }
+      }
+    }
+
+    // Check if we should fallback to BlazeAI for glm-5 on Aqua failure
+    const blazeAiFallbackModels = new Set(['glm-5']);
+    const canFallbackToBlazeAi = blazeAiFallbackModels.has(modelId) && providerUrl.includes('aquadevs');
+    
+    if (canFallbackToBlazeAi) {
+      console.log(`[${requestId}] Aqua failed for ${modelId}, falling back to BlazeAI...`);
+      
+      const blazeAiUrl = `${PROVIDER_URLS.blazeai}/chat/completions`;
+      const blazeAiApiKey = getBlazeAiApiKey();
+      const blazeAiModelId = getBlazeAiModelId(modelId);
+      
+      if (blazeAiApiKey) {
+        const fallbackBody = {
+          ...standardBody,
+          model: blazeAiModelId
+        };
+
+        try {
+          const fallbackResponse = await fetch(blazeAiUrl, {
+            method: 'POST',
+            headers: {
+              ...headers,
+              'Authorization': `Bearer ${blazeAiApiKey}`
+            },
+            body: JSON.stringify(fallbackBody),
+            signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS)
+          });
+
+          if (fallbackResponse.ok) {
+            console.log(`[${requestId}] BlazeAI fallback succeeded for ${modelId}`);
+            providerResponse = fallbackResponse;
+            actualModelId = blazeAiModelId;
+          } else {
+            const fallbackErrorText = await fallbackResponse.text();
+            console.error(`[${requestId}] BlazeAI fallback also failed:`, fallbackErrorText.substring(0, 300));
+          }
+        } catch (fallbackError: any) {
+          console.error(`[${requestId}] BlazeAI fallback fetch error:`, fallbackError);
         }
       }
     }

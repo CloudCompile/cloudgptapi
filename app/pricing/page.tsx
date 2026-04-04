@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Zap, Shield, Rocket, Lock, CheckCircle } from 'lucide-react';
+import { Check, Zap, Shield, Rocket, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';

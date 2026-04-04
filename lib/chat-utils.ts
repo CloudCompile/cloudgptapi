@@ -254,6 +254,16 @@ export function getBluesmindsModelId(modelId: string): string {
   return BLUESMINDS_MODEL_MAPPING[modelId] || modelId;
 }
 
+// BlazeAI model mapping (Vetra ID -> BlazeAI ID)
+// Used when Aqua fails and we fallback to BlazeAI
+export const BLAZEAI_MODEL_MAPPING: Record<string, string> = {
+  'glm-5': 'z-ai/glm5',
+};
+
+export function getBlazeAiModelId(modelId: string): string {
+  return BLAZEAI_MODEL_MAPPING[modelId] || modelId;
+}
+
 export function resolveModelId(modelId: string): string {
   const normalizedModelId = modelId.trim().replace(/^['"]+|['"]+$/g, '');
   const aliased = modelAliases[normalizedModelId] || normalizedModelId;
@@ -318,6 +328,7 @@ export const PROVIDER_URLS = {
   shalom: 'https://api.bluesminds.com/v1',
   bluesminds: 'https://api.bluesminds.com/v1',
   aqua: 'https://api.aquadevs.com/v1',
+  blazeai: 'https://blazeai.boxu.dev/v1',
 };
 
 export function createChatTransformStream(

@@ -244,3 +244,32 @@ BEGIN
     WHERE reset_at < timezone('utc'::text, now());
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Promo Codes table
+CREATE TABLE IF NOT EXISTS public.promo_codes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code TEXT UNIQUE NOT NULL,
+    discount_amount INTEGER NOT NULL,
+    discount_type TEXT NOT NULL CHECK (discount_type IN ('percent', 'fixed')),
+    usage_limit INTEGER,
+    times_used INTEGER DEFAULT 0,
+    expires_at TIMESTAMPTZ,
+    stripe_coupon_id TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS on promo_codes
+ALTER TABLE public.promo_codes ENABLE ROW LEVEL SECURITY;
+
+-- Policy for public read access (for validation)
+DROP POLICY IF EXISTS "Public access to promo codes" ON public.promo_codes;
+CREATE POLICY "Public access to promo codes"
+    ON public.promo_codes FOR SELECT
+    USING (true);
+
+-- Policy for admin to manage promo codes
+DROP POLICY IF EXISTS "Admins can manage promo codes" ON public.promo_codes;
+CREATE POLICY "Admins can manage promo codes"
+    ON public.promo_codes FOR ALL
+    USING (true);

@@ -453,4 +453,5 @@ export const PROVIDER_URLS = {
   bluesminds: 'https://api.bluesminds.com/v1',
   minimax: 'https://api.bluesminds.com/v1',
   aqua: 'https://api.aquadevs.com/v1',
+  blazeai: 'https://blazeai.boxu.dev/v1',
 };

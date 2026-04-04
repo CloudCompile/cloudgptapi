@@ -64,6 +64,35 @@ export async function POST(req: Request) {
 
       console.log(`[${requestId}] Updating user ${userId} (${userEmail || 'no email'}) to plan ${planName} (price: ${priceId})`);
 
+      // Handle promo code usage if present
+      const promoCodeFromSession = session.metadata?.promoCode;
+      if (promoCodeFromSession) {
+        console.log(`[${requestId}] Processing promo code: ${promoCodeFromSession}`);
+        
+        // First get current count
+        const { data: promoData } = await supabaseAdmin
+          .from('promo_codes')
+          .select('times_used')
+          .eq('code', promoCodeFromSession)
+          .eq('is_active', true)
+          .single();
+        
+        if (promoData) {
+          // Increment promo code usage
+          const { error: promoUpdateError } = await supabaseAdmin
+            .from('promo_codes')
+            .update({ times_used: promoData.times_used + 1 })
+            .eq('code', promoCodeFromSession)
+            .eq('is_active', true);
+
+          if (promoUpdateError) {
+            console.error(`[${requestId}] Error updating promo code usage:`, promoUpdateError);
+          } else {
+            console.log(`[${requestId}] Successfully incremented usage for promo code: ${promoCodeFromSession}`);
+          }
+        }
+      }
+
       // Safely get subscription product ID
       const stripeProductId = subscription.items?.data?.[0]?.plan?.product || null;
 
