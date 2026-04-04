@@ -1,9 +1,10 @@
 'use client';
 
-import { Check, Zap, Shield, Rocket, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Check, Zap, Shield, Rocket, CheckCircle, Tag, X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
 
 const plans = [
   {
@@ -82,9 +83,17 @@ const plans = [
 ];
 
 export default function PricingPage() {
+  const router = useRouter();
   const inviteOnlyLabel = 'Invite Only';
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+  
+  // Promo code state
+  const [promoCode, setPromoCode] = useState('');
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoError, setPromoError] = useState('');
+  const [promoSuccess, setPromoSuccess] = useState<{ amount: number; type: string } | null>(null);
+  const [appliedPromoCode, setAppliedPromoCode] = useState('');
 
   useEffect(() => {
     fetch('/api/profile', { credentials: 'include' })
@@ -104,17 +113,62 @@ export default function PricingPage() {
       const res = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId: stripePriceId }),
+        body: JSON.stringify({ 
+          priceId: stripePriceId,
+          promoCode: appliedPromoCode || undefined 
+        }),
       });
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
+      } else if (data.error) {
+        setPromoError(data.error);
+        setPromoSuccess(null);
+        setAppliedPromoCode('');
       }
     } catch (err) {
       console.error('Checkout error:', err);
     } finally {
       setLoadingPlan(null);
     }
+  };
+
+  const handleApplyPromoCode = async () => {
+    if (!promoCode.trim()) return;
+    setPromoLoading(true);
+    setPromoError('');
+    setPromoSuccess(null);
+    
+    try {
+      const res = await fetch('/api/promo/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: promoCode }),
+      });
+      const data = await res.json();
+      
+      if (data.valid) {
+        setPromoSuccess(data.discount);
+        setAppliedPromoCode(promoCode.toUpperCase());
+        setPromoError('');
+      } else {
+        setPromoError(data.error || 'Invalid promo code');
+        setPromoSuccess(null);
+        setAppliedPromoCode('');
+      }
+    } catch (err) {
+      setPromoError('Failed to validate promo code');
+      setPromoSuccess(null);
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const clearPromoCode = () => {
+    setPromoCode('');
+    setPromoSuccess(null);
+    setPromoError('');
+    setAppliedPromoCode('');
   };
 
   return (
@@ -137,6 +191,47 @@ export default function PricingPage() {
           <p className="text-base sm:text-xl text-slate-500 dark:text-slate-400 mb-8 sm:mb-10 max-w-2xl mx-auto font-medium animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
             Simple, transparent plans designed for developers and teams. No hidden fees, just unified AI power.
           </p>
+
+          {/* Promo Code Input */}
+          <div className="max-w-md mx-auto animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
+            <div className="flex items-center gap-2 p-3 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm rounded-xl border border-white/50 dark:border-white/10">
+              <Tag className="h-4 w-4 text-primary ml-2" />
+              <input
+                type="text"
+                placeholder="Enter promo code"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                className="flex-1 bg-transparent border-none outline-none text-sm font-medium placeholder:text-slate-400"
+              />
+              {promoSuccess ? (
+                <button
+                  onClick={clearPromoCode}
+                  className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                >
+                  <X className="h-4 w-4 text-emerald-500" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleApplyPromoCode}
+                  disabled={promoLoading || !promoCode.trim()}
+                  className="px-4 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed mr-1"
+                >
+                  {promoLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Apply'}
+                </button>
+              )}
+            </div>
+            {promoError && (
+              <p className="text-xs text-red-500 mt-2 font-medium">{promoError}</p>
+            )}
+            {promoSuccess && (
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium flex items-center gap-1">
+                <Check className="h-3 w-3" />
+                {promoSuccess.type === 'percent' 
+                  ? `${promoSuccess.amount}% discount applied!`
+                  : `$${promoSuccess.amount} discount applied!`}
+              </p>
+            )}
+          </div>
         </div>
       </section>
 
@@ -225,7 +320,7 @@ export default function PricingPage() {
                     </a>
                   ) : (
                     <button
-                      onClick={() => plan.stripePriceId && handleUpgrade(plan.stripePriceId, plan.name)}
+                      onClick={() => plan.stripePriceId && router.push(`/checkout?plan=${plan.name.toLowerCase()}`)}
                       disabled={loadingPlan === plan.name || !plan.stripePriceId || (currentPlan === plan.name.toLowerCase())}
                       className={cn(
                         "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all border",
