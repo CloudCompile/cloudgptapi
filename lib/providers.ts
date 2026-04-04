@@ -107,6 +107,7 @@ const KIVEST_CHAT_MODELS: ChatModel[] = [
   { id: 'seed-oss-36b-instruct', name: 'Seed OSS 36B Instruct', provider: 'bytedance', description: 'ByteDance Seed OSS 36B Instruct', usageWeight: 2 },
   // Xiaomi (via Kivest) - Pro tier
   { id: 'mimo-omni', name: 'Mimo V2 Omni', provider: 'xiaomi', description: 'Xiaomi Mimo V2 Omni', usageWeight: 3 },
+  // Claude (via Aqua - provider field still anthropic for display)
   { id: 'claude-sonnet-4.6', name: 'Claude Sonnet 4.6', provider: 'anthropic', description: 'Anthropic Claude Sonnet 4.6', usageWeight: 10 },
   { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', provider: 'anthropic', description: 'Anthropic Claude Opus 4.6', usageWeight: 25 },
   { id: 'claude-opus-4-5', name: 'Claude Opus 4.5', provider: 'anthropic', description: 'Anthropic Claude Opus 4.5', usageWeight: 20 },

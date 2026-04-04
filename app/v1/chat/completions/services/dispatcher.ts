@@ -70,7 +70,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     // Kimi/Moonshot models (existing via Kivest)
     'kimi-k2-instruct-0905',
     // Claude models (via Aqua)
-    'claude-opus-4-6', 'claude-opus-4.5', 'claude-sonnet-4-6', 'claude-sonnet-4.5',
+    'claude-opus-4-6', 'claude-opus-4.5', 'claude-sonnet-4-6', 'claude-sonnet-4.5', 'claude-sonnet-4.6',
     'claude-sonnet-4.5-20250929', 'claude-haiku-4.5', 'claude-3-haiku', 'claude-3-7-sonnet',
     // OpenAI models
     'gpt-4o', 'gpt-4o-mini', 'gpt-3.5-turbo',
