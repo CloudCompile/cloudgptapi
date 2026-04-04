@@ -421,11 +421,12 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       
       const bluesmindsUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
       const bluesmindsApiKey = getBluesmindsApiKey();
+      const bluesmindsModelId = getBluesmindsModelId(modelId);
       
       if (bluesmindsApiKey) {
         const fallbackBody = {
           ...standardBody,
-          model: modelId
+          model: bluesmindsModelId
         };
 
         try {

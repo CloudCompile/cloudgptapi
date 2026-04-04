@@ -264,6 +264,7 @@ export const BLUESMINDS_MODEL_MAPPING: Record<string, string> = {
   'gemini-2.5-pro': 'gemini-3.1-pro-preview',
   'gemini-3-flash-preview': 'gemini-3-flash-preview',
   'gemini-3-pro-preview': 'gemini-3.1-pro-preview',
+  'gemini-3.1-pro': 'gemini-3.1-pro-preview',
   'gemma-3-12b': 'google/gemma-3-12b-it',
   // DeepSeek models
   'deepseek-v3.2': 'deepseek-ai/deepseek-v3.2',
