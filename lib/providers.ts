@@ -386,7 +386,7 @@ export const ULTRA_MODELS = new Set([
   // Claude Ultra (via Aqua)
   'claude-opus-4-6', 'claude-opus-4-5', 'claude-sonnet-4.6', 'claude-sonnet-4-5',
   // Gemini Ultra (via Aqua)
-  'gemini-2.5-pro', 'gemini-3.1-pro',
+  'gemini-2.5-pro', 'gemini-3.1-pro', 'gemini-3-pro-preview',
   // OpenAI GPT-5 Ultra (via Aqua) 
   'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
   // Zhipu Ultra (via Aqua)
