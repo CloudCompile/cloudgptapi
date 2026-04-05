@@ -12,6 +12,7 @@ export default async function AdminUsersPage({
 }) {
   const query = typeof searchParams.search === 'string' ? searchParams.search.toLowerCase() : '';
   const sort = typeof searchParams.sort === 'string' ? searchParams.sort : 'created_at';
+  const plan = typeof searchParams.plan === 'string' ? searchParams.plan.toLowerCase() : 'all';
   const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page) : 1;
   const perPage = 20;
 
@@ -35,6 +36,15 @@ export default async function AdminUsersPage({
     return 0;
   });
 
+  // Plan Filter
+  if (plan !== 'all') {
+    users = users.filter((user) => {
+      const userPlan = user.plan || 'free';
+      if (plan === 'free') return userPlan === 'free';
+      return userPlan === plan;
+    });
+  }
+
   // Pagination
   const totalUsers = users.length;
   const totalPages = Math.ceil(totalUsers / perPage);
@@ -53,28 +63,41 @@ export default async function AdminUsersPage({
 
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         {/* Toolbar */}
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <form method="GET" action="/admin/users" className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <input 
-              type="text" 
-              name="search"
-              defaultValue={query}
-              placeholder="Search by name, email, or ID..." 
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
-            />
-            {query && (
-              <Link href="/admin/users" className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600">
-                Clear
-              </Link>
-            )}
-          </form>
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-col items-start gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-4">
+            <form method="GET" action="/admin/users" className="relative w-full sm:w-80">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input 
+                type="text" 
+                name="search"
+                defaultValue={query}
+                placeholder="Search by name, email, or ID..." 
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
+              />
+              <input type="hidden" name="plan" value={plan} />
+              <input type="hidden" name="sort" value={sort} />
+              {query && (
+                <Link href={`/admin/users?sort=${sort}&plan=${plan}`} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600">
+                  Clear
+                </Link>
+              )}
+            </form>
 
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <span>Sort by:</span>
-            <Link href={`/admin/users?search=${query}&sort=created_at`} className={cn("px-2 py-1 rounded", sort === 'created_at' && "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white")}>Date</Link>
-            <Link href={`/admin/users?search=${query}&sort=name`} className={cn("px-2 py-1 rounded", sort === 'name' && "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white")}>Name</Link>
-            <Link href={`/admin/users?search=${query}&sort=email`} className={cn("px-2 py-1 rounded", sort === 'email' && "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white")}>Email</Link>
+            <div className="flex items-center gap-2 text-sm text-slate-500">
+              <span>Sort by:</span>
+              <Link href={`/admin/users?search=${query}&sort=created_at&plan=${plan}`} className={cn("px-2 py-1 rounded", sort === 'created_at' && "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white")}>Date</Link>
+              <Link href={`/admin/users?search=${query}&sort=name&plan=${plan}`} className={cn("px-2 py-1 rounded", sort === 'name' && "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white")}>Name</Link>
+              <Link href={`/admin/users?search=${query}&sort=email&plan=${plan}`} className={cn("px-2 py-1 rounded", sort === 'email' && "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white")}>Email</Link>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2 text-xs sm:text-sm font-medium overflow-x-auto w-full pb-2 md:pb-0 no-scrollbar">
+            <span className="text-slate-500 mr-2 shrink-0">Filter Plan:</span>
+            <Link href={`/admin/users?search=${query}&sort=${sort}&plan=all`} className={cn("px-3 py-1.5 rounded-full border transition-colors shrink-0", plan === 'all' ? "bg-slate-900 border-slate-900 text-white dark:bg-slate-100 dark:border-slate-100 dark:text-slate-900" : "bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400")}>All</Link>
+            <Link href={`/admin/users?search=${query}&sort=${sort}&plan=free`} className={cn("px-3 py-1.5 rounded-full border transition-colors shrink-0", plan === 'free' ? "bg-slate-500 border-slate-500 text-white" : "bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400")}>Free</Link>
+            <Link href={`/admin/users?search=${query}&sort=${sort}&plan=developer`} className={cn("px-3 py-1.5 rounded-full border transition-colors shrink-0", plan === 'developer' ? "bg-blue-500 border-blue-500 text-white" : "bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400")}>Developer</Link>
+            <Link href={`/admin/users?search=${query}&sort=${sort}&plan=pro`} className={cn("px-3 py-1.5 rounded-full border transition-colors shrink-0", plan === 'pro' ? "bg-emerald-500 border-emerald-500 text-white" : "bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400")}>Pro</Link>
+            <Link href={`/admin/users?search=${query}&sort=${sort}&plan=ultra`} className={cn("px-3 py-1.5 rounded-full border transition-colors shrink-0", plan === 'ultra' ? "bg-purple-500 border-purple-500 text-white" : "bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400")}>Ultra</Link>
           </div>
         </div>
 
@@ -213,13 +236,13 @@ export default async function AdminUsersPage({
             </span>
             <div className="flex items-center gap-2">
               <Link 
-                href={`/admin/users?page=${Math.max(page - 1, 1)}${query ? `&search=${query}` : ''}${sort ? `&sort=${sort}` : ''}`}
+                href={`/admin/users?page=${Math.max(page - 1, 1)}${query ? `&search=${query}` : ''}${sort ? `&sort=${sort}` : ''}&plan=${plan}`}
                 className={cn("p-2 rounded-lg border border-slate-200 dark:border-slate-800", page <= 1 ? "opacity-50 pointer-events-none" : "hover:bg-slate-50 dark:hover:bg-slate-800")}
               >
                 <ChevronLeft className="h-4 w-4" />
               </Link>
               <Link 
-                href={`/admin/users?page=${Math.min(page + 1, totalPages)}${query ? `&search=${query}` : ''}${sort ? `&sort=${sort}` : ''}`}
+                href={`/admin/users?page=${Math.min(page + 1, totalPages)}${query ? `&search=${query}` : ''}${sort ? `&sort=${sort}` : ''}&plan=${plan}`}
                 className={cn("p-2 rounded-lg border border-slate-200 dark:border-slate-800", page >= totalPages ? "opacity-50 pointer-events-none" : "hover:bg-slate-50 dark:hover:bg-slate-800")}
               >
                 <ChevronRight className="h-4 w-4" />

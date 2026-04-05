@@ -1,9 +1,8 @@
-import { Shield, Users, Activity, Crown, AlertCircle, Tag, ArrowRight, BarChart3 } from 'lucide-react';
+import { Shield, Users, Activity, Crown, AlertCircle, Tag, ArrowRight, BarChart3, Sparkles, Rocket } from 'lucide-react';
 import { getAllUsers } from '@/lib/admin-actions';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
-// Force dynamic rendering to prevent prerendering errors with authentication
 export const dynamic = 'force-dynamic';
 
 export default async function AdminOverviewPage() {
@@ -32,12 +31,14 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* High-Level Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-12">
         {[
-          { label: 'Total Users', value: users.length.toString(), icon: Users, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-          { label: 'Pro Users', value: users.filter(u => u.plan === 'pro').length.toString(), icon: Crown, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-          { label: 'Admin Users', value: users.filter(u => u.role === 'admin').length.toString(), icon: Shield, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
-          { label: 'System Health', value: '99.9%', icon: Activity, color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20' },
+          { label: 'Total', value: users.length.toString(), icon: Users, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+          { label: 'Free', value: users.filter(u => (!u.plan || u.plan === 'free')).length.toString(), icon: Rocket, color: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-800/50' },
+          { label: 'Pro', value: users.filter(u => u.plan === 'pro').length.toString(), icon: Crown, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+          { label: 'Ultra', value: users.filter(u => u.plan === 'ultra').length.toString(), icon: Sparkles, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
+          { label: 'Admins', value: users.filter(u => u.role === 'admin').length.toString(), icon: Shield, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+          { label: 'Health', value: '99.9%', icon: Activity, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
         ].map((stat) => (
           <div key={stat.label} className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md">
             <div className="flex items-center justify-between mb-4">
@@ -55,12 +56,12 @@ export default async function AdminOverviewPage() {
       </div>
 
       <h2 className="text-xl font-bold tracking-tight mb-6">Management Modules</h2>
-      
+
       {/* Quick Links Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {quickLinks.map((link) => (
-          <Link 
-            key={link.name} 
+          <Link
+            key={link.name}
             href={link.href}
             className="group p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:border-primary/50 hover:shadow-md transition-all flex items-start justify-between"
           >
