@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const userEmail = user?.email || undefined;
 
     const body = await req.json();
-    const { priceId, promoCode } = body;
+    const { priceId, promoCode, mode } = body;
 
     if (!priceId) {
       return new NextResponse('Price ID is required', { status: 400 });
@@ -78,6 +78,8 @@ export async function POST(req: Request) {
       }
     }
 
+    const checkoutMode = mode === 'payment' ? 'payment' : 'subscription';
+
     // Create a Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       ...discountParams,
@@ -88,7 +90,7 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-      mode: 'subscription',
+      mode: checkoutMode,
       success_url: `${baseUrl}/dashboard?success=true`,
       cancel_url: `${baseUrl}/pricing?canceled=true`,
       customer_email: userEmail,

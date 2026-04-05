@@ -9,8 +9,10 @@ import Link from 'next/link';
 const plans = [
   {
     name: 'Pro',
-    price: '5',
+    monthlyPrice: '5',
+    oneTimePrice: '5',
     period: '/month',
+    oneTimePeriod: 'for 1 month',
     description: 'For professional developers and growing applications.',
     features: [
       'Access to ALL Flagship models',
@@ -22,12 +24,15 @@ const plans = [
       '1000 requests per day',
       'Priority email support',
     ],
-    stripePriceId: 'price_1TItn8QvLgyqzP00jz4MFk7R',
+    stripePriceIdMonthly: 'price_1TItn8QvLgyqzP00jz4MFk7R',
+    stripePriceIdOneTime: 'price_1TIwdcQvLgyqzP00KIv9kWVr',
   },
   {
     name: 'Ultra',
-    price: '10',
+    monthlyPrice: '10',
+    oneTimePrice: '10',
     period: '/month',
+    oneTimePeriod: 'for 1 month',
     description: 'For power users who need higher limits and premium models.',
     features: [
       'Everything in Pro',
@@ -39,7 +44,8 @@ const plans = [
       'Priority processing',
       'Early access to new models',
     ],
-    stripePriceId: 'price_1TItmiQvLgyqzP00FPsN9Vxb',
+    stripePriceIdMonthly: 'price_1TItmiQvLgyqzP00FPsN9Vxb',
+    stripePriceIdOneTime: 'price_1TIwenQvLgyqzP00fNKxQuxY',
   },
 ];
 
@@ -47,8 +53,10 @@ function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const planParam = searchParams.get('plan');
+  const paymentParam = searchParams.get('payment');
   
   const [selectedPlan, setSelectedPlan] = useState<string>(planParam || 'pro');
+  const [selectedPaymentMode, setSelectedPaymentMode] = useState<string>(paymentParam || 'monthly');
   const [loading, setLoading] = useState(false);
   
   // Promo code state
@@ -59,7 +67,8 @@ function CheckoutContent() {
   const [appliedPromoCode, setAppliedPromoCode] = useState('');
 
   const currentPlan = plans.find(p => p.name.toLowerCase() === selectedPlan.toLowerCase()) || plans[0];
-  const originalPrice = parseFloat(currentPlan.price);
+  const activePriceAmount = selectedPaymentMode === 'onetime' ? currentPlan.oneTimePrice : currentPlan.monthlyPrice;
+  const originalPrice = parseFloat(activePriceAmount);
   const discount = promoDiscount ? 
     (promoDiscount.type === 'percent' 
       ? originalPrice * (promoDiscount.amount / 100)
@@ -101,15 +110,18 @@ function CheckoutContent() {
   };
 
   const handleCheckout = async () => {
-    if (!currentPlan.stripePriceId) return;
+    const activePriceId = selectedPaymentMode === 'onetime' ? currentPlan.stripePriceIdOneTime : currentPlan.stripePriceIdMonthly;
+    if (!activePriceId) return;
+    
     setLoading(true);
     try {
       const res = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          priceId: currentPlan.stripePriceId,
-          promoCode: appliedPromoCode || undefined 
+          priceId: activePriceId,
+          promoCode: appliedPromoCode || undefined,
+          mode: selectedPaymentMode === 'onetime' ? 'payment' : 'subscription'
         }),
       });
       const data = await res.json();
@@ -159,8 +171,10 @@ function CheckoutContent() {
                     <Check className="h-5 w-5 text-primary" />
                   )}
                 </div>
-                <span className="text-2xl font-black">${plan.price}</span>
-                <span className="text-xs text-slate-500">/month</span>
+                <span className="text-2xl font-black">${selectedPaymentMode === 'onetime' ? plan.oneTimePrice : plan.monthlyPrice}</span>
+                <span className="text-xs text-slate-500">
+                  {selectedPaymentMode === 'onetime' ? ' / 1 month' : '/month'}
+                </span>
               </button>
             ))}
           </div>
@@ -211,8 +225,8 @@ function CheckoutContent() {
           <h2 className="text-lg font-bold mb-4">Order Summary</h2>
           <div className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-slate-600 dark:text-slate-400">{currentPlan.name} Plan</span>
-              <span className="font-medium">${originalPrice}/month</span>
+              <span className="text-slate-600 dark:text-slate-400">{currentPlan.name} Plan ({selectedPaymentMode === 'onetime' ? '1-Month Pass' : 'Monthly'})</span>
+              <span className="font-medium">${originalPrice}</span>
             </div>
             {promoDiscount && (
               <div className="flex justify-between text-emerald-500">
@@ -222,21 +236,22 @@ function CheckoutContent() {
             )}
             <div className="border-t border-slate-200 dark:border-slate-700 pt-3 flex justify-between">
               <span className="font-bold">Total</span>
-              <span className="text-2xl font-black">${finalPrice}/month</span>
+              <span className="text-2xl font-black">${finalPrice}</span>
             </div>
           </div>
         </div>
 
-        {/* Checkout Button */}
         <button
           onClick={handleCheckout}
-          disabled={loading}
+          disabled={loading || !(selectedPaymentMode === 'onetime' ? currentPlan.stripePriceIdOneTime : currentPlan.stripePriceIdMonthly)}
           className="w-full py-4 bg-primary text-white text-lg font-bold rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+          ) : !(selectedPaymentMode === 'onetime' ? currentPlan.stripePriceIdOneTime : currentPlan.stripePriceIdMonthly) ? (
+            'Coming Soon'
           ) : (
-            `Subscribe for $${finalPrice}/month`
+            selectedPaymentMode === 'onetime' ? `Pay $${finalPrice} for 1 Month` : `Subscribe for $${finalPrice}/month`
           )}
         </button>
 

@@ -9,7 +9,8 @@ import Link from 'next/link';
 const plans = [
   {
     name: 'Free',
-    price: '$0',
+    monthlyPrice: '$0',
+    oneTimePrice: '$0',
     description: 'Perfect for exploring our API and personal projects.',
     features: [
       'Access to standard chat models',
@@ -24,8 +25,10 @@ const plans = [
   },
   {
     name: 'Pro',
-    price: '$5',
+    monthlyPrice: '$5',
+    oneTimePrice: '$5',
     period: '/month',
+    oneTimePeriod: 'for 1 month',
     description: 'For professional developers and growing applications.',
     features: [
       'Access to ALL Flagship models',
@@ -41,12 +44,15 @@ const plans = [
     buttonHref: '#',
     highlight: true,
     stripeProductId: 'prod_UFav3WC8TduOAB',
-    stripePriceId: 'price_1TItn8QvLgyqzP00jz4MFk7R',
+    stripePriceIdMonthly: 'price_1TItn8QvLgyqzP00jz4MFk7R',
+    stripePriceIdOneTime: 'price_1TIwdcQvLgyqzP00KIv9kWVr',
   },
   {
     name: 'Ultra',
-    price: '$10',
+    monthlyPrice: '$10',
+    oneTimePrice: '$10',
     period: '/month',
+    oneTimePeriod: 'for 1 month',
     description: 'For power users who need higher limits and premium models.',
     features: [
       'Everything in Pro',
@@ -62,11 +68,13 @@ const plans = [
     buttonHref: '#',
     highlight: false,
     stripeProductId: 'prod_UFawzHE1IUU1Rb',
-    stripePriceId: 'price_1TItmiQvLgyqzP00FPsN9Vxb',
+    stripePriceIdMonthly: 'price_1TItmiQvLgyqzP00FPsN9Vxb',
+    stripePriceIdOneTime: 'price_1TIwenQvLgyqzP00fNKxQuxY',
   },
   {
     name: 'Enterprise',
-    price: 'Custom',
+    monthlyPrice: 'Custom',
+    oneTimePrice: 'Custom',
     description: 'Scalable solutions for large teams and high-volume needs.',
     features: [
       'Everything in Ultra',
@@ -87,6 +95,7 @@ export default function PricingPage() {
   const inviteOnlyLabel = 'Invite Only';
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+  const [paymentMode, setPaymentMode] = useState<'monthly' | 'onetime'>('monthly');
 
   useEffect(() => {
     fetch('/api/profile', { credentials: 'include' })
@@ -99,9 +108,9 @@ export default function PricingPage() {
       .catch(() => {});
   }, []);
 
-  const handleUpgrade = async (stripePriceId: string, planName: string) => {
+  const handleUpgrade = async (planName: string, stripePriceId?: string) => {
     if (!stripePriceId) return;
-    router.push(`/checkout?plan=${planName.toLowerCase()}`);
+    router.push(`/checkout?plan=${planName.toLowerCase()}&payment=${paymentMode}`);
   };
 
   return (
@@ -124,6 +133,33 @@ export default function PricingPage() {
           <p className="text-base sm:text-xl text-slate-500 dark:text-slate-400 mb-8 sm:mb-10 max-w-2xl mx-auto font-medium animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
             Simple, transparent plans designed for developers and teams. No hidden fees, just unified AI power.
           </p>
+          
+          {/* Payment Mode Toggle */}
+          <div className="inline-flex items-center p-1.5 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 mb-8 sm:mb-12">
+            <button
+              onClick={() => setPaymentMode('monthly')}
+              className={cn(
+                "px-6 py-2.5 rounded-xl font-bold text-sm transition-all",
+                paymentMode === 'monthly'
+                  ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
+                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+              )}
+            >
+              Pay Monthly
+            </button>
+            <button
+              onClick={() => setPaymentMode('onetime')}
+              className={cn(
+                "px-6 py-2.5 rounded-xl font-bold text-sm transition-all relative overflow-hidden",
+                paymentMode === 'onetime'
+                  ? "bg-primary text-white shadow-sm shadow-primary/25"
+                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+              )}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] animate-[shimmer_2s_infinite]" />
+              Pay Once (1 Month)
+            </button>
+          </div>
         </div>
       </section>
 
@@ -165,8 +201,14 @@ export default function PricingPage() {
                     </div>
                   </div>
                   <div className="flex items-baseline gap-1 mb-3 sm:mb-4">
-                    <span className="text-4xl sm:text-6xl font-black tracking-tighter">{plan.price}</span>
-                    {plan.period && <span className="text-xs sm:text-sm font-bold opacity-60 uppercase tracking-widest">{plan.period}</span>}
+                    <span className="text-4xl sm:text-6xl font-black tracking-tighter">
+                      {paymentMode === 'monthly' ? plan.monthlyPrice : plan.oneTimePrice}
+                    </span>
+                    {plan.period && (
+                      <span className="text-xs sm:text-sm font-bold opacity-60 uppercase tracking-widest mt-2 block sm:inline">
+                        {paymentMode === 'monthly' ? plan.period : plan.oneTimePeriod}
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs sm:text-sm font-medium opacity-70 leading-relaxed">
                     {plan.description}
@@ -264,18 +306,21 @@ export default function PricingPage() {
 
                     return (
                       <button
-                        onClick={() => plan.stripePriceId && router.push(`/checkout?plan=${plan.name.toLowerCase()}`)}
-                        disabled={loadingPlan === plan.name || !plan.stripePriceId}
+                        onClick={() => handleUpgrade(plan.name, paymentMode === 'monthly' ? plan.stripePriceIdMonthly : plan.stripePriceIdOneTime)}
+                        disabled={loadingPlan === plan.name || !(paymentMode === 'monthly' ? plan.stripePriceIdMonthly : plan.stripePriceIdOneTime)}
                         className={cn(
                           "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all border",
                           plan.highlight
                             ? "bg-white/30 text-slate-900 dark:text-white border-white/60 hover:bg-white/50"
                             : "bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 border-border hover:border-primary/30",
-                          loadingPlan === plan.name && "opacity-50 cursor-wait"
+                          loadingPlan === plan.name && "opacity-50 cursor-wait",
+                          !(paymentMode === 'monthly' ? plan.stripePriceIdMonthly : plan.stripePriceIdOneTime) && "opacity-50 cursor-not-allowed"
                         )}
                       >
                         {loadingPlan === plan.name ? (
                           'Processing...'
+                        ) : !(paymentMode === 'monthly' ? plan.stripePriceIdMonthly : plan.stripePriceIdOneTime) ? (
+                          'Coming Soon'
                         ) : (
                           <>
                             <Zap className="h-4 w-4" />
