@@ -241,6 +241,30 @@ export function getBluesmindsApiKey(): string | undefined {
 }
 
 /**
+ * Get all available Bluesminds API keys
+ */
+export function getBluesmindsApiKeys(): string[] {
+  const keys = [
+    process.env.SHALOM_API_KEY,
+    process.env.SHALOM_API_KEY_2,
+    process.env.SHALOM_API_KEY_3,
+  ].filter(Boolean) as string[];
+  
+  return Array.from(new Set(keys));
+}
+
+/**
+ * Get a random Bluesminds API key
+ */
+export function getRandomBluesmindsApiKey(): string | undefined {
+  const keys = getBluesmindsApiKeys();
+  if (keys.length === 0) return undefined;
+  
+  const randomIndex = Math.floor(Math.random() * keys.length);
+  return keys[randomIndex];
+}
+
+/**
  * Get BlazeAI API key
  */
 export function getBlazeAiApiKey(): string | undefined {

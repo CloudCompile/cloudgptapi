@@ -21,6 +21,8 @@ import {
   getOpenAIApiKey,
   getAquaApiKey,
   getBluesmindsApiKey,
+  getBluesmindsApiKeys,
+  getRandomBluesmindsApiKey,
   getBlazeAiApiKey,
   safeResponseJson
 } from '@/lib/utils';
@@ -503,7 +505,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       console.log(`[${requestId}] Aqua failed for ${modelId}, falling back to Bluesminds...`);
       
       const bluesmindsUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
-      const bluesmindsApiKey = getBluesmindsApiKey();
+      const bluesmindsApiKey = getRandomBluesmindsApiKey();
       const bluesmindsModelId = getBluesmindsModelId(modelId);
       
       if (bluesmindsApiKey) {
