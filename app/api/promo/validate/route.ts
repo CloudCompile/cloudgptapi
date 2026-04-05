@@ -20,8 +20,9 @@ export async function POST(req: Request) {
       .from('promo_codes')
       .select('*')
       .eq('code', normalizedCode)
-      .eq('is_active', true)
       .single();
+
+    console.log('[PROMO_VALIDATE] Query result:', { normalizedCode, promoCode, error });
 
     if (error || !promoCode) {
       return NextResponse.json(

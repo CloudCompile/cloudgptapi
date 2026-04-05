@@ -23,6 +23,7 @@ async function createPromoCode(formData: FormData) {
       discount_type: discountType,
       usage_limit: usageLimit,
       expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
+      is_active: true,
     });
   } catch (e) {
     console.error('Error creating promo code', e);
