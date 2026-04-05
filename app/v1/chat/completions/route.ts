@@ -191,6 +191,8 @@ export const POST = withErrorHandler(async function POST(request: NextRequest) {
     // Pro access if they have a pro/enterprise/developer/admin plan
     const hasPro = hasProAccess(userPlan);
 
+    console.log(`[${requestId}] FINAL Access Check: model=${modelId}, plan=${userPlan}, isPremium=${isPremium}, isUltra=${isUltra}, isFree=${isFree}, hasProAccess=${hasPro}, apiKeyPlan=${apiKeyInfo?.plan}`);
+
     // Diagnostic logging for access issues
     if (isPremium || isUltra || userPlan !== 'free') {
       console.log(`[${requestId}] Access Check: model=${modelId}, plan=${userPlan}, isPremium=${isPremium}, isUltra=${isUltra}, isFree=${isFree}, hasProAccess=${hasPro}`);

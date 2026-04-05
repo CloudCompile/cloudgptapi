@@ -406,12 +406,20 @@ export const PREMIUM_MODELS = new Set([
 ]);
 
 // Ultra-only models (require ultra plan) - all from Aqua (aquadevs)
+// IMPORTANT: Include BOTH the original Vetra IDs AND the resolved provider IDs
+// (after PROVIDER_MODEL_MAPPING / resolveModelId runs) so the access check in
+// route.ts reliably catches ultra models regardless of which ID the user sends.
 export const ULTRA_MODELS = new Set([
-  // Claude Ultra (via Aqua)
-  'claude-opus-4-6', 'claude-opus-4-5', 'claude-sonnet-4.6', 'claude-sonnet-4-5',
+  // Claude Ultra - original Vetra IDs
+  'claude-opus-4-6', 'claude-opus-4-5', 'claude-opus-4.5', 'claude-opus-4.6',
+  'claude-sonnet-4.6', 'claude-sonnet-4-6', 'claude-sonnet-4-5', 'claude-sonnet-4.5',
+  // Claude Ultra - resolved (post-PROVIDER_MODEL_MAPPING) Aqua IDs
+  'opus-4.6', 'opus-4.5', 'sonnet-4.6', 'sonnet-4.5',
+  // Claude Haiku (Pro tier, but check here so it doesn't accidentally block)
+  // 'haiku-4.5',  <- intentionally NOT ultra; keep at Pro level
   // Gemini Ultra (via Aqua)
   'gemini-2.5-pro', 'gemini-3.1-pro', 'gemini-3-pro-preview',
-  // OpenAI GPT-5 Ultra (via Aqua) 
+  // OpenAI GPT-5 Ultra (via Aqua)
   'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
   // Zhipu Ultra (via Aqua)
   'glm-5.1',

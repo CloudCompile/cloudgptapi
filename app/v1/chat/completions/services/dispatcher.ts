@@ -293,6 +293,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     stream: body.stream ?? false,
     top_p: body.top_p ?? 1,
   };
+  console.log(`[${requestId}] Model mapping: ${modelId} -> ${standardBody.model}`);
 
   // Track actual model ID used (for Bluesminds mapping)
   let actualModelId = standardBody.model;

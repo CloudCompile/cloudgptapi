@@ -213,8 +213,10 @@ export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
   'liz-llama-3.3-70b': 'llama-3.3-70b',
   'claude-opus-4-6': 'opus-4.6',
   'claude-opus-4.5': 'opus-4.5',
+  'claude-opus-4.6': 'opus-4.6',
   'claude-sonnet-4-6': 'sonnet-4.6',
   'claude-sonnet-4.5': 'sonnet-4.5',
+  'claude-sonnet-4.6': 'sonnet-4.6',
   'claude-haiku-4.5': 'haiku-4.5',
   // Pollinations canonical IDs
   'gemini': 'gemini-3-flash-preview',

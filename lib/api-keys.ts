@@ -58,6 +58,8 @@ export async function validateApiKey(key: string): Promise<ApiKey | null> {
   let userEmail = profile?.email;
   let userPlan = profile?.plan || 'free';
 
+  console.log('[validateApiKey] Profile plan for', userEmail, ':', userPlan);
+
   if (userEmail) {
     userPlan = await applyPlanOverride(userEmail, userPlan, userEmail, 'email');
   }
