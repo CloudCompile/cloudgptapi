@@ -188,55 +188,103 @@ export default function PricingPage() {
                 </div>
 
                 <div className="relative z-10">
-                  {plan.name === 'Free' ? (
-                    <Link
-                      href={plan.buttonHref}
-                      className={cn(
-                        "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all border",
-                        "bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 border-border hover:border-primary/30"
-                      )}
-                    >
-                      <Rocket className="h-4 w-4" />
-                      {plan.buttonText}
-                    </Link>
-                  ) : plan.name === 'Enterprise' ? (
-                    <a
-                      href={plan.buttonHref}
-                      className={cn(
-                        "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all border",
-                        "bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 border-border hover:border-primary/30"
-                      )}
-                    >
-                      <Shield className="h-4 w-4" />
-                      {plan.buttonText}
-                    </a>
-                  ) : (
-                    <button
-                      onClick={() => plan.stripePriceId && router.push(`/checkout?plan=${plan.name.toLowerCase()}`)}
-                      disabled={loadingPlan === plan.name || !plan.stripePriceId || (currentPlan === plan.name.toLowerCase())}
-                      className={cn(
-                        "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all border",
-                        plan.highlight
-                          ? "bg-white/30 text-slate-900 dark:text-white border-white/60 hover:bg-white/50"
-                          : "bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 border-border hover:border-primary/30",
-                        (loadingPlan === plan.name || currentPlan === plan.name.toLowerCase()) && "opacity-50 cursor-wait"
-                      )}
-                    >
-                      {currentPlan === plan.name.toLowerCase() ? (
-                        <>
+                  {(() => {
+                    const ranks: Record<string, number> = { free: 0, pro: 1, ultra: 2, enterprise: 3 };
+                    const currRank = currentPlan ? (ranks[currentPlan] ?? 0) : -1;
+                    const planRank = ranks[plan.name.toLowerCase()] ?? 0;
+                    
+                    const isCurrent = currentPlan && currRank === planRank;
+                    const isDowngrade = currentPlan && currRank > planRank;
+
+                    if (plan.name === 'Enterprise') {
+                      return (
+                        <a
+                          href={plan.buttonHref}
+                          className={cn(
+                            "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all border",
+                            "bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 border-border hover:border-primary/30"
+                          )}
+                        >
+                          <Shield className="h-4 w-4" />
+                          {plan.buttonText}
+                        </a>
+                      );
+                    }
+
+                    if (isCurrent) {
+                      return (
+                        <button
+                          disabled
+                          className={cn(
+                            "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all border",
+                            plan.highlight
+                              ? "bg-white/30 text-slate-900 dark:text-white border-white/60 hover:bg-white/50"
+                              : "bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 border-border hover:border-primary/30",
+                            "opacity-50 cursor-not-allowed"
+                          )}
+                        >
                           <CheckCircle className="h-4 w-4" />
                           Current Plan
-                        </>
-                      ) : loadingPlan === plan.name ? (
-                        'Processing...'
-                      ) : (
-                        <>
-                          <Zap className="h-4 w-4" />
+                        </button>
+                      );
+                    }
+
+                    if (isDowngrade) {
+                      return (
+                        <button
+                          disabled
+                          className={cn(
+                            "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all border",
+                            plan.highlight
+                              ? "bg-white/30 text-slate-900 dark:text-white border-white/60"
+                              : "bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 border-border",
+                            "opacity-50 cursor-not-allowed"
+                          )}
+                        >
+                          <Shield className="h-4 w-4" />
+                          Cannot Downgrade
+                        </button>
+                      );
+                    }
+
+                    if (plan.name === 'Free') {
+                      return (
+                        <Link
+                          href={plan.buttonHref}
+                          className={cn(
+                            "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all border",
+                            "bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 border-border hover:border-primary/30"
+                          )}
+                        >
+                          <Rocket className="h-4 w-4" />
                           {plan.buttonText}
-                        </>
-                      )}
-                    </button>
-                  )}
+                        </Link>
+                      );
+                    }
+
+                    return (
+                      <button
+                        onClick={() => plan.stripePriceId && router.push(`/checkout?plan=${plan.name.toLowerCase()}`)}
+                        disabled={loadingPlan === plan.name || !plan.stripePriceId}
+                        className={cn(
+                          "flex items-center justify-center gap-2 w-full py-4 sm:py-5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] transition-all border",
+                          plan.highlight
+                            ? "bg-white/30 text-slate-900 dark:text-white border-white/60 hover:bg-white/50"
+                            : "bg-white/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-300 border-border hover:border-primary/30",
+                          loadingPlan === plan.name && "opacity-50 cursor-wait"
+                        )}
+                      >
+                        {loadingPlan === plan.name ? (
+                          'Processing...'
+                        ) : (
+                          <>
+                            <Zap className="h-4 w-4" />
+                            {plan.buttonText}
+                          </>
+                        )}
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             ))}
