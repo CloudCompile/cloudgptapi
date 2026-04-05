@@ -103,9 +103,23 @@ export function getOpenRouterApiKeys(): string[] {
     'sk_nun1ulPVBLupdJrHBF7CGwIgBAoJsEV3', // Key 4 (Requested removal)
   ];
 
+  const indexedEnvKeys = Object.entries(process.env)
+    .filter(([key, value]) =>
+      Boolean(value) &&
+      (/^OR_KEY_\d+$/i.test(key) || /^OPENROUTER_API_KEY_\d+$/i.test(key))
+    )
+    .sort(([a], [b]) => {
+      const aNum = Number(a.match(/(\d+)$/)?.[1] || '0');
+      const bNum = Number(b.match(/(\d+)$/)?.[1] || '0');
+      return aNum - bNum;
+    })
+    .map(([, value]) => value as string);
+
   const keys = [
+    process.env.OR_KEY,
     process.env.OPENROUTER_API_KEY,
     process.env.OPENROUTER_FALLBACK_KEY,
+    ...indexedEnvKeys,
     process.env.OPENROUTER_API_KEY_1,
     process.env.OPENROUTER_API_KEY_2,
     process.env.OPENROUTER_API_KEY_3,
