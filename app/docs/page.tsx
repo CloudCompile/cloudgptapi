@@ -134,7 +134,7 @@ export default function DocsPage() {
                     <div className="grid sm:grid-cols-2 gap-3 sm:gap-4 mt-6 sm:mt-8">
                       <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50">
                         <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white mb-1 sm:mb-2">Unified Access</h4>
-                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">One API key for Pollinations chat, image, and video models.</p>
+                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">One API key for our massive array of models from Claude, OpenAI, DeepSeek, Google, and more.</p>
                       </div>
                       <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50">
                         <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white mb-1 sm:mb-2">Enterprise Scale</h4>
@@ -304,12 +304,12 @@ const response = await fetch('https://vetraai.vercel.app/v1/chat/completions', {
                   </h2>
                   <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400">
                     <Crown className="h-3 w-3" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Pollinations Models</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Multiple Providers</span>
                   </div>
                 </div>
                 <div className="space-y-6">
                   <p className="text-slate-600 dark:text-slate-400">
-                    Generate text completions using Pollinations-hosted models like OpenAI, DeepSeek, Kimi, and more.
+                    Generate text completions using industry-leading models like GPT-4o, Claude 3.5 Sonnet, DeepSeek V3, and more.
                   </p>
                   
                   <div className="bg-slate-50 dark:bg-slate-900 rounded-xl border p-1 mb-6 flex items-center h-12 w-fit">
@@ -333,7 +333,7 @@ const response = await fetch('https://vetraai.vercel.app/v1/chat/completions', {
                           <td className="px-6 py-4 font-mono font-bold text-primary">model</td>
                           <td className="px-6 py-4">string</td>
                           <td className="px-6 py-4 text-red-500">Yes</td>
-                          <td className="px-6 py-4 text-slate-500">The Pollinations model ID to use (e.g., "openai", "deepseek")</td>
+                          <td className="px-6 py-4 text-slate-500">The model ID to use (e.g., "gpt-4o", "claude-3-5-sonnet")</td>
                         </tr>
                         <tr>
                           <td className="px-6 py-4 font-mono font-bold text-primary">messages</td>
@@ -553,8 +553,8 @@ const videoUrl = data[0].url;`}</code>
                   <ol>
                     <li><strong>Authentication:</strong> Verifies your API key or session.</li>
                     <li><strong>User Identification:</strong> Determines the user ID for storage isolation (see below).</li>
-                    <li><strong>Provider Selection:</strong> Routes the request to Pollinations.</li>
-                    <li><strong>Header Propagation:</strong> Passes custom headers to upstream providers so they can manage data isolation on their end.</li>
+                    <li><strong>Provider Selection:</strong> Dynamically routes the request to our upstream infrastructure.</li>
+                    <li><strong>Header Propagation:</strong> Passes custom headers downstream so providers can handle data isolation and tracking.</li>
                   </ol>
 
                   <h3 className="text-lg font-bold">User Identification Chain</h3>
@@ -573,7 +573,7 @@ const videoUrl = data[0].url;`}</code>
                       </li>
                       <li className="flex items-start gap-3">
                         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 text-xs font-bold">3</span>
-                        <span><strong>Session User:</strong> For website requests, we use the logged-in Logto user.</span>
+                        <span><strong>Session User:</strong> For website requests, we use the authenticated Kinde session user.</span>
                       </li>
                       <li className="flex items-start gap-3">
                         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 text-xs font-bold">4</span>
@@ -588,7 +588,7 @@ const videoUrl = data[0].url;`}</code>
                   </p>
                   <ul>
                     <li><strong>Memory:</strong> Context handling depends on your configured backend features and user ID strategy.</li>
-                    <li><strong>Images/Video:</strong> Generated media may be temporarily cached by Pollinations for retrieval.</li>
+                    <li><strong>Images/Video:</strong> Generated media may be temporarily cached by our upstream providers for retrieval.</li>
                     <li><strong>Logs:</strong> Vetra only logs metadata (request count, model used) for billing and rate-limiting purposes.</li>
                   </ul>
                 </div>
