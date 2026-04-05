@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { trackUsage, getRateLimitInfo, getDailyLimitInfo, ApiKey, getModelUsageWeight } from '@/lib/api-keys';
+import { trackUsage, getRateLimitInfo, getDailyLimitInfo, checkRateLimit, checkDailyLimit, ApiKey, getModelUsageWeight } from '@/lib/api-keys';
 import {
   PROVIDER_URLS,
   PROVIDER_MODEL_MAPPING,
@@ -17,6 +17,7 @@ import {
   getPoeApiKey,
   getLizApiKey,
   getKivestApiKey,
+  getOpenRouterApiKeys,
   getOpenAIApiKey,
   getAquaApiKey,
   getBluesmindsApiKey,
@@ -24,6 +25,24 @@ import {
   safeResponseJson
 } from '@/lib/utils';
 import { rememberInteraction } from '@/lib/memory';
+
+function getSecureRandomInt(maxExclusive: number): number {
+  if (maxExclusive <= 0) return 0;
+  const randomBytes = new Uint32Array(1);
+  crypto.getRandomValues(randomBytes);
+  return randomBytes[0] % maxExclusive;
+}
+
+function secureShuffleArray<T>(items: T[]): T[] {
+  const shuffled = [...items];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = getSecureRandomInt(i + 1);
+    const temp = shuffled[i];
+    shuffled[i] = shuffled[j];
+    shuffled[j] = temp;
+  }
+  return shuffled;
+}
 
 export interface DispatchOptions {
   request: NextRequest;
@@ -52,6 +71,8 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   const startTime = Date.now();
   let providerUrl: string;
   let providerApiKey: string | undefined;
+  let providerDailyLimit = dailyLimit;
+  let providerPerMinuteLimit = limit;
 
   // Models that can be routed to Aqua API (primary)
   const aquaModels = new Set([
@@ -135,6 +156,64 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   if (aquaModels.has(modelId)) {
     // Primary: Aqua
     providerUrl = `${PROVIDER_URLS.aqua}/chat/completions`;
+  } else if (model.provider === 'openrouter') {
+    providerUrl = `${PROVIDER_URLS.openrouter}/api/v1/chat/completions`;
+    providerDailyLimit = 50;
+    providerPerMinuteLimit = 20;
+
+    const openRouterKeys = getOpenRouterApiKeys();
+    if (openRouterKeys.length === 0) {
+      console.warn(`[${requestId}] Missing OpenRouter API key for model: ${modelId}`);
+      return NextResponse.json(
+        { error: { message: 'OpenRouter API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { status: 500, headers: getCorsHeaders() }
+      );
+    }
+
+    const shuffledKeys = secureShuffleArray(openRouterKeys);
+    for (const key of shuffledKeys) {
+      const minuteOk = await checkRateLimit(key, providerPerMinuteLimit, 'chat:openrouter');
+      if (!minuteOk) continue;
+      const dailyOk = await checkDailyLimit(key, providerDailyLimit);
+      if (!dailyOk) continue;
+      providerApiKey = key;
+      break;
+    }
+
+    if (!providerApiKey) {
+      const firstKey = shuffledKeys[0];
+      if (!firstKey) {
+        return NextResponse.json(
+          { error: { message: 'OpenRouter API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
+      const minuteInfo = await getRateLimitInfo(firstKey, providerPerMinuteLimit, 'chat:openrouter');
+      const dailyInfo = await getDailyLimitInfo(firstKey, providerDailyLimit);
+      return NextResponse.json(
+        {
+          error: {
+            message: `All OpenRouter keys are currently rate-limited (${providerPerMinuteLimit} RPM / ${providerDailyLimit} RPD per key). Please retry shortly.`,
+            type: 'requests',
+            param: null,
+            code: 'openrouter_keys_rate_limited',
+            request_id: requestId
+          }
+        },
+        {
+          status: 429,
+          headers: {
+            ...getCorsHeaders(),
+            'X-RateLimit-Remaining': String(minuteInfo.remaining),
+            'X-RateLimit-Reset': String(minuteInfo.resetAt),
+            'X-RateLimit-Limit': String(minuteInfo.limit),
+            'X-DailyLimit-Remaining': String(dailyInfo.remaining),
+            'X-DailyLimit-Reset': String(dailyInfo.resetAt),
+            'X-DailyLimit-Limit': String(dailyInfo.limit),
+          },
+        }
+      );
+    }
   } else if (model.provider === 'pollinations') {
     providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
     providerApiKey = getPollinationsApiKey();
@@ -199,6 +278,10 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     'X-App-Source': apiKeyInfo ? 'Vetra-API' : 'Vetra-Website',
     ...(providerApiKey && { 'Authorization': `Bearer ${providerApiKey}` }),
   };
+  if (model.provider === 'openrouter') {
+    headers['HTTP-Referer'] = process.env.NEXT_PUBLIC_APP_URL || 'https://vetraai.vercel.app';
+    headers['X-Title'] = 'Vetra';
+  }
   headers['x-user-id'] = userId;
 
   const isHighSpeedModel = [
@@ -689,16 +772,23 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
 
   const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'chat');
   const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
+  let responseRateLimitInfo = rateLimitInfo;
+  let responseDailyLimitInfo = dailyLimitInfo;
+
+  if (model.provider === 'openrouter' && providerApiKey) {
+    responseRateLimitInfo = await getRateLimitInfo(providerApiKey, providerPerMinuteLimit, 'chat:openrouter');
+    responseDailyLimitInfo = await getDailyLimitInfo(providerApiKey, providerDailyLimit);
+  }
   
   return NextResponse.json(responseData || { error: 'Empty response from provider' }, {
     headers: {
       ...getCorsHeaders(),
-      'X-RateLimit-Remaining': String(rateLimitInfo.remaining),
-      'X-RateLimit-Reset': String(rateLimitInfo.resetAt),
-      'X-RateLimit-Limit': String(rateLimitInfo.limit),
-      'X-DailyLimit-Remaining': String(dailyLimitInfo.remaining),
-      'X-DailyLimit-Reset': String(dailyLimitInfo.resetAt),
-      'X-DailyLimit-Limit': String(dailyLimitInfo.limit),
+      'X-RateLimit-Remaining': String(responseRateLimitInfo.remaining),
+      'X-RateLimit-Reset': String(responseRateLimitInfo.resetAt),
+      'X-RateLimit-Limit': String(responseRateLimitInfo.limit),
+      'X-DailyLimit-Remaining': String(responseDailyLimitInfo.remaining),
+      'X-DailyLimit-Reset': String(responseDailyLimitInfo.resetAt),
+      'X-DailyLimit-Limit': String(responseDailyLimitInfo.limit),
       'X-Request-Id': requestId,
       'X-Vetra-Latency': `${Date.now() - startTime}ms`,
       'X-Vetra-Provider': model.provider || 'unknown',

@@ -151,6 +151,26 @@ const CLAUDE_CHAT_MODELS: ChatModel[] = [
 ];
 
 const OPENROUTER_CHAT_MODELS: ChatModel[] = [
+  { id: 'openrouter/free', name: 'OpenRouter Free Router', provider: 'openrouter', description: 'OpenRouter free-model router' },
+  { id: 'qwen/qwen3.6-plus:free', name: 'Qwen3.6 Plus (free)', provider: 'openrouter', description: 'Qwen Qwen3.6 Plus free' },
+  { id: 'stepfun-ai/step-3.5-flash:free', name: 'Step 3.5 Flash (free)', provider: 'openrouter', description: 'StepFun Step 3.5 Flash free' },
+  { id: 'nvidia/nemotron-3-super:free', name: 'Nemotron 3 Super (free)', provider: 'openrouter', description: 'NVIDIA Nemotron 3 Super free' },
+  { id: 'arcee-ai/trinity-large-preview:free', name: 'Trinity Large Preview (free)', provider: 'openrouter', description: 'Arcee AI Trinity Large Preview free' },
+  { id: 'z-ai/glm-4.5-air:free', name: 'GLM 4.5 Air (free)', provider: 'openrouter', description: 'Z.ai GLM 4.5 Air free' },
+  { id: 'nvidia/nemotron-3-nano-30b-a3b:free', name: 'Nemotron 3 Nano 30B A3B (free)', provider: 'openrouter', description: 'NVIDIA Nemotron 3 Nano 30B A3B free' },
+  { id: 'arcee-ai/trinity-mini:free', name: 'Trinity Mini (free)', provider: 'openrouter', description: 'Arcee AI Trinity Mini free' },
+  { id: 'nvidia/nemotron-nano-12b-2-vl:free', name: 'Nemotron Nano 12B 2 VL (free)', provider: 'openrouter', description: 'NVIDIA Nemotron Nano 12B 2 VL free' },
+  { id: 'minimax/minimax-m2.5:free', name: 'MiniMax M2.5 (free)', provider: 'openrouter', description: 'MiniMax M2.5 free' },
+  { id: 'nvidia/nemotron-nano-9b-v2:free', name: 'Nemotron Nano 9B V2 (free)', provider: 'openrouter', description: 'NVIDIA Nemotron Nano 9B V2 free' },
+  { id: 'openai/gpt-oss-120b:free', name: 'GPT-OSS 120B (free)', provider: 'openrouter', description: 'OpenAI GPT-OSS 120B free' },
+  { id: 'qwen/qwen3-coder-480b-a35b:free', name: 'Qwen3 Coder 480B A35B (free)', provider: 'openrouter', description: 'Qwen Qwen3 Coder 480B A35B free' },
+  { id: 'openai/gpt-oss-20b:free', name: 'GPT-OSS 20B (free)', provider: 'openrouter', description: 'OpenAI GPT-OSS 20B free' },
+  { id: 'qwen/qwen3-next-80b-a3b-instruct:free', name: 'Qwen3 Next 80B A3B Instruct (free)', provider: 'openrouter', description: 'Qwen Qwen3 Next 80B A3B Instruct free' },
+  { id: 'google/gemma-3-27b-it:free', name: 'Gemma 3 27B (free)', provider: 'openrouter', description: 'Google Gemma 3 27B free' },
+  { id: 'google/gemma-3-4b-it:free', name: 'Gemma 3 4B (free)', provider: 'openrouter', description: 'Google Gemma 3 4B free' },
+  { id: 'google/gemma-3n-e4b-it:free', name: 'Gemma 3n 4B (free)', provider: 'openrouter', description: 'Google Gemma 3n 4B free' },
+  { id: 'google/gemma-3-12b-it:free', name: 'Gemma 3 12B (free)', provider: 'openrouter', description: 'Google Gemma 3 12B free' },
+  { id: 'google/gemma-3n-e2b-it:free', name: 'Gemma 3n 2B (free)', provider: 'openrouter', description: 'Google Gemma 3n 2B free' },
   // OpenRouter free models
   { id: 'xiaomi/mimo-v2-flash:free', name: 'Xiaomi Mimo V2 Flash', provider: 'openrouter', description: 'Xiaomi Mimo V2 Flash model' },
   { id: 'mistralai/devstral-2512:free', name: 'Mistral Devstral 2512', provider: 'openrouter', description: 'Mistral AI Devstral 2512' },
@@ -311,7 +331,7 @@ const OPENAI_CHAT_MODELS: ChatModel[] = [
 
 // Deduplicate models by ID - last provider wins
 // Order: pollinations → kivest
-const ALL_CHAT_MODELS = [...POLLINATIONS_CHAT_MODELS, ...KIVEST_CHAT_MODELS];
+const ALL_CHAT_MODELS = [...POLLINATIONS_CHAT_MODELS, ...KIVEST_CHAT_MODELS, ...OPENROUTER_CHAT_MODELS];
 
 // Keep last occurrence of each model ID (kivest overwrites pollinations)
 const seen = new Set<string>();
@@ -323,6 +343,7 @@ export const CHAT_MODELS: ChatModel[] = [...ALL_CHAT_MODELS].reverse().filter(mo
 
 // All models require PRO subscription (except DeepSeek free tier)
 export const PREMIUM_MODELS = new Set([
+  ...OPENROUTER_CHAT_MODELS.map(model => model.id),
   // OpenAI (Pro/Ultra)
   'gpt-5.4', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.1', 'gpt-5-nano', 'gpt-oss-120b', 'gpt-oss-20b',
   'qwen3.5-plus', 'qwen3.5-flash', 'qwen-slides', 'qwen-deep-research',

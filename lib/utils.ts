@@ -102,14 +102,27 @@ export function getOpenRouterApiKeys(): string[] {
   const invalidKeys = [
     'sk_nun1ulPVBLupdJrHBF7CGwIgBAoJsEV3', // Key 4 (Requested removal)
   ];
+  const indexedSuffixRegex = /(\d+)$/;
+  const orKeyPattern = /^OR_KEY_\d+$/i;
+  const openRouterIndexedPattern = /^OPENROUTER_API_KEY_\d+$/i;
+
+  const indexedEnvKeys = Object.entries(process.env)
+    .filter(([key, value]) =>
+      Boolean(value) &&
+      (orKeyPattern.test(key) || openRouterIndexedPattern.test(key))
+    )
+    .sort(([a], [b]) => {
+      const aNum = Number(a.match(indexedSuffixRegex)?.[1] || '0');
+      const bNum = Number(b.match(indexedSuffixRegex)?.[1] || '0');
+      return aNum - bNum;
+    })
+    .map(([, value]) => value as string);
 
   const keys = [
+    process.env.OR_KEY,
     process.env.OPENROUTER_API_KEY,
     process.env.OPENROUTER_FALLBACK_KEY,
-    process.env.OPENROUTER_API_KEY_1,
-    process.env.OPENROUTER_API_KEY_2,
-    process.env.OPENROUTER_API_KEY_3,
-    process.env.OPENROUTER_API_KEY_5,
+    ...indexedEnvKeys,
   ].filter(Boolean) as string[];
   
   return Array.from(new Set(keys)).filter(key => !invalidKeys.includes(key));
