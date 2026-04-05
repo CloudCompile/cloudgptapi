@@ -10,7 +10,7 @@ import {
   getBluesmindsModelId,
   getBlazeAiModelId
 } from '@/lib/chat-utils';
-import { CHAT_MODELS } from '@/lib/providers';
+import { CHAT_MODELS, ULTRA_MODELS } from '@/lib/providers';
 import {
   getCorsHeaders, getPollinationsApiKey,
   getClaudeApiKey,
@@ -158,6 +158,22 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   if (aquaModels.has(modelId)) {
     // Primary: Aqua
     providerUrl = `${PROVIDER_URLS.aqua}/chat/completions`;
+    
+    // Ultra models get AQUA_API_KEY_2, free/non-ultra models get AQUA_API_KEY_1 only
+    if (ULTRA_MODELS.has(modelId)) {
+      providerApiKey = process.env.AQUA_API_KEY_2;
+      console.log(`[${requestId}] Aqua: using AQUA_API_KEY_2 for ultra model: ${modelId}`);
+    } else {
+      providerApiKey = process.env.AQUA_API_KEY;
+      console.log(`[${requestId}] Aqua: using AQUA_API_KEY_1 for model: ${modelId}`);
+    }
+    if (!providerApiKey) {
+      console.warn(`[${requestId}] Missing Aqua API key for model: ${modelId}`);
+      return NextResponse.json(
+        { error: { message: 'Aqua API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { status: 500, headers: getCorsHeaders() }
+      );
+    }
   } else if (model.provider === 'openrouter') {
     providerUrl = `${PROVIDER_URLS.openrouter}/api/v1/chat/completions`;
     providerDailyLimit = 50;
@@ -233,37 +249,6 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       console.warn(`[${requestId}] Missing Kivest API key for model: ${modelId}`);
       return NextResponse.json(
         { error: { message: 'Kivest API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
-        { status: 500, headers: getCorsHeaders() }
-      );
-    }
-  } else if (aquaModels.has(modelId)) {
-    // Route to Aqua API
-    providerUrl = `${PROVIDER_URLS.aqua}/chat/completions`;
-    const premiumTierModels = new Set([
-      'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
-      'gemini-2.5-pro', 'gemini-3.1-pro', 'sonnet-4.5', 'sonnet-4.6', 'opus-4.5', 'opus-4.6', 'mimo-pro'
-    ]);
-    if (premiumTierModels.has(modelId)) {
-      // Use premium Aqua keys (API_KEY_2 or API_KEY_3)
-      const premiumKeys = [process.env.AQUA_API_KEY_2, process.env.AQUA_API_KEY_3].filter(Boolean);
-      if (premiumKeys.length > 0) {
-        providerApiKey = premiumKeys[Math.floor(Math.random() * premiumKeys.length)];
-      }
-    } else {
-      // Use any available Aqua key (random selection)
-      const allAquaKeys = [
-        process.env.AQUA_API_KEY,
-        process.env.AQUA_API_KEY_2,
-        process.env.AQUA_API_KEY_3
-      ].filter(Boolean);
-      if (allAquaKeys.length > 0) {
-        providerApiKey = allAquaKeys[Math.floor(Math.random() * allAquaKeys.length)];
-      }
-    }
-    if (!providerApiKey) {
-      console.warn(`[${requestId}] Missing Aqua API key for model: ${modelId}`);
-      return NextResponse.json(
-        { error: { message: 'Aqua API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
         { status: 500, headers: getCorsHeaders() }
       );
     }

@@ -2,6 +2,7 @@ import { Tag, Plus, Trash2, Info, CheckCircle, Percent, DollarSign, Clock, X } f
 import { supabaseAdmin } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,10 +15,13 @@ async function createPromoCode(formData: FormData) {
   const usageLimit = formData.get('usage_limit') ? parseInt(formData.get('usage_limit') as string) : null;
   const expiresAt = formData.get('expires_at') as string || null;
 
-  if (!code || isNaN(discountAmount)) return;
+  if (!code || isNaN(discountAmount)) {
+    redirect('/admin/promo-codes');
+    return;
+  }
 
   try {
-    await supabaseAdmin.from('promo_codes').insert({
+    const { data, error } = await supabaseAdmin.from('promo_codes').insert({
       code: code.toUpperCase(),
       discount_amount: discountAmount,
       discount_type: discountType,
@@ -25,10 +29,16 @@ async function createPromoCode(formData: FormData) {
       expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
       is_active: true,
     });
+    if (error) {
+      console.error('Error creating promo code:', error);
+    } else {
+      console.log('Created promo code:', code.toUpperCase());
+    }
   } catch (e) {
     console.error('Error creating promo code', e);
   }
   revalidatePath('/admin/promo-codes');
+  redirect('/admin/promo-codes');
 }
 
 export default async function AdminPromoCodesPage({
@@ -45,7 +55,10 @@ export default async function AdminPromoCodesPage({
         .select('*', { count: 'exact' })
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching promo codes:', error);
+        throw error;
+      }
       return { promoCodes: data || [], count: count || 0, dbReady: true };
     } catch (e) {
       console.warn('Error fetching promo codes. The promo_codes table might not exist yet.', e);
