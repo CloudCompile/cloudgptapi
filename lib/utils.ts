@@ -95,8 +95,8 @@ export async function safeResponseJson<T>(response: Response, fallback: T): Prom
 
 /**
  * Get OpenRouter API keys for fallback and load balancing
- * Supports multiple API keys via OPENROUTER_API_KEY and OPENROUTER_FALLBACK_KEY
- * Also looks for OPENROUTER_API_KEY_1 through OPENROUTER_API_KEY_5
+ * Supports multiple API keys via OPENROUTER_API_KEY and OPENROUTER_FALLBACK_KEY,
+ * and indexed keys like OPENROUTER_API_KEY_1..N, OPENROUTER_API_KEY1..N, OR_KEY_1..N
  */
 export function getOpenRouterApiKeys(): string[] {
   const invalidKeys = [
@@ -105,11 +105,16 @@ export function getOpenRouterApiKeys(): string[] {
   const indexedSuffixRegex = /(\d+)$/;
   const orKeyPattern = /^OR_KEY_\d+$/i;
   const openRouterIndexedPattern = /^OPENROUTER_API_KEY_\d+$/i;
+  const openRouterIndexedNoUnderscorePattern = /^OPENROUTER_API_KEY\d+$/i;
 
   const indexedEnvKeys = Object.entries(process.env)
     .filter(([key, value]) =>
       Boolean(value) &&
-      (orKeyPattern.test(key) || openRouterIndexedPattern.test(key))
+      (
+        orKeyPattern.test(key) ||
+        openRouterIndexedPattern.test(key) ||
+        openRouterIndexedNoUnderscorePattern.test(key)
+      )
     )
     .sort(([a], [b]) => {
       const aNum = Number(a.match(indexedSuffixRegex)?.[1] || '0');

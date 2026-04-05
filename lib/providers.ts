@@ -343,7 +343,9 @@ export const CHAT_MODELS: ChatModel[] = [...ALL_CHAT_MODELS].reverse().filter(mo
 
 // All models require PRO subscription (except DeepSeek free tier)
 export const PREMIUM_MODELS = new Set([
-  ...OPENROUTER_CHAT_MODELS.map(model => model.id),
+  ...OPENROUTER_CHAT_MODELS
+    .map(model => model.id)
+    .filter(id => !id.endsWith(':free')),
   // OpenAI (Pro/Ultra)
   'gpt-5.4', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.1', 'gpt-5-nano', 'gpt-oss-120b', 'gpt-oss-20b',
   'qwen3.5-plus', 'qwen3.5-flash', 'qwen-slides', 'qwen-deep-research',
@@ -426,6 +428,9 @@ export const FREE_MODELS = new Set([
   // Free models
   'deepseek-chat', 'deepseek-v3.2', 'deepseek-v3.1', 'deepseek-reasoner',
   'glm-4.7', 'mimo-omni',
+  ...OPENROUTER_CHAT_MODELS
+    .map(model => model.id)
+    .filter(id => id.endsWith(':free')),
 ]);
 
 // Available image models - Pro tier (except flux which is free)
