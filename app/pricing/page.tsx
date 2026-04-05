@@ -9,7 +9,7 @@ import Link from 'next/link';
 const plans = [
   {
     name: 'Free',
-    price: '€0',
+    price: '$0',
     description: 'Perfect for exploring our API and personal projects.',
     features: [
       'Access to standard chat models',
@@ -24,7 +24,7 @@ const plans = [
   },
   {
     name: 'Pro',
-    price: '€5',
+    price: '$5',
     period: '/month',
     description: 'For professional developers and growing applications.',
     features: [
@@ -41,11 +41,11 @@ const plans = [
     buttonHref: '#',
     highlight: true,
     stripeProductId: 'prod_UFav3WC8TduOAB',
-    stripePriceId: 'price_1TH5jYQvLgyqzP00y0P6OYDO',
+    stripePriceId: 'price_1TItn8QvLgyqzP00jz4MFk7R',
   },
   {
     name: 'Ultra',
-    price: '€10',
+    price: '$10',
     period: '/month',
     description: 'For power users who need higher limits and premium models.',
     features: [
@@ -62,7 +62,7 @@ const plans = [
     buttonHref: '#',
     highlight: false,
     stripeProductId: 'prod_UFawzHE1IUU1Rb',
-    stripePriceId: 'price_1TH5l0QvLgyqzP00K7uLVmS4',
+    stripePriceId: 'price_1TItmiQvLgyqzP00FPsN9Vxb',
   },
   {
     name: 'Enterprise',

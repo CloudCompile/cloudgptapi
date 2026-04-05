@@ -53,8 +53,8 @@ export async function POST(req: Request) {
       
       // Map price ID to plan name using env vars if available, fallback to hardcoded IDs from pricing page
       let planName = 'free';
-      const PRO_PRICE_ID = 'price_1TH5jYQvLgyqzP00y0P6OYDO';
-      const ULTRA_PRICE_ID = 'price_1TH5l0QvLgyqzP00K7uLVmS4';
+      const PRO_PRICE_ID = 'price_1TItn8QvLgyqzP00jz4MFk7R';
+      const ULTRA_PRICE_ID = 'price_1TItmiQvLgyqzP00FPsN9Vxb';
 
       if (priceId === PRO_PRICE_ID) {
         planName = 'pro';
@@ -72,16 +72,15 @@ export async function POST(req: Request) {
         // First get current count
         const { data: promoData } = await supabaseAdmin
           .from('promo_codes')
-          .select('times_used')
+          .select('usage_count')
           .eq('code', promoCodeFromSession)
           .eq('is_active', true)
           .single();
         
         if (promoData) {
-          // Increment promo code usage
           const { error: promoUpdateError } = await supabaseAdmin
             .from('promo_codes')
-            .update({ times_used: promoData.times_used + 1 })
+            .update({ usage_count: promoData.usage_count + 1 })
             .eq('code', promoCodeFromSession)
             .eq('is_active', true);
 
@@ -242,8 +241,8 @@ export async function POST(req: Request) {
       }
       
       let planName = 'free';
-      const PRO_PRICE_ID = 'price_1TH5jYQvLgyqzP00y0P6OYDO';
-      const ULTRA_PRICE_ID = 'price_1TH5l0QvLgyqzP00K7uLVmS4';
+      const PRO_PRICE_ID = 'price_1TItn8QvLgyqzP00jz4MFk7R';
+      const ULTRA_PRICE_ID = 'price_1TItmiQvLgyqzP00FPsN9Vxb';
 
       if (priceId === PRO_PRICE_ID) {
         planName = 'pro';

@@ -50,8 +50,10 @@ export function extractApiKey(headers: Headers): string | null {
   const authHeader = headers.get('authorization');
   if (authHeader?.startsWith('Bearer ')) {
     const key = authHeader.substring(7);
-    // Validate key format before returning
-    if (key.startsWith('vtai_') && key.length === 37) {
+    if (key.startsWith('vtai_')) {
+      if (key.length !== 37) {
+        console.warn('[extractApiKey] Unexpected key length:', key.length);
+      }
       return key;
     }
   }

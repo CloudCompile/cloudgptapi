@@ -99,21 +99,18 @@ export async function POST(request: NextRequest) {
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 100;
     } else if (userPlan === 'pro' || userPlan === 'ultra') {
-      limit = 5; // 5 RPM for images as requested
+      limit = 5;
     } else if (userPlan === 'developer') {
       limit = 20;
     } else if (userPlan === 'free') {
-      limit = 5; // 5 RPM for images
+      limit = 5;
     }
 
-    // If API key has a specific custom limit that's higher, use that
     if (apiKeyInfo && apiKeyInfo.rateLimit > limit) {
       limit = apiKeyInfo.rateLimit;
     }
     
-    // Apply peak hours reduction (5 PM - 5 AM UTC): 50% reduction for all users
     limit = applyPeakHoursLimit(limit);
-    dailyLimit = applyPeakHoursLimit(dailyLimit);
     
     // VPS Bypass: Don't count requests from our own VPS against RPD
     const isSystemRequest = clientIp === '157.151.169.121';

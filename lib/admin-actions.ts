@@ -148,8 +148,8 @@ export async function syncUser(userId: string, email: string, username?: string,
       let initialPlan = 'free';
       if (subscription) {
         const priceId = subscription.stripe_price_id;
-        const PRO_PRICE_ID = 'price_1TH5jYQvLgyqzP00y0P6OYDO';
-        const ULTRA_PRICE_ID = 'price_1TH5l0QvLgyqzP00K7uLVmS4';
+        const PRO_PRICE_ID = 'price_1TItn8QvLgyqzP00jz4MFk7R';
+        const ULTRA_PRICE_ID = 'price_1TItmiQvLgyqzP00FPsN9Vxb';
 
         if (priceId === PRO_PRICE_ID) initialPlan = 'pro';
         else if (priceId === ULTRA_PRICE_ID) initialPlan = 'ultra';
@@ -210,8 +210,8 @@ export async function syncUser(userId: string, email: string, username?: string,
 
   if (subscription) {
     const priceId = subscription.stripe_price_id;
-    const PRO_PRICE_ID = 'price_1TH5jYQvLgyqzP00y0P6OYDO';
-    const ULTRA_PRICE_ID = 'price_1TH5l0QvLgyqzP00K7uLVmS4';
+    const PRO_PRICE_ID = 'price_1TItn8QvLgyqzP00jz4MFk7R';
+    const ULTRA_PRICE_ID = 'price_1TItmiQvLgyqzP00FPsN9Vxb';
 
     if (priceId === PRO_PRICE_ID) initialPlan = 'pro';
     else if (priceId === ULTRA_PRICE_ID) initialPlan = 'ultra';

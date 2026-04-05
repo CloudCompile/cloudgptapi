@@ -29,7 +29,7 @@ export default async function AdminPlansPage() {
       bg: 'bg-emerald-50 dark:bg-emerald-900/20',
       border: 'border-emerald-200 dark:border-emerald-800/50',
       features: ['Access to ALL Flagship models', 'GPT-5.4, Claude 4.6, Gemini 3 Pro', 'Reasoning & Specialized models', 'High-res image generation', '10 requests per minute', '1000 requests per day', 'Priority support'],
-      stripeId: 'price_1TH5jYQvLgyqzP00y0P6OYDO',
+      stripeId: 'price_1TItn8QvLgyqzP00jz4MFk7R',
       status: 'Active',
     },
     {
@@ -42,7 +42,7 @@ export default async function AdminPlansPage() {
       bg: 'bg-blue-50 dark:bg-blue-900/20',
       border: 'border-blue-200 dark:border-blue-800/50',
       features: ['Everything in Pro', 'Higher rate limits', '2500 requests per day', 'Priority processing', 'Early access to new models'],
-      stripeId: 'price_1TH5l0QvLgyqzP00K7uLVmS4',
+      stripeId: 'price_1TItmiQvLgyqzP00FPsN9Vxb',
       status: 'Active',
     },
     {

@@ -22,7 +22,7 @@ const plans = [
       '1000 requests per day',
       'Priority email support',
     ],
-    stripePriceId: 'price_1TH5jYQvLgyqzP00y0P6OYDO',
+    stripePriceId: 'price_1TItn8QvLgyqzP00jz4MFk7R',
   },
   {
     name: 'Ultra',
@@ -39,7 +39,7 @@ const plans = [
       'Priority processing',
       'Early access to new models',
     ],
-    stripePriceId: 'price_1TH5l0QvLgyqzP00K7uLVmS4',
+    stripePriceId: 'price_1TItmiQvLgyqzP00FPsN9Vxb',
   },
 ];
 

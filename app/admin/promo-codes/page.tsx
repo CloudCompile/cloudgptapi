@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 async function createPromoCode(formData: FormData) {
   'use server';
-  
+
   const code = formData.get('code') as string;
   const discountAmount = parseFloat(formData.get('discount_amount') as string);
   const discountType = formData.get('discount_type') as 'percent' | 'fixed';
@@ -20,8 +20,10 @@ async function createPromoCode(formData: FormData) {
     return;
   }
 
+  let redirectUrl: string;
+
   try {
-    const { data, error } = await supabaseAdmin.from('promo_codes').insert({
+    const { error } = await supabaseAdmin.from('promo_codes').insert({
       code: code.toUpperCase(),
       discount_amount: discountAmount,
       discount_type: discountType,
@@ -31,15 +33,18 @@ async function createPromoCode(formData: FormData) {
     });
     if (error) {
       console.error('Error creating promo code:', error);
-      redirect('/admin/promo-codes?message=' + encodeURIComponent(error.message) + '&messageType=error');
+      redirectUrl = '/admin/promo-codes?message=' + encodeURIComponent(error.message) + '&messageType=error';
     } else {
       console.log('Created promo code:', code.toUpperCase());
-      redirect('/admin/promo-codes?message=Promo+code+' + code.toUpperCase() + '+created+successfully&messageType=success');
+      revalidatePath('/admin/promo-codes');
+      redirectUrl = '/admin/promo-codes?message=Promo+code+' + code.toUpperCase() + '+created+successfully&messageType=success';
     }
   } catch (e: any) {
-    console.error('Error creating promo code', e);
-    redirect('/admin/promo-codes?message=' + encodeURIComponent(e.message || 'Unknown error') + '&messageType=error');
+    console.error('Error creating promo code:', e);
+    redirectUrl = '/admin/promo-codes?message=' + encodeURIComponent(e.message || 'Unknown error') + '&messageType=error';
   }
+
+  redirect(redirectUrl!);
 }
 
 export default async function AdminPromoCodesPage({
@@ -48,19 +53,19 @@ export default async function AdminPromoCodesPage({
   searchParams: { showCreate?: string; message?: string; messageType?: string };
 }) {
   const showCreateDialog = searchParams?.showCreate === 'true';
-  
+
   // Check for message in URL (from form submission)
   const urlMessage = searchParams?.message;
   const urlMessageType = searchParams?.messageType;
   const displayMessage = urlMessage ? { type: urlMessageType as 'success' | 'error', message: urlMessage } : null;
-  
+
   const fetchPromoCodes = async () => {
     try {
       const { data, count, error } = await supabaseAdmin
         .from('promo_codes')
         .select('*', { count: 'exact', head: false })
         .order('created_at', { ascending: false });
-      
+
       if (error) {
         console.error('Error fetching promo codes:', error);
         return { promoCodes: [], count: 0, dbReady: false, error: error.message };
@@ -82,7 +87,7 @@ export default async function AdminPromoCodesPage({
     'use server';
     const id = formData.get('id') as string;
     if (!id) return;
-    
+
     try {
       await supabaseAdmin.from('promo_codes').delete().eq('id', id);
     } catch (e) {
@@ -104,7 +109,7 @@ export default async function AdminPromoCodesPage({
           {dbReady && (
             <form action="">
               <input type="hidden" name="showCreate" value="true" />
-              <button 
+              <button
                 type="submit"
                 className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors shadow-sm"
               >
@@ -118,7 +123,7 @@ export default async function AdminPromoCodesPage({
       {displayMessage && (
         <div className={cn(
           "mb-6 p-4 rounded-xl border flex items-start gap-4",
-          displayMessage.type === 'success' 
+          displayMessage.type === 'success'
             ? "border-green-200 bg-green-50 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300"
             : "border-red-200 bg-red-50 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300"
         )}>
@@ -168,14 +173,14 @@ export default async function AdminPromoCodesPage({
                 </button>
               </form>
             </div>
-            
+
             <form action={createPromoCode} className="p-5 flex flex-col gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1.5">Code</label>
-                <input 
-                  type="text" 
-                  name="code" 
-                  required 
+                <input
+                  type="text"
+                  name="code"
+                  required
                   placeholder="e.g. SUMMER2026"
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
                   style={{ textTransform: 'uppercase' }}
@@ -185,10 +190,10 @@ export default async function AdminPromoCodesPage({
               <div className="flex gap-4">
                 <div className="flex-1">
                   <label className="block text-sm font-medium mb-1.5">Discount Amount</label>
-                  <input 
-                    type="number" 
-                    name="discount_amount" 
-                    required 
+                  <input
+                    type="number"
+                    name="discount_amount"
+                    required
                     min="0"
                     step="0.01"
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -196,7 +201,7 @@ export default async function AdminPromoCodesPage({
                 </div>
                 <div className="w-1/3">
                   <label className="block text-sm font-medium mb-1.5">Type</label>
-                  <select 
+                  <select
                     name="discount_type"
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
                   >
@@ -209,9 +214,9 @@ export default async function AdminPromoCodesPage({
               <div className="flex gap-4">
                 <div className="flex-1">
                   <label className="block text-sm font-medium mb-1.5">Usage Limit <span className="text-slate-500 font-normal">(Optional)</span></label>
-                  <input 
-                    type="number" 
-                    name="usage_limit" 
+                  <input
+                    type="number"
+                    name="usage_limit"
                     min="1"
                     placeholder="e.g. 100"
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -219,9 +224,9 @@ export default async function AdminPromoCodesPage({
                 </div>
                 <div className="flex-1">
                   <label className="block text-sm font-medium mb-1.5">Expires At <span className="text-slate-500 font-normal">(Optional)</span></label>
-                  <input 
-                    type="date" 
-                    name="expires_at" 
+                  <input
+                    type="date"
+                    name="expires_at"
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
                   />
                 </div>
@@ -249,7 +254,7 @@ export default async function AdminPromoCodesPage({
           </div>
           <h2 className="font-bold text-lg">Active Campaigns & Codes</h2>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -281,7 +286,7 @@ export default async function AdminPromoCodesPage({
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium">{promo.times_used || 0} used</span>
+                      <span className="text-sm font-medium">{promo.usage_count || 0} used</span>
                       {promo.usage_limit && <span className="text-xs text-slate-500">Limit: {promo.usage_limit}</span>}
                     </div>
                   </td>
@@ -307,7 +312,7 @@ export default async function AdminPromoCodesPage({
                   </td>
                 </tr>
               ))}
-              
+
               {promoCodes.length === 0 && dbReady && (
                 <tr>
                   <td colSpan={5} className="px-6 py-16 text-center text-slate-500">
@@ -321,7 +326,7 @@ export default async function AdminPromoCodesPage({
                   </td>
                 </tr>
               )}
-              
+
               {promoCodes.length === 0 && !dbReady && (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-slate-500 bg-slate-50/50 dark:bg-slate-800/20">

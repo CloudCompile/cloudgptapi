@@ -84,16 +84,14 @@ export async function POST(request: NextRequest) {
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 20;
     } else if (userPlan === 'pro' || userPlan === 'ultra' || userPlan === 'video_pro') {
-      limit = 2; // 2 RPM for video as requested
+      limit = 2;
     } else if (userPlan === 'developer') {
       limit = 5;
     } else if (userPlan === 'free') {
-      limit = 2; // 2 RPM for video
+      limit = 2;
     }
 
-    // Apply peak hours reduction (5 PM - 5 AM UTC): 50% reduction for all users
     limit = applyPeakHoursLimit(limit);
-    dailyLimit = applyPeakHoursLimit(dailyLimit);
     
     // VPS Bypass: Don't count requests from our own VPS against RPD
     const isSystemRequest = clientIp === '157.151.169.121';
@@ -293,8 +291,14 @@ export async function POST(request: NextRequest) {
         );
       }
     } else {
-      // Default to our internal proxy which handles Pollinations
-      videoUrl = `${process.env.NEXT_PUBLIC_APP_URL || ''}/api/video?${params.toString()}`;
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+      if (!appUrl) {
+        return NextResponse.json(
+          { error: { message: 'NEXT_PUBLIC_APP_URL is not configured', type: 'config_error', code: 'missing_config' } },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
+      videoUrl = `${appUrl}/api/video?${params.toString()}`;
     }
     
     if (!videoUrl) {
