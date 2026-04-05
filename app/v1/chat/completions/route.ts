@@ -153,7 +153,8 @@ export const POST = withErrorHandler(async function POST(request: NextRequest) {
     const body = schemaValidation.data;
 
     // Save last message before memory/lore injection for later tracking
-    const lastMessage = body.messages && body.messages.length > 0 ? body.messages[body.messages.length - 1]?.content || '' : '';
+    const rawLastMessageContent = body.messages && body.messages.length > 0 ? body.messages[body.messages.length - 1]?.content || '' : '';
+    const lastMessage = typeof rawLastMessageContent === 'string' ? rawLastMessageContent : JSON.stringify(rawLastMessageContent);
     
     // Log request details for debugging (especially token issues)
     console.log(`[${requestId}] Request model: ${body.model}, max_tokens: ${body.max_tokens}, messages: ${body.messages?.length}`);

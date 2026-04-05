@@ -27,7 +27,7 @@ export const PROVIDER_TIMEOUT_MS = 300000; // 5 minutes (RP models can be slow)
  */
 export function generateCharacterId(metadata: any): string {
   if (!metadata) return 'default-character';
-  
+
   // If we already have a clean UUID or ID, use it
   if (typeof metadata === 'string' && metadata.length > 10) return metadata;
   if (metadata.id && typeof metadata.id === 'string' && metadata.id.length > 10) return metadata.id;
@@ -103,50 +103,50 @@ export function validateMessages(messages: any[]): { valid: boolean; error?: str
   if (messages.length === 0) {
     return { valid: false, error: 'messages array cannot be empty' };
   }
-  
+
   if (messages.length > MAX_MESSAGES_COUNT) {
     return { valid: false, error: `messages array exceeds maximum of ${MAX_MESSAGES_COUNT} messages` };
   }
-  
+
   let totalLength = 0;
-  
+
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
-    
+
     if (!msg || typeof msg !== 'object') {
       return { valid: false, error: `messages[${i}] must be an object` };
     }
-    
+
     if (!msg.role || typeof msg.role !== 'string') {
       return { valid: false, error: `messages[${i}].role must be a string` };
     }
-    
+
     const validRoles = ['system', 'user', 'assistant', 'function', 'tool'];
     if (!validRoles.includes(msg.role)) {
       return { valid: false, error: `messages[${i}].role must be one of: ${validRoles.join(', ')}` };
     }
-    
+
     if (msg.content !== null && msg.content !== undefined) {
       if (typeof msg.content !== 'string' && !Array.isArray(msg.content)) {
         return { valid: false, error: `messages[${i}].content must be a string or array` };
       }
-      
+
       const contentLength = typeof msg.content === 'string'
         ? msg.content.length
         : JSON.stringify(msg.content).length;
-        
+
       if (contentLength > MAX_MESSAGE_LENGTH) {
         return { valid: false, error: `Message at index ${i} is too long (${contentLength} chars). Maximum allowed per message is ${MAX_MESSAGE_LENGTH} characters. Please truncate your input.` };
       }
-      
+
       totalLength += contentLength;
     }
   }
-  
+
   if (totalLength > MAX_TOTAL_LENGTH) {
     return { valid: false, error: `Total conversation length (${totalLength} chars) exceeds the maximum allowed limit of ${MAX_TOTAL_LENGTH} characters. Please reduce the number of messages or their content.` };
   }
-  
+
   return { valid: true };
 }
 
@@ -240,7 +240,7 @@ export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
   'minimax': 'minimax-m2.5',
   'deepseek': 'deepseek-v3.2',
   'grok': 'grok',
-  
+
   // OpenRouter specific mappings if needed
   'openai/gpt-4o': 'gpt-4o',
   'anthropic/claude-3.5-sonnet': 'claude-3-5-sonnet',
@@ -332,8 +332,8 @@ export function getBlazeAiModelId(modelId: string): string {
 
 export function resolveModelId(modelId: string): string {
   const normalizedModelId = modelId.trim().replace(/^['"]+|['"]+$/g, '');
-  const aliased = modelAliases[normalizedModelId] || normalizedModelId;
-  return PROVIDER_MODEL_MAPPING[aliased] || aliased;
+
+  return modelAliases[normalizedModelId] || normalizedModelId;
 }
 
 export const SEARCH_MODEL_ALIASES: Record<string, string> = {
@@ -355,18 +355,18 @@ export function generateRequestId(): string {
 // Simple token estimation: ~4 chars per token
 export function estimateTokens(text: string | any[] | object): number {
   if (!text) return 0;
-  
-  const content = typeof text === 'string' 
-    ? text 
+
+  const content = typeof text === 'string'
+    ? text
     : JSON.stringify(text);
-    
+
   return Math.ceil(content.length / 4);
 }
 
 // Sanitize error text to prevent XML/HTML leakage
 export function sanitizeErrorText(text: string): string {
   if (!text) return 'Unknown error';
-  
+
   // If it's XML or HTML, extract meaningful message or return generic error
   if (text.includes('<?xml') || text.includes('<html') || (text.includes('<Error>') && text.includes('</Error>'))) {
     if (text.includes('AccessDenied')) return 'Access denied by upstream provider.';
@@ -377,7 +377,7 @@ export function sanitizeErrorText(text: string): string {
     }
     return 'The upstream provider returned an invalid response format (XML/HTML).';
   }
-  
+
   return text.substring(0, 1000);
 }
 
@@ -408,7 +408,7 @@ export function createChatTransformStream(
   let fullContent = '';
   let fullToolCalls: any[] = [];
   let leftover = '';
-  
+
   // Track last seen content for various fields to handle providers that send snapshots instead of deltas
   const streamState = {
     lastContent: '',
@@ -422,7 +422,7 @@ export function createChatTransformStream(
     // 0. Handle potential error objects in the stream
     if (parsed.error) {
       console.error('[STREAM ERROR] Received error in stream chunk:', parsed.error);
-      return false; 
+      return false;
     }
 
     let modified = false;
@@ -430,9 +430,9 @@ export function createChatTransformStream(
     // Helper to extract delta from potential snapshots
     const getDelta = (newVal: string, lastValKey: keyof typeof streamState): string => {
       if (typeof newVal !== 'string' || !newVal) return '';
-      
+
       const lastVal = streamState[lastValKey] as string;
-      
+
       // If the new value starts with the last value, it's likely a snapshot
       if (lastVal && newVal.startsWith(lastVal)) {
         const delta = newVal.slice(lastVal.length);
@@ -442,7 +442,7 @@ export function createChatTransformStream(
         }
         return '';
       }
-      
+
       // If it doesn't start with the last value, it might be a true delta 
       // OR a completely new snapshot (e.g. from a different field)
       // For safety, if it's not a snapshot, we treat it as a delta but update our snapshot tracker
@@ -466,7 +466,7 @@ export function createChatTransformStream(
             modified = true;
           }
         }
-      } 
+      }
       // Check for top-level content (some Pollinations models)
       else if (parsed.content) {
         const delta = getDelta(parsed.content, 'lastContent');
@@ -556,13 +556,13 @@ export function createChatTransformStream(
 
     const choice = parsed.choices[0];
     const delta = choice.delta || choice.message || {};
-    
+
     // 3. Extract content and ensure it's in delta.content for client compatibility
     // Fix for Claude/Gemini repetition: some providers send snapshots instead of deltas
     if (delta.content) {
       const originalContent = delta.content;
       const extractedDelta = getDelta(originalContent, 'lastContent');
-      
+
       if (extractedDelta !== originalContent) {
         delta.content = extractedDelta;
         modified = true;
@@ -625,7 +625,7 @@ export function createChatTransformStream(
     } else if (contentFromBlocks && !modifiedInStep3) {
       fullContent += contentFromBlocks;
     }
-    
+
     // 5. Tool calls
     if (delta.tool_calls) {
       for (const toolCall of delta.tool_calls) {
@@ -651,7 +651,7 @@ export function createChatTransformStream(
       const text = decoder.decode(chunk, { stream: true });
       const lines = (leftover + text).split('\n');
       leftover = lines.pop() || '';
-      
+
       let outputText = '';
       for (const line of lines) {
         const trimmedLine = line.trim();
@@ -669,11 +669,11 @@ export function createChatTransformStream(
           try {
             const parsed = JSON.parse(dataStr);
             const modified = processParsedData(parsed);
-            
+
             // Strictly filter out chunks that have empty content to prevent "Empty completion" errors in Chub JAI/ST
             const choice = parsed.choices?.[0];
             const content = choice?.delta?.content || choice?.message?.content;
-            
+
             if ((!parsed.choices || parsed.choices.length === 0 || (content !== undefined && content === "")) && !parsed.error) {
               // Skip empty chunk
               continue;
@@ -694,14 +694,14 @@ export function createChatTransformStream(
           outputText += trimmedLine + '\n';
         }
       }
-      
+
       if (outputText) {
         controller.enqueue(new TextEncoder().encode(outputText));
       }
     },
     async flush(controller) {
       let finalOutput = '';
-      
+
       // Process any remaining leftover data
       if (leftover) {
         const lines = leftover.split('\n');
@@ -719,10 +719,10 @@ export function createChatTransformStream(
             try {
               const parsed = JSON.parse(dataStr);
               const modified = processParsedData(parsed);
-              
+
               const choice = parsed.choices?.[0];
               const content = choice?.delta?.content || choice?.message?.content;
-              
+
               if ((!parsed.choices || parsed.choices.length === 0 || (content !== undefined && content === "")) && !parsed.error) {
                 continue;
               }
@@ -756,7 +756,7 @@ export function createChatTransformStream(
           };
           finalOutput = `data: ${JSON.stringify(fallback)}\n\n` + finalOutput;
         }
-        
+
         finalOutput += 'data: [DONE]\n\n';
       }
 
@@ -769,14 +769,14 @@ export function createChatTransformStream(
       if (fullContent.length > 0 && fullContent.length < 200) {
         console.log(`[STREAM FLUSH] fullContent:`, fullContent);
       }
-      
+
       // If we have tool calls but no content, we still want to remember it
       const hasContent = !!fullContent;
       const hasToolCalls = fullToolCalls.length > 0;
-      
+
       // Only remember for gemini-large or if explicitly enabled
       const isGeminiLarge = modelId === 'gemini-large';
-      
+
       if ((hasContent || hasToolCalls) && userId && lastMessage && isGeminiLarge) {
         try {
           // Format assistant message for memory
