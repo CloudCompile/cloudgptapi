@@ -47,7 +47,7 @@ function secureShuffleArray<T>(items: T[]): T[] {
 }
 
 function generateRotatingIp(): string {
-  const octet = () => getSecureRandomInt(254) + 1;
+  const octet = () => getSecureRandomInt(256);
   return `${octet()}.${octet()}.${octet()}.${octet()}`;
 }
 
@@ -411,7 +411,9 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   try {
     if (model.provider === 'openrouter' && openRouterCandidateKeys.length > 1) {
       const fallbackStatuses = new Set([401, 403, 429, 500, 502, 503, 504]);
-      const keyOrder = [providerApiKey, ...openRouterCandidateKeys.filter(key => key !== providerApiKey)].filter(Boolean) as string[];
+      const keyOrder = providerApiKey
+        ? [providerApiKey, ...openRouterCandidateKeys.filter(key => key !== providerApiKey)]
+        : [...openRouterCandidateKeys];
       let lastNetworkError: any = null;
 
       for (let i = 0; i < keyOrder.length; i++) {
@@ -472,13 +474,14 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     );
   }
 
-  if (!providerResponse || !providerResponse.ok) {
-    if (!providerResponse) {
-      return NextResponse.json(
-        { error: { message: 'Provider returned no response', type: 'network_error', param: null, code: 'empty_provider_response', request_id: requestId } },
-        { status: 502, headers: getCorsHeaders() }
-      );
-    }
+  if (!providerResponse) {
+    return NextResponse.json(
+      { error: { message: 'Provider returned no response', type: 'network_error', param: null, code: 'empty_provider_response', request_id: requestId } },
+      { status: 502, headers: getCorsHeaders() }
+    );
+  }
+
+  if (!providerResponse.ok) {
     const errorText = await providerResponse.text();
     console.error(`[${requestId}] Provider error from ${model.provider} (${providerResponse.status}):`, errorText.substring(0, 500));
 
