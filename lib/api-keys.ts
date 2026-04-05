@@ -44,11 +44,28 @@ export async function validateApiKey(key: string): Promise<ApiKey | null> {
     return null;
   }
 
-  const { data: profile } = await supabaseAdmin
+  console.log('[validateApiKey] Found API key for user_id:', data.user_id, '| key_name:', data.name);
+
+  const keyLevelPlan: string | null = (data as any).plan || null;
+  if (keyLevelPlan) {
+    console.log('[validateApiKey] Using key-level plan override:', keyLevelPlan);
+  }
+
+  // 2. Profile lookup (standard path)
+  const { data: profile, error: profileError } = await supabaseAdmin
     .from('profiles')
     .select('plan, email')
     .eq('id', data.user_id)
     .maybeSingle();
+
+  if (profileError) {
+    console.error('[validateApiKey] Profile query error:', profileError.message);
+  }
+
+  if (!profile) {
+    console.warn('[validateApiKey] No profile found for user_id:', data.user_id,
+      '— plan will default to free unless overridden by subscription or key-level plan');
+  }
 
   await supabaseAdmin
     .from('api_keys')
@@ -58,7 +75,56 @@ export async function validateApiKey(key: string): Promise<ApiKey | null> {
   let userEmail = profile?.email;
   let userPlan = profile?.plan || 'free';
 
-  console.log('[validateApiKey] Profile plan for', userEmail, ':', userPlan);
+  console.log('[validateApiKey] Profile plan for user_id', data.user_id, '(email:', userEmail, ') :', userPlan);
+
+  if (!keyLevelPlan && userPlan === 'free') {
+    console.log('[validateApiKey] Profile shows free — checking user_subscriptions for active subscription...');
+    const { data: subscription } = await supabaseAdmin
+      .from('user_subscriptions')
+      .select('stripe_price_id, status, stripe_current_period_end')
+      .eq('user_id', data.user_id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (subscription) {
+      const isExpired = subscription.stripe_current_period_end
+        ? new Date(subscription.stripe_current_period_end) < new Date()
+        : false;
+
+      if (!isExpired) {
+        const priceId = subscription.stripe_price_id || '';
+        console.log('[validateApiKey] Active subscription found! price_id:', priceId);
+
+        const ULTRA_PRICE_IDS = (process.env.STRIPE_ULTRA_PRICE_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+        const PRO_PRICE_IDS = (process.env.STRIPE_PRO_PRICE_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+
+        if (ULTRA_PRICE_IDS.length > 0 && ULTRA_PRICE_IDS.some(pid => priceId.includes(pid))) {
+          userPlan = 'ultra';
+          console.log('[validateApiKey] Subscription resolves to ULTRA');
+        } else if (PRO_PRICE_IDS.length > 0 && PRO_PRICE_IDS.some(pid => priceId.includes(pid))) {
+          userPlan = 'pro';
+          console.log('[validateApiKey] Subscription resolves to PRO');
+        } else {
+          userPlan = 'pro';
+          console.warn('[validateApiKey] Active subscription found but STRIPE_ULTRA_PRICE_IDS / STRIPE_PRO_PRICE_IDS env vars not set. Defaulting to pro. Configure env vars for accurate plan detection.');
+        }
+
+        if (profile) {
+          Promise.resolve(
+            supabaseAdmin.from('profiles').update({ plan: userPlan }).eq('id', data.user_id)
+          ).then(() => {
+            console.log('[validateApiKey] Synced plan', userPlan, 'back to profile for user_id:', data.user_id);
+          }).catch(() => { });
+        }
+      } else {
+        console.log('[validateApiKey] Subscription is expired.');
+      }
+    } else {
+      console.log('[validateApiKey] No active subscription found for user_id:', data.user_id);
+    }
+  }
 
   if (userEmail) {
     userPlan = await applyPlanOverride(userEmail, userPlan, userEmail, 'email');
@@ -67,6 +133,12 @@ export async function validateApiKey(key: string): Promise<ApiKey | null> {
   if (userEmail === 'tery9tery9@gmail.com') {
     userPlan = 'pro';
   }
+
+  if (keyLevelPlan) {
+    userPlan = keyLevelPlan;
+  }
+
+  console.log('[validateApiKey] FINAL resolved plan for user_id', data.user_id, ':', userPlan);
 
   const rawSettings = data.fandom_settings || {};
   const normalizedSettings = {
