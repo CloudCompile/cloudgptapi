@@ -272,4 +272,5 @@ CREATE POLICY "Public access to promo codes"
 DROP POLICY IF EXISTS "Admins can manage promo codes" ON public.promo_codes;
 CREATE POLICY "Admins can manage promo codes"
     ON public.promo_codes FOR ALL
-    USING (true);
+    USING (true)
+    WITH CHECK (true);

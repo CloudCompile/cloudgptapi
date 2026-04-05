@@ -16,7 +16,7 @@ async function createPromoCode(formData: FormData) {
   const expiresAt = formData.get('expires_at') as string || null;
 
   if (!code || isNaN(discountAmount)) {
-    redirect('/admin/promo-codes');
+    redirect('/admin/promo-codes?showCreate=true&message=Invalid+input&messageType=error');
     return;
   }
 
@@ -31,42 +31,52 @@ async function createPromoCode(formData: FormData) {
     });
     if (error) {
       console.error('Error creating promo code:', error);
+      redirect('/admin/promo-codes?message=' + encodeURIComponent(error.message) + '&messageType=error');
     } else {
       console.log('Created promo code:', code.toUpperCase());
+      redirect('/admin/promo-codes?message=Promo+code+' + code.toUpperCase() + '+created+successfully&messageType=success');
     }
-  } catch (e) {
+  } catch (e: any) {
     console.error('Error creating promo code', e);
+    redirect('/admin/promo-codes?message=' + encodeURIComponent(e.message || 'Unknown error') + '&messageType=error');
   }
-  revalidatePath('/admin/promo-codes');
-  redirect('/admin/promo-codes');
 }
 
 export default async function AdminPromoCodesPage({
   searchParams,
 }: {
-  searchParams: { showCreate?: string };
+  searchParams: { showCreate?: string; message?: string; messageType?: string };
 }) {
   const showCreateDialog = searchParams?.showCreate === 'true';
+  
+  // Check for message in URL (from form submission)
+  const urlMessage = searchParams?.message;
+  const urlMessageType = searchParams?.messageType;
+  const displayMessage = urlMessage ? { type: urlMessageType as 'success' | 'error', message: urlMessage } : null;
   
   const fetchPromoCodes = async () => {
     try {
       const { data, count, error } = await supabaseAdmin
         .from('promo_codes')
-        .select('*', { count: 'exact' })
+        .select('*', { count: 'exact', head: false })
         .order('created_at', { ascending: false });
       
       if (error) {
         console.error('Error fetching promo codes:', error);
-        throw error;
+        return { promoCodes: [], count: 0, dbReady: false, error: error.message };
       }
+      console.log('Fetched promo codes:', data);
       return { promoCodes: data || [], count: count || 0, dbReady: true };
-    } catch (e) {
-      console.warn('Error fetching promo codes. The promo_codes table might not exist yet.', e);
-      return { promoCodes: [], count: 0, dbReady: false };
+    } catch (e: any) {
+      console.warn('Error fetching promo codes:', e);
+      return { promoCodes: [], count: 0, dbReady: false, error: e.message };
     }
   };
 
-  const { promoCodes, dbReady } = await fetchPromoCodes();
+  const result = await fetchPromoCodes();
+  const promoCodes = result.promoCodes;
+  const dbReady = result.dbReady;
+  const fetchError = result.error;
 
   async function deletePromoCode(formData: FormData) {
     'use server';
@@ -105,7 +115,39 @@ export default async function AdminPromoCodesPage({
         </div>
       </div>
 
-      {!dbReady && (
+      {displayMessage && (
+        <div className={cn(
+          "mb-6 p-4 rounded-xl border flex items-start gap-4",
+          displayMessage.type === 'success' 
+            ? "border-green-200 bg-green-50 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300"
+            : "border-red-200 bg-red-50 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300"
+        )}>
+          {displayMessage.type === 'success' ? <CheckCircle className="h-5 w-5 shrink-0 mt-0.5" /> : <X className="h-5 w-5 shrink-0 mt-0.5" />}
+          <p className="text-sm font-medium">{displayMessage.message}</p>
+        </div>
+      )}
+
+      {!dbReady && fetchError && (
+        <div className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300 flex items-start gap-4">
+          <X className="h-6 w-6 shrink-0 mt-0.5" />
+          <div>
+            <h3 className="font-bold text-lg mb-1">Database Error</h3>
+            <p className="text-sm">{fetchError}</p>
+          </div>
+        </div>
+      )}
+
+      {(!dbReady || promoCodes.length === 0) && fetchError && (
+        <div className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300 flex items-start gap-4">
+          <X className="h-6 w-6 shrink-0 mt-0.5" />
+          <div>
+            <h3 className="font-bold text-lg mb-1">Database Error</h3>
+            <p className="text-sm">{fetchError}</p>
+          </div>
+        </div>
+      )}
+
+      {!dbReady && !fetchError && (
         <div className="mb-6 p-4 rounded-xl border border-blue-200 bg-blue-50 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300 flex items-start gap-4">
           <Info className="h-6 w-6 shrink-0 mt-0.5" />
           <div>
