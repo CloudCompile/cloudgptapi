@@ -298,9 +298,19 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   }
   const effectiveMaxTokens = body.max_tokens ? Math.min(body.max_tokens, maxTokensSafetyCap) : defaultMaxTokens;
 
+  let providerMessages = processedMessages;
+  if (model.provider === 'openrouter') {
+    providerMessages = processedMessages.map((message: any) => {
+      if (message?.role === 'developer') {
+        return { ...message, role: 'system' };
+      }
+      return message;
+    });
+  }
+
   const standardBody: any = {
     model: PROVIDER_MODEL_MAPPING[modelId] || modelId,
-    messages: processedMessages,
+    messages: providerMessages,
     temperature: body.temperature ?? 0.7,
     max_tokens: effectiveMaxTokens,
     stream: body.stream ?? false,
