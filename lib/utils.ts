@@ -102,10 +102,13 @@ export function getOpenRouterApiKeys(): string[] {
   const invalidKeys = [
     'sk_nun1ulPVBLupdJrHBF7CGwIgBAoJsEV3', // Key 4 (Requested removal)
   ];
-  const indexedSuffixRegex = /(\d+)$/;
   const orKeyPattern = /^OR_KEY_\d+$/i;
   const openRouterIndexedPattern = /^OPENROUTER_API_KEY_\d+$/i;
   const openRouterIndexedNoUnderscorePattern = /^OPENROUTER_API_KEY\d+$/i;
+  const extractKeyIndex = (key: string): number => {
+    const match = key.match(/(\d+)$/);
+    return Number(match?.[1] || '0');
+  };
 
   const indexedEnvKeys = Object.entries(process.env)
     .filter(([key, value]) =>
@@ -117,8 +120,8 @@ export function getOpenRouterApiKeys(): string[] {
       )
     )
     .sort(([a], [b]) => {
-      const aNum = Number(a.match(indexedSuffixRegex)?.[1] || '0');
-      const bNum = Number(b.match(indexedSuffixRegex)?.[1] || '0');
+      const aNum = extractKeyIndex(a);
+      const bNum = extractKeyIndex(b);
       return aNum - bNum;
     })
     .map(([, value]) => value as string);
