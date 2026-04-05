@@ -42,7 +42,9 @@ export async function GET(request: NextRequest) {
     let rpmLimit = 5;
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       rpmLimit = 10000;
-    } else if (userPlan === 'pro' || userPlan === 'ultra') {
+    } else if (userPlan === 'ultra') {
+      rpmLimit = 20;
+    } else if (userPlan === 'pro') {
       rpmLimit = 10;
     } else if (userPlan === 'developer') {
       rpmLimit = 1000;

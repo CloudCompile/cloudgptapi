@@ -62,7 +62,9 @@ export async function processAuth(
   
   if (userPlan === 'admin' || userPlan === 'enterprise') {
     limit = 10000; 
-  } else if (userPlan === 'pro' || userPlan === 'ultra') {
+  } else if (userPlan === 'ultra') {
+    limit = 20;
+  } else if (userPlan === 'pro') {
     limit = 10;
   } else if (userPlan === 'developer') {
     limit = 1000;
