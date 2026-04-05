@@ -153,13 +153,13 @@ const CLAUDE_CHAT_MODELS: ChatModel[] = [
 const OPENROUTER_CHAT_MODELS: ChatModel[] = [
   { id: 'openrouter/free', name: 'OpenRouter Free Router', provider: 'openrouter', description: 'OpenRouter free-model router' },
   { id: 'qwen/qwen3.6-plus:free', name: 'Qwen3.6 Plus (free)', provider: 'openrouter', description: 'Qwen Qwen3.6 Plus free' },
-  { id: 'stepfun-ai/step-3.5-flash:free', name: 'Step 3.5 Flash (free)', provider: 'openrouter', description: 'StepFun Step 3.5 Flash free' },
+  { id: 'stepfun/step-3.5-flash:free', name: 'Step 3.5 Flash (free)', provider: 'openrouter', description: 'StepFun Step 3.5 Flash free' },
   { id: 'nvidia/nemotron-3-super:free', name: 'Nemotron 3 Super (free)', provider: 'openrouter', description: 'NVIDIA Nemotron 3 Super free' },
   { id: 'arcee-ai/trinity-large-preview:free', name: 'Trinity Large Preview (free)', provider: 'openrouter', description: 'Arcee AI Trinity Large Preview free' },
   { id: 'z-ai/glm-4.5-air:free', name: 'GLM 4.5 Air (free)', provider: 'openrouter', description: 'Z.ai GLM 4.5 Air free' },
   { id: 'nvidia/nemotron-3-nano-30b-a3b:free', name: 'Nemotron 3 Nano 30B A3B (free)', provider: 'openrouter', description: 'NVIDIA Nemotron 3 Nano 30B A3B free' },
   { id: 'arcee-ai/trinity-mini:free', name: 'Trinity Mini (free)', provider: 'openrouter', description: 'Arcee AI Trinity Mini free' },
-  { id: 'nvidia/nemotron-nano-12b-2-vl:free', name: 'Nemotron Nano 12B 2 VL (free)', provider: 'openrouter', description: 'NVIDIA Nemotron Nano 12B 2 VL free' },
+  { id: 'nvidia/nemotron-nano-12b-v2-vl:free', name: 'Nemotron Nano 12B V2 VL (free)', provider: 'openrouter', description: 'NVIDIA Nemotron Nano 12B V2 VL free' },
   { id: 'minimax/minimax-m2.5:free', name: 'MiniMax M2.5 (free)', provider: 'openrouter', description: 'MiniMax M2.5 free' },
   { id: 'nvidia/nemotron-nano-9b-v2:free', name: 'Nemotron Nano 9B V2 (free)', provider: 'openrouter', description: 'NVIDIA Nemotron Nano 9B V2 free' },
   { id: 'openai/gpt-oss-120b:free', name: 'GPT-OSS 120B (free)', provider: 'openrouter', description: 'OpenAI GPT-OSS 120B free' },
@@ -168,7 +168,6 @@ const OPENROUTER_CHAT_MODELS: ChatModel[] = [
   { id: 'qwen/qwen3-next-80b-a3b-instruct:free', name: 'Qwen3 Next 80B A3B Instruct (free)', provider: 'openrouter', description: 'Qwen Qwen3 Next 80B A3B Instruct free' },
   { id: 'google/gemma-3-27b-it:free', name: 'Gemma 3 27B (free)', provider: 'openrouter', description: 'Google Gemma 3 27B free' },
   { id: 'google/gemma-3-4b-it:free', name: 'Gemma 3 4B (free)', provider: 'openrouter', description: 'Google Gemma 3 4B free' },
-  { id: 'google/gemma-3n-e4b-it:free', name: 'Gemma 3n 4B (free)', provider: 'openrouter', description: 'Google Gemma 3n 4B free' },
   { id: 'google/gemma-3-12b-it:free', name: 'Gemma 3 12B (free)', provider: 'openrouter', description: 'Google Gemma 3 12B free' },
   { id: 'google/gemma-3n-e2b-it:free', name: 'Gemma 3n 2B (free)', provider: 'openrouter', description: 'Google Gemma 3n 2B free' },
   // OpenRouter free models
@@ -183,7 +182,7 @@ const OPENROUTER_CHAT_MODELS: ChatModel[] = [
   { id: 'nvidia/nemotron-3-nano-30b-a3b:free', name: 'NVIDIA Nemotron 3 Nano 30B', provider: 'openrouter', description: 'NVIDIA Nemotron 3 Nano 30B A3B' },
   { id: 'nvidia/nemotron-nano-12b-v2-vl:free', name: 'NVIDIA Nemotron Nano 12B V2 VL', provider: 'openrouter', description: 'NVIDIA Nemotron Nano 12B V2 Vision-Language' },
   { id: 'qwen/qwen3-coder:free', name: 'Qwen 3 Coder', provider: 'openrouter', description: 'Qwen 3 Coder model' },
-  { id: 'ai/glm-4.5-air:free', name: 'GLM 4.5 Air', provider: 'openrouter', description: 'Z-AI GLM 4.5 Air' },
+  { id: 'z-ai/glm-4.5-air:free', name: 'GLM 4.5 Air', provider: 'openrouter', description: 'Z-AI GLM 4.5 Air' },
   { id: 'google/gemma-3-27b-it:free', name: 'Google Gemma 3 27B IT', provider: 'openrouter', description: 'Google Gemma 3 27B Instruct' },
   { id: 'meta-llama/llama-3.3-70b-instruct:free', name: 'Meta Llama 3.3 70B Instruct', provider: 'openrouter', description: 'Meta Llama 3.3 70B Instruct' },
   { id: 'google/gemini-2.0-flash-exp:free', name: 'Google Gemini 2.0 Flash Exp', provider: 'openrouter', description: 'Google Gemini 2.0 Flash Experimental' },
@@ -199,11 +198,9 @@ const OPENROUTER_CHAT_MODELS: ChatModel[] = [
   { id: 'qwen/qwen3-4b:free', name: 'Qwen 3 4B', provider: 'openrouter', description: 'Qwen 3 4B model' },
   { id: 'meta-llama/llama-3.2-3b-instruct:free', name: 'Meta Llama 3.2 3B Instruct', provider: 'openrouter', description: 'Meta Llama 3.2 3B Instruct' },
   { id: 'qwen/qwen-2.5-vl-7b-instruct:free', name: 'Qwen 2.5 VL 7B Instruct', provider: 'openrouter', description: 'Qwen 2.5 Vision-Language 7B Instruct' },
-  { id: 'google/gemma-3n-e2b-it:free', name: 'Google Gemma 3N E2B IT', provider: 'openrouter', description: 'Google Gemma 3N E2B Instruct' },
   { id: 'google/gemma-3-4b-it:free', name: 'Google Gemma 3 4B IT', provider: 'openrouter', description: 'Google Gemma 3 4B Instruct' },
   { id: 'google/gemma-3-12b-it:free', name: 'Google Gemma 3 12B IT', provider: 'openrouter', description: 'Google Gemma 3 12B Instruct' },
-  { id: 'google/gemma-3n-e4b-it:free', name: 'Google Gemma 3N E4B IT', provider: 'openrouter', description: 'Google Gemma 3N E4B Instruct' },
-  { id: 'moonshotai/kimi-k2:free', name: 'Moonshot AI Kimi K2', provider: 'openrouter', description: 'Moonshot AI Kimi K2' },
+  { id: 'google/gemma-3n-e2b-it:free', name: 'Google Gemma 3N E2B IT', provider: 'openrouter', description: 'Google Gemma 3N E2B Instruct' },
 ];
 
 const STABLEHORDE_CHAT_MODELS: ChatModel[] = [
