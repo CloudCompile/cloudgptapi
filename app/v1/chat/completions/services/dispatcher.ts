@@ -26,6 +26,24 @@ import {
 } from '@/lib/utils';
 import { rememberInteraction } from '@/lib/memory';
 
+function getSecureRandomInt(maxExclusive: number): number {
+  if (maxExclusive <= 0) return 0;
+  const randomBytes = new Uint32Array(1);
+  crypto.getRandomValues(randomBytes);
+  return randomBytes[0] % maxExclusive;
+}
+
+function secureShuffleArray<T>(items: T[]): T[] {
+  const shuffled = [...items];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = getSecureRandomInt(i + 1);
+    const temp = shuffled[i];
+    shuffled[i] = shuffled[j];
+    shuffled[j] = temp;
+  }
+  return shuffled;
+}
+
 export interface DispatchOptions {
   request: NextRequest;
   body: any;
@@ -152,7 +170,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       );
     }
 
-    const shuffledKeys = [...openRouterKeys].sort(() => Math.random() - 0.5);
+    const shuffledKeys = secureShuffleArray(openRouterKeys);
     for (const key of shuffledKeys) {
       const minuteOk = await checkRateLimit(key, providerPerMinuteLimit, 'chat:openrouter');
       if (!minuteOk) continue;
@@ -164,12 +182,18 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
 
     if (!providerApiKey) {
       const firstKey = shuffledKeys[0];
+      if (!firstKey) {
+        return NextResponse.json(
+          { error: { message: 'OpenRouter API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
       const minuteInfo = await getRateLimitInfo(firstKey, providerPerMinuteLimit, 'chat:openrouter');
       const dailyInfo = await getDailyLimitInfo(firstKey, providerDailyLimit);
       return NextResponse.json(
         {
           error: {
-            message: 'All OpenRouter keys are currently rate-limited (20 RPM / 50 RPD per key). Please retry shortly.',
+            message: `All OpenRouter keys are currently rate-limited (${providerPerMinuteLimit} RPM / ${providerDailyLimit} RPD per key). Please retry shortly.`,
             type: 'requests',
             param: null,
             code: 'openrouter_keys_rate_limited',
