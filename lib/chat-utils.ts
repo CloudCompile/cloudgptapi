@@ -332,7 +332,7 @@ export function getBlazeAiModelId(modelId: string): string {
 
 export function resolveModelId(modelId: string): string {
   const normalizedModelId = modelId.trim().replace(/^['"]+|['"]+$/g, '');
-
+  // DO NOT APPLY PROVIDER_MODEL_MAPPING HERE
   return modelAliases[normalizedModelId] || normalizedModelId;
 }
 
