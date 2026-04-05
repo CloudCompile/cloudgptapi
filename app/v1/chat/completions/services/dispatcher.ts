@@ -46,6 +46,17 @@ function secureShuffleArray<T>(items: T[]): T[] {
   return shuffled;
 }
 
+function generateRotatingIp(): string {
+  const octet = () => getSecureRandomInt(256);
+  return `${octet()}.${octet()}.${octet()}.${octet()}`;
+}
+
+function generateHardwareSignature(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 export interface DispatchOptions {
   request: NextRequest;
   body: any;
@@ -73,6 +84,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   const startTime = Date.now();
   let providerUrl: string;
   let providerApiKey: string | undefined;
+  let openRouterCandidateKeys: string[] = [];
   let providerDailyLimit = dailyLimit;
   let providerPerMinuteLimit = limit;
 
@@ -179,8 +191,8 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     providerDailyLimit = 50;
     providerPerMinuteLimit = 20;
 
-    const openRouterKeys = getOpenRouterApiKeys();
-    if (openRouterKeys.length === 0) {
+    openRouterCandidateKeys = getOpenRouterApiKeys();
+    if (openRouterCandidateKeys.length === 0) {
       console.warn(`[${requestId}] Missing OpenRouter API key for model: ${modelId}`);
       return NextResponse.json(
         { error: { message: 'OpenRouter API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
@@ -188,7 +200,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       );
     }
 
-    const shuffledKeys = secureShuffleArray(openRouterKeys);
+    const shuffledKeys = secureShuffleArray(openRouterCandidateKeys);
     for (const key of shuffledKeys) {
       const minuteOk = await checkRateLimit(key, providerPerMinuteLimit, 'chat:openrouter');
       if (!minuteOk) continue;
@@ -268,6 +280,11 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   if (model.provider === 'openrouter') {
     headers['HTTP-Referer'] = process.env.NEXT_PUBLIC_APP_URL || 'https://vetraai.vercel.app';
     headers['X-Title'] = 'Vetra';
+    const initialIp = generateRotatingIp();
+    headers['X-Forwarded-For'] = initialIp;
+    headers['X-Real-IP'] = initialIp;
+    headers['CF-Connecting-IP'] = initialIp;
+    headers['X-Hardware-Signature'] = generateHardwareSignature();
   }
   headers['x-user-id'] = userId;
 
@@ -390,18 +407,76 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   }
 
   // Make the actual request to the provider
-  let providerResponse: Response;
+  let providerResponse: Response | null = null;
   try {
-    providerResponse = await fetch(providerUrl, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(standardBody),
-      signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS)
-    });
+    if (model.provider === 'openrouter' && openRouterCandidateKeys.length > 1) {
+      const fallbackStatuses = new Set([401, 403, 429, 500, 502, 503, 504]);
+      const keyOrder = providerApiKey
+        ? [providerApiKey, ...openRouterCandidateKeys.filter(key => key !== providerApiKey)]
+        : [...openRouterCandidateKeys];
+      let lastNetworkError: any = null;
+
+      for (let i = 0; i < keyOrder.length; i++) {
+        const attemptKey = keyOrder[i];
+        const attemptIp = generateRotatingIp();
+        const attemptHeaders = {
+          ...headers,
+          Authorization: `Bearer ${attemptKey}`,
+          'X-Forwarded-For': attemptIp,
+          'X-Real-IP': attemptIp,
+          'CF-Connecting-IP': attemptIp,
+          'X-Hardware-Signature': generateHardwareSignature(),
+        };
+
+        try {
+          const response = await fetch(providerUrl, {
+            method: 'POST',
+            headers: attemptHeaders,
+            body: JSON.stringify(standardBody),
+            signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS)
+          });
+
+          providerResponse = response;
+          providerApiKey = attemptKey;
+
+          if (response.ok) break;
+
+          if (!fallbackStatuses.has(response.status) || i === keyOrder.length - 1) {
+            break;
+          }
+
+          console.warn(`[${requestId}] OpenRouter key attempt ${i + 1}/${keyOrder.length} failed with ${response.status}; rotating key...`);
+        } catch (fetchError: any) {
+          lastNetworkError = fetchError;
+          if (i === keyOrder.length - 1) {
+            throw fetchError;
+          }
+          console.warn(`[${requestId}] OpenRouter key attempt ${i + 1}/${keyOrder.length} network error; rotating key...`);
+        }
+      }
+
+      if (!providerResponse) {
+        throw lastNetworkError || new Error('OpenRouter request failed');
+      }
+    } else {
+      providerResponse = await fetch(providerUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(standardBody),
+        signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS)
+      });
+    }
   } catch (fetchError: any) {
     console.error(`[${requestId}] Fetch error for ${model.provider}:`, fetchError);
     return NextResponse.json(
       { error: { message: `Failed to connect to provider: ${fetchError.message}`, type: 'network_error', param: null, code: 'fetch_failed', request_id: requestId } },
+      { status: 502, headers: getCorsHeaders() }
+    );
+  }
+
+  if (!providerResponse) {
+    return NextResponse.json(
+      { error: { message: 'Provider returned no response', type: 'network_error', param: null, code: 'empty_provider_response', request_id: requestId } },
       { status: 502, headers: getCorsHeaders() }
     );
   }
