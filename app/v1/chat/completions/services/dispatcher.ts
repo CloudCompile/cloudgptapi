@@ -46,6 +46,17 @@ function secureShuffleArray<T>(items: T[]): T[] {
   return shuffled;
 }
 
+function generateRotatingIp(): string {
+  const octet = () => getSecureRandomInt(254) + 1;
+  return `${octet()}.${octet()}.${octet()}.${octet()}`;
+}
+
+function generateHardwareSignature(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 export interface DispatchOptions {
   request: NextRequest;
   body: any;
@@ -269,6 +280,11 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   if (model.provider === 'openrouter') {
     headers['HTTP-Referer'] = process.env.NEXT_PUBLIC_APP_URL || 'https://vetraai.vercel.app';
     headers['X-Title'] = 'Vetra';
+    const initialIp = generateRotatingIp();
+    headers['X-Forwarded-For'] = initialIp;
+    headers['X-Real-IP'] = initialIp;
+    headers['CF-Connecting-IP'] = initialIp;
+    headers['X-Hardware-Signature'] = generateHardwareSignature();
   }
   headers['x-user-id'] = userId;
 
@@ -391,7 +407,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   }
 
   // Make the actual request to the provider
-  let providerResponse: Response;
+  let providerResponse: Response | null = null;
   try {
     if (model.provider === 'openrouter' && openRouterCandidateKeys.length > 1) {
       const fallbackStatuses = new Set([401, 403, 429, 500, 502, 503, 504]);
@@ -400,7 +416,15 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
 
       for (let i = 0; i < keyOrder.length; i++) {
         const attemptKey = keyOrder[i];
-        const attemptHeaders = { ...headers, Authorization: `Bearer ${attemptKey}` };
+        const attemptIp = generateRotatingIp();
+        const attemptHeaders = {
+          ...headers,
+          Authorization: `Bearer ${attemptKey}`,
+          'X-Forwarded-For': attemptIp,
+          'X-Real-IP': attemptIp,
+          'CF-Connecting-IP': attemptIp,
+          'X-Hardware-Signature': generateHardwareSignature(),
+        };
 
         try {
           const response = await fetch(providerUrl, {
@@ -429,7 +453,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
         }
       }
 
-      if (!providerResponse!) {
+      if (!providerResponse) {
         throw lastNetworkError || new Error('OpenRouter request failed');
       }
     } else {
@@ -448,7 +472,13 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     );
   }
 
-  if (!providerResponse.ok) {
+  if (!providerResponse || !providerResponse.ok) {
+    if (!providerResponse) {
+      return NextResponse.json(
+        { error: { message: 'Provider returned no response', type: 'network_error', param: null, code: 'empty_provider_response', request_id: requestId } },
+        { status: 502, headers: getCorsHeaders() }
+      );
+    }
     const errorText = await providerResponse.text();
     console.error(`[${requestId}] Provider error from ${model.provider} (${providerResponse.status}):`, errorText.substring(0, 500));
 
