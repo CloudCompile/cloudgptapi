@@ -168,7 +168,6 @@ const OPENROUTER_CHAT_MODELS: ChatModel[] = [
   { id: 'qwen/qwen3-next-80b-a3b-instruct:free', name: 'Qwen3 Next 80B A3B Instruct (free)', provider: 'openrouter', description: 'Qwen Qwen3 Next 80B A3B Instruct free' },
   { id: 'google/gemma-3-27b-it:free', name: 'Gemma 3 27B (free)', provider: 'openrouter', description: 'Google Gemma 3 27B free' },
   { id: 'google/gemma-3-4b-it:free', name: 'Gemma 3 4B (free)', provider: 'openrouter', description: 'Google Gemma 3 4B free' },
-  { id: 'google/gemma-3n-e2b-it:free', name: 'Gemma 3n 2B (free)', provider: 'openrouter', description: 'Google Gemma 3n 2B free' },
   { id: 'google/gemma-3-12b-it:free', name: 'Gemma 3 12B (free)', provider: 'openrouter', description: 'Google Gemma 3 12B free' },
   { id: 'google/gemma-3n-e2b-it:free', name: 'Gemma 3n 2B (free)', provider: 'openrouter', description: 'Google Gemma 3n 2B free' },
   // OpenRouter free models
