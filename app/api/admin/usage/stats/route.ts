@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     const { data: logs, error: logsError } = await supabaseAdmin
       .from('usage_logs')
-      .select('timestamp, type, model_id, tokens, user_id')
+      .select('*')
       .gte('timestamp', startDate.toISOString())
       .order('timestamp', { ascending: false });
 

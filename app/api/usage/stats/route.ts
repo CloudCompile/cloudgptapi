@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabaseAdmin
       .from('usage_logs')
-      .select('timestamp, type, model_id, tokens')
+      .select('*')
       .eq('user_id', userId)
       .gte('timestamp', startDate.toISOString())
       .order('timestamp', { ascending: true });

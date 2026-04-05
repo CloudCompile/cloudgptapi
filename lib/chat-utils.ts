@@ -211,6 +211,11 @@ export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
   'liz-o3-mini': 'o3-mini',
   'liz-qwen3-235b': 'qwen3-235b-a22b',
   'liz-llama-3.3-70b': 'llama-3.3-70b',
+  'claude-opus-4-6': 'opus-4.6',
+  'claude-opus-4.5': 'opus-4.5',
+  'claude-sonnet-4-6': 'sonnet-4.6',
+  'claude-sonnet-4.5': 'sonnet-4.5',
+  'claude-haiku-4.5': 'haiku-4.5',
   // Pollinations canonical IDs
   'gemini': 'gemini-3-flash-preview',
   'gemini-search': 'gemini-3-flash-preview:search',
