@@ -31,14 +31,11 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* High-Level Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {[
-          { label: 'Total', value: users.length.toString(), icon: Users, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-          { label: 'Free', value: users.filter(u => (!u.plan || u.plan === 'free')).length.toString(), icon: Rocket, color: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-800/50' },
-          { label: 'Pro', value: users.filter(u => u.plan === 'pro').length.toString(), icon: Crown, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-          { label: 'Ultra', value: users.filter(u => u.plan === 'ultra').length.toString(), icon: Sparkles, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
-          { label: 'Admins', value: users.filter(u => u.role === 'admin').length.toString(), icon: Shield, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-          { label: 'Health', value: '99.9%', icon: Activity, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+          { label: 'Total Users', value: users.length.toString(), icon: Users, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+          { label: 'Admin Users', value: users.filter(u => u.role === 'admin').length.toString(), icon: Shield, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+          { label: 'System Health', value: '99.9%', icon: Activity, color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20' },
         ].map((stat) => (
           <div key={stat.label} className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md">
             <div className="flex items-center justify-between mb-4">
@@ -53,6 +50,42 @@ export default async function AdminOverviewPage() {
             <p className="text-2xl font-bold mt-1">{stat.value}</p>
           </div>
         ))}
+        
+        {/* Unified Plan Breakdown Panel */}
+        <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-md row-span-2 md:col-span-1">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-900/20">
+              <Crown className="h-5 w-5 text-amber-500" />
+            </div>
+            <span className="text-xs font-medium text-slate-500 flex items-center gap-1">
+              Live <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            </span>
+          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-4">Subscription Plans</p>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center text-sm border-b border-slate-100 dark:border-slate-800 pb-2">
+              <div className="flex items-center gap-2">
+                <Rocket className="h-3.5 w-3.5 text-slate-500" />
+                <span className="font-medium text-slate-700 dark:text-slate-300">Free</span>
+              </div>
+              <span className="font-bold">{users.filter(u => (!u.plan || u.plan === 'free')).length}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm border-b border-slate-100 dark:border-slate-800 pb-2">
+              <div className="flex items-center gap-2">
+                <Crown className="h-3.5 w-3.5 text-amber-500" />
+                <span className="font-medium text-amber-600 dark:text-amber-500">Pro</span>
+              </div>
+              <span className="font-bold">{users.filter(u => u.plan === 'pro').length}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm border-b border-slate-100 dark:border-slate-800 pb-2">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-3.5 w-3.5 text-purple-500" />
+                <span className="font-medium text-purple-600 dark:text-purple-500">Ultra</span>
+              </div>
+              <span className="font-bold">{users.filter(u => u.plan === 'ultra').length}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <h2 className="text-xl font-bold tracking-tight mb-6">Management Modules</h2>
