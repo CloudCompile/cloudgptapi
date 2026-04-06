@@ -85,7 +85,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   const startTime = Date.now();
   const cloudflareGatewayUrl = process.env.CF_AI_GATEWAY_CHAT_COMPLETIONS_URL;
   const cloudflareGatewayToken = process.env.CF_AIG_TOKEN;
-  const useCloudflareGatewayForCompat = Boolean(cloudflareGatewayToken && cloudflareGatewayUrl?.trim());
+  const isCloudflareGatewayEnabled = Boolean(cloudflareGatewayToken && cloudflareGatewayUrl?.trim());
   let providerUrl: string;
   let providerApiKey: string | undefined;
   let openRouterCandidateKeys: string[] = [];
@@ -191,7 +191,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       );
     }
   } else if (model.provider === 'openrouter') {
-    if (useCloudflareGatewayForCompat) {
+    if (isCloudflareGatewayEnabled) {
       providerUrl = cloudflareGatewayUrl;
       providerApiKey = cloudflareGatewayToken;
     } else {
@@ -254,7 +254,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       }
     }
   } else if (model.provider === 'pollinations') {
-    if (useCloudflareGatewayForCompat) {
+    if (isCloudflareGatewayEnabled) {
       providerUrl = cloudflareGatewayUrl;
       providerApiKey = cloudflareGatewayToken;
     } else {
@@ -399,9 +399,13 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     };
 
     try {
-      const pollKey = useCloudflareGatewayForCompat ? cloudflareGatewayToken : getPollinationsApiKey();
+      const fastPathUrl = isCloudflareGatewayEnabled ? cloudflareGatewayUrl : `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
+      const pollKey = isCloudflareGatewayEnabled ? cloudflareGatewayToken : getPollinationsApiKey();
       const startTime = Date.now();
-      const response = await fastFetch(useCloudflareGatewayForCompat ? cloudflareGatewayUrl : `${PROVIDER_URLS.pollinations}/v1/chat/completions`, pollKey || '');
+      if (!fastPathUrl) {
+        throw new Error('Cloudflare gateway URL is not configured');
+      }
+      const response = await fastFetch(fastPathUrl, pollKey || '');
       
       if (response.ok) {
         console.log(`[${requestId}] Fast-path success: ${Date.now() - startTime}ms via Pollinations`);
