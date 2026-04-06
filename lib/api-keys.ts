@@ -197,7 +197,7 @@ export async function trackUsage(
     estimatedTokens = estimateTokens(tokensOrData);
   }
 
-  await supabaseAdmin
+  const { error: insertError } = await supabaseAdmin
     .from('usage_logs')
     .insert({
       api_key_id: apiKeyId,
@@ -207,6 +207,15 @@ export async function trackUsage(
       tokens: estimatedTokens > 0 ? estimatedTokens : null,
       timestamp: new Date().toISOString(),
     });
+
+  if (insertError) {
+    console.error('[trackUsage] Failed to insert usage log:', insertError.message, {
+      apiKeyId,
+      userId,
+      modelId,
+      type,
+    });
+  }
 }
 
 const overrideCache = new Set<string>();
