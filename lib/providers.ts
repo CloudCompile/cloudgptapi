@@ -3,7 +3,7 @@
 export interface ChatModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'openai' | 'kivest' | 'bluesminds' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'moonshot' | 'zhipu' | 'minimax' | 'meta' | 'amazon' | 'mistral' | 'microsoft' | 'bytedance' | 'xiaomi' | 'alibaba' | 'litrouter';
+  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'openai' | 'kivest' | 'bluesminds' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'moonshot' | 'zhipu' | 'minimax' | 'meta' | 'amazon' | 'mistral' | 'microsoft' | 'bytedance' | 'xiaomi' | 'alibaba' | 'litrouter' | 'mino';
   description?: string;
   contextWindow?: number;
   downtimeUntil?: string;
@@ -142,6 +142,20 @@ const BLUESMINDS_CHAT_MODELS: ChatModel[] = [
   { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet', provider: 'anthropic', description: 'Anthropic Claude 3.7 Sonnet', usageWeight: 10 },
   // OpenAI - Pro tier
   { id: 'gpt-5.2', name: 'GPT-5.2', provider: 'openai', description: 'OpenAI GPT-5.2', usageWeight: 12 },
+];
+
+// Mino Chat Models - Fallback provider (very low RPM ~1-2 req/min)
+const MINO_CHAT_MODELS: ChatModel[] = [
+  // Qwen
+  { id: 'qwen3.6-plus', name: 'Qwen 3.6 Plus', provider: 'mino', description: 'Qwen 3.6 Plus (Mino)', usageWeight: 1 },
+  { id: 'qwen3.5-plus', name: 'Qwen 3.5 Plus', provider: 'mino', description: 'Qwen 3.5 Plus (Mino)', usageWeight: 1 },
+  // Zhipu GLM
+  { id: 'glm-4.7', name: 'GLM 4.7', provider: 'mino', description: 'Zhipu GLM 4.7 (Mino)', usageWeight: 1 },
+  { id: 'glm-5', name: 'GLM 5', provider: 'mino', description: 'Zhipu GLM 5 (Mino)', usageWeight: 1 },
+  { id: 'glm-5.1', name: 'GLM 5.1', provider: 'mino', description: 'Zhipu GLM 5.1 (Mino)', usageWeight: 1 },
+  // DeepSeek
+  { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'mino', description: 'DeepSeek Chat (Mino)', usageWeight: 1 },
+  { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner', provider: 'mino', description: 'DeepSeek Reasoner (Mino)', usageWeight: 1 },
 ];
 
 const GEMINI_CHAT_MODELS: ChatModel[] = [
@@ -327,8 +341,8 @@ const OPENAI_CHAT_MODELS: ChatModel[] = [
 ];
 
 // Deduplicate models by ID - last provider wins
-// Order: pollinations → kivest
-const ALL_CHAT_MODELS = [...POLLINATIONS_CHAT_MODELS, ...KIVEST_CHAT_MODELS, ...OPENROUTER_CHAT_MODELS];
+// Order: pollinations → kivest → openrouter → mino
+const ALL_CHAT_MODELS = [...POLLINATIONS_CHAT_MODELS, ...KIVEST_CHAT_MODELS, ...OPENROUTER_CHAT_MODELS, ...MINO_CHAT_MODELS];
 
 // Keep last occurrence of each model ID (kivest overwrites pollinations)
 const seen = new Set<string>();
@@ -492,4 +506,5 @@ export const PROVIDER_URLS = {
   minimax: 'https://api.bluesminds.com/v1',
   aqua: 'https://api.aquadevs.com/v1',
   blazeai: 'https://blazeai.boxu.dev/v1',
+  mino: 'https://mino.redemption.pw',
 };

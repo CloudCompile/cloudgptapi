@@ -46,6 +46,7 @@ const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
   zhipu: 'Zhipu',
   minimax: 'MiniMax',
   bluesminds: 'Bluesminds',
+  mino: 'Mino',
 };
 
 function formatProviderName(provider: string): string {

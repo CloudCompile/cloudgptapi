@@ -331,6 +331,25 @@ export function getBlazeAiModelId(modelId: string): string {
   return BLAZEAI_MODEL_MAPPING[modelId] || modelId;
 }
 
+// Mino model mapping (Vetra ID -> Mino ID)
+// Mino has different endpoints: /x/qwen/, /x/zai/, /x/deepseek/
+export const MINO_MODEL_MAPPING: Record<string, string> = {
+  // Qwen - uses /x/qwen/ endpoint
+  'qwen3.6-plus': 'qwen3.6-plus',
+  'qwen3.5-plus': 'qwen3.5-plus',
+  // Zhipu GLM - uses /x/zai/ endpoint
+  'glm-4.7': 'glm-4.7',
+  'glm-5': 'glm-5',
+  'glm-5.1': 'glm-5.1',
+  // DeepSeek - uses /x/deepseek/ endpoint
+  'deepseek-chat': 'deepseek-chat',
+  'deepseek-reasoner': 'deepseek-reasoner',
+};
+
+export function getMinoModelId(modelId: string): string {
+  return MINO_MODEL_MAPPING[modelId] || modelId;
+}
+
 export function resolveModelId(modelId: string): string {
   const normalizedModelId = modelId.trim().replace(/^['"]+|['"]+$/g, '');
   // DO NOT APPLY PROVIDER_MODEL_MAPPING HERE
@@ -396,6 +415,7 @@ export const PROVIDER_URLS = {
   bluesminds: 'https://api.bluesminds.com/v1',
   aqua: 'https://api.aquadevs.com/v1',
   blazeai: 'https://blazeai.boxu.dev/v1',
+  mino: 'https://mino.redemption.pw',
 };
 
 export function createChatTransformStream(

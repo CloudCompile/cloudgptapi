@@ -8,7 +8,8 @@ import {
   sanitizeErrorText,
   BLUESMINDS_MODEL_MAPPING,
   getBluesmindsModelId,
-  getBlazeAiModelId
+  getBlazeAiModelId,
+  getMinoModelId
 } from '@/lib/chat-utils';
 import { CHAT_MODELS, ULTRA_MODELS } from '@/lib/providers';
 import {
@@ -264,6 +265,20 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
         { status: 500, headers: getCorsHeaders() }
       );
     }
+  } else if (model.provider === 'mino') {
+    // Mino has multiple endpoints based on model type
+    const minoModelId = getMinoModelId(modelId);
+    if (modelId.startsWith('glm-4') || modelId.startsWith('glm-5')) {
+      // GLM models use /x/zai/ endpoint
+      providerUrl = `${PROVIDER_URLS.mino}/x/zai/chat/completions`;
+    } else if (modelId.startsWith('deepseek-')) {
+      // DeepSeek models use /x/deepseek/ endpoint
+      providerUrl = `${PROVIDER_URLS.mino}/x/deepseek/chat/completions`;
+    } else {
+      // Qwen and others use /x/qwen/ endpoint
+      providerUrl = `${PROVIDER_URLS.mino}/x/qwen/chat/completions`;
+    }
+    console.log(`[${requestId}] Mino: routing ${modelId} to ${providerUrl}`);
   } else {
     // Fallback or Unknown provider
     return NextResponse.json(

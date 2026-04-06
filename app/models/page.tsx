@@ -191,6 +191,7 @@ export default function ModelsPage() {
     xiaomi: 'Xiaomi',
     amazon: 'Amazon',
     bluesminds: 'Bluesminds',
+    mino: 'Mino',
     github: 'GitHub',
     stablehorde: 'Stable Horde',
     poe: 'Poe',
