@@ -305,6 +305,7 @@ export const BLUESMINDS_MODEL_MAPPING: Record<string, string> = {
   // Zhipu models
   'glm-5': 'z-ai/glm5',
   'glm-4.6': 'glm-4.6',
+  'glm-4.7': 'z-ai/glm4.7',
   // Microsoft models
   'phi-4-mini': 'microsoft/phi-4-mini-instruct',
   'phi-4-multimodal': 'microsoft/phi-4-multimodal-instruct',
