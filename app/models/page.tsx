@@ -166,6 +166,7 @@ export default function ModelsPage() {
     providers.delete('kivest');
     providers.delete('pollinations');
     providers.delete('bluesminds');
+    providers.delete('mino');
     return ['all', ...Array.from(providers)].sort();
   }, []);
 

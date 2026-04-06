@@ -100,8 +100,8 @@ const KIVEST_CHAT_MODELS: ChatModel[] = [
   { id: 'kimi-k2.5', name: 'Kimi K2.5', provider: 'moonshot', description: 'Moonshot Kimi K2.5', usageWeight: 6 },
   // Zhipu (via Kivest) - Pro tier
   { id: 'glm-4.7', name: 'GLM 4.7', provider: 'zhipu', description: 'Zhipu GLM 4.7', usageWeight: 2 },
-  { id: 'glm-5', name: 'GLM 5', provider: 'zhipu', description: 'Zhipu GLM 5', usageWeight: 3 },
-  { id: 'glm-5.1', name: 'GLM 5.1', provider: 'zhipu', description: 'Zhipu GLM 5.1', usageWeight: 4 },
+  { id: 'glm-5', name: 'GLM 5', provider: 'zhipu', description: 'Zhipu GLM 5', usageWeight: 4 },
+  { id: 'glm-5.1', name: 'GLM 5.1', provider: 'zhipu', description: 'Zhipu GLM 5.1', usageWeight: 9 },
   { id: 'nova', name: 'Nova', provider: 'minimax', description: 'MiniMax Nova', usageWeight: 2 },
   // ByteDance (via Kivest) - Pro tier
   { id: 'seed-oss-36b-instruct', name: 'Seed OSS 36B Instruct', provider: 'bytedance', description: 'ByteDance Seed OSS 36B Instruct', usageWeight: 2 },
@@ -146,16 +146,13 @@ const BLUESMINDS_CHAT_MODELS: ChatModel[] = [
 
 // Mino Chat Models - Fallback provider (very low RPM ~1-2 req/min)
 const MINO_CHAT_MODELS: ChatModel[] = [
-  // Qwen
-  { id: 'qwen3.6-plus', name: 'Qwen 3.6 Plus', provider: 'mino', description: 'Qwen 3.6 Plus (Mino)', usageWeight: 1 },
-  { id: 'qwen3.5-plus', name: 'Qwen 3.5 Plus', provider: 'mino', description: 'Qwen 3.5 Plus (Mino)', usageWeight: 1 },
-  // Zhipu GLM
-  { id: 'glm-4.7', name: 'GLM 4.7', provider: 'mino', description: 'Zhipu GLM 4.7 (Mino)', usageWeight: 1 },
-  { id: 'glm-5', name: 'GLM 5', provider: 'mino', description: 'Zhipu GLM 5 (Mino)', usageWeight: 1 },
-  { id: 'glm-5.1', name: 'GLM 5.1', provider: 'mino', description: 'Zhipu GLM 5.1 (Mino)', usageWeight: 1 },
-  // DeepSeek
-  { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'mino', description: 'DeepSeek Chat (Mino)', usageWeight: 1 },
-  { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner', provider: 'mino', description: 'DeepSeek Reasoner (Mino)', usageWeight: 1 },
+  // Zhipu GLM models only - show as Zhipu provider
+  { id: 'glm-4.7', name: 'Zhipu GLM 4.7', provider: 'zhipu', description: 'Zhipu GLM 4.7', usageWeight: 2 },
+  { id: 'glm-5', name: 'Zhipu GLM 5', provider: 'zhipu', description: 'Zhipu GLM 5', usageWeight: 4 },
+  { id: 'glm-5.1', name: 'Zhipu GLM 5.1', provider: 'zhipu', description: 'Zhipu GLM 5.1', usageWeight: 9 },
+  // Qwen - hidden provider (mino)
+  { id: 'qwen3.6-plus', name: 'Qwen 3.6 Plus', provider: 'mino', description: 'Qwen 3.6 Plus', usageWeight: 1 },
+  { id: 'qwen3.5-plus', name: 'Qwen 3.5 Plus', provider: 'mino', description: 'Qwen 3.5 Plus', usageWeight: 1 },
 ];
 
 const GEMINI_CHAT_MODELS: ChatModel[] = [
