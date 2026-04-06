@@ -12,6 +12,7 @@ interface UsageStats {
   };
   topModels: Array<{ id: string; requests: number; tokens: number }>;
   topProviders: Array<{ name: string; requests: number; tokens: number }>;
+  topUsers: Array<{ id: string; email: string; name: string; plan: string; requests: number; tokens: number }>;
   chartData: Array<{ date: string; requests: number; tokens: number }>;
 }
 
@@ -187,11 +188,12 @@ export default function AdminUsagePage() {
               return (
                 <div
                   key={idx}
-                  className="flex-1 bg-primary/80 rounded-t hover:bg-primary transition-colors group relative"
-                  style={{ height: `${Math.max(height, 2)}%` }}
+                  className="flex-1 bg-gradient-to-t from-primary/40 to-primary/80 group-hover:from-primary/60 group-hover:to-primary rounded-t-sm transition-all duration-300 ease-in-out relative ring-1 ring-inset ring-white/10 dark:ring-white/5 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] dark:shadow-primary/10"
+                  style={{ height: `${Math.max(height, 4)}%` }}
                 >
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">
-                    {day.date}: {day.requests} requests
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-900/90 backdrop-blur-sm text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 whitespace-nowrap shadow-xl border border-white/10 z-10 pointer-events-none transition-opacity duration-200">
+                    <span className="font-semibold block mb-0.5">{day.date}</span>
+                    <span className="opacity-90">{day.requests} requests</span>
                   </div>
                 </div>
               );
@@ -246,6 +248,58 @@ export default function AdminUsagePage() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Top Users */}
+      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 mt-8 mb-8 overflow-hidden relative">
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+        <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
+          Top Users
+        </h2>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-500 text-sm">
+                <th className="pb-4 font-medium uppercase tracking-wider text-xs">User</th>
+                <th className="pb-4 font-medium uppercase tracking-wider text-xs">Plan</th>
+                <th className="pb-4 font-medium uppercase tracking-wider text-xs text-right">Requests</th>
+                <th className="pb-4 font-medium uppercase tracking-wider text-xs text-right">Tokens</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.topUsers?.map((user, idx) => (
+                <tr key={user.id} className="border-b border-slate-100 dark:border-slate-800/60 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors group">
+                  <td className="py-4">
+                    <div className="font-medium text-slate-800 dark:text-slate-200 group-hover:text-primary transition-colors">
+                      {user.name || user.email.split('@')[0]}
+                    </div>
+                    <div className="text-xs text-slate-500">{user.email}</div>
+                  </td>
+                  <td className="py-4">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold capitalize tracking-wide shadow-sm
+                      ${user.plan === 'ultra' ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white border border-purple-500/50' :
+                        user.plan === 'pro' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border border-blue-500/50' :
+                        user.plan === 'developer' ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border border-orange-400/50' :
+                        'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 border border-slate-200'}`}
+                    >
+                      {user.plan}
+                    </span>
+                  </td>
+                  <td className="py-4 text-right font-semibold tabular-nums">{formatNumber(user.requests)}</td>
+                  <td className="py-4 text-right text-slate-500 text-sm tabular-nums">{formatNumber(user.tokens)}</td>
+                </tr>
+              ))}
+              {(!stats.topUsers || stats.topUsers.length === 0) && (
+                <tr>
+                  <td colSpan={4} className="py-12 text-center text-slate-500 bg-slate-50/50 dark:bg-slate-900/20 rounded-lg">
+                    No active users found in this period.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

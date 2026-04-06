@@ -24,17 +24,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch usage stats', details: logsError.message }, { status: 500 });
     }
 
-    if (!logs) {
+    if (!logs || logs.length === 0) {
       return NextResponse.json({
         summary: { totalRequests: 0, totalTokens: 0, days },
         topModels: [],
         topProviders: [],
+        topUsers: [],
         chartData: [],
       });
     }
 
     const modelUsage: Record<string, { count: number; tokens: number }> = {};
     const providerUsage: Record<string, { count: number; tokens: number }> = {};
+    const userUsage: Record<string, { count: number; tokens: number }> = {};
+    const userIds = new Set<string>();
     let totalRequests = 0;
     let totalTokens = 0;
 
@@ -78,7 +81,26 @@ export async function GET(request: NextRequest) {
       }
       providerUsage[provider].count++;
       providerUsage[provider].tokens += tokens;
+
+      if (!userUsage[log.user_id]) {
+        userUsage[log.user_id] = { count: 0, tokens: 0 };
+      }
+      userUsage[log.user_id].count++;
+      userUsage[log.user_id].tokens += tokens;
+      userIds.add(log.user_id);
     });
+
+    let profilesMap = new Map();
+    if (userIds.size > 0) {
+      const { data: profiles } = await supabaseAdmin
+        .from('profiles')
+        .select('id, email, name, plan')
+        .in('id', Array.from(userIds));
+
+      if (profiles) {
+        profilesMap = new Map(profiles.map(p => [p.id, p]));
+      }
+    }
 
     const topModels = Object.entries(modelUsage)
       .map(([id, data]) => ({ id, requests: data.count, tokens: data.tokens }))
@@ -89,8 +111,23 @@ export async function GET(request: NextRequest) {
       .map(([name, data]) => ({ name, requests: data.count, tokens: data.tokens }))
       .sort((a, b) => b.requests - a.requests);
 
+    const topUsers = Object.entries(userUsage)
+      .map(([id, data]) => {
+        const profile = profilesMap.get(id);
+        return {
+          id,
+          email: profile?.email || 'Unknown User',
+          name: profile?.name,
+          plan: profile?.plan || 'free',
+          requests: data.count,
+          tokens: data.tokens
+        };
+      })
+      .sort((a, b) => b.requests - a.requests)
+      .slice(0, limit);
+
     const dailyStats: Record<string, { date: string; requests: number; tokens: number }> = {};
-    
+
     logs?.forEach((log) => {
       const dateStr = new Date(log.timestamp).toISOString().split('T')[0];
       if (!dailyStats[dateStr]) {
@@ -112,6 +149,7 @@ export async function GET(request: NextRequest) {
       },
       topModels,
       topProviders,
+      topUsers,
       chartData,
     });
 
