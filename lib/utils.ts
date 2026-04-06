@@ -5,6 +5,21 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+function getSecureRandomIndex(maxExclusive: number): number {
+  if (maxExclusive <= 1) return 0;
+  const maxUint32 = 0x100000000;
+  const unbiasedLimit = maxUint32 - (maxUint32 % maxExclusive);
+  const randomBytes = new Uint32Array(1);
+
+  while (true) {
+    crypto.getRandomValues(randomBytes);
+    const value = randomBytes[0];
+    if (value < unbiasedLimit) {
+      return value % maxExclusive;
+    }
+  }
+}
+
 export function getCorsHeaders() {
   return {
     'Access-Control-Allow-Origin': '*',
@@ -55,7 +70,7 @@ export function getClaudeApiKeys(): string[] {
 export function getPollinationsApiKey(): string | undefined {
   const keys = getPollinationsApiKeys();
   if (keys.length === 0) return undefined;
-  const randomIndex = Math.floor(Math.random() * keys.length);
+  const randomIndex = getSecureRandomIndex(keys.length);
   return keys[randomIndex];
 }
 
@@ -65,7 +80,7 @@ export function getPollinationsApiKey(): string | undefined {
 export function getClaudeApiKey(): string | undefined {
   const keys = getClaudeApiKeys();
   if (keys.length === 0) return getPollinationsApiKey(); // Fallback to general keys
-  const randomIndex = Math.floor(Math.random() * keys.length);
+  const randomIndex = getSecureRandomIndex(keys.length);
   return keys[randomIndex];
 }
 
@@ -182,7 +197,7 @@ export function getOpenRouterApiKey(): string | undefined {
   const keys = getOpenRouterApiKeys();
   if (keys.length === 0) return undefined;
   
-  const randomIndex = Math.floor(Math.random() * keys.length);
+  const randomIndex = getSecureRandomIndex(keys.length);
   return keys[randomIndex];
 }
 
@@ -205,7 +220,7 @@ export function getPoeApiKey(): string | undefined {
   const keys = getPoeApiKeys();
   if (keys.length === 0) return undefined;
   
-  const randomIndex = Math.floor(Math.random() * keys.length);
+  const randomIndex = getSecureRandomIndex(keys.length);
   return keys[randomIndex];
 }
 
@@ -229,7 +244,7 @@ export function getKivestApiKey(): string | undefined {
   const keys = getKivestApiKeys();
   if (keys.length === 0) return undefined;
 
-  const randomIndex = Math.floor(Math.random() * keys.length);
+  const randomIndex = getSecureRandomIndex(keys.length);
   return keys[randomIndex];
 }
 
@@ -260,7 +275,7 @@ export function getRandomBluesmindsApiKey(): string | undefined {
   const keys = getBluesmindsApiKeys();
   if (keys.length === 0) return undefined;
   
-  const randomIndex = Math.floor(Math.random() * keys.length);
+  const randomIndex = getSecureRandomIndex(keys.length);
   return keys[randomIndex];
 }
 
@@ -298,7 +313,7 @@ export function getRandomAquaApiKey(): string | undefined {
   const keys = getAquaApiKeys();
   if (keys.length === 0) return undefined;
   
-  const randomIndex = Math.floor(Math.random() * keys.length);
+  const randomIndex = getSecureRandomIndex(keys.length);
   return keys[randomIndex];
 }
 
@@ -321,7 +336,7 @@ export function getLizApiKey(): string | undefined {
   const keys = getLizApiKeys();
   if (keys.length === 0) return undefined;
   
-  const randomIndex = Math.floor(Math.random() * keys.length);
+  const randomIndex = getSecureRandomIndex(keys.length);
   return keys[randomIndex];
 }
 
@@ -345,7 +360,7 @@ export function getOpenAIApiKey(): string | undefined {
   const keys = getOpenAIApiKeys();
   if (keys.length === 0) return undefined;
   
-  const randomIndex = Math.floor(Math.random() * keys.length);
+  const randomIndex = getSecureRandomIndex(keys.length);
   return keys[randomIndex];
 }
 

@@ -29,17 +29,25 @@ import {
 } from '@/lib/utils';
 import { rememberInteraction } from '@/lib/memory';
 
-function getSecureRandomInt(maxExclusive: number): number {
-  if (maxExclusive <= 0) return 0;
+function getSecureRandomIndex(maxExclusive: number): number {
+  if (maxExclusive <= 1) return 0;
+  const maxUint32 = 0x100000000;
+  const unbiasedLimit = maxUint32 - (maxUint32 % maxExclusive);
   const randomBytes = new Uint32Array(1);
-  crypto.getRandomValues(randomBytes);
-  return randomBytes[0] % maxExclusive;
+
+  while (true) {
+    crypto.getRandomValues(randomBytes);
+    const value = randomBytes[0];
+    if (value < unbiasedLimit) {
+      return value % maxExclusive;
+    }
+  }
 }
 
 function secureShuffleArray<T>(items: T[]): T[] {
   const shuffled = [...items];
   for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = getSecureRandomInt(i + 1);
+    const j = getSecureRandomIndex(i + 1);
     const temp = shuffled[i];
     shuffled[i] = shuffled[j];
     shuffled[j] = temp;
@@ -48,7 +56,7 @@ function secureShuffleArray<T>(items: T[]): T[] {
 }
 
 function generateRotatingIp(): string {
-  const octet = () => getSecureRandomInt(256);
+  const octet = () => getSecureRandomIndex(256);
   return `${octet()}.${octet()}.${octet()}.${octet()}`;
 }
 
@@ -83,6 +91,9 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   } = options;
 
   const startTime = Date.now();
+  const cloudflareGatewayUrl = process.env.CF_AI_GATEWAY_CHAT_COMPLETIONS_URL;
+  const cloudflareGatewayToken = process.env.CF_AIG_TOKEN;
+  const isCloudflareGatewayEnabled = Boolean(cloudflareGatewayToken && cloudflareGatewayUrl?.trim());
   let providerUrl: string;
   let providerApiKey: string | undefined;
   let openRouterCandidateKeys: string[] = [];
@@ -188,72 +199,82 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       );
     }
   } else if (model.provider === 'openrouter') {
-    providerUrl = `${PROVIDER_URLS.openrouter}/api/v1/chat/completions`;
-    providerDailyLimit = 50;
-    providerPerMinuteLimit = 20;
+    if (isCloudflareGatewayEnabled) {
+      providerUrl = cloudflareGatewayUrl;
+      providerApiKey = cloudflareGatewayToken;
+    } else {
+      providerUrl = `${PROVIDER_URLS.openrouter}/api/v1/chat/completions`;
+      providerDailyLimit = 50;
+      providerPerMinuteLimit = 20;
 
-    openRouterCandidateKeys = getOpenRouterApiKeys();
-    if (openRouterCandidateKeys.length === 0) {
-      console.warn(`[${requestId}] Missing OpenRouter API key for model: ${modelId}`);
-      return NextResponse.json(
-        { error: { message: 'OpenRouter API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
-        { status: 500, headers: getCorsHeaders() }
-      );
-    }
-
-    const shuffledKeys = secureShuffleArray(openRouterCandidateKeys);
-    for (const key of shuffledKeys) {
-      const minuteOk = await checkRateLimit(key, providerPerMinuteLimit, 'chat:openrouter');
-      if (!minuteOk) continue;
-      const dailyOk = await checkDailyLimit(key, providerDailyLimit);
-      if (!dailyOk) continue;
-      providerApiKey = key;
-      break;
-    }
-
-    if (!providerApiKey) {
-      const firstKey = shuffledKeys[0];
-      if (!firstKey) {
+      openRouterCandidateKeys = getOpenRouterApiKeys();
+      if (openRouterCandidateKeys.length === 0) {
+        console.warn(`[${requestId}] Missing OpenRouter API key for model: ${modelId}`);
         return NextResponse.json(
           { error: { message: 'OpenRouter API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
           { status: 500, headers: getCorsHeaders() }
         );
       }
-      const minuteInfo = await getRateLimitInfo(firstKey, providerPerMinuteLimit, 'chat:openrouter');
-      const dailyInfo = await getDailyLimitInfo(firstKey, providerDailyLimit);
-      return NextResponse.json(
-        {
-          error: {
-            message: `All OpenRouter keys are currently rate-limited (${providerPerMinuteLimit} RPM / ${providerDailyLimit} RPD per key). Please retry shortly.`,
-            type: 'requests',
-            param: null,
-            code: 'openrouter_keys_rate_limited',
-            request_id: requestId
-          }
-        },
-        {
-          status: 429,
-          headers: {
-            ...getCorsHeaders(),
-            'X-RateLimit-Remaining': String(minuteInfo.remaining),
-            'X-RateLimit-Reset': String(minuteInfo.resetAt),
-            'X-RateLimit-Limit': String(minuteInfo.limit),
-            'X-DailyLimit-Remaining': String(dailyInfo.remaining),
-            'X-DailyLimit-Reset': String(dailyInfo.resetAt),
-            'X-DailyLimit-Limit': String(dailyInfo.limit),
-          },
+
+      const shuffledKeys = secureShuffleArray(openRouterCandidateKeys);
+      for (const key of shuffledKeys) {
+        const minuteOk = await checkRateLimit(key, providerPerMinuteLimit, 'chat:openrouter');
+        if (!minuteOk) continue;
+        const dailyOk = await checkDailyLimit(key, providerDailyLimit);
+        if (!dailyOk) continue;
+        providerApiKey = key;
+        break;
+      }
+
+      if (!providerApiKey) {
+        const firstKey = shuffledKeys[0];
+        if (!firstKey) {
+          return NextResponse.json(
+            { error: { message: 'OpenRouter API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+            { status: 500, headers: getCorsHeaders() }
+          );
         }
-      );
+        const minuteInfo = await getRateLimitInfo(firstKey, providerPerMinuteLimit, 'chat:openrouter');
+        const dailyInfo = await getDailyLimitInfo(firstKey, providerDailyLimit);
+        return NextResponse.json(
+          {
+            error: {
+              message: `All OpenRouter keys are currently rate-limited (${providerPerMinuteLimit} RPM / ${providerDailyLimit} RPD per key). Please retry shortly.`,
+              type: 'requests',
+              param: null,
+              code: 'openrouter_keys_rate_limited',
+              request_id: requestId
+            }
+          },
+          {
+            status: 429,
+            headers: {
+              ...getCorsHeaders(),
+              'X-RateLimit-Remaining': String(minuteInfo.remaining),
+              'X-RateLimit-Reset': String(minuteInfo.resetAt),
+              'X-RateLimit-Limit': String(minuteInfo.limit),
+              'X-DailyLimit-Remaining': String(dailyInfo.remaining),
+              'X-DailyLimit-Reset': String(dailyInfo.resetAt),
+              'X-DailyLimit-Limit': String(dailyInfo.limit),
+            },
+          }
+        );
+      }
     }
   } else if (model.provider === 'pollinations') {
-    providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
-    providerApiKey = getPollinationsApiKey();
-    if (!providerApiKey) {
-      console.warn(`[${requestId}] Missing Pollinations API key for model: ${modelId}`);
-      return NextResponse.json(
-        { error: { message: 'Pollinations API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
-        { status: 500, headers: getCorsHeaders() }
-      );
+    if (isCloudflareGatewayEnabled) {
+      providerUrl = cloudflareGatewayUrl;
+      providerApiKey = cloudflareGatewayToken;
+    } else {
+      providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
+      providerApiKey = getPollinationsApiKey();
+      if (!providerApiKey) {
+        console.warn(`[${requestId}] Missing Pollinations API key for model: ${modelId}`);
+        return NextResponse.json(
+          { error: { message: 'Pollinations API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
     }
   } else if (model.provider === 'kivest') {
     providerUrl = `${PROVIDER_URLS.kivest}/v1/chat/completions`;
@@ -350,7 +371,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   if (body.seed !== undefined) {
     standardBody.seed = body.seed;
   } else if (model.provider === 'pollinations' && !modelId.includes('gemini') && !modelId.includes('claude')) {
-    standardBody.seed = Math.floor(Math.random() * 1000000);
+    standardBody.seed = getSecureRandomIndex(1000000);
   }
 
   if (body.frequency_penalty !== undefined && body.frequency_penalty !== 0) standardBody.frequency_penalty = body.frequency_penalty;
@@ -386,9 +407,13 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     };
 
     try {
-      const pollKey = getPollinationsApiKey();
+      const fastPathUrl = isCloudflareGatewayEnabled ? cloudflareGatewayUrl : `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
+      const pollKey = isCloudflareGatewayEnabled ? cloudflareGatewayToken : getPollinationsApiKey();
       const startTime = Date.now();
-      const response = await fastFetch(`${PROVIDER_URLS.pollinations}/v1/chat/completions`, pollKey || '');
+      if (!fastPathUrl) {
+        throw new Error('Cloudflare gateway URL is not configured');
+      }
+      const response = await fastFetch(fastPathUrl, pollKey || '');
       
       if (response.ok) {
         console.log(`[${requestId}] Fast-path success: ${Date.now() - startTime}ms via Pollinations`);
