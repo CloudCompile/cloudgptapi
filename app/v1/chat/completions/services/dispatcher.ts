@@ -83,9 +83,9 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   } = options;
 
   const startTime = Date.now();
-  const cloudflareGatewayUrl = process.env.CF_AI_GATEWAY_CHAT_COMPLETIONS_URL || 'https://gateway.ai.cloudflare.com/v1/828393e6a7d75e508d1bf4a898bd1e6e/test/compat/chat/completions';
+  const cloudflareGatewayUrl = process.env.CF_AI_GATEWAY_CHAT_COMPLETIONS_URL;
   const cloudflareGatewayToken = process.env.CF_AIG_TOKEN;
-  const useCloudflareGatewayForCompat = Boolean(cloudflareGatewayToken && cloudflareGatewayUrl);
+  const useCloudflareGatewayForCompat = Boolean(cloudflareGatewayToken && cloudflareGatewayUrl?.trim());
   let providerUrl: string;
   let providerApiKey: string | undefined;
   let openRouterCandidateKeys: string[] = [];
@@ -363,7 +363,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   if (body.seed !== undefined) {
     standardBody.seed = body.seed;
   } else if (model.provider === 'pollinations' && !modelId.includes('gemini') && !modelId.includes('claude')) {
-    standardBody.seed = Math.floor(Math.random() * 1000000);
+    standardBody.seed = getSecureRandomInt(1000000);
   }
 
   if (body.frequency_penalty !== undefined && body.frequency_penalty !== 0) standardBody.frequency_penalty = body.frequency_penalty;
