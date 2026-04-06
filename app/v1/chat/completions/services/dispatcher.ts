@@ -29,17 +29,25 @@ import {
 } from '@/lib/utils';
 import { rememberInteraction } from '@/lib/memory';
 
-function getSecureRandomInt(maxExclusive: number): number {
-  if (maxExclusive <= 0) return 0;
+function getSecureRandomIndex(maxExclusive: number): number {
+  if (maxExclusive <= 1) return 0;
+  const maxUint32 = 0x100000000;
+  const unbiasedLimit = maxUint32 - (maxUint32 % maxExclusive);
   const randomBytes = new Uint32Array(1);
-  crypto.getRandomValues(randomBytes);
-  return randomBytes[0] % maxExclusive;
+
+  while (true) {
+    crypto.getRandomValues(randomBytes);
+    const value = randomBytes[0];
+    if (value < unbiasedLimit) {
+      return value % maxExclusive;
+    }
+  }
 }
 
 function secureShuffleArray<T>(items: T[]): T[] {
   const shuffled = [...items];
   for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = getSecureRandomInt(i + 1);
+    const j = getSecureRandomIndex(i + 1);
     const temp = shuffled[i];
     shuffled[i] = shuffled[j];
     shuffled[j] = temp;
@@ -48,7 +56,7 @@ function secureShuffleArray<T>(items: T[]): T[] {
 }
 
 function generateRotatingIp(): string {
-  const octet = () => getSecureRandomInt(256);
+  const octet = () => getSecureRandomIndex(256);
   return `${octet()}.${octet()}.${octet()}.${octet()}`;
 }
 
@@ -363,7 +371,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   if (body.seed !== undefined) {
     standardBody.seed = body.seed;
   } else if (model.provider === 'pollinations' && !modelId.includes('gemini') && !modelId.includes('claude')) {
-    standardBody.seed = getSecureRandomInt(1000000);
+    standardBody.seed = getSecureRandomIndex(1000000);
   }
 
   if (body.frequency_penalty !== undefined && body.frequency_penalty !== 0) standardBody.frequency_penalty = body.frequency_penalty;
