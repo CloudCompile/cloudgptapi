@@ -25,6 +25,10 @@ import {
   getBluesmindsApiKeys,
   getRandomBluesmindsApiKey,
   getBlazeAiApiKey,
+  getGroqApiKey,
+  getCerebrasApiKey,
+  getGoogleAiStudioApiKey,
+  getElevenLabsApiKey,
   safeResponseJson
 } from '@/lib/utils';
 import { rememberInteraction } from '@/lib/memory';
@@ -199,82 +203,72 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       );
     }
   } else if (model.provider === 'openrouter') {
-    if (isCloudflareGatewayEnabled) {
-      providerUrl = cloudflareGatewayUrl;
-      providerApiKey = cloudflareGatewayToken;
-    } else {
-      providerUrl = `${PROVIDER_URLS.openrouter}/api/v1/chat/completions`;
-      providerDailyLimit = 50;
-      providerPerMinuteLimit = 20;
+    providerUrl = `${PROVIDER_URLS.openrouter}/api/v1/chat/completions`;
+    providerDailyLimit = 50;
+    providerPerMinuteLimit = 20;
 
-      openRouterCandidateKeys = getOpenRouterApiKeys();
-      if (openRouterCandidateKeys.length === 0) {
-        console.warn(`[${requestId}] Missing OpenRouter API key for model: ${modelId}`);
+    openRouterCandidateKeys = getOpenRouterApiKeys();
+    if (openRouterCandidateKeys.length === 0) {
+      console.warn(`[${requestId}] Missing OpenRouter API key for model: ${modelId}`);
+      return NextResponse.json(
+        { error: { message: 'OpenRouter API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { status: 500, headers: getCorsHeaders() }
+      );
+    }
+
+    const shuffledKeys = secureShuffleArray(openRouterCandidateKeys);
+    for (const key of shuffledKeys) {
+      const minuteOk = await checkRateLimit(key, providerPerMinuteLimit, 'chat:openrouter');
+      if (!minuteOk) continue;
+      const dailyOk = await checkDailyLimit(key, providerDailyLimit);
+      if (!dailyOk) continue;
+      providerApiKey = key;
+      break;
+    }
+
+    if (!providerApiKey) {
+      const firstKey = shuffledKeys[0];
+      if (!firstKey) {
         return NextResponse.json(
           { error: { message: 'OpenRouter API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
           { status: 500, headers: getCorsHeaders() }
         );
       }
-
-      const shuffledKeys = secureShuffleArray(openRouterCandidateKeys);
-      for (const key of shuffledKeys) {
-        const minuteOk = await checkRateLimit(key, providerPerMinuteLimit, 'chat:openrouter');
-        if (!minuteOk) continue;
-        const dailyOk = await checkDailyLimit(key, providerDailyLimit);
-        if (!dailyOk) continue;
-        providerApiKey = key;
-        break;
-      }
-
-      if (!providerApiKey) {
-        const firstKey = shuffledKeys[0];
-        if (!firstKey) {
-          return NextResponse.json(
-            { error: { message: 'OpenRouter API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
-            { status: 500, headers: getCorsHeaders() }
-          );
-        }
-        const minuteInfo = await getRateLimitInfo(firstKey, providerPerMinuteLimit, 'chat:openrouter');
-        const dailyInfo = await getDailyLimitInfo(firstKey, providerDailyLimit);
-        return NextResponse.json(
-          {
-            error: {
-              message: `All OpenRouter keys are currently rate-limited (${providerPerMinuteLimit} RPM / ${providerDailyLimit} RPD per key). Please retry shortly.`,
-              type: 'requests',
-              param: null,
-              code: 'openrouter_keys_rate_limited',
-              request_id: requestId
-            }
-          },
-          {
-            status: 429,
-            headers: {
-              ...getCorsHeaders(),
-              'X-RateLimit-Remaining': String(minuteInfo.remaining),
-              'X-RateLimit-Reset': String(minuteInfo.resetAt),
-              'X-RateLimit-Limit': String(minuteInfo.limit),
-              'X-DailyLimit-Remaining': String(dailyInfo.remaining),
-              'X-DailyLimit-Reset': String(dailyInfo.resetAt),
-              'X-DailyLimit-Limit': String(dailyInfo.limit),
-            },
+      const minuteInfo = await getRateLimitInfo(firstKey, providerPerMinuteLimit, 'chat:openrouter');
+      const dailyInfo = await getDailyLimitInfo(firstKey, providerDailyLimit);
+      return NextResponse.json(
+        {
+          error: {
+            message: `All OpenRouter keys are currently rate-limited (${providerPerMinuteLimit} RPM / ${providerDailyLimit} RPD per key). Please retry shortly.`,
+            type: 'requests',
+            param: null,
+            code: 'openrouter_keys_rate_limited',
+            request_id: requestId
           }
-        );
-      }
+        },
+        {
+          status: 429,
+          headers: {
+            ...getCorsHeaders(),
+            'X-RateLimit-Remaining': String(minuteInfo.remaining),
+            'X-RateLimit-Reset': String(minuteInfo.resetAt),
+            'X-RateLimit-Limit': String(minuteInfo.limit),
+            'X-DailyLimit-Remaining': String(dailyInfo.remaining),
+            'X-DailyLimit-Reset': String(dailyInfo.resetAt),
+            'X-DailyLimit-Limit': String(dailyInfo.limit),
+          },
+        }
+      );
     }
   } else if (model.provider === 'pollinations') {
-    if (isCloudflareGatewayEnabled) {
-      providerUrl = cloudflareGatewayUrl;
-      providerApiKey = cloudflareGatewayToken;
-    } else {
-      providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
-      providerApiKey = getPollinationsApiKey();
-      if (!providerApiKey) {
-        console.warn(`[${requestId}] Missing Pollinations API key for model: ${modelId}`);
-        return NextResponse.json(
-          { error: { message: 'Pollinations API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
-          { status: 500, headers: getCorsHeaders() }
-        );
-      }
+    providerUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
+    providerApiKey = getPollinationsApiKey();
+    if (!providerApiKey) {
+      console.warn(`[${requestId}] Missing Pollinations API key for model: ${modelId}`);
+      return NextResponse.json(
+        { error: { message: 'Pollinations API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { status: 500, headers: getCorsHeaders() }
+      );
     }
   } else if (model.provider === 'kivest') {
     providerUrl = `${PROVIDER_URLS.kivest}/v1/chat/completions`;
@@ -300,6 +294,42 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       providerUrl = `${PROVIDER_URLS.mino}/x/qwen/chat/completions`;
     }
     console.log(`[${requestId}] Mino: routing ${modelId} to ${providerUrl}`);
+  } else if (model.provider === 'groq') {
+    providerUrl = `${PROVIDER_URLS.groq}/chat/completions`;
+    providerApiKey = getGroqApiKey();
+    if (!providerApiKey) {
+      console.warn(`[${requestId}] Missing Groq API key for model: ${modelId}`);
+      return NextResponse.json(
+        { error: { message: 'Groq API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { status: 500, headers: getCorsHeaders() }
+      );
+    }
+  } else if (model.provider === 'cerebras') {
+    providerUrl = `${PROVIDER_URLS.cerebras}/chat/completions`;
+    providerApiKey = getCerebrasApiKey();
+    if (!providerApiKey) {
+      console.warn(`[${requestId}] Missing Cerebras API key for model: ${modelId}`);
+      return NextResponse.json(
+        { error: { message: 'Cerebras API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { status: 500, headers: getCorsHeaders() }
+      );
+    }
+  } else if (model.provider === 'googleai') {
+    providerUrl = `${PROVIDER_URLS.googleai}/chat/completions`;
+    providerApiKey = getGoogleAiStudioApiKey();
+    if (!providerApiKey) {
+      console.warn(`[${requestId}] Missing Google AI Studio API key for model: ${modelId}`);
+      return NextResponse.json(
+        { error: { message: 'Google AI Studio API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { status: 500, headers: getCorsHeaders() }
+      );
+    }
+  } else if (model.provider === 'elevenlabs') {
+    // ElevenLabs is a TTS provider - not a chat completions provider
+    return NextResponse.json(
+      { error: { message: 'ElevenLabs models are text-to-speech only and do not support chat completions. Use the /v1/audio/speech endpoint instead.', type: 'invalid_request_error', param: 'model', code: 'unsupported_for_provider', request_id: requestId } },
+      { status: 400, headers: getCorsHeaders() }
+    );
   } else {
     // Fallback or Unknown provider
     return NextResponse.json(
@@ -358,6 +388,14 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   };
   console.log(`[${requestId}] Model mapping: ${modelId} -> ${standardBody.model}`);
 
+  // Strip provider prefix for Groq, Cerebras, and Google AI Studio (e.g. "groq/llama3-8b-8192" -> "llama3-8b-8192")
+  if (model.provider === 'groq' || model.provider === 'cerebras' || model.provider === 'googleai') {
+    const slashIdx = standardBody.model.indexOf('/');
+    if (slashIdx !== -1) {
+      standardBody.model = standardBody.model.substring(slashIdx + 1);
+    }
+  }
+
   // Track actual model ID used (for Bluesminds mapping)
   let actualModelId = standardBody.model;
   
@@ -407,12 +445,9 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     };
 
     try {
-      const fastPathUrl = isCloudflareGatewayEnabled ? cloudflareGatewayUrl : `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
-      const pollKey = isCloudflareGatewayEnabled ? cloudflareGatewayToken : getPollinationsApiKey();
+      const fastPathUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
+      const pollKey = getPollinationsApiKey();
       const startTime = Date.now();
-      if (!fastPathUrl) {
-        throw new Error('Cloudflare gateway URL is not configured');
-      }
       const response = await fastFetch(fastPathUrl, pollKey || '');
       
       if (response.ok) {
