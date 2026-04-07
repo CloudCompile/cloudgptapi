@@ -162,6 +162,8 @@ const CLAUDE_CHAT_MODELS: ChatModel[] = [
 ];
 
 // Groq Chat Models - ultra-fast inference
+// Note: Groq uses mixed naming conventions: older models use 'llama3' (no hyphen),
+// newer models use 'llama-3.x' or 'llama-4' with hyphens — these match Groq's actual model IDs.
 const GROQ_CHAT_MODELS: ChatModel[] = [
   { id: 'groq/llama-3.3-70b-versatile', name: 'Llama 3.3 70B Versatile (Groq)', provider: 'groq', description: 'Meta Llama 3.3 70B via Groq', contextWindow: 128, usageWeight: 2 },
   { id: 'groq/llama-3.1-8b-instant', name: 'Llama 3.1 8B Instant (Groq)', provider: 'groq', description: 'Meta Llama 3.1 8B ultra-fast via Groq', contextWindow: 128, usageWeight: 1 },

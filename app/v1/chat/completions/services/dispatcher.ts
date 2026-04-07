@@ -448,7 +448,11 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       const fastPathUrl = `${PROVIDER_URLS.pollinations}/v1/chat/completions`;
       const pollKey = getPollinationsApiKey();
       const startTime = Date.now();
-      const response = await fastFetch(fastPathUrl, pollKey || '');
+      if (!pollKey) {
+        console.warn(`[${requestId}] Fast-path skipped: no Pollinations API key available`);
+        throw new Error('No Pollinations API key configured');
+      }
+      const response = await fastFetch(fastPathUrl, pollKey);
       
       if (response.ok) {
         console.log(`[${requestId}] Fast-path success: ${Date.now() - startTime}ms via Pollinations`);
