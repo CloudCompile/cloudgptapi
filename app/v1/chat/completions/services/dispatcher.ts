@@ -379,6 +379,45 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   };
   console.log(`[${requestId}] Model mapping: ${modelId} -> ${standardBody.model}`);
 
+  // Estimate input tokens and truncate if exceeds provider limit (200k chars / 4 ≈ 50k tokens)
+  // Use 180k to leave buffer for headers/model overhead
+  const MAX_PROVIDER_CHARS = 180000;
+  const totalInputChars = JSON.stringify(standardBody.messages).length;
+  if (totalInputChars > MAX_PROVIDER_CHARS) {
+    console.log(`[${requestId}] Input too long (${totalInputChars} chars), truncating from ${MAX_PROVIDER_CHARS}...`);
+    // Keep system message if present, truncate from oldest messages
+    const systemMsgIdx = standardBody.messages.findIndex((m: any) => m.role === 'system');
+    if (systemMsgIdx !== -1) {
+      const systemMsg = standardBody.messages[systemMsgIdx];
+      const otherMessages = standardBody.messages.filter((_: any, i: number) => i !== systemMsgIdx);
+      const allowedChars = MAX_PROVIDER_CHARS - JSON.stringify(systemMsg).length - 100;
+      let truncatedChars = 0;
+      const keptMessages: any[] = [systemMsg];
+      for (const msg of otherMessages) {
+        const msgJson = JSON.stringify(msg);
+        if (truncatedChars + msgJson.length <= allowedChars) {
+          keptMessages.push(msg);
+          truncatedChars += msgJson.length;
+        }
+      }
+      standardBody.messages = keptMessages;
+      console.log(`[${requestId}] Truncated ${standardBody.messages.length} messages from ${totalInputChars} chars`);
+    } else {
+      // No system message, truncate oldest messages
+      const allowedChars = MAX_PROVIDER_CHARS - 100;
+      let truncatedChars = 0;
+      const keptMessages: any[] = [];
+      for (const msg of standardBody.messages) {
+        const msgJson = JSON.stringify(msg);
+        if (truncatedChars + msgJson.length <= allowedChars) {
+          keptMessages.push(msg);
+          truncatedChars += msgJson.length;
+        }
+      }
+      standardBody.messages = keptMessages;
+    }
+  }
+
   // Strip provider prefix for Groq and Cerebras (e.g. "groq/llama3-8b-8192" -> "llama3-8b-8192")
   if (model.provider === 'groq' || model.provider === 'cerebras') {
     const slashIdx = standardBody.model.indexOf('/');
