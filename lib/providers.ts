@@ -3,7 +3,7 @@
 export interface ChatModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'openai' | 'kivest' | 'bluesminds' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'moonshot' | 'zhipu' | 'minimax' | 'meta' | 'amazon' | 'mistral' | 'microsoft' | 'bytedance' | 'xiaomi' | 'alibaba' | 'litrouter' | 'mino' | 'groq' | 'cerebras' | 'googleai' | 'elevenlabs';
+  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'openai' | 'kivest' | 'bluesminds' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'moonshot' | 'zhipu' | 'minimax' | 'meta' | 'amazon' | 'mistral' | 'microsoft' | 'bytedance' | 'xiaomi' | 'alibaba' | 'litrouter' | 'mino' | 'groq' | 'cerebras' | 'elevenlabs';
   description?: string;
   contextWindow?: number;
   downtimeUntil?: string;
@@ -13,7 +13,7 @@ export interface ChatModel {
 export interface ImageModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'appypie' | 'stablehorde' | 'github' | 'openai' | 'google' | 'xai' | 'zhipu' | 'alibaba' | 'minimax' | 'googleai';
+  provider: 'pollinations' | 'openrouter' | 'appypie' | 'stablehorde' | 'github' | 'openai' | 'google' | 'xai' | 'zhipu' | 'alibaba' | 'minimax';
   description?: string;
   downtimeUntil?: string;
   usageWeight?: number;
@@ -22,7 +22,7 @@ export interface ImageModel {
 export interface VideoModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'github' | 'google' | 'googleai';
+  provider: 'pollinations' | 'openrouter' | 'github' | 'google';
   description?: string;
   maxDuration?: number;
   downtimeUntil?: string;
@@ -187,21 +187,8 @@ const CEREBRAS_CHAT_MODELS: ChatModel[] = [
   { id: 'cerebras/qwen-3-32b', name: 'Qwen 3 32B (Cerebras)', provider: 'cerebras', description: 'Qwen 3 32B via Cerebras', contextWindow: 128, usageWeight: 2 },
 ];
 
-// Google AI Studio Chat Models
-const GOOGLEAI_CHAT_MODELS: ChatModel[] = [
-  { id: 'googleai/gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'googleai', description: 'Google Gemini 2.5 Pro via AI Studio', contextWindow: 1000, usageWeight: 8 },
-  { id: 'googleai/gemini-pro-latest', name: 'Gemini Pro Latest', provider: 'googleai', description: 'Alias to latest Gemini Pro model', contextWindow: 1000, usageWeight: 8 },
-  { id: 'googleai/gemini-flash-latest', name: 'Gemini Flash Latest', provider: 'googleai', description: 'Alias to latest Gemini Flash model', contextWindow: 1000, usageWeight: 3 },
-  { id: 'googleai/gemini-flash-lite-latest', name: 'Gemini Flash-Lite Latest', provider: 'googleai', description: 'Alias to latest Gemini Flash-Lite model', contextWindow: 1000, usageWeight: 1 },
-  { id: 'googleai/gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'googleai', description: 'Google Gemini 2.5 Flash hybrid reasoning', contextWindow: 1000, usageWeight: 3 },
-  { id: 'googleai/gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite', provider: 'googleai', description: 'Google Gemini 2.5 Flash-Lite, most cost-effective', contextWindow: 1000, usageWeight: 1 },
-  { id: 'googleai/gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'googleai', description: 'Google Gemini 2.0 Flash multimodal', contextWindow: 1000, usageWeight: 2 },
-  { id: 'googleai/gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash-Lite', provider: 'googleai', description: 'Google Gemini 2.0 Flash-Lite', contextWindow: 1000, usageWeight: 1 },
-  { id: 'googleai/gemini-robotics-er-1.5-preview', name: 'Gemini Robotics-ER 1.5 Preview', provider: 'googleai', description: 'Google Gemini Robotics Embodied Reasoning', contextWindow: 1000, usageWeight: 4 },
-  { id: 'googleai/gemini-3.1-flash-live-preview', name: 'Gemini 3.1 Flash Live Preview', provider: 'googleai', description: 'Google Gemini 3.1 Flash Live low-latency audio', contextWindow: 1000, usageWeight: 4 },
-  { id: 'googleai/gemma-4-26b-a4b-it', name: 'Gemma 4 26B A4B IT', provider: 'googleai', description: 'Google Gemma 4 26B Mixture-of-Experts open model', contextWindow: 256, usageWeight: 2 },
-  { id: 'googleai/gemma-4-31b-it', name: 'Gemma 4 31B IT', provider: 'googleai', description: 'Google Gemma 4 31B dense open model', contextWindow: 256, usageWeight: 2 },
-];
+// Google AI Studio Chat Models - disabled
+const GOOGLEAI_CHAT_MODELS: ChatModel[] = [];
 
 // ElevenLabs Voice Models (TTS)
 const ELEVENLABS_MODELS: ChatModel[] = [
@@ -408,14 +395,7 @@ export const PREMIUM_MODELS = new Set([
   'gemini-2.5-flash', 'gemini-3.1-pro', 'gemini-2.5-pro',
   'gemini-3.1-pro', 'gemini-3.1-flash-lite-preview', 'gemini-3.1-flash-lite-preview-thinking',
   'gemini-3-flash-preview-thinking', 'gemini-2.5-flash-lite', 'gemini-2.5-flash-thinking',
-  // Google AI Studio (Pro)
-  'googleai/gemini-2.5-pro', 'googleai/gemini-pro-latest', 'googleai/gemini-flash-latest',
-  'googleai/gemini-flash-lite-latest', 'googleai/gemini-2.5-flash', 'googleai/gemini-2.5-flash-lite',
-  'googleai/gemini-2.0-flash', 'googleai/gemini-2.0-flash-lite', 'googleai/gemini-robotics-er-1.5-preview',
-  'googleai/gemini-3.1-flash-live-preview', 'googleai/gemma-4-26b-a4b-it', 'googleai/gemma-4-31b-it',
-  'googleai/gemini-2.5-flash-image', 'googleai/imagen-4.0-generate-001', 'googleai/imagen-4.0-ultra-generate-001',
-  'googleai/imagen-4.0-fast-generate-001', 'googleai/veo-3.1-generate-preview', 'googleai/veo-3.1-fast-generate-preview',
-  'googleai/veo-3.1-lite-generate-preview', 'googleai/veo-2.0-generate-001',
+  // Google AI Studio (Pro) - disabled
   // ElevenLabs (Pro)
   'elevenlabs/eleven_multilingual_v2', 'elevenlabs/eleven_turbo_v2_5', 'elevenlabs/eleven_flash_v2_5',
   'elevenlabs/eleven_flash_v2', 'elevenlabs/eleven_monolingual_v1',
@@ -523,11 +503,6 @@ export const IMAGE_MODELS: ImageModel[] = [
   { id: 'dall-e-3', name: 'DALL-E 3', provider: 'openai', description: 'OpenAI DALL-E 3 Image Generation', usageWeight: 20 },
   { id: 'gpt-image-1', name: 'GPT Image 1', provider: 'openai', description: 'OpenAI GPT Image 1', usageWeight: 25 },
   { id: 'gpt-image-1.5', name: 'GPT Image 1.5', provider: 'openai', description: 'OpenAI GPT Image 1.5', usageWeight: 25 },
-  // Google AI Studio (Pro/Ultra)
-  { id: 'googleai/gemini-2.5-flash-image', name: 'Gemini 2.5 Flash Image', provider: 'googleai', description: 'Google Gemini 2.5 Flash image generation & editing', usageWeight: 5 },
-  { id: 'googleai/imagen-4.0-generate-001', name: 'Imagen 4', provider: 'googleai', description: 'Google Imagen 4 highest quality image generation', usageWeight: 8 },
-  { id: 'googleai/imagen-4.0-ultra-generate-001', name: 'Imagen 4 Ultra', provider: 'googleai', description: 'Google Imagen 4 Ultra best image quality', usageWeight: 12 },
-  { id: 'googleai/imagen-4.0-fast-generate-001', name: 'Imagen 4 Fast', provider: 'googleai', description: 'Google Imagen 4 Fast affordable generation', usageWeight: 4 },
 ];
 
 // Available video models - Pro tier
@@ -536,11 +511,6 @@ export const VIDEO_MODELS: VideoModel[] = [
   { id: 'cogvideox-5b', name: 'CogVideoX 5B', provider: 'pollinations', description: 'CogVideoX 5B', usageWeight: 8, maxDuration: 10 },
   { id: 'pix2pix-video', name: 'Pix2Pix Video', provider: 'pollinations', description: 'Pix2Pix Video Generation', usageWeight: 8, maxDuration: 10 },
   { id: 'svd', name: 'Stable Video Diffusion', provider: 'pollinations', description: 'SVD Video Generation', usageWeight: 6, maxDuration: 4 },
-  // Google AI Studio (Paid)
-  { id: 'googleai/veo-3.1-generate-preview', name: 'Veo 3.1', provider: 'googleai', description: 'Google Veo 3.1 latest video generation', usageWeight: 20 },
-  { id: 'googleai/veo-3.1-fast-generate-preview', name: 'Veo 3.1 Fast', provider: 'googleai', description: 'Google Veo 3.1 Fast optimized for speed', usageWeight: 12 },
-  { id: 'googleai/veo-3.1-lite-generate-preview', name: 'Veo 3.1 Lite', provider: 'googleai', description: 'Google Veo 3.1 Lite most cost-efficient', usageWeight: 6 },
-  { id: 'googleai/veo-2.0-generate-001', name: 'Veo 2', provider: 'googleai', description: 'Google Veo 2 second-gen video generation', usageWeight: 15 },
 ];
 
 // Video models require pro/video_pro plan for access
@@ -570,6 +540,5 @@ export const PROVIDER_URLS = {
   mino: 'https://mino.redemption.pw',
   groq: 'https://api.groq.com/openai/v1',
   cerebras: 'https://api.cerebras.ai/v1',
-  googleai: 'https://generativelanguage.googleapis.com/v1beta/openai',
   elevenlabs: 'https://api.elevenlabs.io/v1',
 };

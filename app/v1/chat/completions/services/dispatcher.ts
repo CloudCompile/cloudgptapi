@@ -27,7 +27,6 @@ import {
   getBlazeAiApiKey,
   getGroqApiKey,
   getCerebrasApiKey,
-  getGoogleAiStudioApiKey,
   getElevenLabsApiKey,
   safeResponseJson
 } from '@/lib/utils';
@@ -314,16 +313,6 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
         { status: 500, headers: getCorsHeaders() }
       );
     }
-  } else if (model.provider === 'googleai') {
-    providerUrl = `${PROVIDER_URLS.googleai}/chat/completions`;
-    providerApiKey = getGoogleAiStudioApiKey();
-    if (!providerApiKey) {
-      console.warn(`[${requestId}] Missing Google AI Studio API key for model: ${modelId}`);
-      return NextResponse.json(
-        { error: { message: 'Google AI Studio API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
-        { status: 500, headers: getCorsHeaders() }
-      );
-    }
   } else if (model.provider === 'elevenlabs') {
     // ElevenLabs is a TTS provider - not a chat completions provider
     return NextResponse.json(
@@ -388,8 +377,8 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   };
   console.log(`[${requestId}] Model mapping: ${modelId} -> ${standardBody.model}`);
 
-  // Strip provider prefix for Groq, Cerebras, and Google AI Studio (e.g. "groq/llama3-8b-8192" -> "llama3-8b-8192")
-  if (model.provider === 'groq' || model.provider === 'cerebras' || model.provider === 'googleai') {
+  // Strip provider prefix for Groq and Cerebras (e.g. "groq/llama3-8b-8192" -> "llama3-8b-8192")
+  if (model.provider === 'groq' || model.provider === 'cerebras') {
     const slashIdx = standardBody.model.indexOf('/');
     if (slashIdx !== -1) {
       standardBody.model = standardBody.model.substring(slashIdx + 1);
