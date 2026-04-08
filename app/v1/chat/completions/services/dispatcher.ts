@@ -280,6 +280,14 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   } else if (model.provider === 'zhipu') {
     // GLM models route via Bluesminds
     providerUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
+    providerApiKey = getBluesmindsApiKey();
+    if (!providerApiKey) {
+      console.warn(`[${requestId}] Missing Bluesminds API key for model: ${modelId}`);
+      return NextResponse.json(
+        { error: { message: 'Bluesminds API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { status: 500, headers: getCorsHeaders() }
+      );
+    }
     console.log(`[${requestId}] Zhipu: routing ${modelId} to Bluesminds`);
   } else if (model.provider === 'mino') {
     // Mino has multiple endpoints based on model type
