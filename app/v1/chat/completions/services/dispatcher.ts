@@ -137,8 +137,6 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     'qwen3.5-plus', 'qwen3.5-flash', 'qwen3-32b', 'qwen3-next-80b', 'qwen3-next-80b-thinking',
     // MiniMax models
     'minimax-m2.5', 'minimax-m2.7', 'minimax-m2', 'minimax-m2.1',
-    // Zhipu models
-    'glm-4.6', 'glm-4.7',
     // Microsoft models
     'phi-4-mini', 'phi-4', 'phi-4-multimodal', 'phi-3.5-mini', 'phi-3-mini',
     // NVIDIA models
@@ -164,7 +162,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     'mistral-large', 'mistral-large-3', 'mistral-small-24b', 'mistral-small-4', 'codestral', 'devstral',
     'qwen3.5-plus', 'qwen3.5-flash', 'qwen3-32b', 'qwen3-next-80b', 'qwen3-next-80b-thinking',
     'minimax-m2.5', 'minimax-m2.7', 'minimax-m2', 'minimax-m2.1',
-    'glm-4.6', 'glm-4.7',
+    'glm-4.6',
     'phi-4-mini', 'phi-4', 'phi-4-multimodal', 'phi-3.5-mini', 'phi-3-mini',
     'nemotron-3-nano', 'nemotron-4-mini', 'nemotron-4', 'nemotron-super',
     'step-3.5-flash',
@@ -279,6 +277,10 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
         { status: 500, headers: getCorsHeaders() }
       );
     }
+  } else if (model.provider === 'zhipu') {
+    // GLM models route via Bluesminds
+    providerUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
+    console.log(`[${requestId}] Zhipu: routing ${modelId} to Bluesminds`);
   } else if (model.provider === 'mino') {
     // Mino has multiple endpoints based on model type
     const minoModelId = getMinoModelId(modelId);
