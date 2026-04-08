@@ -370,3 +370,31 @@ export function getOpenAIApiKey(): string | undefined {
 export function getLitRouterApiKey(): string | undefined {
   return process.env.LITROUTER_API_KEY;
 }
+
+/**
+ * Get Groq API key
+ */
+export function getGroqApiKey(): string | undefined {
+  return process.env.GROQ_API_KEY;
+}
+
+/**
+ * Get Cerebras API key
+ */
+export function getCerebrasApiKey(): string | undefined {
+  return process.env.CEREBRAS_API_KEY;
+}
+
+/**
+ * Get Google AI Studio API key
+ */
+export function getGoogleAiStudioApiKey(): string | undefined {
+  return process.env.GOOGLE_AI_STUDIO_KEY || process.env.GOOGLE_AI_STUDIO_API_KEY;
+}
+
+/**
+ * Get ElevenLabs API key
+ */
+export function getElevenLabsApiKey(): string | undefined {
+  return process.env.ELEVENLABS_API_KEY;
+}

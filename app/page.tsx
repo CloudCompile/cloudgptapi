@@ -22,8 +22,8 @@ export default function Home() {
               Intelligence <br /><span className="premium-text">Unbound</span>
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-5 duration-700 delay-200 font-medium">
-              Vetra is a Pollinations-powered API gateway for global AI infrastructure. 
-              Access fast chat, image, and video generation with enterprise-grade reliability.
+              Vetra is a unified AI API gateway powered by Pollinations, OpenRouter, Groq, Cerebras, Google AI Studio, ElevenLabs, and more.
+              Access fast chat, image, video, and audio generation with enterprise-grade reliability.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
               <Link 
@@ -144,38 +144,35 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pollinations Section */}
+      {/* Powered by Providers Section */}
       <section className="py-8 sm:py-12 bg-slate-50 dark:bg-slate-900/50 border-b border-border">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
-            <div className="flex flex-col gap-2 text-center md:text-left items-center md:items-start">
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary w-fit">
-                <Crown className="h-3.5 w-3.5" />
-                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">Premium Models</span>
-              </div>
-              <h3 className="text-2xl sm:text-3xl font-black tracking-tighter">Pollinations Integration</h3>
-              <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium max-w-lg">
-                Access Pollinations chat, image, and video models through one unified OpenAI-compatible API.
-              </p>
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary w-fit mx-auto mb-3">
+              <Crown className="h-3.5 w-3.5" />
+              <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">Powered By</span>
             </div>
-            <div className="flex gap-8 sm:gap-12 items-center overflow-x-auto pb-4 md:pb-0 scrollbar-hide w-full md:w-auto justify-start sm:justify-center md:justify-end">
-              <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
-                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">Kimi K2 Thinking</span>
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Reasoning</span>
+            <h3 className="text-2xl sm:text-3xl font-black tracking-tighter">All Our Providers</h3>
+            <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium mt-2 max-w-xl mx-auto">
+              One API key. Every provider. Switch models without changing your code.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4 sm:gap-6 items-center justify-items-center">
+            {[
+              { name: 'Pollinations', tag: 'Chat · Image · Video', color: 'text-pink-500' },
+              { name: 'OpenRouter', tag: 'Aggregator', color: 'text-violet-500' },
+              { name: 'Groq', tag: 'Ultra-fast', color: 'text-orange-500' },
+              { name: 'Cerebras', tag: 'Ultra-fast', color: 'text-blue-500' },
+              { name: 'Google AI Studio', tag: 'Gemini · Imagen · Veo', color: 'text-emerald-500' },
+              { name: 'ElevenLabs', tag: 'Voice · TTS', color: 'text-amber-500' },
+              { name: 'Anthropic', tag: 'Claude', color: 'text-red-500' },
+              { name: 'OpenAI', tag: 'GPT · DALL-E', color: 'text-sky-500' },
+            ].map((provider) => (
+              <div key={provider.name} className="flex flex-col items-center gap-1.5 group cursor-default">
+                <span className={`font-black text-sm sm:text-base tracking-tight group-hover:scale-105 transition-transform ${provider.color}`}>{provider.name}</span>
+                <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.15em] text-slate-400 font-black text-center">{provider.tag}</span>
               </div>
-              <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
-                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">Perplexity Sonar</span>
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Reasoning</span>
-              </div>
-              <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
-                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">Seedream Pro</span>
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Image</span>
-              </div>
-              <div className="flex flex-col items-center gap-1 group cursor-default shrink-0">
-                <span className="font-black text-lg sm:text-xl tracking-tighter group-hover:text-primary transition-colors">Veo</span>
-                <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">Video</span>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -186,7 +183,7 @@ export default function Home() {
           <div className="max-w-3xl mb-12 sm:mb-24 text-center sm:text-left">
             <h2 className="text-3xl sm:text-5xl font-black tracking-tighter mb-4 sm:mb-6 leading-none">Engineered for Developers.</h2>
             <p className="text-slate-600 dark:text-slate-400 text-base sm:text-xl leading-relaxed font-medium">
-              We've packaged Pollinations models into a single, elegant interface. 
+              We've unified Pollinations, OpenRouter, Groq, Cerebras, Google AI Studio, ElevenLabs, and more into a single, elegant interface. 
               Focus on your product, not your infrastructure.
             </p>
           </div>
@@ -250,11 +247,11 @@ export default function Home() {
                 <span>Developer Experience</span>
               </div>
               <h2 className="text-4xl sm:text-6xl font-black tracking-tighter mb-6 sm:mb-8 leading-[0.9]">
-                One API.<br />Pollinations Models.
+                One API.<br />Every Provider.
               </h2>
               <p className="text-slate-400 text-base sm:text-xl mb-8 sm:mb-10 leading-relaxed font-medium">
-                Replace fragmented integrations with a single, elegant Pollinations-powered API. 
-                Switch models on the fly without changing a single line of your core logic.
+                Replace fragmented integrations with a single, elegant API. 
+                Switch between Groq, Cerebras, Google AI Studio, Pollinations, OpenRouter, and more by changing a single parameter.
               </p>
               
               <div className="grid grid-cols-2 gap-6 sm:gap-8 max-w-sm mx-auto lg:mx-0">
@@ -315,7 +312,7 @@ console.log(response.content);`}</code>
             </div>
             <h2 className="text-3xl sm:text-5xl font-black tracking-tighter mb-4 sm:mb-6 leading-none">Built by Developers, for Developers.</h2>
             <p className="text-slate-600 dark:text-slate-400 text-base sm:text-xl leading-relaxed font-medium">
-              Built by developers focused on making Pollinations integration reliable, fast, and simple.
+              Built by developers focused on making multi-provider AI integration reliable, fast, and simple.
             </p>
           </div>
 
@@ -381,7 +378,7 @@ console.log(response.content);`}</code>
                 <span className="text-xl sm:text-2xl font-black tracking-tighter">Vetra</span>
               </div>
               <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-sm mb-6">
-                The next generation of AI infrastructure. Built for developers shipping with Pollinations.
+                The next generation of AI infrastructure. Built for developers shipping with multiple AI providers.
               </p>
               <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                 <a href="https://vetraai.vercel.app/" target="_blank" className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-primary hover:opacity-80 transition-all flex items-center gap-1.5">

@@ -3,7 +3,7 @@
 export interface ChatModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'openai' | 'kivest' | 'bluesminds' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'moonshot' | 'zhipu' | 'minimax' | 'meta' | 'amazon' | 'mistral' | 'microsoft' | 'bytedance' | 'xiaomi' | 'alibaba' | 'litrouter' | 'mino';
+  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'openai' | 'kivest' | 'bluesminds' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'moonshot' | 'zhipu' | 'minimax' | 'meta' | 'amazon' | 'mistral' | 'microsoft' | 'bytedance' | 'xiaomi' | 'alibaba' | 'litrouter' | 'mino' | 'groq' | 'cerebras' | 'googleai' | 'elevenlabs';
   description?: string;
   contextWindow?: number;
   downtimeUntil?: string;
@@ -13,7 +13,7 @@ export interface ChatModel {
 export interface ImageModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'appypie' | 'stablehorde' | 'github' | 'openai' | 'google' | 'xai' | 'zhipu' | 'alibaba' | 'minimax';
+  provider: 'pollinations' | 'openrouter' | 'appypie' | 'stablehorde' | 'github' | 'openai' | 'google' | 'xai' | 'zhipu' | 'alibaba' | 'minimax' | 'googleai';
   description?: string;
   downtimeUntil?: string;
   usageWeight?: number;
@@ -22,7 +22,7 @@ export interface ImageModel {
 export interface VideoModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'github' | 'google';
+  provider: 'pollinations' | 'openrouter' | 'github' | 'google' | 'googleai';
   description?: string;
   maxDuration?: number;
   downtimeUntil?: string;
@@ -159,6 +159,57 @@ const GEMINI_CHAT_MODELS: ChatModel[] = [
 ];
 
 const CLAUDE_CHAT_MODELS: ChatModel[] = [
+];
+
+// Groq Chat Models - ultra-fast inference
+// Note: Groq uses mixed naming conventions: older models use 'llama3' (no hyphen),
+// newer models use 'llama-3.x' or 'llama-4' with hyphens — these match Groq's actual model IDs.
+const GROQ_CHAT_MODELS: ChatModel[] = [
+  { id: 'groq/llama-3.3-70b-versatile', name: 'Llama 3.3 70B Versatile (Groq)', provider: 'groq', description: 'Meta Llama 3.3 70B via Groq', contextWindow: 128, usageWeight: 2 },
+  { id: 'groq/llama-3.1-8b-instant', name: 'Llama 3.1 8B Instant (Groq)', provider: 'groq', description: 'Meta Llama 3.1 8B ultra-fast via Groq', contextWindow: 128, usageWeight: 1 },
+  { id: 'groq/llama3-70b-8192', name: 'Llama 3 70B (Groq)', provider: 'groq', description: 'Meta Llama 3 70B via Groq', contextWindow: 8, usageWeight: 2 },
+  { id: 'groq/llama3-8b-8192', name: 'Llama 3 8B (Groq)', provider: 'groq', description: 'Meta Llama 3 8B via Groq', contextWindow: 8, usageWeight: 1 },
+  { id: 'groq/mixtral-8x7b-32768', name: 'Mixtral 8x7B (Groq)', provider: 'groq', description: 'Mistral Mixtral 8x7B via Groq', contextWindow: 32, usageWeight: 1 },
+  { id: 'groq/gemma2-9b-it', name: 'Gemma 2 9B IT (Groq)', provider: 'groq', description: 'Google Gemma 2 9B Instruct via Groq', contextWindow: 8, usageWeight: 1 },
+  { id: 'groq/qwen-qwq-32b', name: 'QwQ 32B (Groq)', provider: 'groq', description: 'Qwen QwQ 32B reasoning model via Groq', contextWindow: 128, usageWeight: 2 },
+  { id: 'groq/llama-4-scout-17b-16e-preview', name: 'Llama 4 Scout 17B (Groq)', provider: 'groq', description: 'Meta Llama 4 Scout 17B 16E via Groq', contextWindow: 512, usageWeight: 2 },
+  { id: 'groq/llama-4-maverick-17b-128e-preview', name: 'Llama 4 Maverick 17B (Groq)', provider: 'groq', description: 'Meta Llama 4 Maverick 17B 128E via Groq', contextWindow: 1024, usageWeight: 3 },
+  { id: 'groq/deepseek-r1-distill-llama-70b', name: 'DeepSeek R1 Distill Llama 70B (Groq)', provider: 'groq', description: 'DeepSeek R1 Distilled Llama 70B via Groq', contextWindow: 128, usageWeight: 2 },
+  { id: 'groq/mistral-saba-24b', name: 'Mistral Saba 24B (Groq)', provider: 'groq', description: 'Mistral Saba 24B via Groq', contextWindow: 32, usageWeight: 2 },
+];
+
+// Cerebras Chat Models - ultra-fast inference
+const CEREBRAS_CHAT_MODELS: ChatModel[] = [
+  { id: 'cerebras/llama3.1-8b', name: 'Llama 3.1 8B (Cerebras)', provider: 'cerebras', description: 'Meta Llama 3.1 8B via Cerebras', contextWindow: 128, usageWeight: 1 },
+  { id: 'cerebras/llama3.1-70b', name: 'Llama 3.1 70B (Cerebras)', provider: 'cerebras', description: 'Meta Llama 3.1 70B via Cerebras', contextWindow: 128, usageWeight: 2 },
+  { id: 'cerebras/llama-4-scout-17b-16e', name: 'Llama 4 Scout 17B (Cerebras)', provider: 'cerebras', description: 'Meta Llama 4 Scout 17B 16E via Cerebras', contextWindow: 128, usageWeight: 2 },
+  { id: 'cerebras/llama-4-maverick-17b-128e', name: 'Llama 4 Maverick 17B (Cerebras)', provider: 'cerebras', description: 'Meta Llama 4 Maverick 17B 128E via Cerebras', contextWindow: 128, usageWeight: 3 },
+  { id: 'cerebras/qwen-3-32b', name: 'Qwen 3 32B (Cerebras)', provider: 'cerebras', description: 'Qwen 3 32B via Cerebras', contextWindow: 128, usageWeight: 2 },
+];
+
+// Google AI Studio Chat Models
+const GOOGLEAI_CHAT_MODELS: ChatModel[] = [
+  { id: 'googleai/gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'googleai', description: 'Google Gemini 2.5 Pro via AI Studio', contextWindow: 1000, usageWeight: 8 },
+  { id: 'googleai/gemini-pro-latest', name: 'Gemini Pro Latest', provider: 'googleai', description: 'Alias to latest Gemini Pro model', contextWindow: 1000, usageWeight: 8 },
+  { id: 'googleai/gemini-flash-latest', name: 'Gemini Flash Latest', provider: 'googleai', description: 'Alias to latest Gemini Flash model', contextWindow: 1000, usageWeight: 3 },
+  { id: 'googleai/gemini-flash-lite-latest', name: 'Gemini Flash-Lite Latest', provider: 'googleai', description: 'Alias to latest Gemini Flash-Lite model', contextWindow: 1000, usageWeight: 1 },
+  { id: 'googleai/gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'googleai', description: 'Google Gemini 2.5 Flash hybrid reasoning', contextWindow: 1000, usageWeight: 3 },
+  { id: 'googleai/gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite', provider: 'googleai', description: 'Google Gemini 2.5 Flash-Lite, most cost-effective', contextWindow: 1000, usageWeight: 1 },
+  { id: 'googleai/gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'googleai', description: 'Google Gemini 2.0 Flash multimodal', contextWindow: 1000, usageWeight: 2 },
+  { id: 'googleai/gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash-Lite', provider: 'googleai', description: 'Google Gemini 2.0 Flash-Lite', contextWindow: 1000, usageWeight: 1 },
+  { id: 'googleai/gemini-robotics-er-1.5-preview', name: 'Gemini Robotics-ER 1.5 Preview', provider: 'googleai', description: 'Google Gemini Robotics Embodied Reasoning', contextWindow: 1000, usageWeight: 4 },
+  { id: 'googleai/gemini-3.1-flash-live-preview', name: 'Gemini 3.1 Flash Live Preview', provider: 'googleai', description: 'Google Gemini 3.1 Flash Live low-latency audio', contextWindow: 1000, usageWeight: 4 },
+  { id: 'googleai/gemma-4-26b-a4b-it', name: 'Gemma 4 26B A4B IT', provider: 'googleai', description: 'Google Gemma 4 26B Mixture-of-Experts open model', contextWindow: 256, usageWeight: 2 },
+  { id: 'googleai/gemma-4-31b-it', name: 'Gemma 4 31B IT', provider: 'googleai', description: 'Google Gemma 4 31B dense open model', contextWindow: 256, usageWeight: 2 },
+];
+
+// ElevenLabs Voice Models (TTS)
+const ELEVENLABS_MODELS: ChatModel[] = [
+  { id: 'elevenlabs/eleven_multilingual_v2', name: 'Eleven Multilingual v2', provider: 'elevenlabs', description: 'ElevenLabs multilingual TTS model v2', usageWeight: 2 },
+  { id: 'elevenlabs/eleven_turbo_v2_5', name: 'Eleven Turbo v2.5', provider: 'elevenlabs', description: 'ElevenLabs ultra-low latency TTS', usageWeight: 1 },
+  { id: 'elevenlabs/eleven_flash_v2_5', name: 'Eleven Flash v2.5', provider: 'elevenlabs', description: 'ElevenLabs flash TTS model v2.5', usageWeight: 1 },
+  { id: 'elevenlabs/eleven_flash_v2', name: 'Eleven Flash v2', provider: 'elevenlabs', description: 'ElevenLabs flash TTS model v2', usageWeight: 1 },
+  { id: 'elevenlabs/eleven_monolingual_v1', name: 'Eleven Monolingual v1', provider: 'elevenlabs', description: 'ElevenLabs English TTS model v1', usageWeight: 1 },
 ];
 
 const OPENROUTER_CHAT_MODELS: ChatModel[] = [
@@ -339,7 +390,7 @@ const OPENAI_CHAT_MODELS: ChatModel[] = [
 
 // Deduplicate models by ID - last provider wins
 // Order: pollinations → kivest → openrouter → mino
-const ALL_CHAT_MODELS = [...POLLINATIONS_CHAT_MODELS, ...KIVEST_CHAT_MODELS, ...OPENROUTER_CHAT_MODELS, ...MINO_CHAT_MODELS];
+const ALL_CHAT_MODELS = [...POLLINATIONS_CHAT_MODELS, ...KIVEST_CHAT_MODELS, ...OPENROUTER_CHAT_MODELS, ...MINO_CHAT_MODELS, ...GROQ_CHAT_MODELS, ...CEREBRAS_CHAT_MODELS, ...GOOGLEAI_CHAT_MODELS, ...ELEVENLABS_MODELS];
 
 // Keep last occurrence of each model ID (kivest overwrites pollinations)
 const seen = new Set<string>();
@@ -369,6 +420,17 @@ export const PREMIUM_MODELS = new Set([
   'gemini-2.5-flash', 'gemini-3.1-pro', 'gemini-2.5-pro',
   'gemini-3.1-pro', 'gemini-3.1-flash-lite-preview', 'gemini-3.1-flash-lite-preview-thinking',
   'gemini-3-flash-preview-thinking', 'gemini-2.5-flash-lite', 'gemini-2.5-flash-thinking',
+  // Google AI Studio (Pro)
+  'googleai/gemini-2.5-pro', 'googleai/gemini-pro-latest', 'googleai/gemini-flash-latest',
+  'googleai/gemini-flash-lite-latest', 'googleai/gemini-2.5-flash', 'googleai/gemini-2.5-flash-lite',
+  'googleai/gemini-2.0-flash', 'googleai/gemini-2.0-flash-lite', 'googleai/gemini-robotics-er-1.5-preview',
+  'googleai/gemini-3.1-flash-live-preview', 'googleai/gemma-4-26b-a4b-it', 'googleai/gemma-4-31b-it',
+  'googleai/gemini-2.5-flash-image', 'googleai/imagen-4.0-generate-001', 'googleai/imagen-4.0-ultra-generate-001',
+  'googleai/imagen-4.0-fast-generate-001', 'googleai/veo-3.1-generate-preview', 'googleai/veo-3.1-fast-generate-preview',
+  'googleai/veo-3.1-lite-generate-preview', 'googleai/veo-2.0-generate-001',
+  // ElevenLabs (Pro)
+  'elevenlabs/eleven_multilingual_v2', 'elevenlabs/eleven_turbo_v2_5', 'elevenlabs/eleven_flash_v2_5',
+  'elevenlabs/eleven_flash_v2', 'elevenlabs/eleven_monolingual_v1',
   'nemotron-3-nano-30b-a3b', 'step-3.5-flash', 'gemma-3-27b-it',
   // MiniMax (Pro - except minimax-2.7 which is duplicate/free)
   'minimax-m2.1', 'minimax-m2.5', 'minimax-m2', 'minimax-m2.7', 'nova',
@@ -447,6 +509,10 @@ export const FREE_MODELS = new Set([
   ...OPENROUTER_CHAT_MODELS
     .map(model => model.id)
     .filter(id => id.endsWith(':free')),
+  // Groq free-tier models
+  ...GROQ_CHAT_MODELS.map(m => m.id),
+  // Cerebras free-tier models
+  ...CEREBRAS_CHAT_MODELS.map(m => m.id),
 ]);
 
 // Available image models - Pro tier (except flux which is free)
@@ -469,6 +535,11 @@ export const IMAGE_MODELS: ImageModel[] = [
   { id: 'dall-e-3', name: 'DALL-E 3', provider: 'openai', description: 'OpenAI DALL-E 3 Image Generation', usageWeight: 20 },
   { id: 'gpt-image-1', name: 'GPT Image 1', provider: 'openai', description: 'OpenAI GPT Image 1', usageWeight: 25 },
   { id: 'gpt-image-1.5', name: 'GPT Image 1.5', provider: 'openai', description: 'OpenAI GPT Image 1.5', usageWeight: 25 },
+  // Google AI Studio (Pro/Ultra)
+  { id: 'googleai/gemini-2.5-flash-image', name: 'Gemini 2.5 Flash Image', provider: 'googleai', description: 'Google Gemini 2.5 Flash image generation & editing', usageWeight: 5 },
+  { id: 'googleai/imagen-4.0-generate-001', name: 'Imagen 4', provider: 'googleai', description: 'Google Imagen 4 highest quality image generation', usageWeight: 8 },
+  { id: 'googleai/imagen-4.0-ultra-generate-001', name: 'Imagen 4 Ultra', provider: 'googleai', description: 'Google Imagen 4 Ultra best image quality', usageWeight: 12 },
+  { id: 'googleai/imagen-4.0-fast-generate-001', name: 'Imagen 4 Fast', provider: 'googleai', description: 'Google Imagen 4 Fast affordable generation', usageWeight: 4 },
 ];
 
 // Available video models - Pro tier
@@ -477,6 +548,11 @@ export const VIDEO_MODELS: VideoModel[] = [
   { id: 'cogvideox-5b', name: 'CogVideoX 5B', provider: 'pollinations', description: 'CogVideoX 5B', usageWeight: 8, maxDuration: 10 },
   { id: 'pix2pix-video', name: 'Pix2Pix Video', provider: 'pollinations', description: 'Pix2Pix Video Generation', usageWeight: 8, maxDuration: 10 },
   { id: 'svd', name: 'Stable Video Diffusion', provider: 'pollinations', description: 'SVD Video Generation', usageWeight: 6, maxDuration: 4 },
+  // Google AI Studio (Paid)
+  { id: 'googleai/veo-3.1-generate-preview', name: 'Veo 3.1', provider: 'googleai', description: 'Google Veo 3.1 latest video generation', usageWeight: 20 },
+  { id: 'googleai/veo-3.1-fast-generate-preview', name: 'Veo 3.1 Fast', provider: 'googleai', description: 'Google Veo 3.1 Fast optimized for speed', usageWeight: 12 },
+  { id: 'googleai/veo-3.1-lite-generate-preview', name: 'Veo 3.1 Lite', provider: 'googleai', description: 'Google Veo 3.1 Lite most cost-efficient', usageWeight: 6 },
+  { id: 'googleai/veo-2.0-generate-001', name: 'Veo 2', provider: 'googleai', description: 'Google Veo 2 second-gen video generation', usageWeight: 15 },
 ];
 
 // Video models require pro/video_pro plan for access
@@ -504,4 +580,8 @@ export const PROVIDER_URLS = {
   aqua: 'https://api.aquadevs.com/v1',
   blazeai: 'https://blazeai.boxu.dev/v1',
   mino: 'https://mino.redemption.pw',
+  groq: 'https://api.groq.com/openai/v1',
+  cerebras: 'https://api.cerebras.ai/v1',
+  googleai: 'https://generativelanguage.googleapis.com/v1beta/openai',
+  elevenlabs: 'https://api.elevenlabs.io/v1',
 };
