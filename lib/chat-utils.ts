@@ -418,7 +418,6 @@ export const PROVIDER_URLS = {
   mino: 'https://mino.redemption.pw',
   groq: 'https://api.groq.com/openai/v1',
   cerebras: 'https://api.cerebras.ai/v1',
-  googleai: 'https://generativelanguage.googleapis.com/v1beta/openai',
   elevenlabs: 'https://api.elevenlabs.io/v1',
 };
 

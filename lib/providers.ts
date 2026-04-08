@@ -3,7 +3,7 @@
 export interface ChatModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'openai' | 'kivest' | 'bluesminds' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'moonshot' | 'zhipu' | 'minimax' | 'meta' | 'amazon' | 'mistral' | 'microsoft' | 'bytedance' | 'xiaomi' | 'alibaba' | 'litrouter' | 'mino' | 'groq' | 'cerebras' | 'googleai' | 'elevenlabs';
+  provider: 'pollinations' | 'openrouter' | 'stablehorde' | 'meridian' | 'github' | 'claude' | 'gemini' | 'openai' | 'kivest' | 'bluesminds' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'moonshot' | 'zhipu' | 'minimax' | 'meta' | 'amazon' | 'mistral' | 'microsoft' | 'bytedance' | 'xiaomi' | 'alibaba' | 'litrouter' | 'mino' | 'groq' | 'cerebras' | 'elevenlabs';
   description?: string;
   contextWindow?: number;
   downtimeUntil?: string;
@@ -13,7 +13,7 @@ export interface ChatModel {
 export interface ImageModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'appypie' | 'stablehorde' | 'github' | 'openai' | 'google' | 'xai' | 'zhipu' | 'alibaba' | 'minimax' | 'googleai';
+  provider: 'pollinations' | 'openrouter' | 'appypie' | 'stablehorde' | 'github' | 'openai' | 'google' | 'xai' | 'zhipu' | 'alibaba' | 'minimax';
   description?: string;
   downtimeUntil?: string;
   usageWeight?: number;
@@ -22,7 +22,7 @@ export interface ImageModel {
 export interface VideoModel {
   id: string;
   name: string;
-  provider: 'pollinations' | 'openrouter' | 'github' | 'google' | 'googleai';
+  provider: 'pollinations' | 'openrouter' | 'github' | 'google';
   description?: string;
   maxDuration?: number;
   downtimeUntil?: string;
@@ -187,21 +187,8 @@ const CEREBRAS_CHAT_MODELS: ChatModel[] = [
   { id: 'cerebras/qwen-3-32b', name: 'Qwen 3 32B (Cerebras)', provider: 'cerebras', description: 'Qwen 3 32B via Cerebras', contextWindow: 128, usageWeight: 2 },
 ];
 
-// Google AI Studio Chat Models
-const GOOGLEAI_CHAT_MODELS: ChatModel[] = [
-  { id: 'googleai/gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'googleai', description: 'Google Gemini 2.5 Pro via AI Studio', contextWindow: 1000, usageWeight: 8 },
-  { id: 'googleai/gemini-pro-latest', name: 'Gemini Pro Latest', provider: 'googleai', description: 'Alias to latest Gemini Pro model', contextWindow: 1000, usageWeight: 8 },
-  { id: 'googleai/gemini-flash-latest', name: 'Gemini Flash Latest', provider: 'googleai', description: 'Alias to latest Gemini Flash model', contextWindow: 1000, usageWeight: 3 },
-  { id: 'googleai/gemini-flash-lite-latest', name: 'Gemini Flash-Lite Latest', provider: 'googleai', description: 'Alias to latest Gemini Flash-Lite model', contextWindow: 1000, usageWeight: 1 },
-  { id: 'googleai/gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'googleai', description: 'Google Gemini 2.5 Flash hybrid reasoning', contextWindow: 1000, usageWeight: 3 },
-  { id: 'googleai/gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite', provider: 'googleai', description: 'Google Gemini 2.5 Flash-Lite, most cost-effective', contextWindow: 1000, usageWeight: 1 },
-  { id: 'googleai/gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'googleai', description: 'Google Gemini 2.0 Flash multimodal', contextWindow: 1000, usageWeight: 2 },
-  { id: 'googleai/gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash-Lite', provider: 'googleai', description: 'Google Gemini 2.0 Flash-Lite', contextWindow: 1000, usageWeight: 1 },
-  { id: 'googleai/gemini-robotics-er-1.5-preview', name: 'Gemini Robotics-ER 1.5 Preview', provider: 'googleai', description: 'Google Gemini Robotics Embodied Reasoning', contextWindow: 1000, usageWeight: 4 },
-  { id: 'googleai/gemini-3.1-flash-live-preview', name: 'Gemini 3.1 Flash Live Preview', provider: 'googleai', description: 'Google Gemini 3.1 Flash Live low-latency audio', contextWindow: 1000, usageWeight: 4 },
-  { id: 'googleai/gemma-4-26b-a4b-it', name: 'Gemma 4 26B A4B IT', provider: 'googleai', description: 'Google Gemma 4 26B Mixture-of-Experts open model', contextWindow: 256, usageWeight: 2 },
-  { id: 'googleai/gemma-4-31b-it', name: 'Gemma 4 31B IT', provider: 'googleai', description: 'Google Gemma 4 31B dense open model', contextWindow: 256, usageWeight: 2 },
-];
+// Google AI Studio Chat Models - disabled
+const GOOGLEAI_CHAT_MODELS: ChatModel[] = [];
 
 // ElevenLabs Voice Models (TTS)
 const ELEVENLABS_MODELS: ChatModel[] = [
@@ -212,8 +199,8 @@ const ELEVENLABS_MODELS: ChatModel[] = [
   { id: 'elevenlabs/eleven_monolingual_v1', name: 'Eleven Monolingual v1', provider: 'elevenlabs', description: 'ElevenLabs English TTS model v1', usageWeight: 1 },
 ];
 
+// Only :free-tagged OpenRouter models are enabled; paid models are disabled.
 const OPENROUTER_CHAT_MODELS: ChatModel[] = [
-  { id: 'openrouter/free', name: 'OpenRouter Free Router', provider: 'openrouter', description: 'OpenRouter free-model router' },
   { id: 'qwen/qwen3.6-plus:free', name: 'Qwen3.6 Plus (free)', provider: 'openrouter', description: 'Qwen Qwen3.6 Plus free' },
   { id: 'stepfun/step-3.5-flash:free', name: 'Step 3.5 Flash (free)', provider: 'openrouter', description: 'StepFun Step 3.5 Flash free' },
   { id: 'nvidia/nemotron-3-super:free', name: 'Nemotron 3 Super (free)', provider: 'openrouter', description: 'NVIDIA Nemotron 3 Super free' },
@@ -232,7 +219,6 @@ const OPENROUTER_CHAT_MODELS: ChatModel[] = [
   { id: 'google/gemma-3-4b-it:free', name: 'Gemma 3 4B (free)', provider: 'openrouter', description: 'Google Gemma 3 4B free' },
   { id: 'google/gemma-3-12b-it:free', name: 'Gemma 3 12B (free)', provider: 'openrouter', description: 'Google Gemma 3 12B free' },
   { id: 'google/gemma-3n-e2b-it:free', name: 'Gemma 3n 2B (free)', provider: 'openrouter', description: 'Google Gemma 3n 2B free' },
-  // OpenRouter free models
   { id: 'xiaomi/mimo-v2-flash:free', name: 'Xiaomi Mimo V2 Flash', provider: 'openrouter', description: 'Xiaomi Mimo V2 Flash model' },
   { id: 'mistralai/devstral-2512:free', name: 'Mistral Devstral 2512', provider: 'openrouter', description: 'Mistral AI Devstral 2512' },
   { id: 'kwaipilot/kat-coder-pro:free', name: 'Kwai KAT Coder Pro', provider: 'openrouter', description: 'Kwai Pilot KAT Coder Pro' },
@@ -241,28 +227,17 @@ const OPENROUTER_CHAT_MODELS: ChatModel[] = [
   { id: 'tngtech/deepseek-r1t-chimera:free', name: 'TNG DeepSeek R1T Chimera', provider: 'openrouter', description: 'TNG Tech DeepSeek R1T Chimera' },
   { id: 'tngtech/tng-r1t-chimera:free', name: 'TNG R1T Chimera', provider: 'openrouter', description: 'TNG Tech R1T Chimera' },
   { id: 'deepseek/deepseek-r1-0528:free', name: 'DeepSeek R1 0528', provider: 'openrouter', description: 'DeepSeek R1 0528 model' },
-  { id: 'nvidia/nemotron-3-nano-30b-a3b:free', name: 'NVIDIA Nemotron 3 Nano 30B', provider: 'openrouter', description: 'NVIDIA Nemotron 3 Nano 30B A3B' },
-  { id: 'nvidia/nemotron-nano-12b-v2-vl:free', name: 'NVIDIA Nemotron Nano 12B V2 VL', provider: 'openrouter', description: 'NVIDIA Nemotron Nano 12B V2 Vision-Language' },
   { id: 'qwen/qwen3-coder:free', name: 'Qwen 3 Coder', provider: 'openrouter', description: 'Qwen 3 Coder model' },
-  { id: 'z-ai/glm-4.5-air:free', name: 'GLM 4.5 Air', provider: 'openrouter', description: 'Z-AI GLM 4.5 Air' },
-  { id: 'google/gemma-3-27b-it:free', name: 'Google Gemma 3 27B IT', provider: 'openrouter', description: 'Google Gemma 3 27B Instruct' },
   { id: 'meta-llama/llama-3.3-70b-instruct:free', name: 'Meta Llama 3.3 70B Instruct', provider: 'openrouter', description: 'Meta Llama 3.3 70B Instruct' },
   { id: 'google/gemini-2.0-flash-exp:free', name: 'Google Gemini 2.0 Flash Exp', provider: 'openrouter', description: 'Google Gemini 2.0 Flash Experimental' },
   { id: 'cognitivecomputations/dolphin-mistral-24b-venice-edition:free', name: 'Dolphin Mistral 24B Venice', provider: 'openrouter', description: 'Cognitive Computations Dolphin Mistral 24B Venice Edition' },
-  { id: 'openai/gpt-oss-120b:free', name: 'OpenAI GPT OSS 120B', provider: 'openrouter', description: 'OpenAI GPT OSS 120B' },
   { id: 'nousresearch/hermes-3-llama-3.1-405b:free', name: 'Hermes 3 Llama 3.1 405B', provider: 'openrouter', description: 'Nous Research Hermes 3 Llama 3.1 405B' },
   { id: 'meta-llama/llama-3.1-405b-instruct:free', name: 'Meta Llama 3.1 405B Instruct', provider: 'openrouter', description: 'Meta Llama 3.1 405B Instruct' },
   { id: 'mistralai/mistral-7b-instruct:free', name: 'Mistral 7B Instruct', provider: 'openrouter', description: 'Mistral AI 7B Instruct' },
-  { id: 'openai/gpt-oss-20b:free', name: 'OpenAI GPT OSS 20B', provider: 'openrouter', description: 'OpenAI GPT OSS 20B' },
   { id: 'mistralai/mistral-small-3.1-24b-instruct:free', name: 'Mistral Small 3.1 24B Instruct', provider: 'openrouter', description: 'Mistral AI Small 3.1 24B Instruct' },
-  { id: 'nvidia/nemotron-nano-9b-v2:free', name: 'NVIDIA Nemotron Nano 9B V2', provider: 'openrouter', description: 'NVIDIA Nemotron Nano 9B V2' },
-  { id: 'arcee-ai/trinity-mini:free', name: 'Arcee AI Trinity Mini', provider: 'openrouter', description: 'Arcee AI Trinity Mini' },
   { id: 'qwen/qwen3-4b:free', name: 'Qwen 3 4B', provider: 'openrouter', description: 'Qwen 3 4B model' },
   { id: 'meta-llama/llama-3.2-3b-instruct:free', name: 'Meta Llama 3.2 3B Instruct', provider: 'openrouter', description: 'Meta Llama 3.2 3B Instruct' },
   { id: 'qwen/qwen-2.5-vl-7b-instruct:free', name: 'Qwen 2.5 VL 7B Instruct', provider: 'openrouter', description: 'Qwen 2.5 Vision-Language 7B Instruct' },
-  { id: 'google/gemma-3-4b-it:free', name: 'Google Gemma 3 4B IT', provider: 'openrouter', description: 'Google Gemma 3 4B Instruct' },
-  { id: 'google/gemma-3-12b-it:free', name: 'Google Gemma 3 12B IT', provider: 'openrouter', description: 'Google Gemma 3 12B Instruct' },
-  { id: 'google/gemma-3n-e2b-it:free', name: 'Google Gemma 3N E2B IT', provider: 'openrouter', description: 'Google Gemma 3N E2B Instruct' },
 ];
 
 const STABLEHORDE_CHAT_MODELS: ChatModel[] = [
@@ -420,14 +395,7 @@ export const PREMIUM_MODELS = new Set([
   'gemini-2.5-flash', 'gemini-3.1-pro', 'gemini-2.5-pro',
   'gemini-3.1-pro', 'gemini-3.1-flash-lite-preview', 'gemini-3.1-flash-lite-preview-thinking',
   'gemini-3-flash-preview-thinking', 'gemini-2.5-flash-lite', 'gemini-2.5-flash-thinking',
-  // Google AI Studio (Pro)
-  'googleai/gemini-2.5-pro', 'googleai/gemini-pro-latest', 'googleai/gemini-flash-latest',
-  'googleai/gemini-flash-lite-latest', 'googleai/gemini-2.5-flash', 'googleai/gemini-2.5-flash-lite',
-  'googleai/gemini-2.0-flash', 'googleai/gemini-2.0-flash-lite', 'googleai/gemini-robotics-er-1.5-preview',
-  'googleai/gemini-3.1-flash-live-preview', 'googleai/gemma-4-26b-a4b-it', 'googleai/gemma-4-31b-it',
-  'googleai/gemini-2.5-flash-image', 'googleai/imagen-4.0-generate-001', 'googleai/imagen-4.0-ultra-generate-001',
-  'googleai/imagen-4.0-fast-generate-001', 'googleai/veo-3.1-generate-preview', 'googleai/veo-3.1-fast-generate-preview',
-  'googleai/veo-3.1-lite-generate-preview', 'googleai/veo-2.0-generate-001',
+  // Google AI Studio (Pro) - disabled
   // ElevenLabs (Pro)
   'elevenlabs/eleven_multilingual_v2', 'elevenlabs/eleven_turbo_v2_5', 'elevenlabs/eleven_flash_v2_5',
   'elevenlabs/eleven_flash_v2', 'elevenlabs/eleven_monolingual_v1',
@@ -535,11 +503,6 @@ export const IMAGE_MODELS: ImageModel[] = [
   { id: 'dall-e-3', name: 'DALL-E 3', provider: 'openai', description: 'OpenAI DALL-E 3 Image Generation', usageWeight: 20 },
   { id: 'gpt-image-1', name: 'GPT Image 1', provider: 'openai', description: 'OpenAI GPT Image 1', usageWeight: 25 },
   { id: 'gpt-image-1.5', name: 'GPT Image 1.5', provider: 'openai', description: 'OpenAI GPT Image 1.5', usageWeight: 25 },
-  // Google AI Studio (Pro/Ultra)
-  { id: 'googleai/gemini-2.5-flash-image', name: 'Gemini 2.5 Flash Image', provider: 'googleai', description: 'Google Gemini 2.5 Flash image generation & editing', usageWeight: 5 },
-  { id: 'googleai/imagen-4.0-generate-001', name: 'Imagen 4', provider: 'googleai', description: 'Google Imagen 4 highest quality image generation', usageWeight: 8 },
-  { id: 'googleai/imagen-4.0-ultra-generate-001', name: 'Imagen 4 Ultra', provider: 'googleai', description: 'Google Imagen 4 Ultra best image quality', usageWeight: 12 },
-  { id: 'googleai/imagen-4.0-fast-generate-001', name: 'Imagen 4 Fast', provider: 'googleai', description: 'Google Imagen 4 Fast affordable generation', usageWeight: 4 },
 ];
 
 // Available video models - Pro tier
@@ -548,11 +511,6 @@ export const VIDEO_MODELS: VideoModel[] = [
   { id: 'cogvideox-5b', name: 'CogVideoX 5B', provider: 'pollinations', description: 'CogVideoX 5B', usageWeight: 8, maxDuration: 10 },
   { id: 'pix2pix-video', name: 'Pix2Pix Video', provider: 'pollinations', description: 'Pix2Pix Video Generation', usageWeight: 8, maxDuration: 10 },
   { id: 'svd', name: 'Stable Video Diffusion', provider: 'pollinations', description: 'SVD Video Generation', usageWeight: 6, maxDuration: 4 },
-  // Google AI Studio (Paid)
-  { id: 'googleai/veo-3.1-generate-preview', name: 'Veo 3.1', provider: 'googleai', description: 'Google Veo 3.1 latest video generation', usageWeight: 20 },
-  { id: 'googleai/veo-3.1-fast-generate-preview', name: 'Veo 3.1 Fast', provider: 'googleai', description: 'Google Veo 3.1 Fast optimized for speed', usageWeight: 12 },
-  { id: 'googleai/veo-3.1-lite-generate-preview', name: 'Veo 3.1 Lite', provider: 'googleai', description: 'Google Veo 3.1 Lite most cost-efficient', usageWeight: 6 },
-  { id: 'googleai/veo-2.0-generate-001', name: 'Veo 2', provider: 'googleai', description: 'Google Veo 2 second-gen video generation', usageWeight: 15 },
 ];
 
 // Video models require pro/video_pro plan for access
@@ -582,6 +540,5 @@ export const PROVIDER_URLS = {
   mino: 'https://mino.redemption.pw',
   groq: 'https://api.groq.com/openai/v1',
   cerebras: 'https://api.cerebras.ai/v1',
-  googleai: 'https://generativelanguage.googleapis.com/v1beta/openai',
   elevenlabs: 'https://api.elevenlabs.io/v1',
 };
