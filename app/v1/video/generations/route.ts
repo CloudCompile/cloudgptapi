@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 20;
-    } else if (userPlan === 'pro' || userPlan === 'ultra' || userPlan === 'video_pro') {
+    } else if (userPlan === 'ultra') {
       limit = 2;
     } else if (userPlan === 'developer') {
       limit = 5;

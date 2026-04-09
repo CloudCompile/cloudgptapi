@@ -68,8 +68,6 @@ export async function processAuth(
     limit = 10;
   } else if (userPlan === 'developer') {
     limit = 1000;
-  } else if (userPlan === 'video_pro') {
-    limit = 500;
   } else if (userPlan === 'free') {
     limit = 5;
   }

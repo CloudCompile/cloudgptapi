@@ -48,8 +48,6 @@ export async function GET(request: NextRequest) {
       rpmLimit = 10;
     } else if (userPlan === 'developer') {
       rpmLimit = 1000;
-    } else if (userPlan === 'video_pro') {
-      rpmLimit = 500;
     }
     const finalRpmLimit = applyPeakHoursLimit(rpmLimit);
 

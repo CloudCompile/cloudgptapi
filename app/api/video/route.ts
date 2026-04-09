@@ -112,15 +112,15 @@ async function handleVideoGeneration(request: NextRequest, body: any) {
     if (userPlan === 'admin' || userPlan === 'enterprise') {
       limit = 20;
       dailyLimit = 100000;
-    } else if (userPlan === 'pro' || userPlan === 'ultra' || userPlan === 'video_pro') {
-      limit = 1; // 1 RPM for video
-      dailyLimit = 5; // 5 RPD for pro/video_pro
+    } else if (userPlan === 'ultra') {
+      limit = 1;
+      dailyLimit = 5;
     } else if (userPlan === 'developer') {
       limit = 5;
       dailyLimit = 5000;
     } else if (userPlan === 'free') {
-      limit = 1; // 1 RPM for video
-      dailyLimit = 5; // 5 RPD for free
+      limit = 1;
+      dailyLimit = 5;
     }
 
     // If API key has a specific custom limit that's higher, use that
@@ -175,14 +175,14 @@ async function handleVideoGeneration(request: NextRequest, body: any) {
       );
     }
 
-    // Lock all video models behind video_pro, enterprise, or admin plans
+    // Lock all video models behind ultra, enterprise, or admin plans
     const canAccessVideo = hasVideoAccess(userPlan) || (apiKeyInfo?.rateLimit && apiKeyInfo.rateLimit >= 50);
 
     if (!canAccessVideo) {
       return NextResponse.json(
         { 
           error: {
-            message: 'Video generation requires a Video Pro plan. Please upgrade at /pricing to access video models.',
+            message: 'Video generation requires an Ultra or Enterprise plan. Please upgrade at /pricing to access video models.',
             type: 'access_denied',
             param: 'plan',
             code: 'video_plan_required'
@@ -214,7 +214,7 @@ async function handleVideoGeneration(request: NextRequest, body: any) {
 
     // Check if model is premium and if user has access
     const isPremium = PREMIUM_MODELS.has(modelId);
-    // Pro access if they have a pro/enterprise/developer/admin/video_pro plan
+    // Pro access if they have a pro/enterprise/developer/admin plan
     const hasPro = hasProAccess(userPlan);
 
     if (isPremium && !hasPro) {

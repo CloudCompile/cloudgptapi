@@ -177,13 +177,17 @@ export default async function AdminUsersPage({
                           </button>
                         </form>
                       )}
-                      {userProfile.plan !== 'developer' && userProfile.plan !== 'admin' && (
+                      {userProfile.plan !== 'admin' && (
                         <form action={async () => {
                           'use server';
-                          await assignPlan(userProfile.id, 'developer');
+                          const isDeveloper = userProfile.plan === 'developer';
+                          await assignPlan(
+                            userProfile.id, 
+                            isDeveloper ? 'free' : 'developer'
+                          );
                         }}>
-                          <button className="p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/20 text-slate-500 hover:text-blue-600 transition-all border border-transparent hover:border-blue-200 dark:hover:border-blue-800" title="Set Developer">
-                            <Package className="h-4 w-4" />
+                          <button className="p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/20 text-slate-500 transition-all border border-transparent hover:border-blue-200 dark:hover:border-blue-800" title={userProfile.plan === 'developer' ? 'Remove Developer' : 'Set Developer'}>
+                            <Package className={cn("h-4 w-4", userProfile.plan === 'developer' && "text-blue-500")} />
                           </button>
                         </form>
                       )}

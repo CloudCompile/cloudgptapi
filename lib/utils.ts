@@ -154,12 +154,9 @@ export function getOpenRouterApiKeys(): string[] {
 /**
  * Plans that have Pro access to premium models
  */
-export const PRO_PLANS = ['pro', 'ultra', 'enterprise', 'developer', 'admin', 'video_pro'];
+export const PRO_PLANS = ['pro', 'ultra', 'enterprise', 'developer', 'admin'];
 
-/**
- * Plans that have access to video generation
- */
-export const VIDEO_PLANS = ['video_pro', 'ultra', 'enterprise', 'admin'];
+export const VIDEO_PLANS = ['ultra', 'enterprise', 'admin'];
 
 /**
  * Plans that have Ultra-only access (highest tier)

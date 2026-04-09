@@ -9,8 +9,10 @@ import {
   ImageModel,
   VideoModel,
   PREMIUM_MODELS,
-  ULTRA_MODELS
+  ULTRA_MODELS,
+  ADMIN_ONLY_MODELS
 } from '@/lib/providers';
+import { createClient } from '@supabase/supabase-js';
 import { getModelDetails, ModelDetails } from '@/lib/model-details';
 import { 
   Activity, 
@@ -119,6 +121,27 @@ export default function ModelsPage() {
   const [selectedTiers, setSelectedTiers] = useState<Set<string>>(new Set(['free', 'premium', 'ultra']));
 
   const isAllTiersSelected = selectedTiers.size === 3;
+
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        setIsAdmin(profile?.role === 'admin');
+      }
+    };
+    checkAdmin();
+  }, []);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => {
@@ -304,13 +327,16 @@ export default function ModelsPage() {
       // Access level filter (Free/Pro/Ultra) - support multiple selections
        let matchesTier = selectedTiers.size === 3; // All selected by default
        
-       const isModelFree = isFree;
-       const isModelPremium = !isModelFree && !ULTRA_MODELS.has(model.id);
-       const isModelUltra = ULTRA_MODELS.has(model.id);
-       
-       if (selectedTiers.has('free') && isModelFree) matchesTier = true;
-       if (selectedTiers.has('premium') && isModelPremium) matchesTier = true;
-       if (selectedTiers.has('ultra') && isModelUltra) matchesTier = true;
+      const isModelFree = isFree;
+      const isModelPremium = !isModelFree && !ULTRA_MODELS.has(model.id);
+      const isModelUltra = ULTRA_MODELS.has(model.id);
+      const isAdminOnly = ADMIN_ONLY_MODELS.has(model.id);
+      
+      if (isAdminOnly && !isAdmin) return false;
+      
+      if (selectedTiers.has('free') && isModelFree) matchesTier = true;
+      if (selectedTiers.has('premium') && isModelPremium) matchesTier = true;
+      if (selectedTiers.has('ultra') && isModelUltra) matchesTier = true;
 
       const matchesProvider = selectedProviders.size === 0 || selectedProviders.has(model.provider.toLowerCase());
       
@@ -692,6 +718,7 @@ export default function ModelsPage() {
                 status={statuses[model.id] || { id: model.id, status: 'checking' }} 
                 onClick={() => handleModelClick(model)}
                 index={i}
+                isAdmin={isAdmin}
               />
             ) : (
               <ModelListItem
@@ -700,6 +727,7 @@ export default function ModelsPage() {
                 status={statuses[model.id] || { id: model.id, status: 'checking' }}
                 onClick={() => handleModelClick(model)}
                 index={i}
+                isAdmin={isAdmin}
               />
             )
           ))}
@@ -770,10 +798,11 @@ function TabButton({ active, onClick, icon, label }: { active: boolean, onClick:
   );
 }
 
-function ModelCard({ model, status, onClick, index }: { model: FilteredModelType, status: ModelStatus, onClick: () => void, index: number }) {
+function ModelCard({ model, status, onClick, index, isAdmin }: { model: FilteredModelType, status: ModelStatus, onClick: () => void, index: number, isAdmin: boolean }) {
   const countdown = useCountdown(model.downtimeUntil);
   const isFree = model.id.endsWith(':free') || !PREMIUM_MODELS.has(model.id);
   const isUltra = ULTRA_MODELS.has(model.id);
+  const isAdminOnly = ADMIN_ONLY_MODELS.has(model.id);
   const isRoleplay = model.isRoleplay;
   
   const typeColors: Record<'chat' | 'image' | 'video', string> = {
@@ -814,7 +843,12 @@ function ModelCard({ model, status, onClick, index }: { model: FilteredModelType
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">Model Tier</span>
-              {isFree ? (
+              {isAdmin && isAdminOnly ? (
+                <div className="flex items-center gap-1 text-red-600 dark:text-red-400 font-black text-sm">
+                  <Crown className="w-3 h-3" />
+                  <span>ADMIN</span>
+                </div>
+              ) : isFree ? (
                 <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-black text-sm">
                   <Zap className="w-3 h-3" />
                   <span>FREE</span>
@@ -932,7 +966,9 @@ function ModelCard({ model, status, onClick, index }: { model: FilteredModelType
             <span className="text-[8px] font-black uppercase tracking-[0.15em] text-slate-400">{model.provider}</span>
             <span className="w-1 h-1 rounded-full bg-slate-200 dark:bg-slate-800" />
             <div className="flex items-center gap-1">
-              {isFree ? (
+              {isAdmin && isAdminOnly ? (
+                <span className="text-[8px] font-black uppercase tracking-[0.15em] text-red-500">Admin</span>
+              ) : isFree ? (
                 <span className="text-[8px] font-black uppercase tracking-[0.15em] text-emerald-500">Free</span>
               ) : isUltra ? (
                 <span className="text-[8px] font-black uppercase tracking-[0.15em] text-purple-500">Ultra</span>
@@ -952,9 +988,10 @@ function ModelCard({ model, status, onClick, index }: { model: FilteredModelType
 }
 
 
-function ModelListItem({ model, status, onClick, index }: { model: FilteredModelType, status: ModelStatus, onClick: () => void, index: number }) {
+function ModelListItem({ model, status, onClick, index, isAdmin }: { model: FilteredModelType, status: ModelStatus, onClick: () => void, index: number, isAdmin: boolean }) {
   const isFree = model.id.endsWith(':free') || !PREMIUM_MODELS.has(model.id);
   const isUltra = ULTRA_MODELS.has(model.id);
+  const isAdminOnly = ADMIN_ONLY_MODELS.has(model.id);
   const isRoleplay = model.isRoleplay;
   
   const typeIcons: Record<'chat' | 'image' | 'video', React.ReactNode> = {

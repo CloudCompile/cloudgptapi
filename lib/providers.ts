@@ -448,25 +448,24 @@ export const PREMIUM_MODELS = new Set([
 // (after PROVIDER_MODEL_MAPPING / resolveModelId runs) so the access check in
 // route.ts reliably catches ultra models regardless of which ID the user sends.
 export const ULTRA_MODELS = new Set([
-  // Claude Ultra - original Vetra IDs
-  'claude-opus-4-6', 'claude-opus-4-5', 'claude-opus-4.5', 'claude-opus-4.6',
+  // Claude Sonnet - original Vetra IDs
   'claude-sonnet-4.6', 'claude-sonnet-4-6', 'claude-sonnet-4-5', 'claude-sonnet-4.5',
-  // Claude Ultra - resolved (post-PROVIDER_MODEL_MAPPING) Aqua IDs
-  'opus-4.6', 'opus-4.5', 'sonnet-4.6', 'sonnet-4.5',
-  // Claude Haiku (Pro tier, but check here so it doesn't accidentally block)
-  // 'haiku-4.5',  <- intentionally NOT ultra; keep at Pro level
+  // Claude Sonnet - resolved (post-PROVIDER_MODEL_MAPPING) Aqua IDs
+  'sonnet-4.6', 'sonnet-4.5',
   // Gemini Ultra (via Aqua)
   'gemini-2.5-pro', 'gemini-3.1-pro', 'gemini-3-pro-preview',
-  // OpenAI GPT-5 Ultra (via Aqua)
-  'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
   // Zhipu Ultra (via Aqua)
   'glm-5.1',
   // Xiaomi Ultra (via Aqua)
   'mimo-pro',
-  // Image models (Ultra)
-  'dall-e-3', 'gpt-image-1', 'gpt-image-1.5',
-  // Video models (Ultra)
-  'cogvideox-5b', 'pix2pix-video', 'svd',
+]);
+
+// Admin-only models (only accessible to admin users)
+export const ADMIN_ONLY_MODELS = new Set([
+  // Claude Opus - original Vetra IDs
+  'claude-opus-4-6', 'claude-opus-4-5', 'claude-opus-4.5', 'claude-opus-4.6',
+  // Claude Opus - resolved (post-PROVIDER_MODEL_MAPPING) Aqua IDs
+  'opus-4.6', 'opus-4.5',
 ]);
 
 // Free models (no subscription required)
@@ -513,7 +512,7 @@ export const VIDEO_MODELS: VideoModel[] = [
   { id: 'svd', name: 'Stable Video Diffusion', provider: 'pollinations', description: 'SVD Video Generation', usageWeight: 6, maxDuration: 4 },
 ];
 
-// Video models require pro/video_pro plan for access
+// Video models require ultra/enterprise/admin plan for access
 export const VIDEO_MODELS_SET = new Set(VIDEO_MODELS.map(m => m.id));
 
 // Provider base URLs
