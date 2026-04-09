@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     // Determine RPM limit (for display in dashboard)
     let rpmLimit = 5;
     if (userPlan === 'admin' || userPlan === 'enterprise') {
-      rpmLimit = 10000;
+      rpmLimit = 1000;
     } else if (userPlan === 'ultra') {
       rpmLimit = 20;
     } else if (userPlan === 'pro') {

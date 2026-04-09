@@ -61,7 +61,7 @@ export async function processAuth(
   let dailyLimit = getDailyLimitForPlan(userPlan);
   
   if (userPlan === 'admin' || userPlan === 'enterprise') {
-    limit = 10000; 
+    limit = 1000; 
   } else if (userPlan === 'ultra') {
     limit = 20;
   } else if (userPlan === 'pro') {

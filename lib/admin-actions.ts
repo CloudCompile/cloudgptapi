@@ -56,7 +56,7 @@ export async function promoteUser(userId: string, role: 'user' | 'admin') {
   return { success: true };
 }
 
-export async function assignPlan(userId: string, plan: 'free' | 'developer' | 'pro' | 'ultra' | 'enterprise', stripeProductId?: string) {
+export async function assignPlan(userId: string, plan: 'free' | 'developer' | 'pro' | 'ultra' | 'enterprise' | 'admin', stripeProductId?: string) {
   await verifyAdmin();
 
   const { error } = await supabaseAdmin
@@ -83,10 +83,10 @@ export async function assignPlan(userId: string, plan: 'free' | 'developer' | 'p
   }
 
   // Also update rate limits for their API keys if they upgrade
-  if (plan === 'pro' || plan === 'enterprise' || plan === 'developer') {
+  if (plan === 'pro' || plan === 'enterprise' || plan === 'developer' || plan === 'admin') {
     let rateLimit = 100;
     if (plan === 'pro') rateLimit = 500;
-    if (plan === 'enterprise') rateLimit = 1000;
+    if (plan === 'enterprise' || plan === 'admin') rateLimit = 1000;
 
     const { error: keyError } = await supabaseAdmin
       .from('api_keys')

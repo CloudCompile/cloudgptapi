@@ -1,4 +1,4 @@
-import { Shield, Search, Package, Crown, ChevronLeft, ChevronRight, UserCircle, X, Sparkles } from 'lucide-react';
+import { Shield, Search, ChevronDown, ChevronLeft, ChevronRight, UserCircle } from 'lucide-react';
 import { getAllUsers, promoteUser, assignPlan } from '@/lib/admin-actions';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -167,50 +167,34 @@ export default async function AdminUsersPage({
                           <Shield className={cn("h-4 w-4", userProfile.role === 'admin' && "text-purple-500")} />
                         </button>
                       </form>
-                      {userProfile.plan && userProfile.plan !== 'free' && (
-                        <form action={async () => {
-                          'use server';
-                          await assignPlan(userProfile.id, 'free');
-                        }}>
-                          <button className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 text-slate-500 hover:text-red-600 transition-all border border-transparent hover:border-red-200 dark:hover:border-red-800" title="Remove Plan">
-                            <X className="h-4 w-4" />
-                          </button>
-                        </form>
-                      )}
-                      {userProfile.plan !== 'admin' && (
-                        <form action={async () => {
-                          'use server';
-                          const isDeveloper = userProfile.plan === 'developer';
-                          await assignPlan(
-                            userProfile.id, 
-                            isDeveloper ? 'free' : 'developer'
-                          );
-                        }}>
-                          <button className="p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/20 text-slate-500 transition-all border border-transparent hover:border-blue-200 dark:hover:border-blue-800" title={userProfile.plan === 'developer' ? 'Remove Developer' : 'Set Developer'}>
-                            <Package className={cn("h-4 w-4", userProfile.plan === 'developer' && "text-blue-500")} />
-                          </button>
-                        </form>
-                      )}
-                      <form action={async () => {
-                        'use server';
-                        const isProOrUltra = userProfile.plan === 'pro' || userProfile.plan === 'ultra';
-                        await assignPlan(
-                          userProfile.id, 
-                          isProOrUltra ? 'free' : 'pro'
-                        );
-                      }}>
-                        <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700" title={userProfile.plan === 'pro' || userProfile.plan === 'ultra' ? 'Remove Pro' : 'Set Pro'}>
-                          <Crown className={cn("h-4 w-4", (userProfile.plan === 'pro' || userProfile.plan === 'ultra') && "text-emerald-500")} />
+                      <div className="relative group">
+                        <button className={cn(
+                          "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all",
+                          userProfile.plan === 'admin' ? "bg-purple-500 text-white border-purple-500" :
+                          userProfile.plan === 'ultra' ? "bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700" :
+                          userProfile.plan === 'pro' ? "bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-700" :
+                          userProfile.plan === 'developer' ? "bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700" :
+                          "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800/50 dark:text-slate-400 dark:border-slate-700"
+                        )}>
+                          {userProfile.plan || 'free'}
+                          <ChevronDown className="w-3 h-3" />
                         </button>
-                      </form>
-                      <form action={async () => {
-                        'use server';
-                        await assignPlan(userProfile.id, 'ultra');
-                      }}>
-                        <button className="p-2 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/20 text-slate-500 transition-all border border-transparent hover:border-purple-200 dark:hover:border-purple-800" title="Set Ultra">
-                          <Sparkles className={cn("h-4 w-4", userProfile.plan === 'ultra' && "text-purple-500")} />
-                        </button>
-                      </form>
+                        <div className="absolute right-0 mt-1 w-40 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                          {['free', 'developer', 'pro', 'ultra', 'enterprise', 'admin'].map((plan) => (
+                            <form key={plan} action={async () => {
+                              'use server';
+                              await assignPlan(userProfile.id, plan as any);
+                            }}>
+                              <button type="submit" className={cn(
+                                "w-full text-left px-3 py-2 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors",
+                                userProfile.plan === plan || (!userProfile.plan && plan === 'free') ? "text-primary font-bold" : "text-slate-700 dark:text-slate-300"
+                              )}>
+                                {plan.charAt(0).toUpperCase() + plan.slice(1)}
+                              </button>
+                            </form>
+                          ))}
+                        </div>
+                      </div>
                       <Link 
                         href={`/admin/users/${userProfile.id}`}
                         className="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
