@@ -829,8 +829,8 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     
     const headers = {
       ...getCorsHeaders(),
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
       'Connection': 'keep-alive',
       'X-Request-Id': requestId,
       'X-Accel-Buffering': 'no',
@@ -840,67 +840,81 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
 
     const kickStream = new ReadableStream({
       async start(controller) {
-        controller.enqueue(new TextEncoder().encode(':\n\n')); 
+        const encoder = new TextEncoder();
+        controller.enqueue(encoder.encode(':\n\n'));
         const reader = providerResponse.body!.pipeThrough(transformStream).getReader();
-        
+
         let firstTokenReceived = false;
         let lastTokenTime = Date.now();
-        
-        // Streaming-specific timeout: wait up to 60 seconds for first token, then 30 seconds between tokens
+        const streamStartTime = Date.now();
+
+        // Abort upstream reader when the client disconnects
+        const clientAbortHandler = () => {
+          console.log(`[${requestId}] Client disconnected — aborting upstream reader.`);
+          try { reader.cancel('client disconnected'); } catch (e) {}
+          try { controller.close(); } catch (e) {}
+        };
+        request.signal.addEventListener('abort', clientAbortHandler, { once: true });
+
+        // Heartbeat: send an SSE comment every 15 s during thinking gaps so that
+        // clients and reverse-proxies never see an idle connection.
+        // Also enforces a hard 5-minute stall limit (matching maxDuration / PROVIDER_TIMEOUT_MS).
+        const HEARTBEAT_INTERVAL_MS = 15000;
+        const MAX_STALL_MS = 300000; // 5 minutes
+        const heartbeatTimer = setInterval(() => {
+          const idleMs = Date.now() - lastTokenTime;
+          if (idleMs >= MAX_STALL_MS) {
+            clearInterval(heartbeatTimer);
+            clearTimeout(firstTokenTimeout);
+            console.error(`[${requestId}] Stream stalled for ${idleMs}ms — closing.`);
+            const stallError = { error: { message: 'The model stopped responding. The response may be incomplete.', type: 'timeout_error', code: 'stream_stall' } };
+            try { controller.enqueue(encoder.encode(`data: ${JSON.stringify(stallError)}\n\n`)); } catch (e) {}
+            try { controller.enqueue(encoder.encode('data: [DONE]\n\n')); } catch (e) {}
+            try { reader.cancel('stream stall'); } catch (e) {}
+            try { controller.close(); } catch (e) {}
+          } else {
+            // Keep-alive ping so idle-timeout watchdogs see activity
+            try { controller.enqueue(encoder.encode(': ping\n\n')); } catch (e) {}
+          }
+        }, HEARTBEAT_INTERVAL_MS);
+
+        // Abort if the very first token never arrives within 60 seconds
         const firstTokenTimeout = setTimeout(() => {
           if (!firstTokenReceived) {
-            console.error(`[${requestId}] STREAM FIRST TOKEN TIMEOUT - no response after 60s`);
-            const timeoutError = { error: { message: "The model is taking too long to start responding. This usually happens when the provider is overloaded. Try again in a moment.", type: "timeout_error", code: "first_token_timeout" } };
-            controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(timeoutError)}\n\n`));
-            controller.enqueue(new TextEncoder().encode(`data: [DONE]\n\n`));
-            try { reader.cancel(); } catch (e) {}
-            controller.close();
+            clearInterval(heartbeatTimer);
+            console.error(`[${requestId}] STREAM FIRST TOKEN TIMEOUT — no response after 60s`);
+            const timeoutError = { error: { message: 'The model is taking too long to start responding. This usually happens when the provider is overloaded. Try again in a moment.', type: 'timeout_error', code: 'first_token_timeout' } };
+            try { controller.enqueue(encoder.encode(`data: ${JSON.stringify(timeoutError)}\n\n`)); } catch (e) {}
+            try { controller.enqueue(encoder.encode('data: [DONE]\n\n')); } catch (e) {}
+            try { reader.cancel('first token timeout'); } catch (e) {}
+            try { controller.close(); } catch (e) {}
           }
-        }, 60000); // 60 seconds for first token
-
-        const checkTokenTimeout = setInterval(() => {
-          const now = Date.now();
-          // If no token received in 45 seconds (but we did get the first one), give up
-          if (firstTokenReceived && (now - lastTokenTime) > 45000) {
-            console.error(`[${requestId}] STREAM TOKEN TIMEOUT - no token after ${now - lastTokenTime}ms`);
-            clearInterval(checkTokenTimeout);
-            clearTimeout(firstTokenTimeout);
-            const timeoutError = { error: { message: "The model stopped responding mid-stream. The response may be incomplete. Try again.", type: "timeout_error", code: "token_timeout" } };
-            controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(timeoutError)}\n\n`));
-            controller.enqueue(new TextEncoder().encode(`data: [DONE]\n\n`));
-            try { reader.cancel(); } catch (e) {}
-            controller.close();
-          }
-        }, 10000); // Check every 10 seconds
+        }, 60000);
 
         try {
           while (true) {
             const { done, value } = await reader.read();
-            if (done) {
-              clearInterval(checkTokenTimeout);
-              clearTimeout(firstTokenTimeout);
-              break;
-            }
+            if (done) break;
             if (!firstTokenReceived && value.length > 0) {
               firstTokenReceived = true;
-              lastTokenTime = Date.now();
               clearTimeout(firstTokenTimeout);
-              console.log(`[${requestId}] First stream chunk received after ${Date.now() - lastTokenTime}ms.`);
+              console.log(`[${requestId}] First stream chunk received after ${Date.now() - streamStartTime}ms.`);
             }
-            if (firstTokenReceived && value.length > 0) {
+            if (value.length > 0) {
               lastTokenTime = Date.now();
             }
             controller.enqueue(value);
           }
         } catch (err) {
-          clearInterval(checkTokenTimeout);
-          clearTimeout(firstTokenTimeout);
-          console.error(`[${requestId}] Stream processing error:`, err);
-          const errorMessage = err instanceof Error ? err.message : String(err);
-          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ error: { message: `Stream error: ${errorMessage}` } })}\n\n`));
+          if (!request.signal.aborted) {
+            console.error(`[${requestId}] Stream processing error:`, err);
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            try { controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: { message: `Stream error: ${errorMessage}` } })}\n\n`)); } catch (e) {}
+          }
         } finally {
-          clearInterval(checkTokenTimeout);
+          clearInterval(heartbeatTimer);
           clearTimeout(firstTokenTimeout);
+          request.signal.removeEventListener('abort', clientAbortHandler);
           try { controller.close(); } catch (e) {}
         }
       }

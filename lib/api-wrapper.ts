@@ -8,6 +8,9 @@ export function withErrorHandler(
     try {
       return await handler(request, ...args);
     } catch (error: any) {
+      // Next.js redirect() throws a special error that must propagate so the
+      // framework can issue the correct 3xx response (e.g. Kinde auth redirect).
+      if (error?.digest?.startsWith('NEXT_REDIRECT')) throw error;
       console.error(`[withErrorHandler] Unhandled API error:`, error?.message || error);
       
       const status = error.status || 500;

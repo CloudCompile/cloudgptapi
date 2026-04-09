@@ -95,7 +95,10 @@ export async function GET(request: NextRequest) {
       headers: getCorsHeaders()
     });
 
-  } catch (err) {
+  } catch (err: any) {
+    // Next.js redirect() throws a special error that must propagate so the
+    // framework can issue the correct 3xx response (e.g. Kinde auth redirect).
+    if (err?.digest?.startsWith('NEXT_REDIRECT')) throw err;
     console.error('Usage API error:', err);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500, headers: getCorsHeaders() });
   }
