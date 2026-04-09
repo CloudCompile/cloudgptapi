@@ -250,8 +250,8 @@ export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
 // Used when routing to Bluesminds as primary provider
 export const BLUESMINDS_MODEL_MAPPING: Record<string, string> = {
   // Claude models
-  'claude-opus-4-6': 'claude-4.6-sonnet',
-  'claude-opus-4.5': 'claude-4.6-sonnet',
+  'claude-opus-4-6': 'claude-opus-4-20250514',
+  'claude-opus-4.5': 'claude-opus-4-20250514',
   'claude-sonnet-4-6': 'claude-sonnet-4-20250514',
   'claude-sonnet-4.5': 'claude-sonnet-4-20250514',
   'claude-sonnet-4.5-20250929': 'claude-sonnet-4-20250514',
