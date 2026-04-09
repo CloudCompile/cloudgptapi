@@ -3,7 +3,7 @@ import { trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDaily
 import { processAuth } from './services/auth';
 import { processContextAndMemory, sanitizeMessagesForProvider } from './services/parser';
 import { dispatchChatRequest } from './services/dispatcher';
-import { CHAT_MODELS, PREMIUM_MODELS, ULTRA_MODELS, FREE_MODELS } from '@/lib/providers';
+import { CHAT_MODELS, PREMIUM_MODELS, ULTRA_MODELS, FREE_MODELS, ADMIN_ONLY_MODELS } from '@/lib/providers';
 import { getCorsHeaders, safeResponseJson, hasProAccess } from '@/lib/utils';
 import { rememberInteraction } from '@/lib/memory';
 import {
@@ -209,6 +209,28 @@ export const POST = withErrorHandler(async function POST(request: NextRequest) {
             type: 'access_denied',
             param: 'model',
             code: 'ultra_model_required',
+            request_id: requestId
+          }
+        },
+        {
+          status: 403,
+          headers: getCorsHeaders()
+        }
+      );
+    }
+
+    // Admin-only models require admin plan
+    const isAdminOnly = ADMIN_ONLY_MODELS.has(modelId);
+    const isAdmin = userPlan === 'admin';
+    if (isAdminOnly && !isAdmin) {
+      console.warn(`[${requestId}] Admin-only model access denied: ${modelId} for key: ${effectiveKey.substring(0, 10)}...`);
+      return NextResponse.json(
+        {
+          error: {
+            message: `The model '${modelId}' is only available to admin users.`,
+            type: 'access_denied',
+            param: 'model',
+            code: 'admin_model_required',
             request_id: requestId
           }
         },
