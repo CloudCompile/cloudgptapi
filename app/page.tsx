@@ -117,28 +117,28 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 sm:gap-8 items-center">
             <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">GPT-5 Mini</span>
+              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">GPT-5.1</span>
               <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">OpenAI</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">OpenAI GPT-5 Mini</span>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Pollinations</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">DeepSeek V3.2</span>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Pollinations</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">OpenAI GPT-5 Nano</span>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Pollinations</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 group cursor-default">
-              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">Flux</span>
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Pollinations</span>
             </div>
             <div className="flex flex-col items-center gap-1 group cursor-default">
               <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">DeepSeek V3.2</span>
               <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">DeepSeek</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 group cursor-default">
+              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">Gemini 3 Pro</span>
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Google</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 group cursor-default">
+              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">Claude Sonnet 4.6</span>
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Anthropic</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 group cursor-default">
+              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">Flux Kontext</span>
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Image</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 group cursor-default">
+              <span className="font-black text-xl sm:text-2xl tracking-tighter group-hover:text-primary transition-colors">Kimi K2</span>
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black text-center">Moonshot</span>
             </div>
           </div>
         </div>
@@ -256,20 +256,20 @@ export default function Home() {
               
               <div className="grid grid-cols-2 gap-6 sm:gap-8 max-w-sm mx-auto lg:mx-0">
                 <div>
-                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">Text</div>
-                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Chat</div>
+                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">50+</div>
+                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Models</div>
                 </div>
                 <div>
-                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">&lt;100ms</div>
-                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Latency</div>
+                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">10+</div>
+                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Providers</div>
                 </div>
                 <div>
-                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">99.9%</div>
-                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Uptime</div>
+                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">Chat</div>
+                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Image · Video</div>
                 </div>
                 <div>
-                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">Media</div>
-                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Image/Video</div>
+                  <div className="text-3xl sm:text-4xl font-black tracking-tighter text-white">Free</div>
+                  <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">To Start</div>
                 </div>
               </div>
             </div>
@@ -283,17 +283,19 @@ export default function Home() {
                     <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-green-500/20" />
                   </div>
                   <pre className="text-[10px] sm:text-sm font-mono text-blue-400 leading-relaxed overflow-x-auto">
-                    <code>{`// Switch models with one parameter
-const response = await vetra.chat.create({
-  model: 'openai',
-  messages: [
-    { role: 'user', content: 'Design a space station' }
-  ],
-  temperature: 0.7,
-  max_tokens: 1024
+                    <code>{`import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: process.env.VETRA_API_KEY,
+  baseURL: 'https://vetraai.vercel.app/v1',
 });
 
-console.log(response.content);`}</code>
+const response = await client.chat.completions.create({
+  model: 'openai',
+  messages: [{ role: 'user', content: 'Design a space station' }],
+});
+
+console.log(response.choices[0].message.content);`}</code>
                   </pre>
                 </div>
               </div>
@@ -345,7 +347,7 @@ console.log(response.content);`}</code>
         <div className="container mx-auto px-4 text-center relative z-10">
           <h2 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tighter mb-6 sm:mb-8 leading-none">Ready to build?</h2>
           <p className="text-slate-600 dark:text-slate-400 mb-8 sm:mb-12 max-w-xl mx-auto text-lg sm:text-xl leading-relaxed font-medium">
-            Join thousands of developers building the next generation of AI applications on Vetra.
+            One API key. Every model. Start building in minutes.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
             <Link 

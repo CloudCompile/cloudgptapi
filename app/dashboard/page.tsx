@@ -1,8 +1,5 @@
 'use client';
 
-// Note: This is a client component that handles authentication state on the client side.
-// API routes called by this component use Logto for server-side authentication.
-
 import { useState, useEffect } from 'react';
 import { 
   Key, 

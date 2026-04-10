@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useCountdown } from '@/lib/hooks/useCountdown';
 import { 
   CHAT_MODELS, 
   IMAGE_MODELS, 
@@ -58,36 +59,6 @@ interface ModelStatus {
 type ModelType = (ChatModel | ImageModel | VideoModel) & { type: 'chat' | 'image' | 'video' };
 type FilteredModelType = ModelType & { isRoleplay: boolean };
 
-// Countdown hook for downtime
-function useCountdown(targetDate?: string) {
-  const [timeLeft, setTimeLeft] = useState<{hours: number, minutes: number, seconds: number} | null>(null);
-
-  useEffect(() => {
-    if (!targetDate) return;
-
-    const calculateTimeLeft = () => {
-      const difference = new Date(targetDate).getTime() - Date.now();
-      
-      if (difference <= 0) {
-        setTimeLeft(null);
-        return;
-      }
-
-      const hours = Math.floor(difference / (1000 * 60 * 60));
-      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-      setTimeLeft({ hours, minutes, seconds });
-    };
-
-    calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 1000);
-
-    return () => clearInterval(timer);
-  }, [targetDate]);
-
-  return timeLeft;
-}
 
 const ALL_MODELS: ModelType[] = [
   ...CHAT_MODELS.map(m => ({ ...m, type: 'chat' as const })),

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { useCountdown } from '@/lib/hooks/useCountdown';
 import { 
   MessageSquare, 
   Image as ImageIcon, 
@@ -55,39 +56,6 @@ function formatProviderName(provider: string): string {
   return name;
 }
 
-// Countdown hook for downtime
-function useCountdown(targetDate?: string) {
-  const [timeLeft, setTimeLeft] = useState<{hours: number, minutes: number, seconds: number} | null>(null);
-
-  useEffect(() => {
-    if (!targetDate) {
-      setTimeLeft(null);
-      return;
-    }
-
-    const calculateTimeLeft = () => {
-      const difference = new Date(targetDate).getTime() - Date.now();
-      
-      if (difference <= 0) {
-        setTimeLeft(null);
-        return;
-      }
-
-      const hours = Math.floor(difference / (1000 * 60 * 60));
-      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-      setTimeLeft({ hours, minutes, seconds });
-    };
-
-    calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 1000);
-
-    return () => clearInterval(timer);
-  }, [targetDate]);
-
-  return timeLeft;
-}
 
 export default function PlaygroundPage() {
   const [isSignedIn, setIsSignedIn] = useState(false);
