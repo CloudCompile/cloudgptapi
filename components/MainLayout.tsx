@@ -115,9 +115,21 @@ function Header({
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
-  // Close mobile menu when pathname changes
+  useEffect(() => {
+    const saved = localStorage.getItem('sidebarCollapsed');
+    if (saved !== null) setIsSidebarCollapsed(saved === 'true');
+  }, []);
+
+  const setSidebarCollapsed = (value: boolean | ((prev: boolean) => boolean)) => {
+    setIsSidebarCollapsed(prev => {
+      const next = typeof value === 'function' ? value(prev) : value;
+      localStorage.setItem('sidebarCollapsed', String(next));
+      return next;
+    });
+  };
+
   React.useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
@@ -131,7 +143,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const isLandingPage = pathname === '/';
 
   return (
-    <MainLayoutContext.Provider value={{ isSidebarCollapsed, setIsSidebarCollapsed }}>
+    <MainLayoutContext.Provider value={{ isSidebarCollapsed, setIsSidebarCollapsed: setSidebarCollapsed }}>
       <div className="min-h-screen bg-background dot-grid">
         {isLandingPage && <LaunchBanner />}
         <Header
@@ -148,7 +160,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
           {isAppPage && (
             <button
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              onClick={() => setSidebarCollapsed(!isSidebarCollapsed)}
               className={cn(
                 "hidden lg:flex fixed top-1/2 -translate-y-1/2 z-50 h-10 w-5 bg-white dark:bg-slate-950 border border-border border-l-0 items-center justify-center rounded-r-lg shadow-sm hover:bg-slate-50 dark:hover:bg-slate-900 transition-all duration-300",
                 isSidebarCollapsed ? "left-0" : "left-72"
