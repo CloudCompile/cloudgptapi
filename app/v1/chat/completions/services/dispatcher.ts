@@ -818,7 +818,10 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   const clientWantsJsonOnly = acceptHeader.includes('application/json') && !acceptHeader.includes('text/event-stream') && !acceptHeader.includes('*/*');
 
   if (body.stream && isStreamingResponse && !clientWantsJsonOnly) {
-    const transformStream = createChatTransformStream(lastMessage, userId, rememberInteraction, characterId, modelId);
+    const isFandomEnabledForStream = apiKeyInfo?.fandomPluginEnabled || false;
+    const isMemoryPluginEnabledForStream = Boolean(apiKeyInfo?.fandomSettings?.plugins?.memory?.enabled);
+    const useMemory = body.use_memory || isFandomEnabledForStream || isMemoryPluginEnabledForStream;
+    const transformStream = createChatTransformStream(lastMessage, userId, rememberInteraction, characterId, modelId, useMemory);
     if (!providerResponse.body) {
       console.error(`[${requestId}] Provider returned null body for streaming request`);
       return NextResponse.json(

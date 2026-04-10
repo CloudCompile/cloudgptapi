@@ -44,7 +44,7 @@ export async function processContextAndMemory(
     const isMemoryPluginEnabled = Boolean((apiKeyInfo?.fandomSettings as any)?.plugins?.memory?.enabled);
     const isSearchPluginEnabled = Boolean((apiKeyInfo?.fandomSettings as any)?.plugins?.search?.enabled);
     
-    if (body.use_memory || isFandomEnabled || isMemoryPluginEnabled) {
+    if (body.use_memory || isMemoryPluginEnabled) {
       memoryContext = await retrieveMemory(lastMessage, userId, characterId);
     }
 

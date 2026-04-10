@@ -426,7 +426,8 @@ export function createChatTransformStream(
   userId: string | null,
   rememberInteraction: (userMsg: string, assistantMsg: string, userId: string, characterId?: string) => Promise<any>,
   characterId?: string,
-  modelId?: string
+  modelId?: string,
+  useMemory?: boolean
 ) {
   const decoder = new TextDecoder();
   let fullContent = '';
@@ -798,10 +799,10 @@ export function createChatTransformStream(
       const hasContent = !!fullContent;
       const hasToolCalls = fullToolCalls.length > 0;
 
-      // Only remember for gemini-large or if explicitly enabled
       const isGeminiLarge = modelId === 'gemini-large';
+      const shouldRemember = isGeminiLarge || useMemory;
 
-      if ((hasContent || hasToolCalls) && userId && lastMessage && isGeminiLarge) {
+      if ((hasContent || hasToolCalls) && userId && lastMessage && shouldRemember) {
         try {
           // Format assistant message for memory
           let assistantMsg = fullContent;

@@ -33,10 +33,25 @@ export async function POST(
       return NextResponse.json({ error: 'query is required' }, { status: 400 });
     }
 
+    // Normalize settings the same way validateApiKey() does so the test
+    // reflects exactly what happens during real chat requests.
+    const rawSettings = keyData.fandom_settings || {};
+    const normalizedSettings = {
+      maxLoreTokens: rawSettings.maxLoreTokens ?? 800,
+      autoSummarize: rawSettings.autoSummarize ?? true,
+      cacheMode: rawSettings.cacheMode ?? 'aggressive',
+      preferredSources: rawSettings.preferredSources ?? ['fandom', 'wikipedia'],
+      wikiBaseUrl: rawSettings.wikiBaseUrl ?? undefined,
+      plugins: {
+        memory: { enabled: Boolean(rawSettings?.plugins?.memory?.enabled) },
+        search: { enabled: Boolean(rawSettings?.plugins?.search?.enabled) },
+      },
+    };
+
     const testMessages = [{ role: 'user', content: query }];
     const resultMessages = await runFandomPlugin(
       testMessages,
-      keyData.fandom_settings || {},
+      normalizedSettings,
       keyId,
       'test'
     );

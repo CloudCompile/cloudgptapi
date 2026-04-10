@@ -46,22 +46,43 @@ async function fetchWithTimeout(url: string, timeoutMs = DEFAULT_TIMEOUT_MS): Pr
   }
 }
 
+// Domains that appear in Brave's navigation, ads, or infrastructure — not real results.
+const BRAVE_NON_RESULT_DOMAINS = new Set([
+  'search.brave.com', 'brave.com', 'account.brave.com',
+  'basicattentiontoken.org', 'bat.community',
+  'twitter.com', 'x.com', 'facebook.com', 'instagram.com', 'youtube.com',
+]);
+
 function parseBraveResults(html: string, maxResults = 5): Array<{ title: string; url: string }> {
+  // Brave wraps organic results inside data-type="web" containers.
+  // Use a narrower pattern to avoid picking up nav/footer/ad anchors.
+  const resultSectionMatch = html.match(/id=["']results["'][^>]*>([\s\S]*?)(?:<\/main>|<footer)/i);
+  const searchArea = resultSectionMatch ? resultSectionMatch[1] : html;
+
   const results: Array<{ title: string; url: string }> = [];
   const anchorRegex = /<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
   const seen = new Set<string>();
   let match: RegExpExecArray | null;
 
-  while ((match = anchorRegex.exec(html)) && results.length < maxResults) {
+  while ((match = anchorRegex.exec(searchArea)) && results.length < maxResults) {
     const href = decodeHtmlEntities(match[1] || '');
     const text = decodeHtmlEntities(stripHtml(match[2] || ''));
     const url = absoluteUrl(href);
     if (!url) continue;
-    if (!text || text.length < 8) continue;
-    if (url.includes('search.brave.com')) continue;
+    if (!text || text.length < 10) continue;
+
+    try {
+      const hostname = new URL(url).hostname.replace(/^www\./, '');
+      if (BRAVE_NON_RESULT_DOMAINS.has(hostname)) continue;
+    } catch { continue; }
+
     if (seen.has(url)) continue;
     seen.add(url);
     results.push({ title: text.slice(0, 140), url });
+  }
+
+  if (results.length === 0) {
+    console.warn('[WebSearch] parseBraveResults found 0 results — Brave HTML structure may have changed');
   }
 
   return results;
@@ -86,13 +107,12 @@ export async function runWebSearch(query: string, maxResults = 3): Promise<strin
     const hits = parseBraveResults(searchHtml, maxResults);
     if (!hits.length) return '';
 
-    const lines: string[] = [];
-    for (const [index, hit] of hits.entries()) {
-      const snippet = await fetchPageSnippet(hit.url, 420);
-      lines.push(
-        `${index + 1}. ${hit.title}\nURL: ${hit.url}\nSnippet: ${snippet || 'Snippet unavailable.'}`
-      );
-    }
+    const lines = await Promise.all(
+      hits.map(async (hit, index) => {
+        const snippet = await fetchPageSnippet(hit.url, 420);
+        return `${index + 1}. ${hit.title}\nURL: ${hit.url}\nSnippet: ${snippet || 'Snippet unavailable.'}`;
+      })
+    );
 
     return lines.join('\n\n');
   } catch (error) {

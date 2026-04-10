@@ -416,18 +416,6 @@ export default function PluginSettingsPage() {
                       className="mt-1.5 w-full px-3 py-2 rounded-xl border border-border bg-slate-50 dark:bg-slate-800 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
-                  <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Cache Mode</label>
-                    <select
-                      value={settings.cacheMode}
-                      onChange={e => setSettings(s => ({ ...s, cacheMode: e.target.value }))}
-                      className="mt-1.5 w-full px-3 py-2 rounded-xl border border-border bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    >
-                      <option value="aggressive">Aggressive</option>
-                      <option value="moderate">Moderate</option>
-                      <option value="none">None</option>
-                    </select>
-                  </div>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Wiki Base URL</label>
@@ -439,15 +427,6 @@ export default function PluginSettingsPage() {
                     placeholder="https://community.fandom.com/wiki/"
                   />
                 </div>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={settings.autoSummarize}
-                    onChange={e => setSettings(s => ({ ...s, autoSummarize: e.target.checked }))}
-                    className="rounded"
-                  />
-                  <span className="text-sm font-medium">Auto-summarize long lore entries</span>
-                </label>
               </div>
             )}
           </div>
@@ -593,7 +572,7 @@ export default function PluginSettingsPage() {
                 />
                 <button
                   onClick={runTest}
-                  disabled={testing || !testQuery.trim()}
+                  disabled={testing || !testQuery.trim() || !enabled}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold disabled:opacity-50 hover:opacity-90 transition-opacity"
                 >
                   {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}

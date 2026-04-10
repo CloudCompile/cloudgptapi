@@ -35,6 +35,7 @@ export interface ApiKeyPluginSettings {
   autoSummarize: boolean;
   cacheMode: string;
   preferredSources: string[];
+  wikiBaseUrl?: string;
   plugins: {
     memory: { enabled: boolean };
     search: { enabled: boolean };

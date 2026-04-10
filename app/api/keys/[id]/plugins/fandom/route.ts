@@ -57,7 +57,7 @@ export async function PATCH(
 
     const { data: keyData, error: keyError } = await supabaseAdmin
       .from('api_keys')
-      .select('user_id')
+      .select('user_id, fandom_settings')
       .eq('id', keyId)
       .eq('user_id', userId)
       .maybeSingle();
@@ -69,11 +69,18 @@ export async function PATCH(
     const body = await request.json();
     const { enabled, settings } = body;
 
+    // Preserve the plugins sub-object so memory/search enabled states are not wiped
+    // when only the fandom/lorebook settings are updated.
+    const existingPlugins = (keyData.fandom_settings as any)?.plugins ?? {};
+    const mergedSettings = settings
+      ? { ...settings, plugins: existingPlugins }
+      : (keyData.fandom_settings ?? null);
+
     const { error: updateError } = await supabaseAdmin
       .from('api_keys')
       .update({
         fandom_plugin_enabled: Boolean(enabled),
-        fandom_settings: settings ?? null,
+        fandom_settings: mergedSettings,
       })
       .eq('id', keyId)
       .eq('user_id', userId);
@@ -86,7 +93,7 @@ export async function PATCH(
     return NextResponse.json({
       success: true,
       enabled: Boolean(enabled),
-      settings: settings ?? null,
+      settings: mergedSettings,
     });
   } catch (err: any) {
     console.error('[PATCH Fandom Plugin] Error:', err);

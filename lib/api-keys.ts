@@ -144,6 +144,7 @@ export async function validateApiKey(key: string): Promise<ApiKey | null> {
     autoSummarize: rawSettings.autoSummarize ?? true,
     cacheMode: rawSettings.cacheMode ?? 'aggressive',
     preferredSources: rawSettings.preferredSources ?? ['fandom', 'wikipedia'],
+    wikiBaseUrl: rawSettings.wikiBaseUrl ?? undefined,
     plugins: {
       memory: { enabled: Boolean(rawSettings?.plugins?.memory?.enabled) },
       search: { enabled: Boolean(rawSettings?.plugins?.search?.enabled) }
