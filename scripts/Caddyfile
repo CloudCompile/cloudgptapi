@@ -1,7 +1,0 @@
-http://157.151.169.121.sslip.io, https://157.151.169.121.sslip.io, https://ethical-incident-barbara-proceedings.trycloudflare.com {
-    reverse_proxy 127.0.0.1:3101
-}
-
-http://admin.157.151.169.121.sslip.io, https://admin.157.151.169.121.sslip.io, https://admin-ethical-incident-barbara-proceedings.trycloudflare.com {
-    reverse_proxy 127.0.0.1:3102
-}

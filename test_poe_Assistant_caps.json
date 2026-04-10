@@ -1,9 +1,0 @@
-{
-  "model": "Assistant",
-  "messages": [
-    {
-      "role": "user",
-      "content": "hi"
-    }
-  ]
-}

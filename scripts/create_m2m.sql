@@ -1,2 +1,0 @@
-INSERT INTO applications (id, tenant_id, type, name, secret, oidc_client_metadata, custom_client_metadata, custom_data, created_at)
-VALUES ('m-migration', 'default', 'MachineToMachine', 'Migration Client', 'MigrationSecret123!', '{"grant_types": ["client_credentials"], "token_endpoint_auth_method": "client_secret_post", "redirectUris": [], "postLogoutRedirectUris": []}'::jsonb, '{}'::jsonb, '{}'::jsonb, NOW());
