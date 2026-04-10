@@ -5,6 +5,17 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export const runtime = 'nodejs';
 
+const PRICE_PLAN_MAP: Record<string, string> = {
+  'price_1TItn8QvLgyqzP00jz4MFk7R': 'pro',   // Pro monthly
+  'price_1TIwdcQvLgyqzP00KIv9kWVr': 'pro',   // Pro one-time
+  'price_1TItmiQvLgyqzP00FPsN9Vxb': 'ultra', // Ultra monthly
+  'price_1TIwenQvLgyqzP00fNKxQuxY': 'ultra', // Ultra one-time
+};
+
+function getPlanFromPriceId(priceId: string): string {
+  return PRICE_PLAN_MAP[priceId] || 'free';
+}
+
 export async function POST(req: Request) {
   const arrayBuffer = await req.arrayBuffer();
   const body = Buffer.from(arrayBuffer);
@@ -51,15 +62,9 @@ export async function POST(req: Request) {
         return new NextResponse('Invalid subscription price', { status: 400 });
       }
       
-      // Map price ID to plan name using env vars if available, fallback to hardcoded IDs from pricing page
-      let planName = 'free';
-      const PRO_PRICE_ID = 'price_1TItn8QvLgyqzP00jz4MFk7R';
-      const ULTRA_PRICE_ID = 'price_1TItmiQvLgyqzP00FPsN9Vxb';
-
-      if (priceId === PRO_PRICE_ID) {
-        planName = 'pro';
-      } else if (priceId === ULTRA_PRICE_ID) {
-        planName = 'ultra';
+      const planName = getPlanFromPriceId(priceId);
+      if (planName === 'free') {
+        console.warn(`[${requestId}] Unrecognised price ID: ${priceId} — user will be set to free plan`);
       }
 
       console.log(`[${requestId}] Updating user ${userId} (${userEmail || 'no email'}) to plan ${planName} (price: ${priceId})`);
@@ -240,14 +245,9 @@ export async function POST(req: Request) {
         return new NextResponse('Invalid subscription data', { status: 400 });
       }
       
-      let planName = 'free';
-      const PRO_PRICE_ID = 'price_1TItn8QvLgyqzP00jz4MFk7R';
-      const ULTRA_PRICE_ID = 'price_1TItmiQvLgyqzP00FPsN9Vxb';
-
-      if (priceId === PRO_PRICE_ID) {
-        planName = 'pro';
-      } else if (priceId === ULTRA_PRICE_ID) {
-        planName = 'ultra';
+      const planName = getPlanFromPriceId(priceId);
+      if (planName === 'free') {
+        console.warn(`[${requestId}] Unrecognised price ID on subscription update: ${priceId}`);
       }
 
       // Find user ID for this subscription
