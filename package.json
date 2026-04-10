@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build --turbo",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint . --max-warnings=100"
   },
   "dependencies": {
     "@kinde-oss/kinde-auth-nextjs": "^2.11.0",
