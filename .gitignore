@@ -48,6 +48,9 @@ coverage/
 *.log
 .eslintrc.json
 
+# Claude Code
+CLAUDE.md
+
 # Model cache
 .models-cache/
 .env*.local
