@@ -25,7 +25,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = await getCurrentUserId();
+    const userId = await getCurrentUserId(request);
     const { id: keyId } = await params;
 
     if (!userId) {
@@ -57,7 +57,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = await getCurrentUserId();
+    const userId = await getCurrentUserId(request);
     const { id: keyId } = await params;
 
     if (!userId) {

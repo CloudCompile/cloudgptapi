@@ -11,7 +11,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = await getCurrentUserId();
+    const userId = await getCurrentUserId(request);
     const { id: keyId } = await params;
 
     if (!userId) {
@@ -48,7 +48,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = await getCurrentUserId();
+    const userId = await getCurrentUserId(request);
     const { id: keyId } = await params;
 
     if (!userId) {
@@ -80,7 +80,7 @@ export async function PATCH(
 
     if (updateError) {
       console.error('[PATCH Fandom Plugin] Supabase update error:', updateError);
-      return NextResponse.json({ error: 'Failed to save plugin settings' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to save plugin settings', details: updateError.message }, { status: 500 });
     }
 
     return NextResponse.json({

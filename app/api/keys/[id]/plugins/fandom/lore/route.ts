@@ -24,7 +24,7 @@ export async function GET(
   const { id: keyId } = await params;
 
   try {
-    const userId = await getCurrentUserId();
+    const userId = await getCurrentUserId(req);
     if (!await verifyOwnership(userId, keyId)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -58,7 +58,7 @@ export async function POST(
   const { id: keyId } = await params;
 
   try {
-    const userId = await getCurrentUserId();
+    const userId = await getCurrentUserId(req);
     if (!await verifyOwnership(userId, keyId)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -105,7 +105,7 @@ export async function DELETE(
   }
 
   try {
-    const userId = await getCurrentUserId();
+    const userId = await getCurrentUserId(req);
     if (!await verifyOwnership(userId, keyId)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

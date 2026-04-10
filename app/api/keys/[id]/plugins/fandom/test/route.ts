@@ -8,7 +8,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = await getCurrentUserId();
+    const userId = await getCurrentUserId(request);
     const { id: keyId } = await params;
 
     if (!userId) {
