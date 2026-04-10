@@ -2,13 +2,16 @@
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
   eslint: {
-    // We enforce ESLint checks during build
-    ignoreDuringBuilds: false,
+    // We run ESLint in GitHub Actions, skip during build to save Vercel build minutes
+    ignoreDuringBuilds: true,
   },
   typescript: {
-    // We enforce TS checks during build
-    ignoreBuildErrors: false,
+    // We run TS checks in GitHub Actions, skip during build to save Vercel build minutes
+    ignoreBuildErrors: true,
   },
   async headers() {
     const corsHeaders = [
