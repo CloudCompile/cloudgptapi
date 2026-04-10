@@ -48,10 +48,12 @@ export async function POST(req: Request) {
       const userEmail = session.metadata.userEmail;
 
       let priceId: string | null = null;
+      let retrievedSubscription: any = null;
 
       if (session.subscription) {
         const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-        priceId = subscription.items?.data?.[0]?.price?.id || null;
+        retrievedSubscription = subscription;
+        priceId = retrievedSubscription?.items?.data?.[0]?.price?.id || null;
 
         if (priceId) {
           const sub = subscription as any;
@@ -109,7 +111,7 @@ export async function POST(req: Request) {
       }
 
       // Safely get subscription product ID
-      const stripeProductId = subscription.items?.data?.[0]?.plan?.product || null;
+      const stripeProductId = retrievedSubscription?.items?.data?.[0]?.plan?.product || null;
 
       // Use upsert to ensure profile exists
       const profileUpdate: any = { 

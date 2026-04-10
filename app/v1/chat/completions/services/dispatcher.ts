@@ -494,6 +494,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
         console.log(`[${requestId}] Fast-path success: ${Date.now() - startTime}ms via Pollinations`);
         const data = await safeResponseJson(response, null as any);
         if (apiKeyInfo && !isSystemRequest) {
+          const usageWeight = getModelUsageWeight(modelId);
           waitUntil(trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages, usageWeight));
         }
         const fastPathIsFandomEnabled = apiKeyInfo?.fandomPluginEnabled || false;

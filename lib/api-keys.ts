@@ -112,11 +112,9 @@ export async function validateApiKey(key: string): Promise<ApiKey | null> {
         }
 
         if (profile) {
-          supabaseAdmin.from('profiles').update({ plan: userPlan }).eq('id', data.user_id)
-            .then(() => {
+          supabaseAdmin.from('profiles').update({ plan: userPlan }).eq('id', data.user_id).then(() => {
               console.log('[validateApiKey] Synced plan', userPlan, 'back to profile for user_id:', data.user_id);
-            })
-            .catch((err: any) => {
+            }, (err: any) => {
               console.warn('[validateApiKey] Failed to sync plan to profile:', err?.message);
             });
         }

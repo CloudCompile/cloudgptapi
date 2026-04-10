@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 
 let stripeInstance: Stripe | null = null;
 
-function getStripe(): Stripe {
+export function getStripe(): Stripe {
   if (!stripeInstance) {
     if (!process.env.STRIPE_SECRET_KEY) {
       throw new Error('STRIPE_SECRET_KEY is not defined in environment variables');
@@ -18,17 +18,14 @@ function getStripe(): Stripe {
 }
 
 export const stripe = {
-  get instance() {
-    return getStripe();
-  },
   get checkout() {
     return {
       get sessions() {
         return {
-          create: (...args: Parameters<Stripe['checkout']['sessions']['create']>) =>
-            getStripe().checkout.sessions.create(...args),
-          listLineItems: (...args: Parameters<Stripe['checkout']['sessions']['listLineItems']>) =>
-            getStripe().checkout.sessions.listLineItems(...args),
+          create: (params: Stripe.Checkout.SessionCreateParams, options?: Stripe.RequestOptions) =>
+            getStripe().checkout.sessions.create(params, options),
+          listLineItems: (sessionId: string, params?: Stripe.Checkout.SessionListLineItemsParams, options?: Stripe.RequestOptions) =>
+            getStripe().checkout.sessions.listLineItems(sessionId, params, options),
         };
       },
     };
@@ -37,30 +34,30 @@ export const stripe = {
     return {
       get sessions() {
         return {
-          create: (...args: Parameters<Stripe['billingPortal']['sessions']['create']>) =>
-            getStripe().billingPortal.sessions.create(...args),
+          create: (params: Stripe.BillingPortal.SessionCreateParams, options?: Stripe.RequestOptions) =>
+            getStripe().billingPortal.sessions.create(params, options),
         };
       },
     };
   },
   get webhooks() {
     return {
-      constructEvent: (...args: Parameters<Stripe['webhooks']['constructEvent']>) =>
-        getStripe().webhooks.constructEvent(...args),
+      constructEvent: (payload: string | Buffer, signature: string, secret: string) =>
+        getStripe().webhooks.constructEvent(payload, signature, secret),
     };
   },
   get subscriptions() {
     return {
-      retrieve: (...args: Parameters<Stripe['subscriptions']['retrieve']>) =>
-        getStripe().subscriptions.retrieve(...args),
+      retrieve: (id: string, params?: Stripe.SubscriptionRetrieveParams, options?: Stripe.RequestOptions) =>
+        getStripe().subscriptions.retrieve(id, params, options),
     };
   },
   get coupons() {
     return {
-      create: (...args: Parameters<Stripe['coupons']['create']>) =>
-        getStripe().coupons.create(...args),
-      del: (...args: Parameters<Stripe['coupons']['del']>) =>
-        getStripe().coupons.del(...args),
+      create: (params: Stripe.CouponCreateParams, options?: Stripe.RequestOptions) =>
+        getStripe().coupons.create(params, options),
+      del: (id: string, options?: Stripe.RequestOptions) =>
+        getStripe().coupons.del(id, options),
     };
   },
 };
