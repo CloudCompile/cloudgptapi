@@ -1,105 +1,101 @@
-import { PROVIDER_URLS } from './providers';
+import { supabaseAdmin } from './supabase';
 
-export interface MemoryResult {
-  context: string;
-}
-
-const APP_ID = 'Vetra';
+const MAX_STORED = 50;  // max rows kept per (user_id, character_id) pair
+const RETRIEVE_LIMIT = 10; // interactions surfaced per request
 
 /**
- * Retrieves relevant long-term memory context for a given query and user.
- * Powered by PolliStack Agent Engine.
+ * Retrieves the most recent interaction history for a user/character pair
+ * and formats it as a context string to inject into the prompt.
+ *
+ * The query parameter is accepted for API compatibility but not used for
+ * semantic search — retrieval is recency-based.
  */
 export async function retrieveMemory(query: string, userId: string, characterId?: string): Promise<string> {
   try {
-    const polliKey = process.env.MERIDIAN_API_KEY;
-    if (!polliKey) return '';
+    if (!userId) return '';
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'x-api-key': polliKey,
-      'x-user-id': userId,
-    };
+    let q = supabaseAdmin
+      .from('memory_logs')
+      .select('prompt, response')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(RETRIEVE_LIMIT);
 
     if (characterId) {
-      headers['x-character-id'] = characterId;
+      q = q.eq('character_id', characterId);
+    } else {
+      q = q.is('character_id', null);
     }
 
-    const response = await fetch(`${PROVIDER_URLS.meridian}/retrieve`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ 
-        query,
-        app_id: APP_ID,
-        character_id: characterId
-      }),
-    });
+    const { data, error } = await q;
 
-    if (!response.ok) return '';
-    
-    const data = await response.json();
-    const context = data.context || '';
-    
-    // Auto-truncate memory to prevent context bloat and response truncation in frontends
-    // Target: ~2000 characters (~512 tokens)
+    if (error || !data || data.length === 0) return '';
+
+    // Reverse so the oldest interaction comes first (natural reading order)
+    const lines = [...data].reverse().map(row =>
+      `User: ${row.prompt}\nAssistant: ${row.response}`
+    ).join('\n\n');
+
+    const context = `[Past Interactions]:\n${lines}`;
     return truncateMemory(context, 2000);
   } catch (error) {
-    console.error('[PolliStack] Error retrieving memory:', error);
+    console.error('[Memory] Error retrieving memory:', error);
     return '';
   }
 }
 
 /**
- * Truncates memory context to a specific character limit to prevent context bloat.
+ * Truncates memory context to a character limit, breaking at a clean line or sentence.
  */
 export function truncateMemory(context: string, limit: number = 2000): string {
   if (!context || context.length <= limit) return context;
-  
-  // Try to find a clean break point (last newline or period)
+
   const truncated = context.substring(0, limit);
   const lastNewline = truncated.lastIndexOf('\n');
   const lastPeriod = truncated.lastIndexOf('. ');
-  
   const breakPoint = Math.max(lastNewline, lastPeriod);
-  
+
   if (breakPoint > limit * 0.7) {
     return truncated.substring(0, breakPoint) + '... [Truncated for brevity]';
   }
-  
+
   return truncated + '... [Truncated for brevity]';
 }
 
 /**
- * Stores a new interaction in the long-term memory.
- * Powered by PolliStack Agent Engine.
+ * Stores an interaction in memory_logs, then prunes the table to MAX_STORED rows
+ * for this user/character pair. Called fire-and-forget after each response.
  */
-export async function rememberInteraction(prompt: string, response: string, userId: string, characterId?: string): Promise<void> {
+export async function rememberInteraction(
+  prompt: string,
+  response: string,
+  userId: string,
+  characterId?: string
+): Promise<void> {
   try {
-    const polliKey = process.env.MERIDIAN_API_KEY;
-    if (!polliKey) return;
+    if (!userId) return;
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'x-api-key': polliKey,
-      'x-user-id': userId,
-    };
+    const { error } = await supabaseAdmin
+      .from('memory_logs')
+      .insert({
+        user_id: userId,
+        character_id: characterId || null,
+        prompt: prompt.slice(0, 2000),
+        response: response.slice(0, 4000),
+      });
 
-    if (characterId) {
-      headers['x-character-id'] = characterId;
+    if (error) {
+      console.error('[Memory] Error storing interaction:', error);
+      return;
     }
 
-    await fetch(`${PROVIDER_URLS.meridian}/remember`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        prompt,
-        response,
-        app_id: APP_ID,
-        character_id: characterId
-      }),
+    // Prune old rows via the SQL function defined in SUPABASE_SETUP.sql
+    await supabaseAdmin.rpc('prune_memory_logs', {
+      p_user_id: userId,
+      p_character_id: characterId || null,
+      p_max_count: MAX_STORED,
     });
   } catch (error) {
-    console.error('[PolliStack] Error storing memory:', error);
+    console.error('[Memory] Error storing interaction:', error);
   }
 }
-

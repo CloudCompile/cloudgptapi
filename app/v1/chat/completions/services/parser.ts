@@ -44,21 +44,22 @@ export async function processContextAndMemory(
     const isMemoryPluginEnabled = Boolean((apiKeyInfo?.fandomSettings as any)?.plugins?.memory?.enabled);
     const isSearchPluginEnabled = Boolean((apiKeyInfo?.fandomSettings as any)?.plugins?.search?.enabled);
     
-    if (isGeminiLarge || isClaude || body.use_memory || isFandomEnabled || isMemoryPluginEnabled) {
+    if (body.use_memory || isFandomEnabled || isMemoryPluginEnabled) {
       memoryContext = await retrieveMemory(lastMessage, userId, characterId);
-      
+    }
+
+    {
       let optimizationPrompt = '';
       if (isGeminiLarge || isClaude) {
         optimizationPrompt += '\n[System Instruction]: Keep responses concise and focused. Limit output to 3-5 paragraphs maximum. Avoid long monologues.';
       }
-      
+
       if (isClaude) {
         optimizationPrompt += ' Do not repeat the user\'s input or previous messages. Start your response directly.';
       }
-      
+
       if (memoryContext && memoryContext !== 'No prior context found.') {
-        const safeMemory = memoryContext.length > 2000 ? memoryContext.substring(0, 2000) + '... [Truncated]' : memoryContext;
-        optimizationPrompt += `\n\n[Character Memory Context]:\n${safeMemory}`;
+        optimizationPrompt += `\n\n[Character Memory Context]:\n${memoryContext}`;
       }
 
       if (optimizationPrompt) {

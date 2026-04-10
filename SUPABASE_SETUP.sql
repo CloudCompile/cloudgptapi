@@ -245,6 +245,77 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Memory Logs table (replaces Meridian external service)
+-- Stores per-user, per-character interaction history for the Memory plugin.
+CREATE TABLE IF NOT EXISTS public.memory_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT NOT NULL,
+    character_id TEXT,                         -- NULL = global memory, non-NULL = character-scoped
+    prompt TEXT NOT NULL,                      -- the user's message (capped at 2000 chars on insert)
+    response TEXT NOT NULL,                    -- the assistant's reply (capped at 4000 chars on insert)
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_memory_logs_user_character
+    ON public.memory_logs (user_id, character_id, created_at DESC);
+
+ALTER TABLE public.memory_logs ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role full access to memory_logs" ON public.memory_logs;
+CREATE POLICY "Service role full access to memory_logs"
+    ON public.memory_logs FOR ALL
+    USING (true)
+    WITH CHECK (true);
+
+-- Prunes rows beyond the p_max_count most recent for a given user+character pair.
+-- Called after every INSERT so the table stays bounded.
+CREATE OR REPLACE FUNCTION public.prune_memory_logs(
+    p_user_id TEXT,
+    p_character_id TEXT,
+    p_max_count INTEGER DEFAULT 50
+)
+RETURNS void AS $$
+BEGIN
+    DELETE FROM public.memory_logs
+    WHERE user_id = p_user_id
+      AND (
+          (p_character_id IS NULL AND character_id IS NULL)
+          OR character_id = p_character_id
+      )
+      AND id NOT IN (
+          SELECT id FROM public.memory_logs
+          WHERE user_id = p_user_id
+            AND (
+                (p_character_id IS NULL AND character_id IS NULL)
+                OR character_id = p_character_id
+            )
+          ORDER BY created_at DESC
+          LIMIT p_max_count
+      );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Lore Snippets table (replaces VPS-based lorebook storage)
+-- Stores manual lore entries added via the Library tab in Plugin Settings.
+CREATE TABLE IF NOT EXISTS public.lore_snippets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    api_key_id UUID NOT NULL REFERENCES public.api_keys(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    source TEXT DEFAULT 'manual',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_lore_snippets_api_key_id ON public.lore_snippets(api_key_id);
+
+ALTER TABLE public.lore_snippets ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role full access to lore_snippets" ON public.lore_snippets;
+CREATE POLICY "Service role full access to lore_snippets"
+    ON public.lore_snippets FOR ALL
+    USING (true)
+    WITH CHECK (true);
+
 -- Promo Codes table
 CREATE TABLE IF NOT EXISTS public.promo_codes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

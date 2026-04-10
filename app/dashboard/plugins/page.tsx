@@ -79,7 +79,7 @@ export default function PluginsPage() {
       icon: Search,
       color: 'text-emerald-500',
       bgColor: 'bg-emerald-500/10',
-      status: 'Coming Soon'
+      status: 'Beta'
     }
   ];
 
