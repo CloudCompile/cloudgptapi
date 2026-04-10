@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Skip static generation for pages that require Logto
   output: 'standalone',
   eslint: {
     // Warning: This allows production builds to successfully complete even if
@@ -14,18 +13,6 @@ const nextConfig = {
     // your project has type errors.
     // !! WARN !!
     ignoreBuildErrors: true,
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/oidc/:path*',
-        destination: 'http://157.151.169.121:3101/oidc/:path*',
-      },
-      {
-        source: '/.well-known/:path*',
-        destination: 'http://157.151.169.121:3101/oidc/.well-known/:path*',
-      },
-    ];
   },
   async headers() {
     const corsHeaders = [

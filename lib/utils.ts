@@ -320,7 +320,7 @@ export function getRandomAquaApiKey(): string | undefined {
 export function getLizApiKeys(): string[] {
   const keys = [
     process.env.LIZ_API_KEY,
-    'sk-946715b46e8fcd676f8cc5d4e9c80a51', // User provided key
+    process.env.LIZ_API_KEY_2,
   ].filter(Boolean) as string[];
   
   return Array.from(new Set(keys));
@@ -343,8 +343,7 @@ export function getLizApiKey(): string | undefined {
 export function getOpenAIApiKeys(): string[] {
   const keys = [
     process.env.OPENAI_API_KEY,
-    // User-provided key from issue - replace with your own key in production
-    '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',
+    process.env.OPENAI_API_KEY_2,
   ].filter(Boolean) as string[];
   
   return Array.from(new Set(keys));

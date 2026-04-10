@@ -112,11 +112,13 @@ export async function validateApiKey(key: string): Promise<ApiKey | null> {
         }
 
         if (profile) {
-          Promise.resolve(
-            supabaseAdmin.from('profiles').update({ plan: userPlan }).eq('id', data.user_id)
-          ).then(() => {
-            console.log('[validateApiKey] Synced plan', userPlan, 'back to profile for user_id:', data.user_id);
-          }).catch(() => { });
+          supabaseAdmin.from('profiles').update({ plan: userPlan }).eq('id', data.user_id)
+            .then(() => {
+              console.log('[validateApiKey] Synced plan', userPlan, 'back to profile for user_id:', data.user_id);
+            })
+            .catch((err: any) => {
+              console.warn('[validateApiKey] Failed to sync plan to profile:', err?.message);
+            });
         }
       } else {
         console.log('[validateApiKey] Subscription is expired.');
@@ -128,10 +130,6 @@ export async function validateApiKey(key: string): Promise<ApiKey | null> {
 
   if (userEmail) {
     userPlan = await applyPlanOverride(userEmail, userPlan, userEmail, 'email');
-  }
-
-  if (userEmail === 'tery9tery9@gmail.com') {
-    userPlan = 'pro';
   }
 
   if (keyLevelPlan) {
