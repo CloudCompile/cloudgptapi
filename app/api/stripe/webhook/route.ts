@@ -73,27 +73,15 @@ export async function POST(req: Request) {
       const promoCodeFromSession = session.metadata?.promoCode;
       if (promoCodeFromSession) {
         console.log(`[${requestId}] Processing promo code: ${promoCodeFromSession}`);
-        
-        // First get current count
-        const { data: promoData } = await supabaseAdmin
-          .from('promo_codes')
-          .select('usage_count')
-          .eq('code', promoCodeFromSession)
-          .eq('is_active', true)
-          .single();
-        
-        if (promoData) {
-          const { error: promoUpdateError } = await supabaseAdmin
-            .from('promo_codes')
-            .update({ usage_count: promoData.usage_count + 1 })
-            .eq('code', promoCodeFromSession)
-            .eq('is_active', true);
 
-          if (promoUpdateError) {
-            console.error(`[${requestId}] Error updating promo code usage:`, promoUpdateError);
-          } else {
-            console.log(`[${requestId}] Successfully incremented usage for promo code: ${promoCodeFromSession}`);
-          }
+        const { error: promoUpdateError } = await supabaseAdmin.rpc('increment_promo_usage', {
+          p_code: promoCodeFromSession,
+        });
+
+        if (promoUpdateError) {
+          console.error(`[${requestId}] Error updating promo code usage:`, promoUpdateError);
+        } else {
+          console.log(`[${requestId}] Successfully incremented usage for promo code: ${promoCodeFromSession}`);
         }
       }
 
