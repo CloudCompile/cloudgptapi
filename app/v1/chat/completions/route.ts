@@ -5,7 +5,6 @@ import { processContextAndMemory, sanitizeMessagesForProvider } from './services
 import { dispatchChatRequest } from './services/dispatcher';
 import { CHAT_MODELS, PREMIUM_MODELS, ULTRA_MODELS, FREE_MODELS, ADMIN_ONLY_MODELS } from '@/lib/providers';
 import { getCorsHeaders, safeResponseJson, hasProAccess } from '@/lib/utils';
-import { rememberInteraction } from '@/lib/memory';
 import {
   validateMessages,
   generateRequestId,

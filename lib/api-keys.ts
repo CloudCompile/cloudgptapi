@@ -218,6 +218,7 @@ export async function trackUsage(
 }
 
 const overrideCache = new Set<string>();
+const OVERRIDE_CACHE_MAX = 5000;
 
 export async function applyPlanOverride(email: string, currentPlan: string, userIdOrEmail: string, identifierType: 'id' | 'email' = 'email'): Promise<string> {
   if (!email) return currentPlan;
@@ -235,6 +236,7 @@ export async function applyPlanOverride(email: string, currentPlan: string, user
 
   if (needsUpdate && !overrideCache.has(userIdOrEmail)) {
     try {
+      if (overrideCache.size >= OVERRIDE_CACHE_MAX) overrideCache.clear();
       overrideCache.add(userIdOrEmail);
       const query = supabaseAdmin.from('profiles').update({ plan: newPlan });
       if (identifierType === 'id') {
@@ -264,13 +266,13 @@ export async function checkRateLimit(key: string, limit: number = 60, type: stri
     });
 
     if (error) {
-      console.error('[checkRateLimit] RPC error:', error.message);
+      console.error('[checkRateLimit] RPC error — rate limiting bypassed:', error.message);
       return true;
     }
 
     return (data as any).allowed;
   } catch (err) {
-    console.error('[checkRateLimit] Exception:', err);
+    console.error('[checkRateLimit] Exception — rate limiting bypassed:', err);
     return true;
   }
 }
@@ -285,13 +287,13 @@ export async function checkDailyLimit(key: string, limit: number = 1000, apiKeyI
       });
 
       if (error) {
-        console.error('[checkDailyLimit] RPC error:', error.message);
+        console.error('[checkDailyLimit] RPC error — daily limit bypassed:', error.message);
         return true;
       }
 
       return (data as any).allowed;
     } catch (err) {
-      console.error('[checkDailyLimit] Exception:', err);
+      console.error('[checkDailyLimit] Exception — daily limit bypassed:', err);
       return true;
     }
   }
@@ -366,7 +368,11 @@ export async function getDailyLimitInfo(key: string, limit: number = 1000, apiKe
       }
 
       const lastReset = new Date(data.last_reset_at);
-      const isNewDay = lastReset.getUTCDate() !== new Date().getUTCDate();
+      const today = new Date();
+      const isNewDay =
+        lastReset.getUTCFullYear() !== today.getUTCFullYear() ||
+        lastReset.getUTCMonth() !== today.getUTCMonth() ||
+        lastReset.getUTCDate() !== today.getUTCDate();
       const currentUsage = isNewDay ? 0 : data.daily_usage_count;
 
       return {

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const ChatCompletionMessageSchema = z.object({
-  role: z.enum(['system', 'user', 'assistant', 'tool']),
+  role: z.enum(['system', 'user', 'assistant', 'tool', 'function', 'developer']),
   content: z.union([z.string(), z.array(z.any())]).nullable().optional(),
   name: z.string().optional(),
   tool_calls: z.array(z.any()).optional(),

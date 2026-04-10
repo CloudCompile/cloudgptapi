@@ -67,9 +67,11 @@ export async function POST(req: Request) {
           couponParams.currency = 'usd';
         }
 
-        const stripeCoupon = await stripe.coupons.create(couponParams);
-        
-        // Apply discount to checkout
+        const stripeCoupon = await stripe.coupons.create({
+          ...couponParams,
+          max_redemptions: 1,
+        });
+
         discountParams = {
           discounts: [{ coupon: stripeCoupon.id }],
         };
@@ -100,6 +102,12 @@ export async function POST(req: Request) {
         ...(promoCode && { promoCode: promoCode.toUpperCase() }),
       },
     });
+
+    if (discountParams.discounts?.[0]?.coupon) {
+      stripe.coupons.del(discountParams.discounts[0].coupon).catch(err =>
+        console.warn('[CHECKOUT] Failed to delete one-use coupon:', err?.message)
+      );
+    }
 
     return NextResponse.json({ url: session.url });
   } catch (error: any) {

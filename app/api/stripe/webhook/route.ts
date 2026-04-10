@@ -39,15 +39,6 @@ export async function POST(req: Request) {
 
   try {
     if (event.type === 'checkout.session.completed') {
-      if (!session.subscription) {
-        console.error(`[${requestId}] Webhook Error: No subscription in session`, session.id);
-        return new NextResponse('No subscription on session', { status: 400 });
-      }
-
-      const subscription = await stripe.subscriptions.retrieve(
-        session.subscription as string
-      );
-
       if (!session?.metadata?.userId) {
         console.error(`[${requestId}] Webhook Error: User id is required in session metadata`, session.id);
         return new NextResponse('User id is required', { status: 400 });
@@ -55,13 +46,45 @@ export async function POST(req: Request) {
 
       const userId = session.metadata.userId;
       const userEmail = session.metadata.userEmail;
-      const priceId = subscription.items?.data?.[0]?.price?.id;
-      
-      if (!priceId) {
-        console.error(`[${requestId}] Could not get price ID from subscription`);
-        return new NextResponse('Invalid subscription price', { status: 400 });
+
+      let priceId: string | null = null;
+
+      if (session.subscription) {
+        const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+        priceId = subscription.items?.data?.[0]?.price?.id || null;
+
+        if (priceId) {
+          const sub = subscription as any;
+          const periodEnd = sub.current_period_end
+            ? new Date(sub.current_period_end * 1000).toISOString()
+            : new Date().toISOString();
+
+          const { error: subError } = await supabaseAdmin
+            .from('user_subscriptions')
+            .upsert({
+              user_id: userId,
+              stripe_subscription_id: sub.id,
+              stripe_customer_id: sub.customer as string,
+              stripe_price_id: priceId,
+              stripe_current_period_end: periodEnd,
+              status: sub.status,
+            }, { onConflict: 'stripe_subscription_id' });
+
+          if (subError) {
+            console.error(`[${requestId}] Error logging subscription for user ${userId}:`, subError);
+          }
+        }
+      } else if (session.payment_intent) {
+        const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
+        priceId = lineItems.data[0]?.price?.id || null;
+        console.log(`[${requestId}] One-time payment completed. payment_intent: ${session.payment_intent}, priceId: ${priceId}`);
       }
-      
+
+      if (!priceId) {
+        console.error(`[${requestId}] Could not get price ID from session`);
+        return new NextResponse('Invalid session price', { status: 400 });
+      }
+
       const planName = getPlanFromPriceId(priceId);
       if (planName === 'free') {
         console.warn(`[${requestId}] Unrecognised price ID: ${priceId} — user will be set to free plan`);
@@ -163,24 +186,6 @@ export async function POST(req: Request) {
         }
       }
       
-      // Also track the subscription details for audit/debugging
-      const sub = subscription as any;
-      const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : new Date().toISOString();
-      
-      const { error: subError } = await supabaseAdmin
-        .from('user_subscriptions')
-        .upsert({
-          user_id: userId,
-          stripe_subscription_id: sub.id,
-          stripe_customer_id: sub.customer as string,
-          stripe_price_id: priceId,
-          stripe_current_period_end: periodEnd,
-          status: sub.status,
-        }, { onConflict: 'stripe_subscription_id' });
-
-      if (subError) {
-        console.error(`[${requestId}] Error logging subscription for user ${userId}:`, subError);
-      }
     }
 
     if (event.type === 'invoice.payment_succeeded') {

@@ -111,8 +111,8 @@ export async function handleStableHordeChat(
           }
           
           const lastUserMessage = body.messages[body.messages.length - 1]?.content || '';
-          const shouldRemember = body.use_memory || apiKeyInfo?.fandomPluginEnabled;
-          
+          const shouldRemember = body.use_memory || apiKeyInfo?.fandomPluginEnabled || Boolean(apiKeyInfo?.fandomSettings?.plugins?.memory?.enabled);
+
           if (userId && lastUserMessage && shouldRemember) {
             rememberInteraction(lastUserMessage, generatedText.trim(), userId, characterId).catch(err =>
               console.error('Failed to remember Stable Horde interaction:', err)

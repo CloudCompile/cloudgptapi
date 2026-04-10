@@ -400,30 +400,27 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       const systemMsg = standardBody.messages[systemMsgIdx];
       const otherMessages = standardBody.messages.filter((_: any, i: number) => i !== systemMsgIdx);
       const allowedChars = MAX_PROVIDER_CHARS - JSON.stringify(systemMsg).length - 100;
-      let truncatedChars = 0;
-      const keptMessages: any[] = [systemMsg];
-      for (const msg of otherMessages) {
-        const msgJson = JSON.stringify(msg);
-        if (truncatedChars + msgJson.length <= allowedChars) {
-          keptMessages.push(msg);
-          truncatedChars += msgJson.length;
-        }
+      let usedChars = 0;
+      const kept: any[] = [];
+      for (let i = otherMessages.length - 1; i >= 0; i--) {
+        const msgJson = JSON.stringify(otherMessages[i]);
+        if (usedChars + msgJson.length > allowedChars) break;
+        kept.unshift(otherMessages[i]);
+        usedChars += msgJson.length;
       }
-      standardBody.messages = keptMessages;
-      console.log(`[${requestId}] Truncated ${standardBody.messages.length} messages from ${totalInputChars} chars`);
+      standardBody.messages = [systemMsg, ...kept];
+      console.log(`[${requestId}] Truncated to ${standardBody.messages.length} messages (${usedChars} chars) from ${totalInputChars} chars`);
     } else {
-      // No system message, truncate oldest messages
       const allowedChars = MAX_PROVIDER_CHARS - 100;
-      let truncatedChars = 0;
-      const keptMessages: any[] = [];
-      for (const msg of standardBody.messages) {
-        const msgJson = JSON.stringify(msg);
-        if (truncatedChars + msgJson.length <= allowedChars) {
-          keptMessages.push(msg);
-          truncatedChars += msgJson.length;
-        }
+      let usedChars = 0;
+      const kept: any[] = [];
+      for (let i = standardBody.messages.length - 1; i >= 0; i--) {
+        const msgJson = JSON.stringify(standardBody.messages[i]);
+        if (usedChars + msgJson.length > allowedChars) break;
+        kept.unshift(standardBody.messages[i]);
+        usedChars += msgJson.length;
       }
-      standardBody.messages = keptMessages;
+      standardBody.messages = kept;
     }
   }
 
@@ -499,9 +496,19 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
         if (apiKeyInfo && !isSystemRequest) {
           waitUntil(trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages, usageWeight));
         }
+        const fastPathIsFandomEnabled = apiKeyInfo?.fandomPluginEnabled || false;
+        const fastPathIsMemoryEnabled = Boolean(apiKeyInfo?.fandomSettings?.plugins?.memory?.enabled);
+        if (userId && lastMessage && (body.use_memory || fastPathIsFandomEnabled || fastPathIsMemoryEnabled)) {
+          const fastPathContent = data?.choices?.[0]?.message?.content || '';
+          if (fastPathContent) {
+            rememberInteraction(lastMessage, fastPathContent, userId, characterId).catch(err =>
+              console.error(`[${requestId}] Failed to remember fast-path interaction:`, err)
+            );
+          }
+        }
         const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'chat');
         const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
-        
+
         return NextResponse.json(data, {
           headers: {
             ...getCorsHeaders(),
