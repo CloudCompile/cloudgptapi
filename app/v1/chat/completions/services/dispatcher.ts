@@ -11,7 +11,7 @@ import {
   getBlazeAiModelId,
   getMinoModelId
 } from '@/lib/chat-utils';
-import { CHAT_MODELS, ULTRA_MODELS } from '@/lib/providers';
+import { CHAT_MODELS, ULTRA_MODELS, ADMIN_ONLY_MODELS } from '@/lib/providers';
 import {
   getCorsHeaders, getPollinationsApiKey,
   getClaudeApiKey,
@@ -184,10 +184,10 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     // Primary: Aqua
     providerUrl = `${PROVIDER_URLS.aqua}/chat/completions`;
     
-    // Ultra models get AQUA_API_KEY_2, free/non-ultra models get AQUA_API_KEY_1 only
-    if (ULTRA_MODELS.has(modelId)) {
+    // Ultra and Admin-only models get AQUA_API_KEY_2, free/non-ultra models get AQUA_API_KEY_1 only
+    if (ULTRA_MODELS.has(modelId) || ADMIN_ONLY_MODELS.has(modelId)) {
       providerApiKey = process.env.AQUA_API_KEY_2;
-      console.log(`[${requestId}] Aqua: using AQUA_API_KEY_2 for ultra model: ${modelId}`);
+      console.log(`[${requestId}] Aqua: using AQUA_API_KEY_2 for ultra/admin model: ${modelId}`);
     } else {
       providerApiKey = process.env.AQUA_API_KEY;
       console.log(`[${requestId}] Aqua: using AQUA_API_KEY_1 for model: ${modelId}`);
