@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUserId } from '@/lib/kinde-auth';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit, getDailyLimitForPlan } from '@/lib/api-keys';
 import { IMAGE_MODELS, PROVIDER_URLS, ImageModel, PREMIUM_MODELS } from '@/lib/providers';
+import { waitUntil } from '@vercel/functions';
 import { getCorsHeaders, getPollinationsApiKey, getPollinationsApiKeys, safeResponseJson, hasProAccess, hasUltraAccess } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 export const maxDuration = 300; // 5 minutes max for long image generation
 
 // Handle OPTIONS for CORS
@@ -644,7 +645,7 @@ export async function POST(request: NextRequest) {
 
     if (apiKeyInfo && !isSystemRequest) {
       const usageWeight = model.usageWeight || 5;
-      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'image', undefined, usageWeight);
+      waitUntil(trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'image', undefined, usageWeight));
     }
 
     const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'image');

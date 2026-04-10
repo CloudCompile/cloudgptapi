@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUserId } from '@/lib/kinde-auth';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit, getDailyLimitForPlan } from '@/lib/api-keys';
 import { VIDEO_MODELS, PROVIDER_URLS, PREMIUM_MODELS } from '@/lib/providers';
+import { waitUntil } from '@vercel/functions';
 import { getCorsHeaders, hasProAccess, hasVideoAccess } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 export const maxDuration = 300; // 5 minutes max for video generation
 
 // Handle OPTIONS for CORS
@@ -311,7 +312,7 @@ export async function POST(request: NextRequest) {
     // Track usage in background if authenticated
     if (apiKeyInfo && !isSystemRequest) {
       const usageWeight = model.usageWeight || 1;
-      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'video', undefined, usageWeight);
+      waitUntil(trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'video', undefined, usageWeight));
     }
 
     // Final response

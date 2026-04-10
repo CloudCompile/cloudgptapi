@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { waitUntil } from '@vercel/functions';
 import { trackUsage, getRateLimitInfo, getDailyLimitInfo, ApiKey } from '@/lib/api-keys';
 import { CHAT_MODELS } from '@/lib/providers';
 import { getCorsHeaders } from '@/lib/utils';
@@ -106,7 +107,7 @@ export async function handleStableHordeChat(
           if (apiKeyInfo && !isSystemRequest) {
             const model = CHAT_MODELS.find(m => m.id === modelId);
             const usageWeight = model?.usageWeight || 1;
-            await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages, usageWeight);
+            waitUntil(trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages, usageWeight));
           }
           
           const lastUserMessage = body.messages[body.messages.length - 1]?.content || '';

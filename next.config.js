@@ -3,16 +3,12 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
-    ignoreDuringBuilds: true,
+    // We enforce ESLint checks during build
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    // !! WARN !!
-    // Dangerously allow production builds to successfully complete even if
-    // your project has type errors.
-    // !! WARN !!
-    ignoreBuildErrors: true,
+    // We enforce TS checks during build
+    ignoreBuildErrors: false,
   },
   async headers() {
     const corsHeaders = [

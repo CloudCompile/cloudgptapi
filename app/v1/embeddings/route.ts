@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUserId } from '@/lib/kinde-auth';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit, getDailyLimitForPlan } from '@/lib/api-keys';
 import { CHAT_MODELS, PROVIDER_URLS } from '@/lib/providers';
+import { waitUntil } from '@vercel/functions';
 import { getCorsHeaders, safeResponseJson } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
 import { generateRequestId } from '@/lib/chat-utils';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 export const maxDuration = 60;
 
 export async function OPTIONS() {
@@ -152,7 +153,7 @@ export async function POST(request: NextRequest) {
     // Track usage in background if authenticated
     if (apiKeyInfo && !isSystemRequest) {
       const usageWeight = model.usageWeight || 1;
-      await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.input, usageWeight);
+      waitUntil(trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.input, usageWeight));
     }
 
     const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'embeddings');

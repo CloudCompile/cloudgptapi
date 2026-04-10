@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { trackUsage, getRateLimitInfo, getDailyLimitInfo, checkRateLimit, checkDailyLimit, ApiKey, getModelUsageWeight } from '@/lib/api-keys';
+import { waitUntil } from '@vercel/functions';
 import {
   PROVIDER_URLS,
   PROVIDER_MODEL_MAPPING,
@@ -496,8 +497,8 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
         console.log(`[${requestId}] Fast-path success: ${Date.now() - startTime}ms via Pollinations`);
         const data = await safeResponseJson(response, null as any);
         if (apiKeyInfo && !isSystemRequest) {
-          const usageWeight = model.usageWeight || 1;
-          await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages, usageWeight);
+          waitUntil(trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages, usageWeight)
+          waitUntil(trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages, usageWeight));
         }
         const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'chat');
         const dailyLimitInfo = await getDailyLimitInfo(effectiveKey, dailyLimit, apiKeyInfo?.id);
@@ -809,7 +810,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   if (apiKeyInfo && !isSystemRequest) {
     const usageWeight = getModelUsageWeight(modelId);
     console.log(`[${requestId}] Tracking usage with weight: ${usageWeight} for model: ${modelId}`);
-    await trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages, usageWeight);
+    waitUntil(trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages, usageWeight));
   }
 
   const providerContentType = providerResponse.headers.get('content-type') || '';
