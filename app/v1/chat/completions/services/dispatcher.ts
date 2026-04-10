@@ -497,7 +497,6 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
         console.log(`[${requestId}] Fast-path success: ${Date.now() - startTime}ms via Pollinations`);
         const data = await safeResponseJson(response, null as any);
         if (apiKeyInfo && !isSystemRequest) {
-          waitUntil(trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages, usageWeight)
           waitUntil(trackUsage(apiKeyInfo.id, apiKeyInfo.userId, modelId, 'chat', body.messages, usageWeight));
         }
         const rateLimitInfo = await getRateLimitInfo(effectiveKey, limit, 'chat');
