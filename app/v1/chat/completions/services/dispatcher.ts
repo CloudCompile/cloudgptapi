@@ -789,11 +789,10 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
           // user's own auth is broken and include should_retry:false, which stops clients
           // from ever retrying a transient provider outage.
           const upstreamCode = errorJson.error?.code;
-          const upstreamMsg: string = errorJson.error?.message || '';
+          const upstreamMsg = errorJson.error?.message || '';
           const isUpstreamProviderAuthError =
             upstreamCode === 'provider_auth_error' ||
-            upstreamMsg.toLowerCase().includes('authentication error with upstream') ||
-            upstreamMsg.toLowerCase().includes('upstream provider');
+            upstreamMsg.toLowerCase().includes('authentication error with upstream');
 
           if (isUpstreamProviderAuthError) {
             return NextResponse.json(
