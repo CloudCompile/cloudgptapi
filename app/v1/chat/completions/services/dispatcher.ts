@@ -771,8 +771,12 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
         errorCode = 'provider_server_error';
         shouldRetry = true;
       } else if (providerResponse.status === 401 || providerResponse.status === 403) {
-        errorMessage = `Authentication error with upstream provider (${model.provider}). Our team has been notified.`;
-        errorCode = 'provider_auth_error';
+        // Upstream provider rejected our (server-side) credentials — this is NOT the user's auth problem.
+        // Map to 503 so clients don't permanently stop retrying on a transient outage.
+        mappedStatus = 503;
+        errorMessage = 'The upstream provider is temporarily unavailable. Please try a different model or try again later.';
+        errorCode = 'provider_unavailable';
+        shouldRetry = true;
       } else if (providerResponse.status === 400) {
         errorMessage = sanitizedMessage || `Invalid request format for ${model.provider}. Please check your message format and try again.`;
         errorCode = 'invalid_request';
@@ -781,6 +785,35 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       try {
         const errorJson = JSON.parse(errorText);
         if (errorJson.error) {
+          // Never pass through raw upstream errors for auth failures — they look like the
+          // user's own auth is broken and include should_retry:false, which stops clients
+          // from ever retrying a transient provider outage.
+          const upstreamCode = errorJson.error?.code;
+          const upstreamMsg = errorJson.error?.message || '';
+          const isUpstreamProviderAuthError =
+            upstreamCode === 'provider_auth_error' ||
+            upstreamMsg.toLowerCase().includes('authentication error with upstream');
+
+          if (isUpstreamProviderAuthError) {
+            return NextResponse.json(
+              {
+                error: {
+                  message: 'The upstream provider is temporarily unavailable. Please try a different model or try again later.',
+                  type: 'api_error',
+                  param: null,
+                  code: 'provider_unavailable',
+                  request_id: requestId,
+                  original_status: providerResponse.status,
+                  should_retry: true,
+                },
+              },
+              {
+                status: 503,
+                headers: { ...getCorsHeaders(), 'Retry-After': '30' },
+              }
+            );
+          }
+
           return NextResponse.json(errorJson, { 
             status: mappedStatus, 
             headers: {
