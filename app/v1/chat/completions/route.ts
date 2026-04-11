@@ -16,7 +16,7 @@ import {
 import { withErrorHandler } from '@/lib/api-wrapper';
 import { ChatCompletionRequestSchema } from '@/lib/schema';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max for long reasoning or slow providers
 
 // Handle OPTIONS for CORS
