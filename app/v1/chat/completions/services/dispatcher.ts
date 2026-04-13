@@ -112,7 +112,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     'gpt-oss', 'minimax', 'glm-5', 'deepseek-v3', 'deepseek-v3.2', 'deepseek-v3.1',
     'kimi-k2', 'kimi-k2.5', 'qwen', 'qwen-3.5', 'mistral', 'step-3.5', 'grok-4.2',
     'llama-4', 'gemini-3.1-lite', 'nemotron', 'llama-3.1', 'minimax-m2.7', 'gpt-5.4-mini',
-    'glm-5.1', 'mimo-omni',
+    'glm-5.1', 'mimo-omni', 'gemma-4', 'gpt-5.4-mini', 'qwen-3.6',
     // Aqua premium tier
     'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
     'gemini-2.5-pro', 'gemini-3.1-pro', 'sonnet-4.5', 'sonnet-4.6', 'opus-4.5', 'opus-4.6',
@@ -289,8 +289,10 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       );
     }
   } else if (model.provider === 'kivest') {
-    providerUrl = `${PROVIDER_URLS.kivest}/chat/completions`;
-    providerApiKey = getKivestApiKey();
+    // TEMPORARILY DISABLED: Kivest is down, route to Aqua instead
+    console.log(`[${requestId}] Kivest disabled, routing ${modelId} to Aqua instead`);
+    providerUrl = `${PROVIDER_URLS.aqua}/chat/completions`;
+    providerApiKey = process.env.AQUA_API_KEY;
     if (!providerApiKey) {
       console.warn(`[${requestId}] Missing Shalom API key for model: ${modelId}`);
       return NextResponse.json(

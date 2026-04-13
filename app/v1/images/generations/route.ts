@@ -3,7 +3,7 @@ import { getCurrentUserId } from '@/lib/kinde-auth';
 import { extractApiKey, validateApiKey, trackUsage, checkRateLimit, getRateLimitInfo, checkDailyLimit, getDailyLimitInfo, ApiKey, applyPlanOverride, applyPeakHoursLimit, getDailyLimitForPlan } from '@/lib/api-keys';
 import { IMAGE_MODELS, PROVIDER_URLS, ImageModel, PREMIUM_MODELS } from '@/lib/providers';
 import { waitUntil } from '@vercel/functions';
-import { getCorsHeaders, getPollinationsApiKey, getPollinationsApiKeys, safeResponseJson, hasProAccess, hasUltraAccess } from '@/lib/utils';
+import { getCorsHeaders, getPollinationsApiKey, getPollinationsApiKeys, safeResponseJson, hasProAccess, hasUltraAccess, getAquaApiKey } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export const runtime = 'edge';
@@ -554,6 +554,66 @@ export async function POST(request: NextRequest) {
       } catch (e) {
         return NextResponse.json(
           { error: { message: 'Failed to connect to GitHub Models API', type: 'api_error' } },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
+    } else if (['flux-2', 'zimage', 'qwen-image', 'nanobanana', 'imagen4', 'grok-image', 'midjourney'].includes(modelId)) {
+      // Aqua image models
+      const aquaApiKey = getAquaApiKey();
+      if (!aquaApiKey) {
+        return NextResponse.json(
+          { error: { message: 'Aqua API key is not configured for image generation.', type: 'config_error', param: null, code: 'missing_api_key' } },
+          { status: 500, headers: getCorsHeaders() }
+        );
+      }
+
+      try {
+        const aquaBody: any = {
+          model: modelId,
+          prompt: body.prompt,
+          n: body.n || 1,
+        };
+        if (body.size) aquaBody.size = body.size;
+        if (body.response_format) aquaBody.response_format = body.response_format;
+        if (body.quality) aquaBody.quality = body.quality;
+        if (body.style) aquaBody.style = body.style;
+
+        const response = await fetch(`${PROVIDER_URLS.aqua}/images/generations`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${aquaApiKey}`,
+          },
+          body: JSON.stringify(aquaBody),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => 'Unknown error');
+          return NextResponse.json(
+            { error: { message: `Aqua image API error: ${response.status} - ${errorText.substring(0, 300)}`, type: 'api_error', code: 'upstream_error' } },
+            { status: response.status, headers: getCorsHeaders() }
+          );
+        }
+
+        const data = await response.json();
+
+        if (body.response_format === 'b64_json') {
+          return NextResponse.json(data, { headers: getCorsHeaders() });
+        }
+
+        imageUrl = data.data?.[0]?.url;
+        if (!imageUrl && data.data?.[0]?.b64_json) {
+          imageUrl = `data:image/png;base64,${data.data[0].b64_json}`;
+        }
+        if (!imageUrl) {
+          return NextResponse.json(
+            { error: { message: 'Aqua returned no image URL', type: 'api_error' } },
+            { status: 500, headers: getCorsHeaders() }
+          );
+        }
+      } catch (e) {
+        return NextResponse.json(
+          { error: { message: 'Failed to connect to Aqua image API', type: 'api_error' } },
           { status: 500, headers: getCorsHeaders() }
         );
       }

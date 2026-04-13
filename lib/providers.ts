@@ -102,11 +102,17 @@ const KIVEST_CHAT_MODELS: ChatModel[] = [
   { id: 'glm-4.7', name: 'GLM 4.7', provider: 'zhipu', description: 'Zhipu GLM 4.7', usageWeight: 2 },
   { id: 'glm-5', name: 'GLM 5', provider: 'zhipu', description: 'Zhipu GLM 5', usageWeight: 4 },
   { id: 'glm-5.1', name: 'GLM 5.1', provider: 'zhipu', description: 'Zhipu GLM 5.1', usageWeight: 9 },
-  { id: 'nova', name: 'Nova', provider: 'minimax', description: 'MiniMax Nova', usageWeight: 2 },
+  { id: 'nova', name: 'Amazon Nova Fast', provider: 'amazon', description: 'Amazon Nova Fast', usageWeight: 2 },
   // ByteDance (via Kivest) - Pro tier
   { id: 'seed-oss-36b-instruct', name: 'Seed OSS 36B Instruct', provider: 'bytedance', description: 'ByteDance Seed OSS 36B Instruct', usageWeight: 2 },
   // Xiaomi (via Kivest) - Pro tier
   { id: 'mimo-omni', name: 'Mimo V2 Omni', provider: 'xiaomi', description: 'Xiaomi Mimo V2 Omni', usageWeight: 3 },
+  // Google (via Aqua) - Free tier
+  { id: 'gemma-4', name: 'Gemma 4 31B', provider: 'google', description: 'Google Gemma 4 31B', usageWeight: 2 },
+  // OpenAI (via Aqua) - Free tier
+  { id: 'gpt-5.4-mini', name: 'GPT 5.4 Mini', provider: 'openai', description: 'OpenAI GPT 5.4 Mini', usageWeight: 2 },
+  // DeepSeek (via Aqua) - Free tier
+  { id: 'deepseek-v3', name: 'DeepSeek V3', provider: 'deepseek', description: 'DeepSeek V3', usageWeight: 2 },
   // Claude (via Aqua - provider field still anthropic for display)
   { id: 'claude-sonnet-4.6', name: 'Claude Sonnet 4.6', provider: 'anthropic', description: 'Anthropic Claude Sonnet 4.6', usageWeight: 10 },
   { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', provider: 'anthropic', description: 'Anthropic Claude Opus 4.6', usageWeight: 25 },
@@ -415,7 +421,7 @@ export const PREMIUM_MODELS = new Set([
   // Ultra models (also in premium - these must be here to show correctly on /models page)
   'claude-opus-4-6', 'claude-opus-4-5',
   // Image models (Pro/Ultra - all non-flux models)
-  'flux-2', 'zimage', 'qwen-image', 'nanobanana', 'imagen4', 'grok-image',
+  'flux-2', 'zimage', 'qwen-image', 'nanobanana', 'imagen4', 'grok-image', 'midjourney',
   'dall-e-3', 'gpt-image-1', 'gpt-image-1.5',
   // Video models (Pro/Ultra)
   'pix2pix-video', 'svd', 'cogvideox-5b',
@@ -498,6 +504,7 @@ export const IMAGE_MODELS: ImageModel[] = [
   { id: 'nanobanana', name: 'NanoBanana', provider: 'google', description: 'Google NanoBanana Image Generation', usageWeight: 4 },
   { id: 'imagen4', name: 'Imagen 4', provider: 'google', description: 'Google Imagen 4', usageWeight: 5 },
   { id: 'grok-image', name: 'Grok Imagine 1.0', provider: 'xai', description: 'xAI Grok Imagine', usageWeight: 4 },
+  { id: 'midjourney', name: 'Midjourney 7', provider: 'openai', description: 'Midjourney 7 Image Generation', usageWeight: 5 },
   // OpenAI (Ultra) - via Aqua/Polliuations if available
   { id: 'dall-e-3', name: 'DALL-E 3', provider: 'openai', description: 'OpenAI DALL-E 3 Image Generation', usageWeight: 20 },
   { id: 'gpt-image-1', name: 'GPT Image 1', provider: 'openai', description: 'OpenAI GPT Image 1', usageWeight: 25 },
