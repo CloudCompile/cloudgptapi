@@ -73,7 +73,8 @@ export async function GET(request: NextRequest) {
       if (id.includes('phi') || id.includes('microsoft')) return 'Microsoft';
       if (id.includes('mimo') || id.includes('xiaomi')) return 'Xiaomi';
       if (id.includes('pollinations')) return 'Pollinations';
-      if (id.includes('bluesminds') || id.includes('aqua')) return 'Bluesminds';
+      if (id.includes('bluesminds') || id.includes('bluesmind') || id.includes('shalom')) return 'Bluesmind';
+      if (id.includes('aqua')) return 'Aqua';
       if (id.includes('litrouter')) return 'LitRouter';
       if (id.includes('liz')) return 'Liz';
       if (id.includes('openrouter')) return 'OpenRouter';
