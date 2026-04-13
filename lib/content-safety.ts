@@ -48,7 +48,7 @@ const SEXUAL_TERMS = /\b(sex(?:ual(?:ly)?)?|porn(?:ography|ographic)?|nude|naked
  * Deliberately conservative to minimise false positives – only flag
  * requests that are unambiguously asking for explicit sexual content.
  */
-const NSFW_EXPLICIT = /\b(porn(?:ography|ographic)?|hentai|xxx\b|explicit\s+sex(?:ual)?\s+(?:content|story|scene|roleplay)|erotic\s+(?:story|fiction|roleplay|rp)|write\s+(?:a\s+)?(?:erotic|porn|sexual|lewd|nsfw)\s+(?:story|fiction|scene)|generate\s+(?:erotic|porn|sexual)\s+(?:content|image|picture))\b/i;
+const NSFW_EXPLICIT = /\b(porn(?:ography|ographic)?|hentai|explicit\s+sex(?:ual)?\s+(?:content|story|scene|roleplay)|erotic\s+(?:story|fiction|roleplay|rp)|write\s+(?:a\s+)?(?:erotic|porn|sexual|lewd|nsfw)\s+(?:story|fiction|scene)|generate\s+(?:erotic|porn|sexual)\s+(?:content|image|picture))\b/i;
 
 // ---------------------------------------------------------------------------
 // Helpers

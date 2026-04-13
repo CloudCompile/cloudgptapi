@@ -173,7 +173,8 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     'gemma-3-12b', 'gemma-2-9b', 'gemma-2b',
   ]);
 
-  // Ultra models that can fallback to Kivest when both Aqua & Bluesminds fail
+  // Ultra models that can fallback to Shalom (Kivest) when both Aqua AND Bluesmind fail.
+  // Shalom is the last-resort provider for the highest-tier models to maximise availability.
   const ultraModelsWithKivest = new Set([
     'gpt-5.4', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.2-codex', 'gpt-5.2', 'gpt-5.1',
     'claude-sonnet-4.6', 'claude-sonnet-4-5', 'claude-opus-4-6', 'claude-opus-4-5',
@@ -193,7 +194,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       return NextResponse.json(
         {
           error: {
-            message: 'This model does not support explicit adult content. Please rephrase your request or choose a different model.',
+            message: 'This model does not support explicit adult content. Please rephrase your request or use a model that supports adult content (see /v1/models for the full list).',
             type: 'policy_violation',
             param: 'messages',
             code: 'nsfw_blocked',
