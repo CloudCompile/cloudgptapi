@@ -173,11 +173,12 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   ]);
 
   // Ultra models that can fallback to Kivest when both Aqua & Bluesminds fail
-  const ultraModelsWithKivest = new Set([
-    'gpt-5.4', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.2-codex', 'gpt-5.2', 'gpt-5.1',
-    'claude-sonnet-4.6', 'claude-sonnet-4-5', 'claude-opus-4-6', 'claude-opus-4-5',
-    'gemini-2.5-pro', 'gemini-3.1-pro',
-    'glm-5.1', 'mimo-pro'
+  // TEMPORARILY DISABLED: Kivest is down, disable fallback until stable
+  const ultraModelsWithKivest = new Set<string>([
+    // 'gpt-5.4', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.2-codex', 'gpt-5.2', 'gpt-5.1',
+    // 'claude-sonnet-4.6', 'claude-sonnet-4-5', 'claude-opus-4-6', 'claude-opus-4-5',
+    // 'gemini-2.5-pro', 'gemini-3.1-pro',
+    // 'glm-5.1', 'mimo-pro'
   ]);
 
   // Determine routing: Aqua primary, Bluesminds fallback for Premium/Ultra
@@ -269,12 +270,14 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       );
     }
   } else if (model.provider === 'kivest') {
-    providerUrl = `${PROVIDER_URLS.kivest}/chat/completions`;
-    providerApiKey = getKivestApiKey();
+    // TEMPORARILY DISABLED: Kivest is down, route to Aqua instead
+    console.log(`[${requestId}] Kivest disabled, routing ${modelId} to Aqua instead`);
+    providerUrl = `${PROVIDER_URLS.aqua}/chat/completions`;
+    providerApiKey = process.env.AQUA_API_KEY;
     if (!providerApiKey) {
-      console.warn(`[${requestId}] Missing Kivest API key for model: ${modelId}`);
+      console.warn(`[${requestId}] Missing Aqua API key for Kivest-redirect model: ${modelId}`);
       return NextResponse.json(
-        { error: { message: 'Kivest API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { error: { message: 'Aqua API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
         { status: 500, headers: getCorsHeaders() }
       );
     }
