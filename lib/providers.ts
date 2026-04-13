@@ -477,8 +477,10 @@ export const ADMIN_ONLY_MODELS = new Set([
 // Free models (no subscription required)
 export const FREE_MODELS = new Set([
   // Free models
-  'deepseek-chat', 'deepseek-v3.2', 'deepseek-v3.1', 'deepseek-reasoner',
+  'deepseek-chat', 'deepseek-v3.2', 'deepseek-v3.1', 'deepseek-v3', 'deepseek-reasoner',
   'glm-4.7', 'mimo-omni',
+  // Aqua free-tier models
+  'gemma-4', 'gpt-5.4-mini',
   ...OPENROUTER_CHAT_MODELS
     .map(model => model.id)
     .filter(id => id.endsWith(':free')),
