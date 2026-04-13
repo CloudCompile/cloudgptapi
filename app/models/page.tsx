@@ -89,9 +89,9 @@ export default function ModelsPage() {
   // Collapsible filter sections
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['providers']));
   const [selectedProviders, setSelectedProviders] = useState<Set<string>>(new Set());
-  const [selectedTiers, setSelectedTiers] = useState<Set<string>>(new Set(['free', 'premium', 'ultra']));
+  const [selectedTiers, setSelectedTiers] = useState<Set<string>>(new Set(['free', 'premium', 'ultra', 'admin']));
 
-  const isAllTiersSelected = selectedTiers.size === 3;
+  const isAllTiersSelected = selectedTiers.size === 4;
 
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -296,18 +296,17 @@ export default function ModelsPage() {
       const matchesType = modelTypeFilter === 'all' || model.type === modelTypeFilter;
        
       // Access level filter (Free/Pro/Ultra) - support multiple selections
-       let matchesTier = selectedTiers.size === 3; // All selected by default
-       
+       let matchesTier = selectedTiers.size === 4; // All selected by default
+
       const isModelFree = isFree;
-      const isModelPremium = !isModelFree && !ULTRA_MODELS.has(model.id);
-      const isModelUltra = ULTRA_MODELS.has(model.id);
+      const isModelPremium = !isModelFree && !ULTRA_MODELS.has(model.id) && !ADMIN_ONLY_MODELS.has(model.id);
+      const isModelUltra = ULTRA_MODELS.has(model.id) && !ADMIN_ONLY_MODELS.has(model.id);
       const isAdminOnly = ADMIN_ONLY_MODELS.has(model.id);
-      
-      if (isAdminOnly && !isAdmin) return false;
-      
+
       if (selectedTiers.has('free') && isModelFree) matchesTier = true;
       if (selectedTiers.has('premium') && isModelPremium) matchesTier = true;
       if (selectedTiers.has('ultra') && isModelUltra) matchesTier = true;
+      if (selectedTiers.has('admin') && isAdminOnly) matchesTier = true;
 
       const matchesProvider = selectedProviders.size === 0 || selectedProviders.has(model.provider.toLowerCase());
       
@@ -623,10 +622,10 @@ export default function ModelsPage() {
                   <div className="p-4 bg-white/50 dark:bg-slate-900/50">
                     <div className="flex flex-wrap gap-2">
                       <button
-                        onClick={() => setSelectedTiers(new Set(['free', 'premium', 'ultra']))}
+                        onClick={() => setSelectedTiers(new Set(['free', 'premium', 'ultra', 'admin']))}
                         className={cn(
                           "px-4 py-2 rounded-lg text-sm font-medium transition-all border flex items-center gap-2",
-                          selectedTiers.size === 3
+                          selectedTiers.size === 4
                             ? "bg-slate-500 border-slate-500 text-white"
                             : "bg-slate-100/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border-slate-200/50 dark:border-slate-700 hover:border-primary/50"
                         )}
@@ -636,12 +635,14 @@ export default function ModelsPage() {
                       {[
                         { value: 'free', label: 'Free', color: 'emerald' },
                         { value: 'premium', label: 'Pro', color: 'amber' },
-                        { value: 'ultra', label: 'Ultra', color: 'purple' }
+                        { value: 'ultra', label: 'Ultra', color: 'purple' },
+                        { value: 'admin', label: 'Admin', color: 'red' }
                       ].map(option => {
                         const isActive = !isAllTiersSelected && selectedTiers.has(option.value);
                         
                         const colorClasses = option.color === 'emerald' ? 'bg-emerald-500 border-emerald-500' :
                           option.color === 'amber' ? 'bg-amber-500 border-amber-500' :
+                          option.color === 'red' ? 'bg-red-500 border-red-500' :
                           'bg-purple-500 border-purple-500';
                         
                         return (
@@ -659,6 +660,7 @@ export default function ModelsPage() {
                               "w-2 h-2 rounded-full",
                               option.color === 'emerald' ? 'bg-emerald-400' :
                               option.color === 'amber' ? 'bg-amber-400' :
+                              option.color === 'red' ? 'bg-red-400' :
                               'bg-purple-400'
                             )} />
                             {option.label}
@@ -814,10 +816,10 @@ function ModelCard({ model, status, onClick, index, isAdmin }: { model: Filtered
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">Model Tier</span>
-              {isAdmin && isAdminOnly ? (
+              {isAdminOnly ? (
                 <div className="flex items-center gap-1 text-red-600 dark:text-red-400 font-black text-sm">
                   <Crown className="w-3 h-3" />
-                  <span>ADMIN</span>
+                  <span>ADMIN ONLY</span>
                 </div>
               ) : isFree ? (
                 <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-black text-sm">
@@ -937,8 +939,8 @@ function ModelCard({ model, status, onClick, index, isAdmin }: { model: Filtered
             <span className="text-[8px] font-black uppercase tracking-[0.15em] text-slate-400">{model.provider}</span>
             <span className="w-1 h-1 rounded-full bg-slate-200 dark:bg-slate-800" />
             <div className="flex items-center gap-1">
-              {isAdmin && isAdminOnly ? (
-                <span className="text-[8px] font-black uppercase tracking-[0.15em] text-red-500">Admin</span>
+              {isAdminOnly ? (
+                <span className="text-[8px] font-black uppercase tracking-[0.15em] text-red-500">Admin Only</span>
               ) : isFree ? (
                 <span className="text-[8px] font-black uppercase tracking-[0.15em] text-emerald-500">Free</span>
               ) : isUltra ? (
@@ -996,7 +998,9 @@ function ModelListItem({ model, status, onClick, index, isAdmin }: { model: Filt
             </span>
           </h3>
           <div className="flex items-center gap-2">
-            {isFree ? (
+            {isAdminOnly ? (
+              <span className="px-2 py-0.5 rounded-full bg-red-500/10 dark:bg-red-500/20 text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest border border-red-500/10 flex items-center gap-1"><Crown className="w-3 h-3" />Admin Only</span>
+            ) : isFree ? (
               <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest border border-emerald-500/10">Free</span>
             ) : isUltra ? (
               <span className="px-2 py-0.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20 text-[10px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest border border-purple-500/10">Ultra</span>
