@@ -32,7 +32,7 @@ import {
   safeResponseJson
 } from '@/lib/utils';
 import { rememberInteraction } from '@/lib/memory';
-import { scanForNSFW } from '@/lib/content-safety';
+// import { scanForNSFW } from '@/lib/content-safety'; // TEMPORARILY DISABLED
 
 function getSecureRandomIndex(maxExclusive: number): number {
   if (maxExclusive <= 1) return 0;
@@ -187,23 +187,23 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     // Primary: Aqua
     providerUrl = `${PROVIDER_URLS.aqua}/chat/completions`;
 
-    // Aqua enforces NSFW content policies — block explicit adult-content requests
-    const nsfwResult = scanForNSFW(processedMessages);
-    if (nsfwResult.flagged) {
-      console.warn(`[${requestId}] NSFW content blocked before routing to Aqua for model: ${modelId}`);
-      return NextResponse.json(
-        {
-          error: {
-            message: 'This model does not support explicit adult content. Please rephrase your request or use a model that supports adult content (see /v1/models for the full list).',
-            type: 'policy_violation',
-            param: 'messages',
-            code: 'nsfw_blocked',
-            request_id: requestId,
-          }
-        },
-        { status: 400, headers: getCorsHeaders() }
-      );
-    }
+    // TEMPORARILY DISABLED: NSFW scanning causing false positives
+    // const nsfwResult = scanForNSFW(processedMessages);
+    // if (nsfwResult.flagged) {
+    //   console.warn(`[${requestId}] NSFW content blocked before routing to Aqua for model: ${modelId}`);
+    //   return NextResponse.json(
+    //     {
+    //       error: {
+    //         message: 'This model does not support explicit adult content. Please rephrase your request or use a model that supports adult content (see /v1/models for the full list).',
+    //         type: 'policy_violation',
+    //         param: 'messages',
+    //         code: 'nsfw_blocked',
+    //         request_id: requestId,
+    //       }
+    //     },
+    //     { status: 400, headers: getCorsHeaders() }
+    //   );
+    // }
 
     // Ultra and Admin-only models get AQUA_API_KEY_2, free/non-ultra models get AQUA_API_KEY_1 only
     if (ULTRA_MODELS.has(modelId) || ADMIN_ONLY_MODELS.has(modelId)) {
