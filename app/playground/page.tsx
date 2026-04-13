@@ -36,7 +36,7 @@ const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
   pollinations: 'Pollinations',
   openrouter: 'OpenRouter',
   stablehorde: 'Stable Horde',
-  kivest: '',  // Temporarily disabled
+  kivest: '',  // Exposed as Shalom; hidden from public UI
   liz: 'Liz',
   openai: 'OpenAI',
   anthropic: 'Anthropic',
@@ -46,7 +46,8 @@ const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
   xai: 'xAI',
   zhipu: 'Zhipu',
   minimax: 'MiniMax',
-  bluesminds: 'Bluesminds',
+  bluesminds: 'Bluesmind',
+  aqua: 'Aqua',
   mino: 'Mino',
 };
 

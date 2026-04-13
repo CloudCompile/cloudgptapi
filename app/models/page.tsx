@@ -168,7 +168,7 @@ export default function ModelsPage() {
     all: 'All',
     pollinations: 'Pollinations',
     openrouter: 'OpenRouter',
-    kivest: '',  // Temporarily disabled
+    kivest: '',  // Exposed as Shalom; hidden from public filter list
     liz: 'Liz',
     openai: 'OpenAI',
     anthropic: 'Anthropic',
@@ -185,7 +185,8 @@ export default function ModelsPage() {
     bytedance: 'ByteDance',
     xiaomi: 'Xiaomi',
     amazon: 'Amazon',
-    bluesminds: 'Bluesminds',
+    bluesminds: 'Bluesmind',
+    aqua: 'Aqua',
     mino: 'Mino',
     github: 'GitHub',
     stablehorde: 'Stable Horde',

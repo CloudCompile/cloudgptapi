@@ -32,6 +32,7 @@ import {
   safeResponseJson
 } from '@/lib/utils';
 import { rememberInteraction } from '@/lib/memory';
+import { scanForNSFW } from '@/lib/content-safety';
 
 function getSecureRandomIndex(maxExclusive: number): number {
   if (maxExclusive <= 1) return 0;
@@ -184,7 +185,25 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   if (aquaModels.has(modelId)) {
     // Primary: Aqua
     providerUrl = `${PROVIDER_URLS.aqua}/chat/completions`;
-    
+
+    // Aqua enforces NSFW content policies — block explicit adult-content requests
+    const nsfwResult = scanForNSFW(processedMessages);
+    if (nsfwResult.flagged) {
+      console.warn(`[${requestId}] NSFW content blocked before routing to Aqua for model: ${modelId}`);
+      return NextResponse.json(
+        {
+          error: {
+            message: 'This model does not support explicit adult content. Please rephrase your request or choose a different model.',
+            type: 'policy_violation',
+            param: 'messages',
+            code: 'nsfw_blocked',
+            request_id: requestId,
+          }
+        },
+        { status: 400, headers: getCorsHeaders() }
+      );
+    }
+
     // Ultra and Admin-only models get AQUA_API_KEY_2, free/non-ultra models get AQUA_API_KEY_1 only
     if (ULTRA_MODELS.has(modelId) || ADMIN_ONLY_MODELS.has(modelId)) {
       providerApiKey = process.env.AQUA_API_KEY_2;
@@ -272,24 +291,24 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     providerUrl = `${PROVIDER_URLS.kivest}/chat/completions`;
     providerApiKey = getKivestApiKey();
     if (!providerApiKey) {
-      console.warn(`[${requestId}] Missing Kivest API key for model: ${modelId}`);
+      console.warn(`[${requestId}] Missing Shalom API key for model: ${modelId}`);
       return NextResponse.json(
-        { error: { message: 'Kivest API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { error: { message: 'Shalom API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
         { status: 500, headers: getCorsHeaders() }
       );
     }
   } else if (model.provider === 'zhipu') {
-    // GLM models route via Bluesminds
+    // GLM models route via Bluesmind
     providerUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
     providerApiKey = getBluesmindsApiKey();
     if (!providerApiKey) {
-      console.warn(`[${requestId}] Missing Bluesminds API key for model: ${modelId}`);
+      console.warn(`[${requestId}] Missing Bluesmind API key for model: ${modelId}`);
       return NextResponse.json(
-        { error: { message: 'Bluesminds API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
+        { error: { message: 'Bluesmind API key is not configured.', type: 'config_error', param: null, code: 'missing_api_key', request_id: requestId } },
         { status: 500, headers: getCorsHeaders() }
       );
     }
-    console.log(`[${requestId}] Zhipu: routing ${modelId} to Bluesminds`);
+    console.log(`[${requestId}] Zhipu: routing ${modelId} to Bluesmind`);
   } else if (model.provider === 'mino') {
     // Mino has multiple endpoints based on model type
     const minoModelId = getMinoModelId(modelId);
@@ -617,7 +636,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     const canFallbackToKivest = (isAquaFailed || isBluesmindsFailed) && ultraModelsWithKivest.has(modelId);
     
     if (canFallbackToKivest && (providerResponse.status === 429 || providerResponse.status === 401 || providerResponse.status === 403 || providerResponse.status >= 500)) {
-      console.log(`[${requestId}] Both Aqua and Bluesminds failed for ${modelId}, falling back to Kivest...`);
+      console.log(`[${requestId}] Both Aqua and Bluesmind failed for ${modelId}, falling back to Shalom...`);
       
       const kivestUrl = `${PROVIDER_URLS.kivest}/chat/completions`;
       const kivestApiKey = getKivestApiKey();
@@ -640,14 +659,14 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
           });
 
           if (fallbackResponse.ok) {
-            console.log(`[${requestId}] Kivest fallback succeeded for ${modelId}`);
+            console.log(`[${requestId}] Shalom fallback succeeded for ${modelId}`);
             providerResponse = fallbackResponse;
           } else {
             const fallbackErrorText = await fallbackResponse.text();
-            console.error(`[${requestId}] Kivest fallback also failed:`, fallbackErrorText.substring(0, 300));
+            console.error(`[${requestId}] Shalom fallback also failed:`, fallbackErrorText.substring(0, 300));
           }
         } catch (fallbackError: any) {
-          console.error(`[${requestId}] Kivest fallback fetch error:`, fallbackError);
+          console.error(`[${requestId}] Shalom fallback fetch error:`, fallbackError);
         }
       }
     }
@@ -694,11 +713,11 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
       }
     }
 
-    // Fallback from Aqua to Bluesminds when Aqua fails (for Premium & Ultra models)
+    // Fallback from Aqua to Bluesmind when Aqua fails (for Premium & Ultra models)
     const canFallbackToBluesminds = aquaModels.has(modelId) && bluesmindsFallbackModels.has(modelId) && providerUrl.includes('aquadevs');
     
     if (canFallbackToBluesminds && !providerResponse.ok) {
-      console.log(`[${requestId}] Aqua failed for ${modelId}, falling back to Bluesminds...`);
+      console.log(`[${requestId}] Aqua failed for ${modelId}, falling back to Bluesmind...`);
       
       const bluesmindsUrl = `${PROVIDER_URLS.shalom}/chat/completions`;
       const bluesmindsApiKey = getRandomBluesmindsApiKey();
@@ -722,14 +741,14 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
           });
 
           if (fallbackResponse.ok) {
-            console.log(`[${requestId}] Bluesminds fallback succeeded for ${modelId}`);
+            console.log(`[${requestId}] Bluesmind fallback succeeded for ${modelId}`);
             providerResponse = fallbackResponse;
           } else {
             const fallbackErrorText = await fallbackResponse.text();
-            console.error(`[${requestId}] Bluesminds fallback also failed:`, fallbackErrorText.substring(0, 300));
+            console.error(`[${requestId}] Bluesmind fallback also failed:`, fallbackErrorText.substring(0, 300));
           }
         } catch (fallbackError: any) {
-          console.error(`[${requestId}] Bluesminds fallback fetch error:`, fallbackError);
+          console.error(`[${requestId}] Bluesmind fallback fetch error:`, fallbackError);
         }
       }
     }

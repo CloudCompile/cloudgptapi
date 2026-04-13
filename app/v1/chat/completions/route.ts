@@ -15,6 +15,7 @@ import {
 
 import { withErrorHandler } from '@/lib/api-wrapper';
 import { ChatCompletionRequestSchema } from '@/lib/schema';
+import { scanForCSAM } from '@/lib/content-safety';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max for long reasoning or slow providers
@@ -176,6 +177,24 @@ export const POST = withErrorHandler(async function POST(request: NextRequest) {
           status: 400,
           headers: getCorsHeaders()
         }
+      );
+    }
+
+    // CSAM scan — hard block before any processing or provider dispatch
+    const csamResult = scanForCSAM(body.messages);
+    if (csamResult.flagged) {
+      console.error(`[${requestId}] CSAM content detected. Key prefix: ${effectiveKey.substring(0, 10)}...`);
+      return NextResponse.json(
+        {
+          error: {
+            message: 'Your request has been blocked. Content involving sexual material related to minors is strictly prohibited and violates our terms of service.',
+            type: 'policy_violation',
+            param: 'messages',
+            code: 'csam_detected',
+            request_id: requestId,
+          }
+        },
+        { status: 400, headers: getCorsHeaders() }
       );
     }
 
