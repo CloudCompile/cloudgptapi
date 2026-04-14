@@ -251,8 +251,8 @@ export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
 // Used when routing to Bluesminds as primary provider
 export const BLUESMINDS_MODEL_MAPPING: Record<string, string> = {
   // Claude models
-  'claude-opus-4-6': 'claude-opus-4-20250514',
-  'claude-opus-4.5': 'claude-opus-4-20250514',
+  'claude-opus-4-6': 'claude-opus-4-6',
+  'claude-opus-4.5': 'claude-opus-4-6',
   'claude-sonnet-4-6': 'claude-sonnet-4-20250514',
   'claude-sonnet-4.5': 'claude-sonnet-4-20250514',
   'claude-sonnet-4.5-20250929': 'claude-sonnet-4-20250514',
@@ -268,11 +268,11 @@ export const BLUESMINDS_MODEL_MAPPING: Record<string, string> = {
   'gpt-3.5-turbo': 'gpt-3.5-turbo-0613',
   'gpt-oss-120b': 'openai/gpt-oss-120b',
   // Google models
-  'gemini-2.5-flash': 'gemini-3-flash-preview',
-  'gemini-2.5-pro': 'gemini-3.1-pro-preview',
-  'gemini-3-flash-preview': 'gemini-3-flash-preview',
-  'gemini-3-pro-preview': 'gemini-3.1-pro-preview',
-  'gemini-3.1-pro': 'gemini-3.1-pro-preview',
+  'gemini-2.5-flash': 'gemini-3-flash',
+  'gemini-2.5-pro': 'gemini-3.1-pro',
+  'gemini-3-flash-preview': 'gemini-3-flash',
+  'gemini-3-pro-preview': 'gemini-3.1-pro',
+  'gemini-3.1-pro': 'gemini-3.1-pro',
   'gemma-3-12b': 'google/gemma-3-12b-it',
   // DeepSeek models
   'deepseek-v3.2': 'deepseek-ai/deepseek-v3.2',
