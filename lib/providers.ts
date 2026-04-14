@@ -105,8 +105,8 @@ const KIVEST_CHAT_MODELS: ChatModel[] = [
   { id: 'nova', name: 'Amazon Nova Fast', provider: 'amazon', description: 'Amazon Nova Fast', usageWeight: 2 },
   // ByteDance (via Kivest) - Pro tier
   { id: 'seed-oss-36b-instruct', name: 'Seed OSS 36B Instruct', provider: 'bytedance', description: 'ByteDance Seed OSS 36B Instruct', usageWeight: 2 },
-  // Xiaomi (via Kivest) - Pro tier
-  { id: 'mimo-omni', name: 'Mimo V2 Omni', provider: 'xiaomi', description: 'Xiaomi Mimo V2 Omni', usageWeight: 3 },
+  // Xiaomi (via OpenRouter) - Free tier
+  { id: 'mimo-omni', name: 'Mimo V2 Omni', provider: 'openrouter', description: 'Xiaomi Mimo V2 Omni', usageWeight: 3 },
   // Google (via Aqua) - Free tier
   { id: 'gemma-4', name: 'Gemma 4 31B', provider: 'google', description: 'Google Gemma 4 31B', usageWeight: 2 },
   // OpenAI (via Aqua) - Free tier

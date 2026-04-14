@@ -240,11 +240,12 @@ export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
   'minimax': 'minimax-m2.5',
   'deepseek': 'deepseek-v3.2',
   'grok': 'grok',
-  'qwen3.6-plus': 'qwen-3.6',
 
   // OpenRouter specific mappings if needed
   'openai/gpt-4o': 'gpt-4o',
   'anthropic/claude-3.5-sonnet': 'claude-3-5-sonnet',
+  // Xiaomi Mimo via OpenRouter
+  'mimo-omni': 'xiaomi/mimo-v2-flash:free',
 };
 
 // Bluesminds model mapping (Vetra ID -> Bluesminds ID)

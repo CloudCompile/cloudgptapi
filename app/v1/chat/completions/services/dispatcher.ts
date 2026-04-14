@@ -112,7 +112,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     'gpt-oss', 'minimax', 'glm-5', 'deepseek-v3', 'deepseek-v3.2', 'deepseek-v3.1',
     'kimi-k2', 'kimi-k2.5', 'qwen', 'qwen-3.5', 'mistral', 'step-3.5', 'grok-4.2',
     'llama-4', 'gemini-3.1-lite', 'nemotron', 'llama-3.1', 'minimax-m2.7',
-    'glm-5.1', 'mimo-omni', 'gemma-4', 'gpt-5.4-mini', 'qwen3.6-plus',
+    'glm-5.1', 'gemma-4', 'gpt-5.4-mini',
     // Aqua premium tier
     'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
     'gemini-2.5-pro', 'gemini-3.1-pro', 'sonnet-4.5', 'sonnet-4.6', 'opus-4.5', 'opus-4.6',
