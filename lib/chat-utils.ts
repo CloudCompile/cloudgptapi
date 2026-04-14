@@ -261,10 +261,10 @@ export const BLUESMINDS_MODEL_MAPPING: Record<string, string> = {
   // OpenAI models
   'gpt-4o': 'gpt-4o',
   'gpt-4o-mini': 'gpt-4o-mini',
-  'gpt-5': 'GPT-5',
-  'gpt-5.1': 'GPT-5',
-  'gpt-5.2': 'GPT-5',
-  'gpt-5.4': 'GPT-5',
+  'gpt-5': 'gpt-5',
+  'gpt-5.1': 'gpt-5',
+  'gpt-5.2': 'gpt-5.2',
+  'gpt-5.4': 'gpt-5.4',
   'gpt-3.5-turbo': 'gpt-3.5-turbo-0613',
   'gpt-oss-120b': 'openai/gpt-oss-120b',
   // Google models
@@ -302,7 +302,8 @@ export const BLUESMINDS_MODEL_MAPPING: Record<string, string> = {
   'minimax-m2.7': 'MiniMax-M2.7',
   // Kimi models
   'kimi-k2': 'moonshotai/kimi-k2-instruct',
-  'kimi-k2.5': 'Kimi-k2.5',
+  'kimi-k2.5': 'moonshotai/kimi-k2.5',
+  'kimi-k2-thinking': 'moonshotai/kimi-k2-thinking',
   // Zhipu models
   'glm-5': 'z-ai/glm5',
   'glm-4.6': 'glm-4.6',

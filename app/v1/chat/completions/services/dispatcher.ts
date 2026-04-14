@@ -120,7 +120,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     // xAI Grok models (existing)
     'grok-3', 'grok-4', 'grok-4.1', 'grok-4.2',
     // Kimi/Moonshot models (existing via Kivest)
-    'kimi-k2-instruct-0905',
+    'kimi-k2-instruct-0905', 'kimi-k2-thinking',
     // Claude models (via Aqua)
     'claude-opus-4-6', 'claude-opus-4.5', 'claude-sonnet-4-6', 'claude-sonnet-4.5', 'claude-sonnet-4.6',
     'claude-sonnet-4.5-20250929', 'claude-haiku-4.5', 'claude-3-haiku', 'claude-3-7-sonnet',
@@ -169,7 +169,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     'nemotron-3-nano', 'nemotron-4-mini', 'nemotron-4', 'nemotron-super',
     'step-3.5-flash',
     'grok-3', 'grok-4', 'grok-4.2',
-    'kimi-k2.5', 'kimi-k2-instruct-0905',
+    'kimi-k2.5', 'kimi-k2-instruct-0905', 'kimi-k2-thinking',
     'gemma-3-12b', 'gemma-2-9b', 'gemma-2b',
   ]);
 
