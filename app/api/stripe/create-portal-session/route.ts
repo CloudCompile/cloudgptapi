@@ -13,19 +13,12 @@ export async function POST(request: Request) {
   try {
     let userId = null;
     
-    // Try to get user from session
-    try {
-      userId = await getCurrentUserId();
-    } catch (authError) {
-      // Try from request body as fallback
-      const body = await request.json().catch(() => ({}));
-      userId = body.userId;
-    }
+    userId = await getCurrentUserId();
 
     if (!userId) {
       return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400, headers: getCorsHeaders() }
+        { error: 'Authentication required. Please log in and try again.' },
+        { status: 401, headers: getCorsHeaders() }
       );
     }
 
@@ -45,9 +38,9 @@ export async function POST(request: Request) {
     }
 
     if (!subscription?.stripe_customer_id) {
-      console.error('No customer ID for user:', userId);
+      console.error('No stripe_customer_id for user:', userId);
       return NextResponse.json(
-        { error: 'No active subscription found', hint: 'Please contact support' },
+        { error: 'No billing record found for your account. Please contact support.' },
         { status: 404, headers: getCorsHeaders() }
       );
     }

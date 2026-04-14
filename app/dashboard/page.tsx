@@ -62,6 +62,7 @@ export default function Dashboard() {
   const [userUsage, setUserUsage] = useState<any>(null);
   const [usageStats, setUsageStats] = useState<UsageStatsResponse | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
+  const [cancellingSubscription, setCancellingSubscription] = useState(false);
 
 
   useEffect(() => {
@@ -341,7 +342,9 @@ export default function Dashboard() {
               <div className="text-xl font-black text-white uppercase tracking-tight">{(userUsage?.plan || 'Free').replace('_', ' ')}</div>
               {userUsage?.plan && userUsage.plan !== 'free' ? (
                 <button
+                  disabled={cancellingSubscription}
                   onClick={async () => {
+                    setCancellingSubscription(true);
                     try {
                       const res = await fetch('/api/stripe/create-portal-session', {
                         method: 'POST',
@@ -349,17 +352,19 @@ export default function Dashboard() {
                       });
                       const data = await res.json();
                       if (data.url) {
-                        window.open(data.url, '_blank');
+                        window.location.href = data.url;
                       } else {
-                        console.error('No portal URL:', data.error);
+                        setError(data.error || 'Failed to open billing portal. Please contact support.');
+                        setCancellingSubscription(false);
                       }
                     } catch (err) {
-                      console.error('Failed to open billing portal:', err);
+                      setError('Failed to open billing portal. Please contact support.');
+                      setCancellingSubscription(false);
                     }
                   }}
-                  className="text-[10px] text-slate-400 font-bold mt-1 flex items-center gap-1 hover:text-white transition-colors"
+                  className="text-[10px] text-slate-400 font-bold mt-1 flex items-center gap-1 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Cancel Subscription
+                  {cancellingSubscription ? 'Loading...' : 'Cancel Subscription'}
                 </button>
               ) : (
                 <div className="text-[10px] text-primary font-bold mt-1 flex items-center gap-1">
