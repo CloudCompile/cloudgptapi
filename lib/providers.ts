@@ -370,8 +370,8 @@ const OPENAI_CHAT_MODELS: ChatModel[] = [
 ];
 
 // Deduplicate models by ID - last provider wins
-// Order: pollinations → kivest → openrouter → mino
-const ALL_CHAT_MODELS = [...POLLINATIONS_CHAT_MODELS, ...KIVEST_CHAT_MODELS, ...OPENROUTER_CHAT_MODELS, ...MINO_CHAT_MODELS, ...GROQ_CHAT_MODELS, ...CEREBRAS_CHAT_MODELS, ...GOOGLEAI_CHAT_MODELS, ...ELEVENLABS_MODELS];
+// Order: pollinations → kivest → openrouter → mino → bluesminds
+const ALL_CHAT_MODELS = [...POLLINATIONS_CHAT_MODELS, ...KIVEST_CHAT_MODELS, ...OPENROUTER_CHAT_MODELS, ...MINO_CHAT_MODELS, ...BLUESMINDS_CHAT_MODELS, ...GROQ_CHAT_MODELS, ...CEREBRAS_CHAT_MODELS, ...GOOGLEAI_CHAT_MODELS, ...ELEVENLABS_MODELS];
 
 // Keep last occurrence of each model ID (kivest overwrites pollinations)
 const seen = new Set<string>();
