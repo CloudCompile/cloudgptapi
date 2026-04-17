@@ -24,7 +24,7 @@ Complete API reference for Vetra - Unified AI API Gateway
 All API requests require authentication using an API key in the Authorization header:
 
 ```http
-Authorization: Bearer cgpt_your_api_key_here
+Authorization: Bearer vtai_your_api_key_here
 ```
 
 Get your API key from the [Dashboard](/dashboard) after signing up.
@@ -99,7 +99,7 @@ When a request hits Vetra, it follows this flow:
 To ensure data isolation (especially for the Memory API), we identify users in this order:
 1. **Explicit Header:** `x-user-id` provided by the API client.
 2. **API Key Owner:** The ID of the account that generated the API key.
-3. **Clerk Session:** The logged-in user (for website requests).
+3. **Kinde Session:** The logged-in user (for website requests).
 4. **Anonymous IP:** The public IP address of the requester (fallback).
 
 ### Data Storage & Third Parties
@@ -207,7 +207,7 @@ Generate text completions with long-term memory behavior through the configured 
 }
 ```
 
-*Note: You must provide an `x-user-id` header or be logged in via Clerk for memory to persist correctly for the specific user.*
+*Note: You must provide an `x-user-id` header or be logged in via Kinde for memory to persist correctly for the specific user.*
 
 ### Image Generation
 

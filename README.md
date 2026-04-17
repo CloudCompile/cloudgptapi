@@ -6,7 +6,7 @@ A unified API gateway for Pollinations-powered chat, image, and video generation
 
 - **🔗 Unified API** - Single API for chat, image, and video generation
 - **⚡ Edge Runtime** - Fast responses with Vercel Edge Functions
-- **🔐 Authentication** - Secure user accounts with Clerk
+- **🔐 Authentication** - Secure user accounts with Kinde
 - **🔑 API Keys** - Generate and manage API keys from the dashboard
 - **🌐 Pollinations-Native** - Pollinations chat, image, and video in one API
 - **📱 Responsive** - Works on desktop and mobile devices
@@ -138,7 +138,7 @@ GET /v1/models
 
 ### User Authentication
 
-The dashboard and API key management require user authentication via Clerk. Sign in to access:
+The dashboard and API key management require user authentication via Kinde. Sign in to access:
 - API key creation and management
 - Usage statistics (coming soon)
 - Account settings
@@ -149,7 +149,7 @@ Use your API key in the Authorization header:
 
 ```bash
 curl -X POST https://vetraai.vercel.app/v1/chat/completions \
-  -H "Authorization: Bearer cgpt_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Authorization: Bearer vtai_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" \
   -H "Content-Type: application/json" \
   -d '{"model": "openai", "messages": [{"role": "user", "content": "Hello!"}]}'
 ```
@@ -191,7 +191,7 @@ curl -X POST https://vetraai.vercel.app/v1/chat/completions \
 ## 🛠️ Configuration
 
 See [KEYS_SETUP.md](./KEYS_SETUP.md) for detailed instructions on setting up:
-- Clerk authentication
+- Kinde authentication
 - Pollinations API key
 - Other environment variables
 
@@ -214,7 +214,7 @@ vetra/
 │   │   └── models/route.ts    # List chat models
 │   ├── dashboard/
 │   │   └── page.tsx           # Dashboard page
-│   ├── layout.tsx             # Root layout with Clerk
+│   ├── layout.tsx             # Root layout with Kinde
 │   ├── page.tsx               # Home page
 │   └── globals.css            # Global styles
 ├── lib/
@@ -267,6 +267,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [Pollinations AI](https://pollinations.ai) - AI generation API
-- [Clerk](https://clerk.com) - Authentication
+- [Kinde](https://kinde.com) - Authentication
 - [Vercel](https://vercel.com) - Hosting platform
 - [Next.js](https://nextjs.org) - React framework

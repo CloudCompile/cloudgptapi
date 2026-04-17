@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PROVIDER_URLS } from '@/lib/providers';
-import { getPollinationsApiKey, getPoeApiKey, getLizApiKey, getKivestApiKey, getBluesmindsApiKey, getAquaApiKey } from '@/lib/utils';
+import { getPollinationsApiKey, getPoeApiKey, getLizApiKey, getBluesmindsApiKey, getAquaApiKey } from '@/lib/utils';
 
 // Cache status for 1 minute to avoid hammering providers
 let statusCache: {
@@ -19,11 +19,7 @@ async function checkProviderStatus(name: string, url: string, apiKey?: string) {
     };
     
     if (apiKey) {
-      if (name === 'poe' || name === 'kivest' || name === 'shalom' || name === 'liz') {
-        headers['Authorization'] = `Bearer ${apiKey}`;
-      } else if (name === 'pollinations' || name === 'bluesminds' || name === 'aqua') {
-        headers['Authorization'] = `Bearer ${apiKey}`;
-      }
+      headers['Authorization'] = `Bearer ${apiKey}`;
     }
 
     const controller = new AbortController();
@@ -69,7 +65,7 @@ export async function GET() {
     { name: 'poe', url: `${PROVIDER_URLS.poe}/models`, apiKey: getPoeApiKey() },
     { name: 'github', url: `https://models.inference.ai.azure.com/models` },
     { name: 'liz', url: `${PROVIDER_URLS.liz}/v1/models`, apiKey: getLizApiKey() },
-    { name: 'shalom', url: `${PROVIDER_URLS.kivest}/models`, apiKey: getKivestApiKey() },
+    { name: 'shalom', url: `${PROVIDER_URLS.shalom}/models`, apiKey: getBluesmindsApiKey() },
     { name: 'bluesminds', url: `${PROVIDER_URLS.bluesminds}/models`, apiKey: getBluesmindsApiKey() },
     { name: 'aqua', url: `${PROVIDER_URLS.aqua}/models`, apiKey: getAquaApiKey() },
   ];

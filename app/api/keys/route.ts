@@ -229,7 +229,6 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to delete API key' }, { status: 500 });
     }
 
-// Also remove from Clerk private metadata -> REMOVED
     return NextResponse.json({ success: true });
   } catch (err: any) {
     console.error('Unexpected error in DELETE /api/keys:', err);
