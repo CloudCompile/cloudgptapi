@@ -128,8 +128,7 @@ export async function POST(request: NextRequest) {
     };
 
     console.log(`[POST /api/keys] User ID: ${userId}, Plan: ${plan}`);
-    console.log(`[POST /api/keys] Data to insert:`, JSON.stringify(newKey, null, 2));
-    console.log(`[POST /api/keys] Attempting to insert key into public.api_keys table...`);
+    console.log(`[POST /api/keys] Inserting key (name: ${newKey.name}, rate_limit: ${newKey.rate_limit}, fandom: ${newKey.fandom_plugin_enabled}) into public.api_keys...`);
 
     let { data, error, status, statusText } = await supabaseAdmin
       .from('api_keys')

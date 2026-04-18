@@ -211,6 +211,8 @@ export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
   'liz-o3-mini': 'o3-mini',
   'liz-qwen3-235b': 'qwen3-235b-a22b',
   'liz-llama-3.3-70b': 'llama-3.3-70b',
+  'claude-opus-4-7': 'opus-4.7',
+  'claude-opus-4.7': 'opus-4.7',
   'claude-opus-4-6': 'opus-4.6',
   'claude-opus-4.5': 'opus-4.5',
   'claude-opus-4.6': 'opus-4.6',
@@ -232,9 +234,6 @@ export const PROVIDER_MODEL_MAPPING: Record<string, string> = {
   'qwen-coder': 'qwen3-coder-480b-a35b-instruct',
   'qwen-next-80b': 'qwen3-next-80b-a3b-instruct',
   'qwen-next-80b-thinking': 'qwen3-next-80b-a3b-thinking',
-  // Kivest compatibility aliases for Qwen Next variants
-  'qwen3-next-80b-a3b-instruct': 'qwen-next-80b',
-  'qwen3-next-80b-a3b-thinking': 'qwen-next-80b-thinking',
   'mistral': 'mistral-large-3-675b-instruct',
   'glm': 'glm-5',
   'minimax': 'minimax-m2.5',
@@ -403,26 +402,6 @@ export function sanitizeErrorText(text: string): string {
 
   return text.substring(0, 1000);
 }
-
-export const PROVIDER_URLS = {
-  pollinations: 'https://gen.pollinations.ai',
-  openrouter: 'https://openrouter.ai',
-  stablehorde: 'https://stablehorde.net/api/v2',
-  meridian: 'https://meridianlabsapp.website/api',
-  github: 'https://models.inference.ai.azure.com',
-  poe: 'https://api.poe.com/v1',
-  liz: 'https://lizley.zeabur.app',
-  openai: 'https://api.openai.com/v1',
-  kivest: 'https://ai.ezif.in/v1',
-  shalom: 'https://api.bluesminds.com/v1',
-  bluesminds: 'https://api.bluesminds.com/v1',
-  aqua: 'https://api.aquadevs.com/v1',
-  blazeai: 'https://blazeai.boxu.dev/v1',
-  mino: 'https://mino.redemption.pw',
-  groq: 'https://api.groq.com/openai/v1',
-  cerebras: 'https://api.cerebras.ai/v1',
-  elevenlabs: 'https://api.elevenlabs.io/v1',
-};
 
 export function createChatTransformStream(
   lastMessage: string | null,

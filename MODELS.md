@@ -138,6 +138,7 @@
 | claude-sonnet-4.6 | Claude Sonnet 4.6 |
 | claude-opus-4-5 | Claude Opus 4.5 |
 | claude-opus-4-6 | Claude Opus 4.6 |
+| claude-opus-4-7 | Claude Opus 4.7 |
 
 ### Mino (fallback)
 | Model ID | Name |
@@ -258,4 +259,4 @@
 - **Free**: OpenRouter `:free` models, Groq, Cerebras, `deepseek-chat`, `deepseek-v3.2`, `deepseek-v3.1`, `deepseek-reasoner`, `glm-4.7`, `mimo-omni`
 - **Pro**: Most Kivest/Bluesminds/Mino models, paid OpenRouter, ElevenLabs, pro image/video models
 - **Ultra**: `claude-sonnet-4.6`, `claude-sonnet-4-5`, `gemini-2.5-pro`, `gemini-3.1-pro`, `gemini-3-pro-preview`, `glm-5.1`, `mimo-pro`
-- **Admin only**: `claude-opus-4-6`, `claude-opus-4-5`
+- **Admin only**: `claude-opus-4-7`, `claude-opus-4-6`, `claude-opus-4-5`

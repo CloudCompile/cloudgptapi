@@ -56,37 +56,42 @@ type ModelDef = {
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
+// Maps a model's `provider` field to the upstream the dispatcher routes through first.
+// Most premium/ultra brands (openai, anthropic, google, deepseek, moonshot, minimax, meta,
+// mistral, microsoft, alibaba, xiaomi, xai, etc.) hit Aqua first per dispatcher.ts:`aquaModels`.
+// `kivest`-branded models are silently rerouted to Aqua. Zhipu's GLM 4.x routes to Bluesminds
+// (Shalom) — close enough since glm-5/5.1 also fall back to Shalom from Aqua.
 const PROVIDER_MAP: Record<string, string> = {
   pollinations: 'pollinations',
   openrouter: 'openrouter',
-  kivest: 'shalom',
-  openai: 'shalom',
+  kivest: 'aqua',
+  openai: 'aqua',
   anthropic: 'aqua',
   google: 'aqua',
-  deepseek: 'shalom',
-  moonshot: 'shalom',
+  deepseek: 'aqua',
+  moonshot: 'aqua',
   zhipu: 'shalom',
-  minimax: 'shalom',
-  meta: 'shalom',
-  amazon: 'shalom',
-  mistral: 'shalom',
-  microsoft: 'shalom',
-  bytedance: 'shalom',
-  xiaomi: 'shalom',
-  alibaba: 'shalom',
-  xai: 'bluesminds',
-  mino: 'shalom',
-  groq: 'pollinations',
-  cerebras: 'pollinations',
+  minimax: 'aqua',
+  meta: 'aqua',
+  amazon: 'aqua',
+  mistral: 'aqua',
+  microsoft: 'aqua',
+  xiaomi: 'aqua',
+  alibaba: 'aqua',
+  xai: 'aqua',
+  mino: 'mino',
+  groq: 'groq',
+  cerebras: 'cerebras',
   elevenlabs: 'shalom',
   stablehorde: 'pollinations',
   meridian: 'pollinations',
   github: 'github',
   litrouter: 'shalom',
+  bytedance: 'aqua',
 };
 
 function getStatusProvider(modelProvider: string): string {
-  return PROVIDER_MAP[modelProvider.toLowerCase()] || 'pollinations';
+  return PROVIDER_MAP[modelProvider.toLowerCase()] || 'aqua';
 }
 
 function getTier(id: string): 'free' | 'pro' | 'ultra' | 'admin' {
@@ -272,7 +277,7 @@ export default function StatusPage() {
     if (isLoading) return 'checking';
     const key = getStatusProvider(model.provider);
     const ps = providerStatuses[key];
-    if (!ps) return 'online'; // default for unchecked
+    if (!ps) return 'checking';
     return ps.status === 'online' ? 'online' : 'offline';
   }
 

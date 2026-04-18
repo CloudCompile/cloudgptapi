@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { trackUsage, getRateLimitInfo, getDailyLimitInfo, checkRateLimit, checkDailyLimit, ApiKey, getModelUsageWeight } from '@/lib/api-keys';
 import { waitUntil } from '@vercel/functions';
 import {
-  PROVIDER_URLS,
   PROVIDER_MODEL_MAPPING,
   createChatTransformStream,
   PROVIDER_TIMEOUT_MS,
@@ -12,12 +11,11 @@ import {
   getBlazeAiModelId,
   getMinoModelId
 } from '@/lib/chat-utils';
-import { CHAT_MODELS, ULTRA_MODELS, ADMIN_ONLY_MODELS } from '@/lib/providers';
+import { CHAT_MODELS, ULTRA_MODELS, ADMIN_ONLY_MODELS, PROVIDER_URLS } from '@/lib/providers';
 import {
   getCorsHeaders, getPollinationsApiKey,
   getClaudeApiKey,
   getPoeApiKey,
-  getLizApiKey,
   getKivestApiKey,
   getOpenRouterApiKeys,
   getOpenAIApiKey,
@@ -115,13 +113,14 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
     'glm-5.1', 'gemma-4', 'gpt-5.4-mini',
     // Aqua premium tier
     'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
-    'gemini-2.5-pro', 'gemini-3.1-pro', 'sonnet-4.5', 'sonnet-4.6', 'opus-4.5', 'opus-4.6',
+    'gemini-2.5-pro', 'gemini-3.1-pro', 'sonnet-4.5', 'sonnet-4.6', 'opus-4.5', 'opus-4.6', 'opus-4.7',
     'mimo-pro', 'deepseek-v3-0324', 'deepseek-v3.1-terminus',
     // xAI Grok models (existing)
     'grok-3', 'grok-4', 'grok-4.1', 'grok-4.2',
     // Kimi/Moonshot models (existing via Kivest)
     'kimi-k2-instruct-0905', 'kimi-k2-thinking',
     // Claude models (via Aqua)
+    'claude-opus-4-7', 'claude-opus-4.7',
     'claude-opus-4-6', 'claude-opus-4.5', 'claude-sonnet-4-6', 'claude-sonnet-4.5', 'claude-sonnet-4.6',
     'claude-sonnet-4.5-20250929', 'claude-haiku-4.5', 'claude-3-haiku', 'claude-3-7-sonnet',
     // OpenAI models
@@ -151,6 +150,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   const bluesmindsFallbackModels = new Set([
     // Ultra models - most critical for fallback
     'gpt-5.1', 'gpt-5.2', 'gpt-5.2-codex', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.4',
+    'claude-opus-4-7', 'claude-opus-4.7',
     'claude-opus-4-6', 'claude-opus-4.5', 'claude-sonnet-4.6', 'claude-sonnet-4.5',
     'claude-sonnet-4.5-20250929', 'gemini-2.5-pro', 'gemini-3.1-pro',
     'glm-5.1', 'mimo-pro',
@@ -177,7 +177,7 @@ export async function dispatchChatRequest(options: DispatchOptions): Promise<Nex
   // Shalom is the last-resort provider for the highest-tier models to maximise availability.
   const ultraModelsWithKivest = new Set([
     'gpt-5.4', 'gpt-5.3-codex', 'gpt-5.3-spark', 'gpt-5.2-codex', 'gpt-5.2', 'gpt-5.1',
-    'claude-sonnet-4.6', 'claude-sonnet-4-5', 'claude-opus-4-6', 'claude-opus-4-5',
+    'claude-sonnet-4.6', 'claude-sonnet-4-5', 'claude-opus-4-7', 'claude-opus-4-6', 'claude-opus-4-5',
     'gemini-2.5-pro', 'gemini-3.1-pro',
     'glm-5.1', 'mimo-pro'
   ]);

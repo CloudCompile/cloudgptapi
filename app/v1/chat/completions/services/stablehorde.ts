@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
 import { waitUntil } from '@vercel/functions';
 import { trackUsage, getRateLimitInfo, getDailyLimitInfo, ApiKey } from '@/lib/api-keys';
-import { CHAT_MODELS } from '@/lib/providers';
+import { CHAT_MODELS, PROVIDER_URLS } from '@/lib/providers';
 import { getCorsHeaders } from '@/lib/utils';
 import { rememberInteraction } from '@/lib/memory';
-import { PROVIDER_URLS } from '@/lib/chat-utils';
 
 export function getStableHordeTextModelName(modelId: string): string {
   const modelMap: Record<string, string> = {

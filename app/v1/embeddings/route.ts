@@ -59,6 +59,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    userPlan = userPlan?.toLowerCase() || 'free';
+
     let limit = 100;
     let dailyLimit = getDailyLimitForPlan(userPlan);
     
